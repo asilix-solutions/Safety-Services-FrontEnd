@@ -45,15 +45,15 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-950 text-slate-100">
+    <div className="flex min-h-screen bg-background text-foreground">
       {/* Sidebar Panel */}
-      <aside className="hidden md:flex w-64 flex-col border-e border-slate-800 bg-slate-900/80 backdrop-blur-md">
+      <aside className="hidden md:flex w-64 flex-col border-e border-border bg-card/80 backdrop-blur-md">
         {/* Sidebar Header */}
-        <div className="flex h-16 items-center px-6 border-b border-slate-800 gap-2.5">
-          <div className="h-7 w-7 rounded bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-600/30">
-            <Icons.ShieldCheck className="h-4 w-4 text-white" />
+        <div className="flex h-16 items-center px-6 border-b border-border gap-2.5">
+          <div className="h-7 w-7 rounded bg-primary flex items-center justify-center shadow-lg shadow-primary/30">
+            <Icons.ShieldCheck className="h-4 w-4 text-primary-foreground" />
           </div>
-          <span className="font-bold text-sm tracking-wide bg-gradient-to-r from-indigo-400 to-indigo-200 bg-clip-text text-transparent">
+          <span className="font-bold text-sm tracking-wide bg-gradient-to-r from-indigo-500 to-indigo-300 dark:from-indigo-400 dark:to-indigo-200 bg-clip-text text-transparent">
             Admin Suite
           </span>
         </div>
@@ -68,8 +68,8 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
                 href={item.path}
                 className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-all ${
                   isActive
-                    ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/20"
-                    : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                    ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
+                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                 }`}
               >
                 <NavIcon name={item.iconName} className="h-4 w-4 shrink-0" />
@@ -80,7 +80,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
         </nav>
 
         {/* Sidebar Footer */}
-        <div className="p-4 border-t border-slate-800 bg-slate-900/40">
+        <div className="p-4 border-t border-border bg-muted/40">
           <div className="flex items-center gap-3 mb-3">
             <Image
               src={user.avatarUrl || "https://api.dicebear.com/7.x/adventurer/svg?seed=default"}
@@ -88,17 +88,17 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
               width={36}
               height={36}
               unoptimized
-              className="h-9 w-9 rounded-full bg-slate-800 border border-slate-700"
+              className="h-9 w-9 rounded-full bg-muted border border-border"
             />
             <div className="overflow-hidden">
-              <p className="text-xs font-semibold truncate text-white">{user.name}</p>
-              <p className="text-[10px] text-slate-400 truncate">{user.role}</p>
+              <p className="text-xs font-semibold truncate text-foreground">{user.name}</p>
+              <p className="text-[10px] text-muted-foreground truncate">{user.role}</p>
             </div>
           </div>
           <Button
             variant="outline"
             size="sm"
-            className="w-full text-xs flex items-center justify-center gap-1.5 border-slate-800 text-slate-300 hover:bg-slate-800"
+            className="w-full text-xs flex items-center justify-center gap-1.5 border-border text-muted-foreground hover:bg-accent hover:text-accent-foreground"
             onClick={logout}
           >
             <Icons.LogOut className="h-3.5 w-3.5" />

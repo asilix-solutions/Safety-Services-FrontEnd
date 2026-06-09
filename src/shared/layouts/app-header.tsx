@@ -51,7 +51,7 @@ export function AppHeader({ onMenuToggle }: AppHeaderProps) {
           <select
             value={user.role}
             onChange={handleRoleChange}
-            className="bg-transparent text-xs font-semibold text-primary outline-none cursor-pointer focus:ring-0 border-0 p-0 pr-6"
+            className="bg-transparent text-xs font-semibold text-primary outline-none cursor-pointer focus:ring-0 border-0 p-0 pe-6"
           >
             <option value="Super Admin" className="bg-popover text-foreground">{t("dashboard:role_Super_Admin")}</option>
             <option value="Company Admin" className="bg-popover text-foreground">{t("dashboard:role_Company_Admin")}</option>
@@ -65,7 +65,7 @@ export function AppHeader({ onMenuToggle }: AppHeaderProps) {
         {/* Notifications Bell */}
         <button className="relative h-9 w-9 rounded-lg bg-secondary/15 border border-border/20 flex items-center justify-center hover:bg-accent transition-colors cursor-pointer">
           <Bell className="h-4 w-4 text-muted-foreground" />
-          <span className="absolute top-2 right-2 h-1.5 w-1.5 rounded-full bg-primary" />
+          <span className="absolute top-2 end-2 h-1.5 w-1.5 rounded-full bg-primary" />
         </button>
 
         {/* Dynamic i18n Language Switcher */}

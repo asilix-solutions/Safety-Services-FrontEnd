@@ -27,6 +27,7 @@ export function I18nProvider({
 }) {
   const [locale, setLocaleState] = useState<Locale>(initialLocale);
   const [translations, setTranslations] = useState<Record<string, Record<string, string>>>(initialTranslations);
+  const dir = getDirection(locale);
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
@@ -34,6 +35,14 @@ export function I18nProvider({
   useEffect(() => {
     setLocaleState(initialLocale);
   }, [initialLocale]);
+
+  // Sync document element dir and lang on client-side
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      document.documentElement.dir = dir;
+      document.documentElement.lang = locale;
+    }
+  }, [locale, dir]);
 
   // Sync translations if initialTranslations changes
   useEffect(() => {
@@ -68,8 +77,6 @@ export function I18nProvider({
       return changed ? merged : prev;
     });
   };
-
-  const dir = getDirection(locale);
 
   // Type-safe translation resolution
   const t = (key: string): string => {

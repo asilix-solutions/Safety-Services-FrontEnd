@@ -59,6 +59,7 @@ const MOCK_VISITS: SiteVisit[] = [
 
 export default function SiteVisitsPage() {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<"list" | "calendar" | "upcoming" | "completed">("list");
   
   if (!user) return null;
@@ -72,8 +73,8 @@ export default function SiteVisitsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Site Visits Management"
-        description="Schedule, track, and complete engineering safety inspections and audits."
+        title={t("dashboard:site_visits_title")}
+        description={t("dashboard:site_visits_desc")}
       />
 
       {/* Tabs Switcher */}
@@ -84,7 +85,7 @@ export default function SiteVisitsPage() {
           className="gap-2"
         >
           <ClipboardList className="h-4 w-4" />
-          List View
+          {t("dashboard:list_view")}
         </Button>
         <Button
           variant={activeTab === "calendar" ? "default" : "ghost"}
@@ -92,7 +93,7 @@ export default function SiteVisitsPage() {
           className="gap-2"
         >
           <CalendarIcon className="h-4 w-4" />
-          Calendar View
+          {t("dashboard:calendar_view")}
         </Button>
         <Button
           variant={activeTab === "upcoming" ? "default" : "ghost"}
@@ -100,7 +101,7 @@ export default function SiteVisitsPage() {
           className="gap-2"
         >
           <Clock className="h-4 w-4" />
-          Upcoming Visits
+          {t("dashboard:upcoming_visits")}
         </Button>
         <Button
           variant={activeTab === "completed" ? "default" : "ghost"}
@@ -108,7 +109,7 @@ export default function SiteVisitsPage() {
           className="gap-2"
         >
           <CheckCircle2 className="h-4 w-4" />
-          Completed Visits
+          {t("dashboard:completed_visits")}
         </Button>
       </div>
 
@@ -116,8 +117,8 @@ export default function SiteVisitsPage() {
         <Card className="border-border bg-card">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle>Inspection Calendar</CardTitle>
-              <CardDescription>June 2026 safety schedule</CardDescription>
+              <CardTitle className="text-foreground">{t("dashboard:inspection_calendar")}</CardTitle>
+              <CardDescription className="text-muted-foreground">{t("dashboard:june_schedule_desc")}</CardDescription>
             </div>
             <div className="flex gap-2">
               <Button variant="outline" size="icon"><ChevronLeft className="h-4 w-4" /></Button>
@@ -170,7 +171,7 @@ export default function SiteVisitsPage() {
                   <Badge variant={visit.status === "upcoming" ? "warning" : "success"}>
                     {visit.status.toUpperCase()}
                   </Badge>
-                  <CardTitle className="text-base font-bold text-slate-100">{visit.projectName}</CardTitle>
+                  <CardTitle className="text-base font-bold text-foreground">{visit.projectName}</CardTitle>
                   <CardDescription className="text-xs flex items-center gap-1">
                     <MapPin className="h-3 w-3" /> {visit.location}
                   </CardDescription>
@@ -183,12 +184,12 @@ export default function SiteVisitsPage() {
                   <span>{new Date(visit.scheduledDate).toLocaleDateString()} at {new Date(visit.scheduledDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                 </div>
                 <div className="space-y-1">
-                  <p className="font-semibold text-muted-foreground">Assigned Inspector:</p>
-                  <p className="text-slate-300">{visit.inspectorName}</p>
+                  <p className="font-semibold text-muted-foreground">{t("dashboard:assigned_inspector")}:</p>
+                  <p className="text-foreground">{visit.inspectorName}</p>
                 </div>
                 {visit.notes && (
-                  <div className="p-2.5 rounded-lg border border-border/80 bg-secondary/10">
-                    <p className="font-semibold text-muted-foreground mb-1">Notes:</p>
+                  <div className="p-2.5 rounded-lg border border-border bg-secondary/10">
+                    <p className="font-semibold text-muted-foreground mb-1">{t("dashboard:notes_label")}:</p>
                     <p className="text-muted-foreground">{visit.notes}</p>
                   </div>
                 )}

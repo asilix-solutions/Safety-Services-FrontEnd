@@ -38,11 +38,11 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+    <div className="flex min-h-screen bg-background text-foreground">
       {/* Sidebar Panel */}
-      <aside className="hidden md:flex w-64 flex-col border-e border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+      <aside className="hidden md:flex w-64 flex-col border-e border-border bg-card shadow-sm">
         {/* Sidebar Header */}
-        <div className="flex h-16 items-center px-6 border-b border-slate-100 dark:border-slate-800 gap-2.5">
+        <div className="flex h-16 items-center px-6 border-b border-border gap-2.5">
           <div className="h-8 w-8 rounded-full bg-emerald-500 flex items-center justify-center shadow-md shadow-emerald-500/20">
             <Icons.Building className="h-4.5 w-4.5 text-white" />
           </div>
@@ -62,7 +62,7 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
                 className={`flex items-center gap-3 px-3 py-2.5 text-sm font-semibold rounded-xl transition-all ${
                   isActive
                     ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/10"
-                    : "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
+                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                 }`}
               >
                 <NavIcon name={item.iconName} className="h-4 w-4 shrink-0" />
@@ -73,7 +73,7 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
         </nav>
 
         {/* Sidebar Footer */}
-        <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+        <div className="p-4 border-t border-border bg-muted/50">
           <div className="flex items-center gap-3 mb-3">
             <Image
               src={user.avatarUrl || "https://api.dicebear.com/7.x/adventurer/svg?seed=default"}
@@ -81,17 +81,17 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
               width={36}
               height={36}
               unoptimized
-              className="h-9 w-9 rounded-full border border-slate-200 dark:border-slate-700"
+              className="h-9 w-9 rounded-full border border-border"
             />
             <div className="overflow-hidden">
-              <p className="text-xs font-bold truncate text-slate-800 dark:text-slate-200">{user.name}</p>
-              <p className="text-[10px] text-slate-400 truncate">Customer Portal</p>
+              <p className="text-xs font-bold truncate text-foreground">{user.name}</p>
+              <p className="text-[10px] text-muted-foreground truncate">Customer Portal</p>
             </div>
           </div>
           <Button
             variant="outline"
             size="sm"
-            className="w-full text-xs flex items-center justify-center gap-1.5 border-slate-200 dark:border-slate-750 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+            className="w-full text-xs flex items-center justify-center gap-1.5 border-border text-muted-foreground hover:bg-accent hover:text-accent-foreground"
             onClick={logout}
           >
             <Icons.LogOut className="h-3.5 w-3.5" />

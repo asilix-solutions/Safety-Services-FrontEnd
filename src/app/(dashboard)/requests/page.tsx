@@ -9,11 +9,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/sha
 import { Button } from "@/shared/ui/button";
 import { Badge } from "@/shared/ui/badge";
 import { DataTable, ColumnDef } from "@/shared/components/data-table/data-table";
-import { Plus, Eye, Calendar, HardHat, FileText, CheckCircle2 } from "lucide-react";
+import { Plus, Eye, Calendar } from "lucide-react";
 import Link from "next/link";
+import { useTranslation } from "@/providers/i18n-provider";
 
 export default function RequestsPage() {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [requests, setRequests] = useState<LicensingRequest[]>([]);
 
   // Load from localStorage and merge with mock requests
@@ -66,12 +68,12 @@ export default function RequestsPage() {
     return (
       <div className="space-y-6">
         <PageHeader
-          title="My Safety Requests"
-          description="Submit and track your commercial licensing compliance review requests."
+          title={t("dashboard:my_safety_requests")}
+          description={t("dashboard:submit_and_track_desc")}
           actions={
             <Link href="/requests/new">
-              <Button size="sm" className="h-9 gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-white shadow-md shadow-emerald-500/10">
-                <Plus className="h-4 w-4" /> Submit Safety Request
+              <Button size="sm" className="h-9 gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/10">
+                <Plus className="h-4 w-4" /> {t("dashboard:submit_safety_request")}
               </Button>
             </Link>
           }
@@ -79,13 +81,13 @@ export default function RequestsPage() {
 
         <div className="grid gap-4 md:grid-cols-2">
           {requests.map((req) => (
-            <Card key={req.id} className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 hover:shadow-md transition-all duration-300">
+            <Card key={req.id} className="border-border bg-card hover:shadow-md transition-all duration-300">
               <CardHeader className="flex flex-row items-start justify-between pb-2">
                 <div className="space-y-1">
                   <Badge variant={getStatusBadgeVariant(req.status)} className="capitalize">
                     {req.status.replace("_", " ")}
                   </Badge>
-                  <CardTitle className="text-base font-bold text-slate-800 dark:text-slate-100">{req.facilityName}</CardTitle>
+                  <CardTitle className="text-base font-bold text-foreground">{req.facilityName}</CardTitle>
                   <CardDescription className="text-xs">{getRequestTypeLabel(req.requestType)}</CardDescription>
                 </div>
                 <span className="text-[10px] font-mono font-bold text-indigo-500">{req.jobNumber}</span>
@@ -102,14 +104,14 @@ export default function RequestsPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
+                <div className="flex items-center justify-between pt-2 border-t border-border">
                   <span className="text-[10px] text-muted-foreground flex items-center gap-1">
                     <Calendar className="h-3.5 w-3.5" />
                     {new Date(req.createdAt).toLocaleDateString()}
                   </span>
                   <Link href={`/requests/${req.jobNumber}`}>
-                    <Button variant="ghost" size="sm" className="h-8 gap-1.5 text-xs text-indigo-600 dark:text-indigo-400">
-                      <Eye className="h-3.5 w-3.5" /> View Details
+                    <Button variant="ghost" size="sm" className="h-8 gap-1.5 text-xs text-primary">
+                      <Eye className="h-3.5 w-3.5" /> {t("dashboard:view_details")}
                     </Button>
                   </Link>
                 </div>
@@ -117,8 +119,8 @@ export default function RequestsPage() {
             </Card>
           ))}
           {requests.length === 0 && (
-            <div className="col-span-2 text-center py-16 bg-white dark:bg-slate-900/40 rounded-2xl border border-dashed border-border/80 text-muted-foreground">
-              No active safety requests found. Click the button above to start your first request.
+            <div className="col-span-2 text-center py-16 bg-card rounded-2xl border border-dashed border-border text-muted-foreground">
+              {t("dashboard:no_active_requests")}
             </div>
           )}
         </div>
@@ -131,14 +133,14 @@ export default function RequestsPage() {
     {
       header: "Job Number",
       accessorKey: "jobNumber",
-      render: (row) => <span className="font-mono font-bold text-indigo-400">{row.jobNumber}</span>,
+      render: (row) => <span className="font-mono font-bold text-indigo-500 dark:text-indigo-400">{row.jobNumber}</span>,
     },
     {
       header: "Facility / Owner",
       accessorKey: "facilityName",
       render: (row) => (
         <div>
-          <p className="font-semibold text-slate-200">{row.facilityName}</p>
+          <p className="font-semibold text-foreground">{row.facilityName}</p>
           <p className="text-[10px] text-muted-foreground">{row.clientName}</p>
         </div>
       ),
@@ -173,21 +175,21 @@ export default function RequestsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Licensing Requests Queue"
-        description="Verify submitted blueprints, audit technical hazard specifications, and approve compliance certifications."
+        title={t("dashboard:licensing_requests_queue")}
+        description={t("dashboard:verify_submitted_desc")}
       />
 
       <Card className="border-border bg-card">
         <CardHeader>
-          <CardTitle className="text-base font-semibold">Incoming Safety Certificates</CardTitle>
-          <CardDescription>SaaS compliance queue for active tenant reviews</CardDescription>
+          <CardTitle className="text-base font-semibold">{t("dashboard:incoming_safety_certificates")}</CardTitle>
+          <CardDescription className="text-muted-foreground">{t("dashboard:saas_compliance_desc")}</CardDescription>
         </CardHeader>
         <CardContent>
           <DataTable
             data={requests}
             columns={columns}
             searchKey="facilityName"
-            searchPlaceholder="Search requests by facility..."
+            searchPlaceholder={t("dashboard:search_requests_placeholder")}
           />
         </CardContent>
       </Card>

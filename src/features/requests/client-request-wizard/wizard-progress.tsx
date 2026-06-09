@@ -10,7 +10,7 @@ interface WizardProgressProps {
 
 export function WizardProgress({ currentStep, steps }: WizardProgressProps) {
   return (
-    <div className="w-full py-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/40 px-6 rounded-xl">
+    <div className="w-full py-4 border-b border-border bg-card px-6 rounded-xl">
       <div className="flex items-center justify-between">
         {steps.map((stepName, index) => {
           const stepNumber = index + 1;
@@ -26,15 +26,15 @@ export function WizardProgress({ currentStep, steps }: WizardProgressProps) {
                     isCompleted
                       ? "bg-emerald-500 text-white"
                       : isActive
-                      ? "bg-indigo-600 text-white ring-4 ring-indigo-600/20"
-                      : "bg-slate-100 dark:bg-slate-800 text-slate-400"
+                      ? "bg-primary text-primary-foreground ring-4 ring-primary/20"
+                      : "bg-muted text-muted-foreground"
                   }`}
                 >
                   {isCompleted ? <Check className="h-4 w-4" /> : stepNumber}
                 </div>
                 <span
                   className={`text-[10px] font-bold tracking-wide uppercase transition-colors ${
-                    isActive ? "text-indigo-600 dark:text-indigo-400" : "text-slate-400"
+                    isActive ? "text-primary dark:text-primary" : "text-muted-foreground"
                   }`}
                 >
                   {stepName}
@@ -43,9 +43,9 @@ export function WizardProgress({ currentStep, steps }: WizardProgressProps) {
 
               {/* Progress Line */}
               {index < steps.length - 1 && (
-                <div className="flex-1 h-0.5 mx-2 bg-slate-100 dark:bg-slate-800 relative -top-3">
+                <div className="flex-1 h-0.5 mx-2 bg-muted relative -top-3">
                   <div
-                    className="absolute h-full bg-emerald-500 transition-all duration-500"
+                    className="absolute h-full bg-emerald-500 transition-all duration-500 start-0"
                     style={{
                       width: isCompleted ? "100%" : "0%",
                     }}

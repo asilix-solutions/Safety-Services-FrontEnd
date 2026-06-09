@@ -64,16 +64,16 @@ export function RequestTypeStep({ value, onChange, onNext }: RequestTypeStepProp
               }}
               className={`border cursor-pointer transition-all duration-300 hover:shadow-md ${
                 isSelected
-                  ? "border-indigo-600 bg-indigo-500/5 ring-1 ring-indigo-600/30"
-                  : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 hover:border-slate-300 dark:hover:border-slate-700"
+                  ? "border-primary bg-primary/5 ring-1 ring-primary/30"
+                  : "border-border bg-card hover:border-accent-foreground/30"
               }`}
             >
               <CardHeader className="flex flex-row items-start gap-4 pb-3">
-                <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-150 dark:border-slate-700 shrink-0">
+                <div className="p-2.5 rounded-xl bg-muted border border-border shrink-0">
                   {opt.icon}
                 </div>
                 <div className="space-y-1">
-                  <CardTitle className="text-base font-bold text-slate-850 dark:text-slate-100">{opt.title}</CardTitle>
+                  <CardTitle className="text-base font-bold text-foreground">{opt.title}</CardTitle>
                   <CardDescription className="text-xs leading-relaxed">{opt.description}</CardDescription>
                 </div>
               </CardHeader>

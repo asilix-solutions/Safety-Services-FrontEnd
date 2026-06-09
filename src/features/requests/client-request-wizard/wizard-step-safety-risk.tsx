@@ -31,83 +31,83 @@ export function SafetyRiskStep({ form, onNext, onPrev }: SafetyRiskStepProps) {
         {/* Toggles Grid */}
         <div className="grid gap-3 sm:grid-cols-2">
           {/* Safety Equipment */}
-          <label className="flex items-center gap-3 p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-850 transition-all select-none">
+          <label className="flex items-center gap-3 p-4 rounded-xl border border-border bg-card cursor-pointer hover:bg-accent/50 transition-all select-none">
             <input
               type="checkbox"
               {...register("safetyEquipment")}
-              className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+              className="h-4 w-4 rounded border-input text-indigo-600 focus:ring-indigo-500"
             />
             <div className="space-y-0.5">
-              <span className="text-xs font-semibold text-slate-850 dark:text-slate-100">Basic Safety Equipment</span>
+              <span className="text-xs font-semibold text-foreground">Basic Safety Equipment</span>
               <span className="text-[10px] text-muted-foreground block">Safety helmets, protective vests, safety signage.</span>
             </div>
           </label>
 
           {/* Fire Alarm System */}
-          <label className="flex items-center gap-3 p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-850 transition-all select-none">
+          <label className="flex items-center gap-3 p-4 rounded-xl border border-border bg-card cursor-pointer hover:bg-accent/50 transition-all select-none">
             <input
               type="checkbox"
               {...register("fireAlarm")}
-              className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+              className="h-4 w-4 rounded border-input text-indigo-600 focus:ring-indigo-500"
             />
             <div className="space-y-0.5">
-              <span className="text-xs font-semibold text-slate-850 dark:text-slate-100">Fire Alarm System</span>
+              <span className="text-xs font-semibold text-foreground">Fire Alarm System</span>
               <span className="text-[10px] text-muted-foreground block">Smoke detectors, heat sensors, alarm controls.</span>
             </div>
           </label>
 
           {/* Fire Extinguishers */}
-          <label className="flex items-center gap-3 p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-850 transition-all select-none">
+          <label className="flex items-center gap-3 p-4 rounded-xl border border-border bg-card cursor-pointer hover:bg-accent/50 transition-all select-none">
             <input
               type="checkbox"
               {...register("fireExtinguishers")}
-              className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+              className="h-4 w-4 rounded border-input text-indigo-600 focus:ring-indigo-500"
             />
             <div className="space-y-0.5">
-              <span className="text-xs font-semibold text-slate-850 dark:text-slate-100">Fire Extinguishers</span>
+              <span className="text-xs font-semibold text-foreground">Fire Extinguishers</span>
               <span className="text-[10px] text-muted-foreground block">CO2/dry powder cylinders positioned near exits.</span>
             </div>
           </label>
 
           {/* Emergency Exits */}
-          <label className="flex items-center gap-3 p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-850 transition-all select-none">
+          <label className="flex items-center gap-3 p-4 rounded-xl border border-border bg-card cursor-pointer hover:bg-accent/50 transition-all select-none">
             <input
               type="checkbox"
               {...register("emergencyExits")}
-              className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+              className="h-4 w-4 rounded border-input text-indigo-600 focus:ring-indigo-500"
             />
             <div className="space-y-0.5">
-              <span className="text-xs font-semibold text-slate-850 dark:text-slate-100">Emergency Exits</span>
+              <span className="text-xs font-semibold text-foreground">Emergency Exits</span>
               <span className="text-[10px] text-muted-foreground block">Clearly mapped and unobstructed exit pathways.</span>
             </div>
           </label>
 
           {/* Gas Extensions */}
-          <label className={`flex items-center gap-3 p-4 rounded-xl border cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-850 transition-all select-none ${
-            gasExtensions ? "border-amber-500/30 bg-amber-500/5" : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60"
+          <label className={`flex items-center gap-3 p-4 rounded-xl border cursor-pointer hover:bg-accent/50 transition-all select-none ${
+            gasExtensions ? "border-amber-500/30 bg-amber-500/5" : "border-border bg-card"
           }`}>
             <input
               type="checkbox"
               {...register("gasExtensions")}
-              className="h-4 w-4 rounded border-slate-300 text-amber-500 focus:ring-amber-500"
+              className="h-4 w-4 rounded border-input text-amber-500 focus:ring-amber-500"
             />
             <div className="space-y-0.5">
-              <span className="text-xs font-semibold text-slate-850 dark:text-slate-100">Active Gas Extensions</span>
+              <span className="text-xs font-semibold text-foreground">Active Gas Extensions</span>
               <span className="text-[10px] text-amber-600 dark:text-amber-400 block font-medium">Overriding Hazard Element: Instantly flags high risk.</span>
             </div>
           </label>
 
           {/* Hazardous Materials */}
-          <label className={`flex items-center gap-3 p-4 rounded-xl border cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-850 transition-all select-none ${
-            hazardousMaterials ? "border-amber-500/30 bg-amber-500/5" : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60"
+          <label className={`flex items-center gap-3 p-4 rounded-xl border cursor-pointer hover:bg-accent/50 transition-all select-none ${
+            hazardousMaterials ? "border-amber-500/30 bg-amber-500/5" : "border-border bg-card"
           }`}>
             <input
               type="checkbox"
               {...register("hazardousMaterials")}
-              className="h-4 w-4 rounded border-slate-300 text-amber-500 focus:ring-amber-500"
+              className="h-4 w-4 rounded border-input text-amber-500 focus:ring-amber-500"
             />
             <div className="space-y-0.5">
-              <span className="text-xs font-semibold text-slate-850 dark:text-slate-100">Hazardous / Flammables</span>
+              <span className="text-xs font-semibold text-foreground">Hazardous / Flammables</span>
               <span className="text-[10px] text-amber-600 dark:text-amber-400 block font-medium">Overriding Hazard Element: Instantly flags high risk.</span>
             </div>
           </label>
