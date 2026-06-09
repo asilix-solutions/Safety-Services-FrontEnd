@@ -1,0 +1,33 @@
+export type UserRole =
+  | "Super Admin"
+  | "Company Admin"
+  | "Consulting Engineer"
+  | "Operations Officer"
+  | "Sales Agent"
+  | "Client";
+
+export type RolePermissionKey =
+  | "projects.view"
+  | "projects.create"
+  | "projects.edit"
+  | "projects.delete"
+  | "reports.view"
+  | "reports.create"
+  | "reports.approve"
+  | "users.manage"
+  | "licenses.view"
+  | "licenses.create"
+  | "licenses.approve"
+  | "customers.view"
+  | "customers.manage"
+  | "contracts.view"
+  | "contracts.create"
+  | "contracts.approve"
+  | "contracts.manage"
+  | "contracts.download"
+  | "invoices.view"
+  | "invoices.create"
+  | "invoices.approve"
+  | "invoices.manage"
+  | "invoices.download"
+  | "requests.view";

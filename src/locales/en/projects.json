@@ -1,0 +1,10 @@
+{
+  "title": "Projects",
+  "subtitle": "Manage safety compliance projects and licensing requests",
+  "addProject": "Add New Project",
+  "projectName": "Project Name",
+  "status": "Project Status",
+  "engineeringReview": "Engineering Review",
+  "client": "Client",
+  "progress": "Progress"
+}

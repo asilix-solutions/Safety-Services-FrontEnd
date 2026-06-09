@@ -1,0 +1,42 @@
+import { Report } from "@/types/report";
+
+export const MOCK_REPORTS: Report[] = [
+  {
+    id: "rep-901",
+    title: "Q1 Structural Safety Assessment",
+    description: "Full audit of structural columns load coefficients and concrete stress tests for Vertex HQ building.",
+    status: "Approved",
+    authorName: "Dr. Marcus Vance",
+    authorId: "u-3",
+    projectId: "PROJ-5512",
+    fileUrl: "/docs/reports/q1-structural-vertex.pdf",
+    fileSize: "4.8 MB",
+    createdAt: "2026-05-25T14:00:00Z",
+    updatedAt: "2026-05-28T16:00:00Z",
+  },
+  {
+    id: "rep-902",
+    title: "Skyline Fire Sprinkler Test Log",
+    description: "Detailed pressure measurements and valve test metrics collected during fire systems commissioning.",
+    status: "Approved",
+    authorName: "Elena Rostova",
+    authorId: "u-4",
+    projectId: "PROJ-8821",
+    fileUrl: "/docs/reports/skyline-sprinkler-test.pdf",
+    fileSize: "2.1 MB",
+    createdAt: "2026-05-30T10:00:00Z",
+    updatedAt: "2026-06-01T14:30:00Z",
+  },
+  {
+    id: "rep-903",
+    title: "Gulf Pipe Hydrostatic Inspection Report",
+    description: "Radiography checklogs and joint seal weld audits for Gulf storage tank pressure pipes.",
+    status: "Pending Review",
+    authorName: "Dr. Marcus Vance",
+    authorId: "u-3",
+    projectId: "PROJ-7643",
+    fileSize: "8.4 MB",
+    createdAt: "2026-06-03T11:00:00Z",
+    updatedAt: "2026-06-03T11:20:00Z",
+  },
+];

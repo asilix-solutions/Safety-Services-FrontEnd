@@ -1,0 +1,9 @@
+{
+  "title": "Customers",
+  "subtitle": "Manage corporate client accounts and contact details",
+  "addCustomer": "Add New Customer",
+  "companyName": "Company Name",
+  "representative": "Representative",
+  "status": "Customer Status",
+  "email": "Email Address"
+}

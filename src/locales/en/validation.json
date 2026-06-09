@@ -1,0 +1,9 @@
+{
+  "invalidEmail": "Invalid email address format.",
+  "passwordLength": "Password must be at least 6 characters.",
+  "required": "This field is required.",
+  "tooShort": "Value is too short.",
+  "tooLong": "Value is too long.",
+  "loginFailed": "Failed to log in. Please check your credentials.",
+  "authDemoFailed": "Failed to authenticate demo user."
+}

@@ -1,0 +1,1 @@
+export const SAFETY_ACCURACY_THRESHOLD = 95;

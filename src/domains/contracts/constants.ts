@@ -1,0 +1,1 @@
+export const DEFAULT_CONTRACT_EXPIRY_DAYS = 365;

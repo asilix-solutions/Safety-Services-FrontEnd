@@ -1,0 +1,8 @@
+{
+  "title": "Maintenance",
+  "subtitle": "Track periodic maintenance and safety systems inspections",
+  "addJob": "Add Maintenance Job",
+  "jobName": "Job Name",
+  "status": "Status",
+  "scheduledDate": "Scheduled Date"
+}
