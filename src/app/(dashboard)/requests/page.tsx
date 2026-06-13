@@ -162,13 +162,29 @@ export default function RequestsPage() {
     {
       header: "Actions",
       accessorKey: "id",
-      render: (row) => (
-        <Link href={`/requests/${row.jobNumber}`}>
-          <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs">
-            <Eye className="h-3.5 w-3.5" /> Audit Details
-          </Button>
-        </Link>
-      ),
+      render: (row) => {
+        const queue = row.assignedQueue || (row.classification === "high_hazard_review" ? "HIGH_HAZARD" : row.classification === "engineering_project" ? "ENGINEERING" : row.classification === "maintenance_strategy" ? "MAINTENANCE" : "FAST_TRACK");
+        const isEngQueue = queue === "ENGINEERING" || queue === "HIGH_HAZARD";
+        const isConsultingEngineer = user.role === "Consulting Engineer";
+
+        if (isConsultingEngineer && isEngQueue) {
+          return (
+            <Link href={`/blueprint-review/${row.jobNumber}`}>
+              <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs text-indigo-600 border-indigo-500/20 hover:bg-indigo-500/5 hover:text-indigo-600">
+                <Eye className="h-3.5 w-3.5" /> Open Review
+              </Button>
+            </Link>
+          );
+        }
+
+        return (
+          <Link href={`/requests/${row.jobNumber}`}>
+            <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs">
+              <Eye className="h-3.5 w-3.5" /> Audit Details
+            </Button>
+          </Link>
+        );
+      },
     },
   ];
 

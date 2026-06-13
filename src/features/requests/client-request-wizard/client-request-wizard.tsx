@@ -6,8 +6,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { clientRequestSchema, ClientRequestFormValues } from "@/schemas/client-request.schema";
 import { useAuth } from "@/providers/AuthProvider";
-import { RequiredDocument, RequestType, RequestClassification, LicensingRequest } from "@/domains/requests/types";
+import { RequiredDocument, RequestType, RequestClassification, RequestQueue, LicensingRequest } from "@/domains/requests/types";
 import { DEFAULT_REQUIRED_DOCUMENTS, HIGH_HAZARD_KEYWORDS, HIGH_HAZARD_ISIC_CODES } from "@/domains/requests/constants";
+import { getClassificationReason, getQueueDisplayName } from "@/domains/requests/workflow";
 
 // Steps Components
 import { WizardProgress } from "./wizard-progress";
@@ -21,10 +22,10 @@ import { ReviewSubmitStep } from "./wizard-step-review-submit";
 // Shared UI
 import { Card, CardContent } from "@/shared/ui/card";
 import { Button } from "@/shared/ui/button";
+import { Badge } from "@/shared/ui/badge";
 import { CheckCircle2, ChevronRight, ListTodo } from "lucide-react";
 import Link from "next/link";
-
-const STEPS = ["Type", "Facility", "Safety", "Uploads", "Classification", "Review"];
+import { useTranslation } from "@/providers/i18n-provider";
 
 // Helper to determine if high hazard is triggered
 function isHighHazardActivity(values: Partial<ClientRequestFormValues>): boolean {
@@ -45,6 +46,17 @@ function isHighHazardActivity(values: Partial<ClientRequestFormValues>): boolean
 export function ClientRequestWizard() {
   const { user } = useAuth();
   const router = useRouter();
+  const { t } = useTranslation();
+  
+  const STEPS = [
+    t("requests:wizard.steps.type"),
+    t("requests:wizard.steps.facility"),
+    t("requests:wizard.steps.safety"),
+    t("requests:wizard.steps.uploads"),
+    t("requests:wizard.steps.classification"),
+    t("requests:wizard.steps.review")
+  ];
+
   const [step, setStep] = useState(1);
   const [documents, setDocuments] = useState<RequiredDocument[]>([]);
   const [submitting, setSubmitting] = useState(false);
@@ -139,6 +151,13 @@ export function ClientRequestWizard() {
   };
 
   const handleNext = () => {
+    if (step === 4) {
+      const allUploaded = documents.every((doc) => doc.uploaded);
+      if (!allUploaded) {
+        alert(t("requests:wizard.validation.missingDocuments") || "Please upload all required documents before proceeding.");
+        return;
+      }
+    }
     const nextStep = step + 1;
     setStep(nextStep);
     saveDraftState(nextStep);
@@ -210,6 +229,15 @@ export function ClientRequestWizard() {
     const year = new Date().getFullYear();
     const jobNumber = `SSLM-${year}-${String(count).padStart(6, "0")}`;
 
+    let assignedQueue: RequestQueue = "FAST_TRACK";
+    if (classification === "high_hazard_review") {
+      assignedQueue = "HIGH_HAZARD";
+    } else if (classification === "engineering_project") {
+      assignedQueue = "ENGINEERING";
+    } else if (classification === "maintenance_strategy") {
+      assignedQueue = "MAINTENANCE";
+    }
+
     const newRequest: LicensingRequest = {
       id: `REQ-${Math.floor(1000 + Math.random() * 9000)}`,
       jobNumber,
@@ -240,6 +268,8 @@ export function ClientRequestWizard() {
       siteVisitRequired,
       engineeringReviewRequired,
       instantReportAllowed,
+      currentStage: "SUBMITTED",
+      assignedQueue,
       documents,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -261,46 +291,94 @@ export function ClientRequestWizard() {
   };
 
   if (submittedRequest) {
+    const getReviewPathSummary = (cls: string) => {
+      switch (cls) {
+        case "fast_track":
+          return {
+            path: t("requests:wizard.classification.fastReviewLabel"),
+            duration: t("requests:wizard.classification.fastTrackTimeline"),
+            nextStep: t("requests:wizard.review.pathSummary.fastReviewNextStep"),
+          };
+        case "maintenance_strategy":
+          return {
+            path: t("requests:wizard.classification.maintenanceReviewLabel"),
+            duration: t("requests:wizard.classification.maintenanceTimeline"),
+            nextStep: t("requests:wizard.review.pathSummary.maintenanceReviewNextStep"),
+          };
+        case "engineering_project":
+          return {
+            path: t("requests:wizard.classification.engineeringReviewLabel"),
+            duration: t("requests:wizard.classification.engineeringTimeline"),
+            nextStep: t("requests:wizard.review.pathSummary.engineeringReviewNextStep"),
+          };
+        case "high_hazard_review":
+          return {
+            path: t("requests:wizard.classification.enhancedSafetyReviewLabel"),
+            duration: t("requests:wizard.classification.highHazardTimeline"),
+            nextStep: t("requests:wizard.review.pathSummary.enhancedSafetyReviewNextStep"),
+          };
+        default:
+          return {
+            path: cls,
+            duration: "",
+            nextStep: "",
+          };
+      }
+    };
+
+    const pathSummary = getReviewPathSummary(submittedRequest.classification);
+
     return (
-      <Card className="max-w-xl mx-auto border-emerald-500/20 bg-white dark:bg-slate-900 shadow-xl overflow-hidden rounded-2xl">
+      <Card className="max-w-xl mx-auto border-border bg-card shadow-xl overflow-hidden rounded-2xl">
         <CardContent className="p-8 text-center space-y-6">
           <div className="mx-auto h-16 w-16 bg-emerald-500/10 text-emerald-500 rounded-full flex items-center justify-center border border-emerald-500/20">
-            <CheckCircle2 className="h-8 w-8" />
+            <CheckCircle2 className="h-8 w-8 text-emerald-500" />
           </div>
 
           <div className="space-y-2">
-            <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">Request Submitted Successfully!</h2>
+            <h2 className="text-xl font-bold text-foreground">
+              {t("requests:wizard.success.titleSubmitted")}
+            </h2>
             <p className="text-xs text-muted-foreground max-w-sm mx-auto leading-relaxed">
-              Your safety review request has been registered. The compliance workflow engine is routing your task.
+              {t("requests:wizard.success.description")}
             </p>
           </div>
 
-          <div className="p-4 rounded-xl border border-slate-150 dark:border-slate-800 bg-secondary/30 max-w-sm mx-auto space-y-2">
-            <div className="flex justify-between text-xs">
-              <span className="text-muted-foreground">Job Reference:</span>
-              <span className="font-mono font-bold text-indigo-500">{submittedRequest.jobNumber}</span>
+          <div className="p-5 rounded-2xl border border-border bg-muted/20 max-w-md mx-auto space-y-3.5 text-left rtl:text-right">
+            <div className="flex justify-between items-center text-xs">
+              <span className="text-muted-foreground">{t("requests:wizard.success.requestNumber")}:</span>
+              <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400 text-sm">{submittedRequest.jobNumber}</span>
             </div>
-            <div className="flex justify-between text-xs">
-              <span className="text-muted-foreground">Facility Name:</span>
-              <span className="font-semibold text-slate-700 dark:text-slate-300">{submittedRequest.facilityName}</span>
+
+            <div className="flex justify-between items-center text-xs pt-2 border-t border-border/50">
+              <span className="text-muted-foreground">{t("requests:wizard.review.pathSummary.path")}:</span>
+              <Badge variant="outline" className="font-semibold">{pathSummary.path}</Badge>
             </div>
-            <div className="flex justify-between text-xs">
-              <span className="text-muted-foreground">Status:</span>
-              <span className="px-2 py-0.5 bg-emerald-500/15 text-emerald-500 text-[9px] font-bold rounded">
-                SUBMITTED
+
+            <div className="flex justify-between items-center text-xs pt-2 border-t border-border/50">
+              <span className="text-muted-foreground">{t("requests:wizard.review.pathSummary.duration")}:</span>
+              <Badge variant="secondary" className="font-semibold text-foreground">{pathSummary.duration}</Badge>
+            </div>
+
+            <div className="flex flex-col items-start gap-1 pt-2.5 border-t border-border/50">
+              <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wide">
+                {t("requests:wizard.review.pathSummary.nextStep")}:
+              </span>
+              <span className="text-xs text-foreground/80 leading-relaxed font-normal">
+                {pathSummary.nextStep}
               </span>
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-2 justify-center max-w-sm mx-auto pt-4">
+          <div className="flex flex-col sm:flex-row gap-3 justify-center max-w-md mx-auto pt-4">
             <Link href="/requests" className="flex-1">
-              <Button variant="outline" className="w-full text-xs gap-1.5 h-10">
-                <ListTodo className="h-4 w-4" /> View My Requests
+              <Button variant="outline" className="w-full text-xs gap-1.5 h-10 rounded-xl">
+                <ListTodo className="h-4 w-4" /> {t("requests:wizard.success.backToRequests")}
               </Button>
             </Link>
             <Link href={`/requests/${submittedRequest.jobNumber}`} className="flex-1">
-              <Button className="w-full text-xs gap-1.5 bg-indigo-600 text-white hover:bg-indigo-700 h-10 shadow-md shadow-indigo-600/10">
-                View Request Details <ChevronRight className="h-4 w-4" />
+              <Button className="w-full text-xs gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white h-10 shadow-md shadow-indigo-600/10 rounded-xl">
+                {t("requests:wizard.success.viewDetails")} <ChevronRight className="h-4 w-4 rtl:rotate-180" />
               </Button>
             </Link>
           </div>
@@ -345,6 +423,7 @@ export function ClientRequestWizard() {
               instantReportAllowed={instantReportAllowed}
               area={area}
               requestType={selectedRequestType}
+              requestData={formValues}
               onNext={handleNext}
               onPrev={handlePrev}
             />

@@ -4,13 +4,16 @@ import React, { useState, useRef } from "react";
 import { UploadCloud, File, X, CheckCircle } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 
+import { useTranslation } from "@/providers/i18n-provider";
+
 interface FileUploadProps {
   onFileSelect?: (file: File) => void;
   accept?: string;
   maxSizeMB?: number;
 }
 
-export function FileUpload({ onFileSelect, accept = ".pdf,.dwg,.zip", maxSizeMB = 10 }: FileUploadProps) {
+export function FileUpload({ onFileSelect, accept = ".pdf,.dwg,.zip", maxSizeMB = 5 }: FileUploadProps) {
+  const { t } = useTranslation();
   const [dragActive, setDragActive] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -28,10 +31,20 @@ export function FileUpload({ onFileSelect, accept = ".pdf,.dwg,.zip", maxSizeMB 
   };
 
   const processFile = (selectedFile: File) => {
+    // Check file size
     if (selectedFile.size > maxSizeMB * 1024 * 1024) {
-      alert(`File size exceeds limit of ${maxSizeMB}MB`);
+      alert(t("requests:wizard.validation.fileTooLarge") || `File size exceeds limit of ${maxSizeMB}MB`);
       return;
     }
+
+    // Check file extension
+    const fileExt = "." + selectedFile.name.split(".").pop()?.toLowerCase();
+    const acceptedExtensions = accept.split(",").map(ext => ext.trim().toLowerCase());
+    if (!acceptedExtensions.includes(fileExt)) {
+      alert(t("requests:wizard.validation.invalidFileType") || "Invalid file type.");
+      return;
+    }
+
     setFile(selectedFile);
     if (onFileSelect) onFileSelect(selectedFile);
     simulateUpload();
@@ -123,7 +136,7 @@ export function FileUpload({ onFileSelect, accept = ".pdf,.dwg,.zip", maxSizeMB 
             ) : (
               uploadProgress === 100 && (
                 <span className="text-[10px] text-success font-semibold flex items-center gap-1">
-                  <CheckCircle className="h-3 w-3" /> Upload Complete
+                  <CheckCircle className="h-3 w-3" /> {t("requests:wizard.uploads.uploaded")}
                 </span>
               )
             )}

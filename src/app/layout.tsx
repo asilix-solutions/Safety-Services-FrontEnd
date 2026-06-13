@@ -38,6 +38,7 @@ export default async function RootLayout({
     "common",
     "validation",
     "dashboard",
+    "requests",
   ]);
 
   return (

@@ -4,6 +4,23 @@ export type RequestType = "new_license" | "maintenance_contract" | "engineering_
 
 export type RequestClassification = "fast_track" | "maintenance_strategy" | "engineering_project" | "high_hazard_review";
 
+export type RequestQueue =
+  | "FAST_TRACK"
+  | "MAINTENANCE"
+  | "ENGINEERING"
+  | "HIGH_HAZARD";
+
+export type WorkflowStage =
+  | "DRAFT"
+  | "SUBMITTED"
+  | "UNDER_REVIEW"
+  | "QUOTATION"
+  | "PAYMENT_CONFIRMED"
+  | "PROJECT_CREATED"
+  | "FIELD_EXECUTION"
+  | "FINAL_INSPECTION"
+  | "COMPLETED";
+
 export interface RequiredDocument {
   name: string;
   type: string;
@@ -48,6 +65,10 @@ export interface LicensingRequest {
   engineeringReviewRequired: boolean;
   instantReportAllowed: boolean;
   
+  // Refinements
+  currentStage: WorkflowStage;
+  assignedQueue: RequestQueue | null;
+  
   // Documents
   documents: RequiredDocument[];
   
@@ -55,3 +76,4 @@ export interface LicensingRequest {
   updatedAt: string;
   timeline: { status: RequestStatus; comment: string; date: string }[];
 }
+

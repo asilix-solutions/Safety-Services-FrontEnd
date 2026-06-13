@@ -23,6 +23,8 @@ import arSettings from "@/locales/ar/settings.json";
 import enSettings from "@/locales/en/settings.json";
 import arValidation from "@/locales/ar/validation.json";
 import enValidation from "@/locales/en/validation.json";
+import arRequests from "@/locales/ar/requests.json";
+import enRequests from "@/locales/en/requests.json";
 
 // Mapping dictionary registry
 export const DICTIONARIES: Record<Locale, Record<Namespace, Record<string, string>>> = {
@@ -36,6 +38,7 @@ export const DICTIONARIES: Record<Locale, Record<Namespace, Record<string, strin
     maintenance: arMaintenance,
     settings: arSettings,
     validation: arValidation,
+    requests: arRequests,
   },
   en: {
     common: enCommon,
@@ -47,6 +50,7 @@ export const DICTIONARIES: Record<Locale, Record<Namespace, Record<string, strin
     maintenance: enMaintenance,
     settings: enSettings,
     validation: enValidation,
+    requests: enRequests,
   },
 };
 

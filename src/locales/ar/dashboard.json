@@ -34,6 +34,8 @@
   "nav_commissions": "العمولات والمبيعات",
   "nav_activities": "سجل الأنشطة",
   "nav_profile": "الملف الشخصي",
+  "nav_contracts": "العقود",
+  "nav_invoices": "الفواتير",
   "role_Super_Admin": "مشرف عام",
   "role_Company_Admin": "مدير منشأة",
   "role_Consulting_Engineer": "مهندس استشاري",

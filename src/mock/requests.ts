@@ -30,6 +30,8 @@ export const MOCK_REQUESTS: LicensingRequest[] = [
     siteVisitRequired: false,
     engineeringReviewRequired: false,
     instantReportAllowed: true,
+    currentStage: "SUBMITTED",
+    assignedQueue: "FAST_TRACK",
     documents: [
       { name: "Commercial Registration / 700 Document", type: "pdf,image", uploaded: true, fileName: "cr_emaar.pdf" },
       { name: "Building Permit", type: "pdf", uploaded: true, fileName: "permit_90221.pdf" },
@@ -70,6 +72,8 @@ export const MOCK_REQUESTS: LicensingRequest[] = [
     siteVisitRequired: true,
     engineeringReviewRequired: true,
     instantReportAllowed: false,
+    currentStage: "UNDER_REVIEW",
+    assignedQueue: "HIGH_HAZARD",
     documents: [
       { name: "Rental/Lease Contract", type: "pdf", uploaded: true, fileName: "lease_gulf.pdf" },
       { name: "Building Permit", type: "pdf", uploaded: true, fileName: "permit_gulf.pdf" },
@@ -83,3 +87,4 @@ export const MOCK_REQUESTS: LicensingRequest[] = [
     ],
   },
 ];
+

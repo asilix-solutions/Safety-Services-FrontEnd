@@ -4,6 +4,7 @@ import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
 import { FileSignature, Wrench, FileCheck, FileText } from "lucide-react";
 import { RequestType } from "@/domains/requests/types";
+import { useTranslation } from "@/providers/i18n-provider";
 
 interface RequestTypeStepProps {
   value: RequestType;
@@ -12,43 +13,58 @@ interface RequestTypeStepProps {
 }
 
 export function RequestTypeStep({ value, onChange, onNext }: RequestTypeStepProps) {
+  const { t } = useTranslation();
+
   const options = [
     {
       id: "new_license" as RequestType,
-      title: "New Safety License",
-      description: "Obtain an official building occupancy or business safety certification.",
+      title: t("requests:wizard.requestTypes.newLicense.title"),
+      description: t("requests:wizard.requestTypes.newLicense.description"),
       icon: <FileSignature className="h-6 w-6 text-emerald-500" />,
-      docs: ["Commercial Registration (CR)", "Building Permit", "Site Photos"],
+      docs: [
+        t("requests:wizard.documents.commercialRegistration"),
+        t("requests:wizard.documents.buildingPermit"),
+        t("requests:wizard.documents.sitePhotos")
+      ],
     },
     {
       id: "maintenance_contract" as RequestType,
-      title: "Maintenance Contract",
-      description: "Schedule regular preventative maintenance and safety systems tests.",
+      title: t("requests:wizard.requestTypes.maintenanceContract.title"),
+      description: t("requests:wizard.requestTypes.maintenanceContract.description"),
       icon: <Wrench className="h-6 w-6 text-amber-500" />,
-      docs: ["Existing Agreements", "Photos of Alarm/Extinguisher systems"],
+      docs: [
+        t("requests:wizard.documents.existingAgreements"),
+        t("requests:wizard.documents.alarmExtinguisherPhotos")
+      ],
     },
     {
       id: "engineering_blueprint" as RequestType,
-      title: "Engineering Drawings / Blueprints Review",
-      description: "Submit civil architectural plans for mechanical & fire safety compliance reviews.",
+      title: t("requests:wizard.requestTypes.engineeringBlueprint.title"),
+      description: t("requests:wizard.requestTypes.engineeringBlueprint.description"),
       icon: <FileCheck className="h-6 w-6 text-blue-500" />,
-      docs: ["Architectural Blueprint PDF", "Building Permit"],
+      docs: [
+        t("requests:wizard.documents.architecturalBlueprintPdf"),
+        t("requests:wizard.documents.buildingPermit")
+      ],
     },
     {
       id: "technical_report" as RequestType,
-      title: "Technical Safety Report",
-      description: "Request a detailed engineering safety check and formal technical report.",
+      title: t("requests:wizard.requestTypes.technicalReport.title"),
+      description: t("requests:wizard.requestTypes.technicalReport.description"),
       icon: <FileText className="h-6 w-6 text-indigo-500" />,
-      docs: ["Lease Agreement", "Photos of Facility layout"],
+      docs: [
+        t("requests:wizard.documents.leaseAgreement"),
+        t("requests:wizard.documents.facilityLayoutPhotos")
+      ],
     },
   ];
 
   return (
     <div className="space-y-6">
       <div className="text-center max-w-lg mx-auto space-y-1.5">
-        <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">Select Safety Request Type</h2>
+        <h2 className="text-xl font-bold text-foreground">{t("requests:wizard.requestType.title")}</h2>
         <p className="text-xs text-muted-foreground">
-          Choose the service segment that matches your safety licensing or compliance requirements.
+          {t("requests:wizard.requestType.subtitle")}
         </p>
       </div>
 
@@ -79,7 +95,7 @@ export function RequestTypeStep({ value, onChange, onNext }: RequestTypeStepProp
               </CardHeader>
               <CardContent className="pt-1 text-xs">
                 <p className="font-semibold text-[10px] text-muted-foreground tracking-wide uppercase mb-1.5">
-                  Required Documents Checklist
+                  {t("requests:wizard.requiredDocumentsChecklist")}
                 </p>
                 <div className="flex flex-wrap gap-1.5">
                   {opt.docs.map((doc, idx) => (

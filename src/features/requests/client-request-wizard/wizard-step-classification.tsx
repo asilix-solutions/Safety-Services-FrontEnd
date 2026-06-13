@@ -4,7 +4,9 @@ import React from "react";
 import { Button } from "@/shared/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/shared/ui/card";
 import { ShieldCheck, HardHat, FileSignature, MapPin, BadgeAlert } from "lucide-react";
-import { RequestClassification, RequestType } from "@/domains/requests/types";
+import { RequestClassification, RequestType, LicensingRequest } from "@/domains/requests/types";
+import { useTranslation } from "@/providers/i18n-provider";
+import { getClassificationReason, getClassificationDisplayName } from "@/domains/requests/workflow";
 
 interface AutoClassificationProps {
   classification: RequestClassification;
@@ -13,6 +15,7 @@ interface AutoClassificationProps {
   instantReportAllowed: boolean;
   area: number;
   requestType: RequestType;
+  requestData: Partial<LicensingRequest>;
   onNext: () => void;
   onPrev: () => void;
 }
@@ -24,105 +27,123 @@ export function ClassificationStep({
   instantReportAllowed,
   area,
   requestType,
+  requestData,
   onNext,
   onPrev,
 }: AutoClassificationProps) {
-  const getClassificationMeta = () => {
+  const { t } = useTranslation();
+
+  const getClientMetadata = () => {
     switch (classification) {
       case "fast_track":
         return {
-          title: "Fast-Track basic Safety",
-          desc: "Instant digital certification flow allowed under basic municipal safety guidelines.",
-          colorClass: "border-emerald-500/20 bg-emerald-500/5 text-emerald-700 dark:text-emerald-400",
+          title: t("requests:wizard.classification.fastReviewLabel"),
+          desc: t("requests:wizard.classification.fastTrackClientDesc"),
+          timeline: t("requests:wizard.classification.fastTrackTimeline"),
+          colorClass: "border-emerald-500/20 bg-emerald-500/[0.03] dark:bg-emerald-950/[0.08] text-emerald-800 dark:text-emerald-300",
           icon: <ShieldCheck className="h-6 w-6 text-emerald-500" />,
         };
       case "maintenance_strategy":
         return {
-          title: "Maintenance Strategy / Mandatory Inspection",
-          desc: "Requires scheduling a certified safety technician site visit before compliance verification.",
-          colorClass: "border-amber-500/20 bg-amber-500/5 text-amber-700 dark:text-amber-400",
+          title: t("requests:wizard.classification.maintenanceReviewLabel"),
+          desc: t("requests:wizard.classification.maintenanceClientDesc"),
+          timeline: t("requests:wizard.classification.maintenanceTimeline"),
+          colorClass: "border-amber-500/20 bg-amber-500/[0.03] dark:bg-amber-950/[0.08] text-amber-800 dark:text-amber-300",
           icon: <HardHat className="h-6 w-6 text-amber-500" />,
         };
       case "engineering_project":
         return {
-          title: "Engineering Project / Blueprint Review",
-          desc: "Requires deep architectural blueprint audits and formal engineering cost quotes.",
-          colorClass: "border-indigo-500/20 bg-indigo-500/5 text-indigo-700 dark:text-indigo-400",
+          title: t("requests:wizard.classification.engineeringReviewLabel"),
+          desc: t("requests:wizard.classification.engineeringClientDesc"),
+          timeline: t("requests:wizard.classification.engineeringTimeline"),
+          colorClass: "border-indigo-500/20 bg-indigo-500/[0.03] dark:bg-indigo-950/[0.08] text-indigo-800 dark:text-indigo-300",
           icon: <FileSignature className="h-6 w-6 text-indigo-500" />,
         };
       case "high_hazard_review":
         return {
-          title: "High Hazard Override Review",
-          desc: "Overriding Risk Element Triggered: Requires on-site inspector verification and deep blueprint safety engineering review.",
-          colorClass: "border-rose-500/20 bg-rose-500/5 text-rose-700 dark:text-rose-400",
-          icon: <BadgeAlert className="h-6 w-6 text-rose-500" />,
+          title: t("requests:wizard.classification.enhancedSafetyReviewLabel"),
+          desc: t("requests:wizard.classification.highHazardClientDesc"),
+          timeline: t("requests:wizard.classification.highHazardTimeline"),
+          colorClass: "border-amber-500/20 bg-amber-500/[0.03] dark:bg-amber-950/[0.08] text-amber-800 dark:text-amber-300",
+          icon: <BadgeAlert className="h-6 w-6 text-amber-500" />,
         };
     }
   };
 
-  const meta = getClassificationMeta();
+  const clientMeta = getClientMetadata();
 
   return (
     <div className="space-y-6">
+      {/* Success Confirmation Banner */}
+      <div className="p-4 rounded-xl border border-emerald-500/10 bg-emerald-500/[0.03] dark:bg-emerald-950/[0.08] text-xs flex gap-3 items-start">
+        <ShieldCheck className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
+        <div className="space-y-0.5 text-left rtl:text-right">
+          <h4 className="font-bold text-foreground">{t("requests:wizard.classification.bannerTitle")}</h4>
+          <p className="text-muted-foreground leading-relaxed">
+            {t("requests:wizard.classification.bannerDesc")}
+          </p>
+        </div>
+      </div>
+
       <div className="text-center max-w-lg mx-auto space-y-1.5">
-        <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">Workflow Classification Engine</h2>
+        <h2 className="text-xl font-bold text-foreground">
+          {t("requests:wizard.classification.clientTitle")}
+        </h2>
         <p className="text-xs text-muted-foreground">
-          SSLM has analyzed your facility area and safety equipment checklist to route your request.
+          {t("requests:wizard.classification.clientSubtitle")}
         </p>
       </div>
 
       <div className="space-y-4">
-        {/* Classification Summary Card */}
-        <div className={`p-5 rounded-xl border flex gap-4 ${meta.colorClass}`}>
-          <div className="p-3 bg-white dark:bg-slate-950 rounded-xl border border-border/80 shrink-0 self-start">
-            {meta.icon}
+        {/* Classification Result Card */}
+        <div className={`p-5 rounded-xl border flex gap-4 transition-all duration-200 ${clientMeta.colorClass}`}>
+          <div className="p-3 bg-background rounded-xl border border-border/40 shadow-sm shrink-0 self-start">
+            {clientMeta.icon}
           </div>
           <div className="space-y-1">
-            <h3 className="font-bold text-sm">{meta.title}</h3>
-            <p className="text-xs leading-relaxed text-slate-500 dark:text-slate-400">{meta.desc}</p>
+            <span className="text-[10px] uppercase font-bold tracking-wider opacity-75">Assigned Path</span>
+            <h3 className="font-bold text-base tracking-tight text-foreground">{clientMeta.title}</h3>
           </div>
         </div>
 
-        {/* Detailed Metrics Checklist */}
-        <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 shadow-sm">
+        {/* What Happens Next Card */}
+        <Card className="border-border bg-card">
           <CardHeader className="pb-2">
-            <CardTitle className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
-              Compliance Routing Matrix
+            <CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              {t("requests:wizard.classification.nextStepTitle")}
             </CardTitle>
           </CardHeader>
-          <CardContent className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
-            <div className="py-2.5 flex justify-between">
-              <span className="text-muted-foreground">Declared Facility Area</span>
-              <span className="font-semibold text-slate-700 dark:text-slate-200">{area} m²</span>
-            </div>
-            <div className="py-2.5 flex justify-between">
-              <span className="text-muted-foreground">On-Site Inspection Required?</span>
-              <span className={`font-semibold ${siteVisitRequired ? "text-amber-500" : "text-emerald-500"}`}>
-                {siteVisitRequired ? "Yes (Mandatory)" : "No (Instant Certification)"}
-              </span>
-            </div>
-            <div className="py-2.5 flex justify-between">
-              <span className="text-muted-foreground">Engineering Blueprint Audit Required?</span>
-              <span className={`font-semibold ${engineeringReviewRequired ? "text-amber-500" : "text-emerald-500"}`}>
-                {engineeringReviewRequired ? "Yes (Blueprint Review Required)" : "No"}
-              </span>
-            </div>
-            <div className="py-2.5 flex justify-between">
-              <span className="text-muted-foreground">Instant Technical Certificate Pathway?</span>
-              <span className={`font-semibold ${instantReportAllowed ? "text-emerald-500" : "text-rose-500"}`}>
-                {instantReportAllowed ? "Allowed" : "Bypassed (requires manual verification)"}
-              </span>
+          <CardContent className="space-y-4 text-xs">
+            <p className="text-foreground leading-relaxed">
+              {clientMeta.desc}
+            </p>
+            
+            <div className="pt-3 border-t border-border space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">{t("requests:wizard.classification.timeline")}:</span>
+                <span className="font-bold text-foreground bg-secondary px-2.5 py-1 rounded text-[11px]">
+                  {clientMeta.timeline}
+                </span>
+              </div>
+              <p className="text-[10px] text-muted-foreground leading-normal italic">
+                {t("requests:wizard.classification.timelineHelper")}
+              </p>
             </div>
           </CardContent>
         </Card>
+
+        {/* Tracking Reminder Card */}
+        <div className="p-4 rounded-xl border border-border bg-secondary/15 text-xs text-muted-foreground leading-relaxed">
+          {t("requests:wizard.classification.trackingReminder")}
+        </div>
       </div>
 
       <div className="flex justify-between pt-4 border-t border-border/80">
         <Button type="button" variant="outline" size="sm" onClick={onPrev}>
-          Back
+          {t("requests:wizard.buttons.previous")}
         </Button>
         <Button type="button" size="sm" onClick={onNext}>
-          Continue to Final Review
+          {t("requests:wizard.classification.continueToReview")}
         </Button>
       </div>
     </div>

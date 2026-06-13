@@ -9,7 +9,8 @@ export type Namespace =
   | "reports"
   | "maintenance"
   | "settings"
-  | "validation";
+  | "validation"
+  | "requests";
 
 export interface Translations {
   common: typeof import("@/locales/en/common.json");
@@ -21,6 +22,7 @@ export interface Translations {
   maintenance: typeof import("@/locales/en/maintenance.json");
   settings: typeof import("@/locales/en/settings.json");
   validation: typeof import("@/locales/en/validation.json");
+  requests: typeof import("@/locales/en/requests.json");
 }
 
 export type TxKey =
@@ -32,4 +34,5 @@ export type TxKey =
   | `reports:${keyof Translations["reports"]}`
   | `maintenance:${keyof Translations["maintenance"]}`
   | `settings:${keyof Translations["settings"]}`
-  | `validation:${keyof Translations["validation"]}`;
+  | `validation:${keyof Translations["validation"]}`
+  | `requests:${keyof Translations["requests"]}`;

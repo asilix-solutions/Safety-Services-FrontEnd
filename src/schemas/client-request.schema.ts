@@ -17,7 +17,7 @@ export const clientRequestSchema = z.object({
   district: z.string().min(2, "District name is required"),
   addressDescription: z.string().min(5, "Address details must be at least 5 characters"),
   contactName: z.string().min(2, "Contact person name is required"),
-  contactPhone: z.string().regex(/^\+?[\d\s-]{9,15}$/, "Contact phone must be a valid phone number"),
+  contactPhone: z.string().regex(/^(05\d{8}|\+9665\d{8}|\+?[1-9]\d{6,14})$/, "Contact phone must start with 05 (10 digits) or +9665 (13 characters) or be a valid international format"),
 
   // Step 3: Safety Risk Toggles
   safetyEquipment: z.boolean().default(false),
