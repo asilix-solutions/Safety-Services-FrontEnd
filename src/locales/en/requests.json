@@ -261,5 +261,20 @@
   "quotations.builder.fieldCurrentStage": "Current Stage",
   "quotations.builder.errMinQuantity": "Quantity must be at least 1",
   "quotations.builder.errMinPrice": "Unit price cannot be negative",
-  "quotations.builder.errNoItems": "Please add at least one quotation item."
+  "quotations.builder.errNoItems": "Please add at least one quotation item.",
+  "quotations.columns.quotationStatus": "Quotation Status",
+  "quotations.status.notStarted": "Not Started",
+  "quotations.status.draft": "Draft",
+  "quotations.status.submitted": "Submitted for Approval",
+  "quotations.actions.continueDraft": "Continue Draft",
+  "quotations.actions.viewSubmission": "View Submission",
+  "list.fields.area": "Area:",
+  "list.fields.classification": "Classification:",
+  "list.columns.jobNumber": "Job Number",
+  "list.columns.facilityOwner": "Facility / Owner",
+  "list.columns.requestType": "Request Type",
+  "list.columns.status": "Status",
+  "list.columns.actions": "Actions",
+  "list.actions.openReview": "Open Review",
+  "list.actions.auditDetails": "Audit Details"
 }

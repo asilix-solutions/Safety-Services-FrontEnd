@@ -261,5 +261,20 @@
   "quotations.builder.fieldCurrentStage": "المرحلة الحالية",
   "quotations.builder.errMinQuantity": "يجب أن تكون الكمية 1 على الأقل",
   "quotations.builder.errMinPrice": "لا يمكن أن يكون سعر الوحدة سالبًا",
-  "quotations.builder.errNoItems": "يرجى إضافة بند واحد على الأقل لعرض السعر."
+  "quotations.builder.errNoItems": "يرجى إضافة بند واحد على الأقل لعرض السعر.",
+  "quotations.columns.quotationStatus": "حالة عرض السعر",
+  "quotations.status.notStarted": "لم يبدأ",
+  "quotations.status.draft": "مسودة",
+  "quotations.status.submitted": "مرسل للمراجعة والاعتماد",
+  "quotations.actions.continueDraft": "متابعة المسودة",
+  "quotations.actions.viewSubmission": "عرض الإرسال",
+  "list.fields.area": "المساحة:",
+  "list.fields.classification": "التصنيف:",
+  "list.columns.jobNumber": "رقم الطلب",
+  "list.columns.facilityOwner": "المنشأة / المالك",
+  "list.columns.requestType": "نوع الطلب",
+  "list.columns.status": "الحالة",
+  "list.columns.actions": "الإجراءات",
+  "list.actions.openReview": "بدء المراجعة",
+  "list.actions.auditDetails": "تفاصيل التدقيق"
 }

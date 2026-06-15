@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/providers/AuthProvider";
 import { MOCK_REQUESTS } from "@/mock/requests";
-import { LicensingRequest, RequestType, WorkflowStage } from "@/domains/requests/types";
+import { LicensingRequest, RequestType } from "@/domains/requests/types";
 import { mapStatusToStage, getQueueDisplayName, getClassificationDisplayName } from "@/domains/requests/workflow";
 import { PageHeader } from "@/shared/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
@@ -14,23 +14,31 @@ import { DataTable, ColumnDef } from "@/shared/components/data-table/data-table"
 import { Eye, DollarSign } from "lucide-react";
 import Link from "next/link";
 import { useTranslation, useNamespaceTranslations } from "@/providers/i18n-provider";
+import { Quotation } from "@/domains/quotations/types";
+
+type DerivedQuotationStatus = "NOT_STARTED" | "DRAFT" | "SUBMITTED_FOR_APPROVAL";
 
 export default function QuotationsQueuePage() {
   const { user } = useAuth();
   const { t } = useTranslation();
   useNamespaceTranslations(["requests", "dashboard", "common"]);
-  const [requests, setRequests] = useState<LicensingRequest[]>([]);
+  const [requests, setRequests] = useState<(LicensingRequest & { derivedStatus: DerivedQuotationStatus })[]>([]);
 
   // Load and merge requests
   useEffect(() => {
     let localList: LicensingRequest[] = [];
+    let localQuotes: Quotation[] = [];
     try {
-      const local = localStorage.getItem("SSLM_CLIENT_REQUESTS");
-      if (local) {
-        localList = JSON.parse(local);
+      const localReqs = localStorage.getItem("SSLM_CLIENT_REQUESTS");
+      if (localReqs) {
+        localList = JSON.parse(localReqs);
+      }
+      const quotes = localStorage.getItem("SSLM_QUOTATIONS");
+      if (quotes) {
+        localQuotes = JSON.parse(quotes);
       }
     } catch (err) {
-      console.error("Failed to read local requests", err);
+      console.error("Failed to read local data", err);
     }
 
     // Merge logic: localStorage overrides MOCK_REQUESTS for identical jobNumbers
@@ -44,16 +52,29 @@ export default function QuotationsQueuePage() {
       mergedMap.set(r.jobNumber, r);
     });
 
-    const normalizedList = Array.from(mergedMap.values()).map((r) => ({
-      ...r,
-      currentStage: r.currentStage || mapStatusToStage(r.status),
-      assignedQueue: r.assignedQueue || (
+    const quoteStatusMap = new Map<string, DerivedQuotationStatus>();
+    localQuotes.forEach((q) => {
+      quoteStatusMap.set(q.jobNumber, q.quotationStatus as DerivedQuotationStatus);
+    });
+
+    const normalizedList = Array.from(mergedMap.values()).map((r) => {
+      const currentStage = r.currentStage || mapStatusToStage(r.status);
+      const assignedQueue = r.assignedQueue || (
         r.classification === "high_hazard_review" ? "HIGH_HAZARD" :
         r.classification === "engineering_project" ? "ENGINEERING" :
         r.classification === "maintenance_strategy" ? "MAINTENANCE" : 
         "FAST_TRACK"
-      )
-    }));
+      );
+
+      const derivedStatus = quoteStatusMap.get(r.jobNumber) || "NOT_STARTED";
+
+      return {
+        ...r,
+        currentStage,
+        assignedQueue,
+        derivedStatus
+      };
+    });
 
     // Filter only those in QUOTATION stage
     const quotationsQueue = normalizedList.filter((r) => r.currentStage === "QUOTATION");
@@ -72,7 +93,41 @@ export default function QuotationsQueuePage() {
     return map[type] || type;
   };
 
-  const columns: ColumnDef<LicensingRequest>[] = [
+  const getQuotationStatusBadge = (status: DerivedQuotationStatus) => {
+    switch (status) {
+      case "DRAFT":
+        return (
+          <Badge variant="warning">
+            {t("requests:quotations.status.draft")}
+          </Badge>
+        );
+      case "SUBMITTED_FOR_APPROVAL":
+        return (
+          <Badge variant="success">
+            {t("requests:quotations.status.submitted")}
+          </Badge>
+        );
+      default:
+        return (
+          <Badge variant="secondary">
+            {t("requests:quotations.status.notStarted")}
+          </Badge>
+        );
+    }
+  };
+
+  const getActionButtonLabel = (status: DerivedQuotationStatus) => {
+    switch (status) {
+      case "DRAFT":
+        return t("requests:quotations.actions.continueDraft");
+      case "SUBMITTED_FOR_APPROVAL":
+        return t("requests:quotations.actions.viewSubmission");
+      default:
+        return t("requests:quotations.queue.prepareQuote");
+    }
+  };
+
+  const columns: ColumnDef<LicensingRequest & { derivedStatus: DerivedQuotationStatus }>[] = [
     {
       header: t("requests:quotations.columns.jobNumber"),
       accessorKey: "jobNumber",
@@ -117,13 +172,9 @@ export default function QuotationsQueuePage() {
       render: (row) => <span>{row.area} m²</span>,
     },
     {
-      header: t("requests:quotations.columns.currentStage"),
-      accessorKey: "currentStage",
-      render: (row) => (
-        <Badge variant="warning" className="capitalize">
-          {row.currentStage.replace("_", " ")}
-        </Badge>
-      ),
+      header: t("requests:quotations.columns.quotationStatus"),
+      accessorKey: "derivedStatus",
+      render: (row) => getQuotationStatusBadge(row.derivedStatus),
     },
     {
       header: t("requests:quotations.columns.actions"),
@@ -133,7 +184,7 @@ export default function QuotationsQueuePage() {
           <Link href={`/quotations/${row.jobNumber}`}>
             <Button size="sm" className="h-8 gap-1 text-xs bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm">
               <DollarSign className="h-3.5 w-3.5" />
-              {t("requests:quotations.queue.prepareQuote")}
+              {getActionButtonLabel(row.derivedStatus)}
             </Button>
           </Link>
           <Link href={`/requests/${row.jobNumber}`}>

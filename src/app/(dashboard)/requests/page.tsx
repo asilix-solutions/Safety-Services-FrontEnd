@@ -104,11 +104,11 @@ export default function RequestsPage() {
               <CardContent className="space-y-4 pt-2 text-xs">
                 <div className="grid grid-cols-2 gap-2 text-[10px] text-muted-foreground p-2 rounded-lg bg-secondary/35">
                   <div>
-                    <span>Area: </span>
+                    <span>{t("requests:list.fields.area")} </span>
                     <span className="font-semibold text-foreground">{req.area} m²</span>
                   </div>
                   <div>
-                    <span>Classification: </span>
+                    <span>{t("requests:list.fields.classification")} </span>
                     <span className="font-semibold text-foreground capitalize">{req.classification.replace("_", " ")}</span>
                   </div>
                 </div>
@@ -140,12 +140,12 @@ export default function RequestsPage() {
   // Admin / Operations internal dense table view
   const columns: ColumnDef<LicensingRequest>[] = [
     {
-      header: "Job Number",
+      header: t("requests:list.columns.jobNumber"),
       accessorKey: "jobNumber",
       render: (row) => <span className="font-mono font-bold text-primary">{row.jobNumber}</span>,
     },
     {
-      header: "Facility / Owner",
+      header: t("requests:list.columns.facilityOwner"),
       accessorKey: "facilityName",
       render: (row) => (
         <div>
@@ -155,12 +155,12 @@ export default function RequestsPage() {
       ),
     },
     {
-      header: "Request Type",
+      header: t("requests:list.columns.requestType"),
       accessorKey: "requestType",
       render: (row) => <span>{getRequestTypeLabel(row.requestType)}</span>,
     },
     {
-      header: "Status",
+      header: t("requests:list.columns.status"),
       accessorKey: "status",
       render: (row) => (
         <Badge variant={getStatusBadgeVariant(row.status)} className="capitalize">
@@ -169,7 +169,7 @@ export default function RequestsPage() {
       ),
     },
     {
-      header: "Actions",
+      header: t("requests:list.columns.actions"),
       accessorKey: "id",
       render: (row) => {
         const queue = row.assignedQueue || (row.classification === "high_hazard_review" ? "HIGH_HAZARD" : row.classification === "engineering_project" ? "ENGINEERING" : row.classification === "maintenance_strategy" ? "MAINTENANCE" : "FAST_TRACK");
@@ -180,7 +180,7 @@ export default function RequestsPage() {
           return (
             <Link href={`/blueprint-review/${row.jobNumber}`}>
               <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs text-primary border-primary/20 hover:bg-primary/5 hover:text-primary">
-                <Eye className="h-3.5 w-3.5" /> Open Review
+                <Eye className="h-3.5 w-3.5" /> {t("requests:list.actions.openReview")}
               </Button>
             </Link>
           );
@@ -189,7 +189,7 @@ export default function RequestsPage() {
         return (
           <Link href={`/requests/${row.jobNumber}`}>
             <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs">
-              <Eye className="h-3.5 w-3.5" /> Audit Details
+              <Eye className="h-3.5 w-3.5" /> {t("requests:list.actions.auditDetails")}
             </Button>
           </Link>
         );
