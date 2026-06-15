@@ -15,6 +15,7 @@ export type WorkflowStage =
   | "SUBMITTED"
   | "UNDER_REVIEW"
   | "QUOTATION"
+  | "QUOTATION_APPROVAL"
   | "PAYMENT_CONFIRMED"
   | "PROJECT_CREATED"
   | "FIELD_EXECUTION"

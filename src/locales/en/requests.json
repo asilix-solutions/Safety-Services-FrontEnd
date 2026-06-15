@@ -276,5 +276,7 @@
   "list.columns.status": "Status",
   "list.columns.actions": "Actions",
   "list.actions.openReview": "Open Review",
-  "list.actions.auditDetails": "Audit Details"
+  "list.actions.auditDetails": "Audit Details",
+  "QUOTATION_APPROVAL": "Quotation Approval",
+  "quotations.status.approvalInstructions": "Quotation submitted for approval. Company Admin review is required before sending it to the client or confirming payment."
 }

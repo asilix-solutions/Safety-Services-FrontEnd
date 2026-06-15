@@ -76,8 +76,8 @@ export default function QuotationsQueuePage() {
       };
     });
 
-    // Filter only those in QUOTATION stage
-    const quotationsQueue = normalizedList.filter((r) => r.currentStage === "QUOTATION");
+    // Filter only those in QUOTATION or QUOTATION_APPROVAL stage
+    const quotationsQueue = normalizedList.filter((r) => r.currentStage === "QUOTATION" || r.currentStage === "QUOTATION_APPROVAL");
     setRequests(quotationsQueue);
   }, []);
 

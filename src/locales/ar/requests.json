@@ -276,5 +276,7 @@
   "list.columns.status": "الحالة",
   "list.columns.actions": "الإجراءات",
   "list.actions.openReview": "بدء المراجعة",
-  "list.actions.auditDetails": "تفاصيل التدقيق"
+  "list.actions.auditDetails": "تفاصيل التدقيق",
+  "QUOTATION_APPROVAL": "اعتماد عرض السعر",
+  "quotations.status.approvalInstructions": "تم إرسال عرض السعر للمراجعة والاعتماد الداخلي. يلزم اعتماد مدير الشركة قبل إرساله للعميل أو تأكيد الدفع."
 }

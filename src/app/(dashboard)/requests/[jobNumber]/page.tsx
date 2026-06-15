@@ -87,6 +87,8 @@ export default function RequestDetailsPage() {
         return "The compliance engineer is auditing the safety blueprints and planning materials.";
       case "QUOTATION":
         return "A quotation is prepared. Client payment verification is required to authorize the inspection.";
+      case "QUOTATION_APPROVAL":
+        return t("requests:quotations.status.approvalInstructions");
       case "PAYMENT_CONFIRMED":
         return "Payment confirmed successfully. The operations manager is initializing workflow tickets.";
       case "PROJECT_CREATED":

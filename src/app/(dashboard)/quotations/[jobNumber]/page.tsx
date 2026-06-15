@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/providers/AuthProvider";
 import { MOCK_REQUESTS } from "@/mock/requests";
-import { LicensingRequest, RequestType } from "@/domains/requests/types";
-import { mapStatusToStage, getQueueDisplayName, getClassificationDisplayName } from "@/domains/requests/workflow";
+import { LicensingRequest, RequestType, WorkflowStage } from "@/domains/requests/types";
+import { mapStatusToStage, getQueueDisplayName, getClassificationDisplayName, WORKFLOW_STAGES } from "@/domains/requests/workflow";
 import { PageHeader } from "@/shared/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Button } from "@/shared/ui/button";
@@ -231,6 +231,49 @@ export default function QuotationBuilderPage() {
       console.log("Persisting SSLM_QUOTATIONS");
       localStorage.setItem("SSLM_QUOTATIONS", JSON.stringify(quotes));
       console.log("LocalStorage SSLM_QUOTATIONS value:", localStorage.getItem("SSLM_QUOTATIONS"));
+
+      // Synchronize associated request stage in SSLM_CLIENT_REQUESTS
+      if (status === "SUBMITTED_FOR_APPROVAL") {
+        try {
+          const localReqsStr = localStorage.getItem("SSLM_CLIENT_REQUESTS");
+          const localRequests: LicensingRequest[] = localReqsStr ? JSON.parse(localReqsStr) : [];
+          
+          const requestIdx = localRequests.findIndex(r => r.jobNumber === jobNumber);
+          const approvalStageIndex = WORKFLOW_STAGES.indexOf("QUOTATION_APPROVAL");
+          
+          if (requestIdx !== -1) {
+            const currentStageIndex = WORKFLOW_STAGES.indexOf(localRequests[requestIdx].currentStage);
+            if (currentStageIndex < approvalStageIndex) {
+              localRequests[requestIdx].currentStage = "QUOTATION_APPROVAL" as WorkflowStage;
+              localRequests[requestIdx].updatedAt = timestamp;
+            }
+          } else if (request) {
+            const currentStageIndex = WORKFLOW_STAGES.indexOf(request.currentStage);
+            const updatedReq = { ...request };
+            if (currentStageIndex < approvalStageIndex) {
+              updatedReq.currentStage = "QUOTATION_APPROVAL" as WorkflowStage;
+              updatedReq.updatedAt = timestamp;
+            }
+            localRequests.push(updatedReq);
+          }
+          
+          localStorage.setItem("SSLM_CLIENT_REQUESTS", JSON.stringify(localRequests));
+
+          // Sync local request state
+          if (request) {
+            const currentStageIndex = WORKFLOW_STAGES.indexOf(request.currentStage);
+            if (currentStageIndex < approvalStageIndex) {
+              setRequest({
+                ...request,
+                currentStage: "QUOTATION_APPROVAL" as WorkflowStage,
+                updatedAt: timestamp
+              });
+            }
+          }
+        } catch (err) {
+          console.error("Failed to sync request stage to localStorage", err);
+        }
+      }
 
       setQuotationStatus(status);
       setExistingQuotation(updatedQuote);
