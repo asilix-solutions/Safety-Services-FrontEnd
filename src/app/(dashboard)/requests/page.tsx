@@ -29,7 +29,16 @@ export default function RequestsPage() {
     } catch (err) {
       console.error("Failed to read local requests", err);
     }
-    setRequests([...localList, ...MOCK_REQUESTS]);
+
+    const mergedMap = new Map<string, LicensingRequest>();
+    MOCK_REQUESTS.forEach((r) => {
+      mergedMap.set(r.jobNumber, r);
+    });
+    localList.forEach((r) => {
+      mergedMap.set(r.jobNumber, r);
+    });
+
+    setRequests(Array.from(mergedMap.values()));
   }, []);
 
   if (!user) return null;
@@ -72,7 +81,7 @@ export default function RequestsPage() {
           description={t("dashboard:submit_and_track_desc")}
           actions={
             <Link href="/requests/new">
-              <Button size="sm" className="h-9 gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/10">
+              <Button size="sm" className="h-9 gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm">
                 <Plus className="h-4 w-4" /> {t("dashboard:submit_safety_request")}
               </Button>
             </Link>
@@ -90,7 +99,7 @@ export default function RequestsPage() {
                   <CardTitle className="text-base font-bold text-foreground">{req.facilityName}</CardTitle>
                   <CardDescription className="text-xs">{getRequestTypeLabel(req.requestType)}</CardDescription>
                 </div>
-                <span className="text-[10px] font-mono font-bold text-indigo-500">{req.jobNumber}</span>
+                <span className="text-[10px] font-mono font-bold text-primary">{req.jobNumber}</span>
               </CardHeader>
               <CardContent className="space-y-4 pt-2 text-xs">
                 <div className="grid grid-cols-2 gap-2 text-[10px] text-muted-foreground p-2 rounded-lg bg-secondary/35">
@@ -133,7 +142,7 @@ export default function RequestsPage() {
     {
       header: "Job Number",
       accessorKey: "jobNumber",
-      render: (row) => <span className="font-mono font-bold text-indigo-500 dark:text-indigo-400">{row.jobNumber}</span>,
+      render: (row) => <span className="font-mono font-bold text-primary">{row.jobNumber}</span>,
     },
     {
       header: "Facility / Owner",
@@ -170,7 +179,7 @@ export default function RequestsPage() {
         if (isConsultingEngineer && isEngQueue) {
           return (
             <Link href={`/blueprint-review/${row.jobNumber}`}>
-              <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs text-indigo-600 border-indigo-500/20 hover:bg-indigo-500/5 hover:text-indigo-600">
+              <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs text-primary border-primary/20 hover:bg-primary/5 hover:text-primary">
                 <Eye className="h-3.5 w-3.5" /> Open Review
               </Button>
             </Link>

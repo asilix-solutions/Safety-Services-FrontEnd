@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/providers/AuthProvider";
 import { useTranslation } from "@/providers/i18n-provider";
 import { AdminLayout } from "@/shared/layouts/admin-layout";
@@ -13,12 +13,44 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const router = useRouter();
   const { t } = useTranslation();
 
+  const pathname = usePathname();
+
   // Redirect to login if unauthenticated after loading finishes
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       router.push("/login");
     }
   }, [isLoading, isAuthenticated, router]);
+
+  // Route guard on role change or path change
+  useEffect(() => {
+    if (isLoading || !isAuthenticated || !user) return;
+
+    const ROLE_DEFAULT_ROUTE: Record<string, string> = {
+      "Super Admin": "/",
+      "Company Admin": "/",
+      "Sales Agent": "/",
+      "Consulting Engineer": "/",
+      "Operations Officer": "/",
+      "Client": "/",
+    };
+
+    const { ROLE_NAVIGATION } = require("@/constants/navigation");
+    const navItems = ROLE_NAVIGATION[user.role] || [];
+    const allowedPaths = navItems.map((item: any) => item.path);
+    const defaultRoute = ROLE_DEFAULT_ROUTE[user.role] || "/";
+
+    const isAllowed = allowedPaths.some((path: string) => {
+      if (path === "/") {
+        return pathname === "/" || pathname === "/overview";
+      }
+      return pathname === path || pathname.startsWith(path + "/");
+    });
+
+    if (!isAllowed) {
+      router.push(defaultRoute);
+    }
+  }, [user?.role, pathname, isLoading, isAuthenticated, router]);
 
   if (isLoading) {
     return (
