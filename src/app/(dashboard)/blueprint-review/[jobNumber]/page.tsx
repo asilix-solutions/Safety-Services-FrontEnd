@@ -104,16 +104,18 @@ export default function EngineeringWorkspacePage() {
     // Save state in localStorage
     try {
       const local = localStorage.getItem("SSLM_CLIENT_REQUESTS");
-      if (local) {
-        const list: LicensingRequest[] = JSON.parse(local);
-        const idx = list.findIndex(r => r.jobNumber === request.jobNumber);
-        if (idx !== -1) {
-          list[idx] = updatedRequest;
-          localStorage.setItem("SSLM_CLIENT_REQUESTS", JSON.stringify(list));
-        }
+      const list: LicensingRequest[] = local ? JSON.parse(local) : [];
+      const idx = list.findIndex(r => r.jobNumber === request.jobNumber);
+
+      if (idx !== -1) {
+        list[idx] = updatedRequest;
+      } else {
+        list.unshift(updatedRequest);
       }
+
+      localStorage.setItem("SSLM_CLIENT_REQUESTS", JSON.stringify(list));
     } catch(e) {
-      console.error(e);
+      console.error("Failed to persist quotation transition", e);
     }
     
     setSuccessMessage("Request successfully approved and transitioned to Quotation phase.");

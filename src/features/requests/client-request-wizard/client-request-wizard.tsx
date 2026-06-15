@@ -352,7 +352,6 @@ export function ClientRequestWizard() {
 
             <div className="flex justify-between items-center text-xs pt-2 border-t border-border/50">
               <span className="text-muted-foreground">{t("requests:wizard.review.pathSummary.path")}:</span>
-              <span className="text-muted-foreground">{t("requests:wizard.review.pathSummary.path")}:</span>
               <Badge variant="outline" className="font-semibold">{pathSummary.path}</Badge>
             </div>
 
