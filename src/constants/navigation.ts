@@ -20,6 +20,7 @@ export const ROLE_NAVIGATION: Record<UserRole, NavigationItem[]> = {
   "Company Admin": [
     { label: "Dashboard", path: "/", iconName: "LayoutDashboard" },
     { label: "Requests", path: "/requests", iconName: "FileSignature" },
+    { label: "Quotation Approvals", path: "/quotations/approvals", iconName: "ClipboardCheck" },
     { label: "Projects", path: "/projects", iconName: "FolderKanban" },
     { label: "Customers", path: "/customers", iconName: "Briefcase" },
     { label: "Employees", path: "/employees", iconName: "Users2" },

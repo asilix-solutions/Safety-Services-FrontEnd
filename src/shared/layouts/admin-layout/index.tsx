@@ -34,6 +34,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
       "Users": "dashboard:nav_users",
       "Settings": "dashboard:nav_settings",
       "Requests": "dashboard:nav_requests",
+      "Quotation Approvals": "dashboard:nav_quotation_approvals",
       "Projects": "dashboard:nav_projects",
       "Customers": "dashboard:nav_customers",
       "Employees": "dashboard:nav_employees",

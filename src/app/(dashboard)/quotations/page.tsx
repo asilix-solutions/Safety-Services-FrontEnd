@@ -16,7 +16,13 @@ import Link from "next/link";
 import { useTranslation, useNamespaceTranslations } from "@/providers/i18n-provider";
 import { Quotation } from "@/domains/quotations/types";
 
-type DerivedQuotationStatus = "NOT_STARTED" | "DRAFT" | "SUBMITTED_FOR_APPROVAL";
+type DerivedQuotationStatus =
+  | "NOT_STARTED"
+  | "DRAFT"
+  | "SUBMITTED_FOR_APPROVAL"
+  | "CHANGES_REQUESTED"
+  | "APPROVED"
+  | "REJECTED";
 
 export default function QuotationsQueuePage() {
   const { user } = useAuth();
@@ -107,6 +113,24 @@ export default function QuotationsQueuePage() {
             {t("requests:quotations.status.submitted")}
           </Badge>
         );
+      case "CHANGES_REQUESTED":
+        return (
+          <Badge variant="warning">
+            {t("requests:quotations.status.changesRequested")}
+          </Badge>
+        );
+      case "APPROVED":
+        return (
+          <Badge variant="success">
+            {t("requests:quotations.status.approved")}
+          </Badge>
+        );
+      case "REJECTED":
+        return (
+          <Badge variant="destructive">
+            {t("requests:quotations.status.rejected")}
+          </Badge>
+        );
       default:
         return (
           <Badge variant="secondary">
@@ -119,8 +143,11 @@ export default function QuotationsQueuePage() {
   const getActionButtonLabel = (status: DerivedQuotationStatus) => {
     switch (status) {
       case "DRAFT":
+      case "CHANGES_REQUESTED":
         return t("requests:quotations.actions.continueDraft");
       case "SUBMITTED_FOR_APPROVAL":
+      case "APPROVED":
+      case "REJECTED":
         return t("requests:quotations.actions.viewSubmission");
       default:
         return t("requests:quotations.queue.prepareQuote");

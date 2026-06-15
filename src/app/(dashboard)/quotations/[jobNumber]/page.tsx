@@ -34,6 +34,8 @@ export default function QuotationBuilderPage() {
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [existingQuotation, setExistingQuotation] = useState<Quotation | null>(null);
 
+  const isReadOnly = quotationStatus === "APPROVED" || quotationStatus === "REJECTED" || quotationStatus === "SUBMITTED_FOR_APPROVAL";
+
   // Load request details and existing quotation if any
   useEffect(() => {
     if (jobNumber) {
@@ -314,6 +316,20 @@ export default function QuotationBuilderPage() {
         </div>
       )}
 
+      {existingQuotation?.reviewComments && quotationStatus === "CHANGES_REQUESTED" && (
+        <div className="p-4 rounded-xl border border-warning/20 bg-warning/5 text-warning text-xs space-y-1">
+          <p className="font-bold">{t("requests:quotations.details.commentsLabel") || "Review Feedback"}:</p>
+          <p className="font-mono">{existingQuotation.reviewComments}</p>
+        </div>
+      )}
+
+      {existingQuotation?.rejectionReason && quotationStatus === "REJECTED" && (
+        <div className="p-4 rounded-xl border border-destructive/20 bg-destructive/5 text-destructive text-xs space-y-1">
+          <p className="font-bold">{t("requests:quotations.details.reasonLabel") || "Rejection Reason"}:</p>
+          <p className="font-mono">{existingQuotation.rejectionReason}</p>
+        </div>
+      )}
+
       {validationErrors["general"] && (
         <div className="p-4 rounded-xl border border-destructive/20 bg-destructive/5 text-destructive text-xs font-semibold">
           {validationErrors["general"]}
@@ -333,6 +349,7 @@ export default function QuotationBuilderPage() {
               <Button 
                 onClick={() => handleAddItem()} 
                 size="sm" 
+                disabled={isReadOnly}
                 className="h-8 gap-1 bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
               >
                 <Plus className="h-3.5 w-3.5" />
@@ -362,6 +379,7 @@ export default function QuotationBuilderPage() {
                           value={item.description}
                           onChange={(e) => handleUpdateItemField(item.id, "description", e.target.value)}
                           placeholder={t("requests:quotations.builder.descriptionPlaceholder")}
+                          disabled={isReadOnly}
                         />
                         {validationErrors[`description-${item.id}`] && (
                           <p className="text-[10px] text-destructive">{validationErrors[`description-${item.id}`]}</p>
@@ -379,6 +397,7 @@ export default function QuotationBuilderPage() {
                           min="1"
                           value={item.quantity}
                           onChange={(e) => handleUpdateItemField(item.id, "quantity", parseInt(e.target.value) || 0)}
+                          disabled={isReadOnly}
                         />
                         {validationErrors[`quantity-${item.id}`] && (
                           <p className="text-[10px] text-destructive">{validationErrors[`quantity-${item.id}`]}</p>
@@ -396,6 +415,7 @@ export default function QuotationBuilderPage() {
                           min="0"
                           value={item.unitPrice}
                           onChange={(e) => handleUpdateItemField(item.id, "unitPrice", parseFloat(e.target.value) || 0)}
+                          disabled={isReadOnly}
                         />
                         {validationErrors[`unitPrice-${item.id}`] && (
                           <p className="text-[10px] text-destructive">{validationErrors[`unitPrice-${item.id}`]}</p>
@@ -408,6 +428,7 @@ export default function QuotationBuilderPage() {
                           id={`taxable-${item.id}`}
                           checked={item.taxable}
                           onChange={(e: any) => handleUpdateItemField(item.id, "taxable", e.target.checked)}
+                          disabled={isReadOnly}
                         />
                         <Label htmlFor={`taxable-${item.id}`} className="cursor-pointer select-none">
                           {t("requests:quotations.builder.taxable")}
@@ -419,6 +440,7 @@ export default function QuotationBuilderPage() {
                         variant="ghost"
                         size="icon"
                         onClick={() => handleRemoveItem(item.id)}
+                        disabled={isReadOnly}
                         className="h-8 w-8 text-destructive hover:bg-destructive/5 self-end md:self-center md:mt-4"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -444,6 +466,7 @@ export default function QuotationBuilderPage() {
                     variant="outline"
                     size="sm"
                     onClick={() => handleAddItem(sug.label)}
+                    disabled={isReadOnly}
                     className="h-8 text-xs font-medium"
                   >
                     <Plus className="h-3 w-3 mr-1" />
@@ -539,6 +562,7 @@ export default function QuotationBuilderPage() {
             <CardContent className="space-y-2.5">
               <Button
                 onClick={() => handleSave("DRAFT")}
+                disabled={isReadOnly}
                 className="w-full h-9 text-xs gap-1.5 bg-secondary text-secondary-foreground hover:bg-secondary/80 border border-border"
               >
                 <Save className="h-4 w-4" />
@@ -547,6 +571,7 @@ export default function QuotationBuilderPage() {
               
               <Button
                 onClick={() => handleSave("SUBMITTED_FOR_APPROVAL")}
+                disabled={isReadOnly}
                 className="w-full h-9 text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
               >
                 <Send className="h-4 w-4" />

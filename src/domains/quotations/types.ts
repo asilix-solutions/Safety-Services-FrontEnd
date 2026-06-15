@@ -1,6 +1,9 @@
 export type QuotationStatus =
   | "DRAFT"
-  | "SUBMITTED_FOR_APPROVAL";
+  | "SUBMITTED_FOR_APPROVAL"
+  | "CHANGES_REQUESTED"
+  | "APPROVED"
+  | "REJECTED";
 
 export interface QuotationItem {
   id: string;
@@ -24,4 +27,13 @@ export interface Quotation {
   updatedBy?: string;
   submittedBy?: string;
   submittedAt?: string;
+  approvedBy?: string;
+  approvedAt?: string;
+  reviewedBy?: string;
+  reviewedAt?: string;
+  reviewComments?: string;
+  rejectedBy?: string;
+  rejectedAt?: string;
+  rejectionReason?: string;
 }
+
