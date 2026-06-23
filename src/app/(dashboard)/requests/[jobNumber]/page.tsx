@@ -77,28 +77,53 @@ export default function RequestDetailsPage() {
     return map[type] || type;
   };
 
-  const getNextStepInstructions = (stage: WorkflowStage) => {
+  const getNextStepInstructions = (req: LicensingRequest) => {
+    const stage = req.currentStage;
+    const queueNorm = (req.assignedQueue || "").toUpperCase();
+    const classNorm = (req.classification || "").toUpperCase().replace(/_/, "");
+    const isMaintenance = queueNorm === "MAINTENANCE" || classNorm === "MAINTENANCESTRATEGY" || classNorm === "MAINTENANCE";
+    const isFastTrack = queueNorm === "FAST_TRACK" || classNorm === "FASTTRACK" || classNorm === "FAST";
+    const isHighHazard = queueNorm === "HIGH_HAZARD" || classNorm === "HIGHHAZARDREVIEW" || classNorm === "HIGHHAZARD" || classNorm === "HAZARD";
+
     switch (stage) {
       case "DRAFT":
-        return "Please complete the wizard and submit the safety request to begin the compliance process.";
+        return t("requests:nextStep.DRAFT");
       case "SUBMITTED":
-        return "Waiting for compliance coordinator check and engineer queue assignment.";
+        if (isMaintenance) {
+          return t("requests:nextStep.SUBMITTED.MAINTENANCE");
+        }
+        if (isFastTrack) {
+          return t("requests:nextStep.SUBMITTED.FAST_TRACK");
+        }
+        if (isHighHazard) {
+          return t("requests:nextStep.SUBMITTED.HIGH_HAZARD");
+        }
+        return t("requests:nextStep.SUBMITTED.ENGINEERING");
       case "UNDER_REVIEW":
-        return "The compliance engineer is auditing the safety blueprints and planning materials.";
+        if (isMaintenance) {
+          return t("requests:nextStep.UNDER_REVIEW.MAINTENANCE");
+        }
+        if (isFastTrack) {
+          return t("requests:nextStep.UNDER_REVIEW.FAST_TRACK");
+        }
+        if (isHighHazard) {
+          return t("requests:nextStep.UNDER_REVIEW.HIGH_HAZARD");
+        }
+        return t("requests:nextStep.UNDER_REVIEW.ENGINEERING");
       case "QUOTATION":
-        return "A quotation is prepared. Client payment verification is required to authorize the inspection.";
+        return t("requests:nextStep.QUOTATION");
       case "QUOTATION_APPROVAL":
-        return t("requests:quotations.status.approvalInstructions");
+        return t("requests:nextStep.QUOTATION_APPROVAL");
       case "PAYMENT_CONFIRMED":
-        return "Payment confirmed successfully. The operations manager is initializing workflow tickets.";
+        return t("requests:nextStep.PAYMENT_CONFIRMED");
       case "PROJECT_CREATED":
-        return "Official compliance project initialized. Preparing safety inspector field credentials.";
+        return t("requests:nextStep.PROJECT_CREATED");
       case "FIELD_EXECUTION":
-        return "On-site safety systems installation and engineering testing in progress.";
+        return t("requests:nextStep.FIELD_EXECUTION");
       case "FINAL_INSPECTION":
-        return "On-site final regulatory safety audit inspection scheduled.";
+        return t("requests:nextStep.FINAL_INSPECTION");
       case "COMPLETED":
-        return "All safety regulations verified. Official compliance certificate issued.";
+        return t("requests:nextStep.COMPLETED");
       default:
         return "In progress.";
     }
@@ -171,7 +196,7 @@ export default function RequestDetailsPage() {
           <div className="space-y-1">
             <h4 className="font-bold text-xs text-foreground uppercase tracking-wide">Next Step / Action Required</h4>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              {getNextStepInstructions(request.currentStage)}
+              {getNextStepInstructions(request)}
             </p>
           </div>
         </CardContent>
@@ -341,7 +366,7 @@ export default function RequestDetailsPage() {
                         )}
                       </div>
                       <span className={`font-semibold ${isActive ? "text-indigo-600 dark:text-indigo-400 font-bold" : isCompleted ? "text-foreground" : "text-muted-foreground"}`}>
-                        {stage.replace("_", " ")}
+                        {t(`requests:stages.${stage}`) || stage.replace("_", " ")}
                       </span>
                     </div>
                   );

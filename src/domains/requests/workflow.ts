@@ -58,6 +58,22 @@ export function getQueueDisplayName(queue: RequestQueue | null, t: (key: string)
 }
 
 export function getClassificationDisplayName(classification: string, t: (key: string) => string): string {
+  const norm = (classification || "").toUpperCase().replace(/_/, "");
+  
+  if (norm.includes("FASTTRACK") || norm === "FAST_TRACK") {
+    return t("requests:classification.client.fastTrack");
+  }
+  if (norm.includes("MAINTENANCE")) {
+    return t("requests:classification.client.maintenance");
+  }
+  if (norm.includes("ENGINEERING")) {
+    return t("requests:classification.client.engineering");
+  }
+  if (norm.includes("HIGHHAZARD") || norm.includes("HAZARD")) {
+    return t("requests:classification.client.highHazard");
+  }
+
+  // Fallback to original wizard classification display keys
   const map: Record<string, string> = {
     fast_track: t("requests:wizard.classification.fastTrack"),
     maintenance_strategy: t("requests:wizard.classification.maintenanceStrategy"),

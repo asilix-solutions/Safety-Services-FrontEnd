@@ -1,5 +1,5 @@
 "use client";
-
+ 
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/providers/AuthProvider";
 import { MOCK_REQUESTS } from "@/mock/requests";
@@ -12,12 +12,13 @@ import { DataTable, ColumnDef } from "@/shared/components/data-table/data-table"
 import { Plus, Eye, Calendar } from "lucide-react";
 import Link from "next/link";
 import { useTranslation } from "@/providers/i18n-provider";
-
+import { getClassificationDisplayName, mapStatusToStage } from "@/domains/requests/workflow";
+ 
 export default function RequestsPage() {
   const { user } = useAuth();
   const { t } = useTranslation();
   const [requests, setRequests] = useState<LicensingRequest[]>([]);
-
+ 
   // Load from localStorage and merge with mock requests
   useEffect(() => {
     let localList: LicensingRequest[] = [];
@@ -29,7 +30,7 @@ export default function RequestsPage() {
     } catch (err) {
       console.error("Failed to read local requests", err);
     }
-
+ 
     const mergedMap = new Map<string, LicensingRequest>();
     MOCK_REQUESTS.forEach((r) => {
       mergedMap.set(r.jobNumber, r);
@@ -37,10 +38,16 @@ export default function RequestsPage() {
     localList.forEach((r) => {
       mergedMap.set(r.jobNumber, r);
     });
+ 
+    const mergedList = Array.from(mergedMap.values()).map((r) => ({
+      ...r,
+      currentStage: r.currentStage || mapStatusToStage(r.status),
+      assignedQueue: r.assignedQueue || (r.classification === "high_hazard_review" ? "HIGH_HAZARD" : r.classification === "engineering_project" ? "ENGINEERING" : r.classification === "maintenance_strategy" ? "MAINTENANCE" : "FAST_TRACK")
+    }));
 
-    setRequests(Array.from(mergedMap.values()));
+    setRequests(mergedList);
   }, []);
-
+ 
   if (!user) return null;
 
   const getRequestTypeLabel = (type: RequestType) => {
@@ -72,6 +79,31 @@ export default function RequestsPage() {
     }
   };
 
+  const getStageBadgeLabel = (stage: string) => {
+    return t(`requests:stages.${stage}`) || stage.replace("_", " ");
+  };
+
+  const getStageBadgeVariant = (stage: string) => {
+    switch (stage) {
+      case "DRAFT":
+        return "secondary";
+      case "SUBMITTED":
+      case "UNDER_REVIEW":
+        return "warning";
+      case "QUOTATION":
+      case "QUOTATION_APPROVAL":
+        return "warning";
+      case "PAYMENT_CONFIRMED":
+      case "PROJECT_CREATED":
+      case "FIELD_EXECUTION":
+      case "FINAL_INSPECTION":
+      case "COMPLETED":
+        return "success";
+      default:
+        return "secondary";
+    }
+  };
+
   // Render client-portal layout with friendly visual cards
   if (user.role === "Client") {
     return (
@@ -93,8 +125,8 @@ export default function RequestsPage() {
             <Card key={req.id} className="border-border bg-card hover:shadow-md transition-all duration-300">
               <CardHeader className="flex flex-row items-start justify-between pb-2">
                 <div className="space-y-1">
-                  <Badge variant={getStatusBadgeVariant(req.status)} className="capitalize">
-                    {req.status.replace("_", " ")}
+                  <Badge variant={getStageBadgeVariant(req.currentStage)} className="capitalize">
+                    {getStageBadgeLabel(req.currentStage)}
                   </Badge>
                   <CardTitle className="text-base font-bold text-foreground">{req.facilityName}</CardTitle>
                   <CardDescription className="text-xs">{getRequestTypeLabel(req.requestType)}</CardDescription>
@@ -109,7 +141,9 @@ export default function RequestsPage() {
                   </div>
                   <div>
                     <span>{t("requests:list.fields.classification")} </span>
-                    <span className="font-semibold text-foreground capitalize">{req.classification.replace("_", " ")}</span>
+                    <span className="font-semibold text-foreground capitalize">
+                      {getClassificationDisplayName(req.classification, t)}
+                    </span>
                   </div>
                 </div>
 
