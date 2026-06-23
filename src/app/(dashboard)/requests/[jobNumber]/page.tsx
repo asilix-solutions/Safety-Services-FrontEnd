@@ -8,7 +8,7 @@ import { PageHeader } from "@/shared/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Button } from "@/shared/ui/button";
 import { Badge } from "@/shared/ui/badge";
-import { MapPin, ShieldAlert, ArrowLeft, CheckCircle2, Clock, Eye, Download, RefreshCw } from "lucide-react";
+import { MapPin, ShieldAlert, ArrowLeft, CheckCircle2, Clock, Eye, Download, RefreshCw, Send } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useTranslation } from "@/providers/i18n-provider";
@@ -171,7 +171,38 @@ export default function RequestDetailsPage() {
     }
   };
 
+  const handleApproveForQuotation = () => {
+    const updatedRequest: LicensingRequest = { 
+      ...request, 
+      currentStage: "QUOTATION" as WorkflowStage,
+      updatedAt: new Date().toISOString()
+    };
+    setRequest(updatedRequest);
+    
+    try {
+      const local = localStorage.getItem("SSLM_CLIENT_REQUESTS");
+      const list: LicensingRequest[] = local ? JSON.parse(local) : [];
+      const idx = list.findIndex(r => r.jobNumber === request.jobNumber);
+      if (idx !== -1) {
+        list[idx] = updatedRequest;
+      } else {
+        list.push(updatedRequest);
+      }
+      localStorage.setItem("SSLM_CLIENT_REQUESTS", JSON.stringify(list));
+      alert("Request successfully approved and transitioned to Quotation phase.");
+    } catch (e) {
+      console.error("Failed to transition request to Quotation", e);
+    }
+  };
+
   const currentStageIndex = WORKFLOW_STAGES.indexOf(request.currentStage);
+
+  const isConsultingEngineer = user?.role === "Consulting Engineer";
+  const queueNorm = (request.assignedQueue || "").toUpperCase();
+  const classNorm = (request.classification || "").toUpperCase().replace(/_/, "");
+  const isFastOrMaintenance = queueNorm === "FAST_TRACK" || queueNorm === "MAINTENANCE" || classNorm.includes("FAST") || classNorm.includes("MAINTENANCE");
+  const isPreQuotationStage = request.currentStage === "SUBMITTED" || request.currentStage === "UNDER_REVIEW";
+  const showApproveForQuotationAction = isConsultingEngineer && isFastOrMaintenance && isPreQuotationStage;
 
   return (
     <div className="space-y-6">
@@ -189,16 +220,28 @@ export default function RequestDetailsPage() {
 
       {/* Next Action Card */}
       <Card className="border-indigo-500/20 bg-indigo-500/5 shadow-sm">
-        <CardContent className="p-4 flex items-start gap-3">
-          <div className="p-2 bg-indigo-600/10 rounded-lg text-indigo-600">
-            <Clock className="h-5 w-5" />
+        <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <div className="p-2 bg-indigo-600/10 rounded-lg text-indigo-600 shrink-0">
+              <Clock className="h-5 w-5" />
+            </div>
+            <div className="space-y-1">
+              <h4 className="font-bold text-xs text-foreground uppercase tracking-wide">Next Step / Action Required</h4>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                {getNextStepInstructions(request)}
+              </p>
+            </div>
           </div>
-          <div className="space-y-1">
-            <h4 className="font-bold text-xs text-foreground uppercase tracking-wide">Next Step / Action Required</h4>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              {getNextStepInstructions(request)}
-            </p>
-          </div>
+          {showApproveForQuotationAction && (
+            <Button
+              size="sm"
+              onClick={handleApproveForQuotation}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white shrink-0 shadow-sm gap-1.5 text-xs h-9"
+            >
+              <Send className="h-3.5 w-3.5" />
+              {t("requests:engineeringWorkspace.decisionApprove") || "Approve for Quotation"}
+            </Button>
+          )}
         </CardContent>
       </Card>
 

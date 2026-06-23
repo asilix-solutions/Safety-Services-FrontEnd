@@ -84,8 +84,26 @@ export function getClassificationDisplayName(classification: string, t: (key: st
 }
 
 export function getClassificationReason(request: Partial<LicensingRequest>, t: (key: string) => string): string {
+  // Normalize based on existing queue or classification path
+  const queueNorm = (request.assignedQueue || "").toUpperCase();
+  const classNorm = (request.classification || "").toUpperCase().replace(/_/, "");
+  
+  if (queueNorm === "HIGH_HAZARD" || classNorm.includes("HIGHHAZARD") || classNorm.includes("HAZARD")) {
+    return t("requests:classificationReason.HIGH_HAZARD");
+  }
+  if (queueNorm === "FAST_TRACK" || classNorm.includes("FASTTRACK") || classNorm.includes("FAST")) {
+    return t("requests:classificationReason.FAST_TRACK");
+  }
+  if (queueNorm === "MAINTENANCE" || classNorm.includes("MAINTENANCE")) {
+    return t("requests:classificationReason.MAINTENANCE");
+  }
+  if (queueNorm === "ENGINEERING" || classNorm.includes("ENGINEERING")) {
+    return t("requests:classificationReason.ENGINEERING");
+  }
+
+  // Rules-based calculation for new requests (fallback)
   if (request.gasExtensions || request.hazardousMaterials || request.riskCategory === "high") {
-    return t("requests:classificationReason.high_hazard");
+    return t("requests:classificationReason.HIGH_HAZARD");
   }
 
   const actName = (request.activityName || "").toLowerCase();
@@ -108,15 +126,15 @@ export function getClassificationReason(request: Partial<LicensingRequest>, t: (
   const highHazardIsic = ["5610", "2011", "4520", "4730"];
 
   if (isKeywordMatched || highHazardIsic.includes(code)) {
-    return t("requests:classificationReason.high_hazard");
+    return t("requests:classificationReason.HIGH_HAZARD");
   }
 
   const area = request.area || 0;
   if (area < 150) {
-    return t("requests:classificationReason.fast_track");
+    return t("requests:classificationReason.FAST_TRACK");
   } else if (area >= 150 && area <= 1000) {
-    return t("requests:classificationReason.maintenance");
+    return t("requests:classificationReason.MAINTENANCE");
   } else {
-    return t("requests:classificationReason.engineering");
+    return t("requests:classificationReason.ENGINEERING");
   }
 }
