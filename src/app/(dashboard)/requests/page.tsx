@@ -12,7 +12,8 @@ import { DataTable, ColumnDef } from "@/shared/components/data-table/data-table"
 import { Plus, Eye, Calendar } from "lucide-react";
 import Link from "next/link";
 import { useTranslation } from "@/providers/i18n-provider";
-import { getClassificationDisplayName, mapStatusToStage } from "@/domains/requests/workflow";
+import { getClassificationDisplayName } from "@/domains/requests/workflow";
+import { getMergedRequests } from "@/domains/requests/storage";
  
 export default function RequestsPage() {
   const { user } = useAuth();
@@ -21,31 +22,7 @@ export default function RequestsPage() {
  
   // Load from localStorage and merge with mock requests
   useEffect(() => {
-    let localList: LicensingRequest[] = [];
-    try {
-      const local = localStorage.getItem("SSLM_CLIENT_REQUESTS");
-      if (local) {
-        localList = JSON.parse(local);
-      }
-    } catch (err) {
-      console.error("Failed to read local requests", err);
-    }
- 
-    const mergedMap = new Map<string, LicensingRequest>();
-    MOCK_REQUESTS.forEach((r) => {
-      mergedMap.set(r.jobNumber, r);
-    });
-    localList.forEach((r) => {
-      mergedMap.set(r.jobNumber, r);
-    });
- 
-    const mergedList = Array.from(mergedMap.values()).map((r) => ({
-      ...r,
-      currentStage: r.currentStage || mapStatusToStage(r.status),
-      assignedQueue: r.assignedQueue || (r.classification === "high_hazard_review" ? "HIGH_HAZARD" : r.classification === "engineering_project" ? "ENGINEERING" : r.classification === "maintenance_strategy" ? "MAINTENANCE" : "FAST_TRACK")
-    }));
-
-    setRequests(mergedList);
+    setRequests(getMergedRequests());
   }, []);
  
   if (!user) return null;

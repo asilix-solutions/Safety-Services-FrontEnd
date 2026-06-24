@@ -2,13 +2,12 @@
 
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/providers/AuthProvider";
-import { MOCK_REQUESTS } from "@/mock/requests";
 import { LicensingRequest, RequestType, WorkflowStage } from "@/domains/requests/types";
 import { PageHeader } from "@/shared/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Button } from "@/shared/ui/button";
 import { Badge } from "@/shared/ui/badge";
-import { MapPin, ShieldAlert, ArrowLeft, CheckCircle2, Clock, Eye, Download, RefreshCw, Send } from "lucide-react";
+import { MapPin, ShieldAlert, ArrowLeft, Clock, Eye, Download, RefreshCw, Send, CreditCard } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useTranslation } from "@/providers/i18n-provider";
@@ -16,43 +15,96 @@ import {
   WORKFLOW_STAGES,
   getQueueDisplayName,
   getClassificationDisplayName,
-  getClassificationReason,
-  mapStatusToStage
+  getClassificationReason
 } from "@/domains/requests/workflow";
+
+// Import new storage domains
+import { ClientInvoice } from "@/domains/invoices/types";
+import { getInvoices, createOrUpdateInvoice } from "@/domains/invoices/storage";
+import { ClientPayment } from "@/domains/payments/types";
+import { createOrUpdatePayment } from "@/domains/payments/storage";
+import { provisionProjectFromRequest } from "@/domains/projects/storage";
+import { getMergedRequests, upsertRequest } from "@/domains/requests/storage";
+import { Quotation } from "@/domains/quotations/types";
 
 export default function RequestDetailsPage() {
   const { user } = useAuth();
   const params = useParams();
   const { t } = useTranslation();
   const [request, setRequest] = useState<LicensingRequest | null>(null);
+  const [invoice, setInvoice] = useState<ClientInvoice | null>(null);
+  const [quotation, setQuotation] = useState<Quotation | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const jobNumber = params?.jobNumber as string;
 
-  useEffect(() => {
+  const loadData = () => {
     if (jobNumber) {
-      let localList: LicensingRequest[] = [];
-      try {
-        const local = localStorage.getItem("SSLM_CLIENT_REQUESTS");
-        if (local) {
-          localList = JSON.parse(local);
-        }
-      } catch (err) {
-        console.error("Failed to read requests", err);
-      }
-
-      // Map dynamic fallback for safety / type-safety on initial state sync
-      const merged = [...localList, ...MOCK_REQUESTS].map((r) => ({
-        ...r,
-        currentStage: r.currentStage || mapStatusToStage(r.status),
-        assignedQueue: r.assignedQueue || (r.classification === "high_hazard_review" ? "HIGH_HAZARD" : r.classification === "engineering_project" ? "ENGINEERING" : r.classification === "maintenance_strategy" ? "MAINTENANCE" : "FAST_TRACK")
-      }));
+      const merged = getMergedRequests();
       
       const found = merged.find((r) => r.jobNumber === jobNumber);
       if (found) {
         setRequest(found);
       }
+
+      // Load invoice if exists
+      const invoices = getInvoices();
+      const foundInvoice = invoices.find((i) => i.jobNumber === jobNumber);
+      if (foundInvoice) {
+        setInvoice(foundInvoice);
+      } else {
+        setInvoice(null);
+      }
+
+      // Load quotation if exists
+      try {
+        const quotesStr = localStorage.getItem("SSLM_QUOTATIONS");
+        const quotes: Quotation[] = quotesStr ? JSON.parse(quotesStr) : [];
+        const foundQuote = quotes.find((q) => q.jobNumber === jobNumber);
+        if (foundQuote) {
+          setQuotation(foundQuote);
+        } else {
+          setQuotation(null);
+        }
+      } catch (e) {
+        console.error("Failed to read quotations", e);
+      }
     }
+  };
+
+  useEffect(() => {
+    loadData();
   }, [jobNumber]);
+
+  const handleRegenerateInvoice = () => {
+    if (!quotation || quotation.quotationStatus !== "APPROVED") return;
+
+    try {
+      const invoiceId = `INV-${Math.floor(1000 + Math.random() * 9000)}`;
+      const dueDate = new Date();
+      dueDate.setDate(dueDate.getDate() + 30);
+
+      const newInvoice: ClientInvoice = {
+        id: invoiceId,
+        tenantId: request?.tenantId || "default-tenant",
+        jobNumber: jobNumber,
+        quotationJobNumber: jobNumber,
+        subtotal: quotation.subtotal || 0,
+        vatAmount: quotation.vat || 0,
+        grandTotal: quotation.grandTotal || 0,
+        currency: "SAR",
+        status: "unpaid",
+        dueDate: dueDate.toISOString(),
+        issuedAt: new Date().toISOString(),
+      };
+
+      createOrUpdateInvoice(newInvoice);
+      alert("Invoice regenerated successfully from approved quotation!");
+      loadData();
+    } catch (err) {
+      console.error("Failed to regenerate invoice", err);
+    }
+  };
 
   if (!user) return null;
 
@@ -153,17 +205,9 @@ export default function RequestDetailsPage() {
       const updatedRequest = { ...request, documents: updatedDocs };
       setRequest(updatedRequest);
       
-      // Update in localStorage
+      // Update using centralized upsert
       try {
-        const local = localStorage.getItem("SSLM_CLIENT_REQUESTS");
-        if (local) {
-          const list: LicensingRequest[] = JSON.parse(local);
-          const idx = list.findIndex(r => r.jobNumber === request.jobNumber);
-          if (idx !== -1) {
-            list[idx] = updatedRequest;
-            localStorage.setItem("SSLM_CLIENT_REQUESTS", JSON.stringify(list));
-          }
-        }
+        upsertRequest(updatedRequest);
       } catch(e) {
         console.error("Failed to sync file replacement to localStorage", e);
       }
@@ -180,24 +224,82 @@ export default function RequestDetailsPage() {
     setRequest(updatedRequest);
     
     try {
-      const local = localStorage.getItem("SSLM_CLIENT_REQUESTS");
-      const list: LicensingRequest[] = local ? JSON.parse(local) : [];
-      const idx = list.findIndex(r => r.jobNumber === request.jobNumber);
-      if (idx !== -1) {
-        list[idx] = updatedRequest;
-      } else {
-        list.push(updatedRequest);
-      }
-      localStorage.setItem("SSLM_CLIENT_REQUESTS", JSON.stringify(list));
+      upsertRequest(updatedRequest);
       alert("Request successfully approved and transitioned to Quotation phase.");
     } catch (e) {
       console.error("Failed to transition request to Quotation", e);
     }
   };
 
+  const handleConfirmMockPayment = () => {
+    if (!invoice || invoice.status === "paid" || isProcessing) return;
+
+    setIsProcessing(true);
+
+    try {
+      const nowStr = new Date().toISOString();
+
+      // 1. Mark Invoice Paid
+      const updatedInvoice: ClientInvoice = {
+        ...invoice,
+        status: "paid",
+        paidAt: nowStr,
+      };
+      createOrUpdateInvoice(updatedInvoice);
+      setInvoice(updatedInvoice);
+
+      // 2. Create Payment Record
+      const newPayment: ClientPayment = {
+        id: `PAY-${Math.floor(1000 + Math.random() * 9000)}`,
+        invoiceId: invoice.id,
+        jobNumber: request.jobNumber,
+        amountPaid: invoice.grandTotal,
+        paymentMethod: "MOCK_PAYMENT",
+        transactionReference: `TXN-${Math.floor(100000 + Math.random() * 900000)}`,
+        paidAt: nowStr,
+        status: "SUCCESS",
+      };
+      createOrUpdatePayment(newPayment);
+
+      // 3. Update Request stage to PROJECT_CREATED and append timeline event
+      const updatedTimeline = [...request.timeline];
+      const hasTimelineMarker = updatedTimeline.some(
+        (t) => t.status === "APPROVED" && t.comment.includes("Payment Confirmed")
+      );
+      if (!hasTimelineMarker) {
+        updatedTimeline.push({
+          status: "APPROVED",
+          comment: `Payment Confirmed. Ref: ${newPayment.transactionReference}`,
+          date: nowStr,
+        });
+      }
+
+      const updatedRequest: LicensingRequest = {
+        ...request,
+        currentStage: "PROJECT_CREATED" as WorkflowStage,
+        updatedAt: nowStr,
+        timeline: updatedTimeline,
+      };
+
+      upsertRequest(updatedRequest);
+      setRequest(updatedRequest);
+
+      // 4. Provision Project Record
+      provisionProjectFromRequest(updatedRequest);
+
+      alert("Mock payment confirmed successfully. Project has been initialized!");
+      loadData();
+    } catch (err) {
+      console.error("Failed to complete mock payment", err);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   const currentStageIndex = WORKFLOW_STAGES.indexOf(request.currentStage);
 
   const isConsultingEngineer = user?.role === "Consulting Engineer";
+  const isClient = user?.role === "Client";
   const queueNorm = (request.assignedQueue || "").toUpperCase();
   const classNorm = (request.classification || "").toUpperCase().replace(/_/, "");
   const isFastOrMaintenance = queueNorm === "FAST_TRACK" || queueNorm === "MAINTENANCE" || classNorm.includes("FAST") || classNorm.includes("MAINTENANCE");
@@ -244,6 +346,80 @@ export default function RequestDetailsPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* MVP Payment and Billing Card - Clients Only */}
+      {isClient && request.currentStage === "PAYMENT_CONFIRMED" && (
+        <Card className="border-indigo-600 bg-indigo-500/5 shadow-sm">
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
+              <CreditCard className="h-5 w-5" />
+              <CardTitle className="text-base font-bold">Billing & Invoice Payment</CardTitle>
+            </div>
+            <CardDescription className="text-xs text-muted-foreground">
+              Confirm your payment to initialize the active safety compliance project.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {!invoice ? (
+              <div className="p-3 border border-amber-500/30 bg-amber-500/10 text-amber-800 dark:text-amber-400 rounded-lg text-xs space-y-2">
+                <p>
+                  <strong>Warning:</strong> Invoice record is missing. Please re-approve quotation or contact support to regenerate invoice.
+                </p>
+                {quotation && quotation.quotationStatus === "APPROVED" && (
+                  <div className="pt-1 flex justify-start">
+                    <Button
+                      size="sm"
+                      onClick={handleRegenerateInvoice}
+                      className="bg-amber-600 hover:bg-amber-700 text-white font-semibold text-[10px] h-7 px-3"
+                    >
+                      Regenerate Invoice from Quotation
+                    </Button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="divide-y divide-border text-xs">
+                <div className="py-2 grid grid-cols-3 gap-2">
+                  <span className="text-muted-foreground">Invoice Reference:</span>
+                  <span className="col-span-2 font-mono font-semibold text-foreground">{invoice.id}</span>
+                </div>
+                <div className="py-2 grid grid-cols-3 gap-2">
+                  <span className="text-muted-foreground">Amount:</span>
+                  <span className="col-span-2 font-semibold text-foreground">{invoice.subtotal.toFixed(2)} {invoice.currency}</span>
+                </div>
+                <div className="py-2 grid grid-cols-3 gap-2">
+                  <span className="text-muted-foreground">VAT (15%):</span>
+                  <span className="col-span-2 font-semibold text-foreground">{invoice.vatAmount.toFixed(2)} {invoice.currency}</span>
+                </div>
+                <div className="py-2 grid grid-cols-3 gap-2">
+                  <span className="text-muted-foreground">Grand Total:</span>
+                  <span className="col-span-2 font-bold text-foreground text-sm">{invoice.grandTotal.toFixed(2)} {invoice.currency}</span>
+                </div>
+                <div className="py-2 grid grid-cols-3 gap-2">
+                  <span className="text-muted-foreground">Payment Status:</span>
+                  <span className="col-span-2">
+                    <Badge variant={invoice.status === "paid" ? "success" : "warning"} className="text-[10px]">
+                      {invoice.status === "paid" ? "Paid" : "Awaiting Client Payment"}
+                    </Badge>
+                  </span>
+                </div>
+                
+                {invoice.status !== "paid" && (
+                  <div className="pt-4 flex justify-end">
+                    <Button
+                      onClick={handleConfirmMockPayment}
+                      disabled={isProcessing}
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-4 py-2"
+                    >
+                      {isProcessing ? "Processing Mock Payment..." : "Confirm Mock Payment"}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid gap-6 md:grid-cols-3">
         {/* Detail Specifications */}

@@ -167,6 +167,40 @@ export default function QuotationApprovalDetailsPage() {
         targetRequest.currentStage = "PAYMENT_CONFIRMED" as WorkflowStage;
         targetRequest.updatedAt = timestamp;
       }
+
+      // Generate invoice
+      try {
+        const invoiceId = `INV-${Math.floor(1000 + Math.random() * 9000)}`;
+        const dueDate = new Date();
+        dueDate.setDate(dueDate.getDate() + 30); // 30 days from now
+
+        const newInvoice = {
+          id: invoiceId,
+          tenantId: targetRequest.tenantId || "default-tenant",
+          jobNumber: targetRequest.jobNumber,
+          quotationJobNumber: targetRequest.jobNumber,
+          subtotal: updatedQuote.subtotal || 0,
+          vatAmount: updatedQuote.vat || 0,
+          grandTotal: updatedQuote.grandTotal || 0,
+          currency: "SAR" as const,
+          status: "unpaid" as const,
+          dueDate: dueDate.toISOString(),
+          issuedAt: timestamp,
+        };
+
+        // Save invoice locally
+        const invoicesStr = localStorage.getItem("SSLM_INVOICES");
+        const invoices = invoicesStr ? JSON.parse(invoicesStr) : [];
+        const invIndex = invoices.findIndex((i: any) => i.jobNumber === targetRequest.jobNumber);
+        if (invIndex !== -1) {
+          invoices[invIndex] = newInvoice;
+        } else {
+          invoices.push(newInvoice);
+        }
+        localStorage.setItem("SSLM_INVOICES", JSON.stringify(invoices));
+      } catch (err) {
+        console.error("Failed to generate or save invoice", err);
+      }
     } else if (actionType === "REQUEST_CHANGES" || actionType === "REJECT") {
       if (targetRequest.currentStage === "QUOTATION_APPROVAL") {
         targetRequest.currentStage = "QUOTATION" as WorkflowStage;

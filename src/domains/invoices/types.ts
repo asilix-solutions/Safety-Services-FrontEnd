@@ -1,9 +1,14 @@
 export interface ClientInvoice {
-  id: string;
+  id: string; // e.g., "INV-XXXX"
   tenantId: string;
-  contractId: string;
-  amount: number;
-  status: "unpaid" | "paid" | "overdue";
+  jobNumber: string; // Reference to the request jobNumber
+  quotationJobNumber?: string; // Reference to the quotation's jobNumber
+  subtotal: number;
+  vatAmount: number;
+  grandTotal: number;
+  currency: "SAR";
+  status: "unpaid" | "paid";
   dueDate: string;
   issuedAt: string;
+  paidAt?: string;
 }
