@@ -76,5 +76,20 @@
   "obstacles.log": "سجل المعوقات الميدانية",
   "obstacles.photos": "صور الإنجاز الميداني",
   "obstacles.noObstacles": "لا توجد معوقات مسجلة حالياً.",
-  "obstacles.noPhotos": "لم يتم تحميل صور توثيقية بعد."
+  "obstacles.noPhotos": "لم يتم تحميل صور توثيقية بعد.",
+  "templates.installation_full": "نطاق تنفيذ تركيب كامل (Full Installation)",
+  "templates.maintenance": "برنامج صيانة تشغيلي (Maintenance)",
+  "templates.compliance_followup": "متابعة امتثال وتقييم خفيف (Compliance Follow-up)",
+  "clientView.title": "حالة تقدم مشروع الامتثال",
+  "clientView.desc": "متابعة الجدول الزمني العام للامتثال دون تعقيدات العمليات الداخلية.",
+  "clientView.progress": "المسار التشغيلي للمشروع",
+  "clientView.finalPhotos": "تحميل صور التوثيق الميداني النهائي",
+  "clientView.finalDocs": "المستندات والتراخيص النهائية الصادرة",
+  "procurement.noInvoices": "لا توجد فواتير توريد مواد مسجلة للمشروع بعد.",
+  "procurement.noMaterials": "لا توجد مواد مسجلة حالياً.",
+  "labor.noStaff": "لم يتم إلحاق عمالة فنية بالموقع بعد.",
+  "maintenance.checks": "سجل زيارات الصيانة الدورية",
+  "maintenance.noVisits": "لم يتم تسجيل أي زيارات فنية بعد.",
+  "compliance.checklist": "قائمة التحقق وتقييم الامتثال",
+  "compliance.noChecks": "لا توجد فحوصات معلقة."
 }

@@ -1,4 +1,4 @@
-import { Project, ProjectWorkspaceData } from "@/types/project";
+import { Project, ProjectWorkspaceData, ProjectWorkspaceTemplate, SiloExecutionData } from "@/types/project";
 import { LicensingRequest } from "@/domains/requests/types";
 
 export function getProjects(): Project[] {
@@ -32,45 +32,98 @@ export function createOrUpdateProject(project: Project): void {
   saveProjects(projects);
 }
 
-export function createDefaultWorkspace(): ProjectWorkspaceData {
+export function buildProjectWorkspaceTemplate(
+  projectType: string,
+  requestType: string,
+  classification?: string,
+  assignedQueue?: string
+): { workspace: ProjectWorkspaceData; template: ProjectWorkspaceTemplate } {
+  let template: ProjectWorkspaceTemplate = "compliance_followup";
+  
+  const pType = (projectType || "").toLowerCase();
+  const rType = (requestType || "").toLowerCase();
+  const classif = (classification || "").toLowerCase();
+  const queue = (assignedQueue || "").toLowerCase();
+  
+  if (
+    classif.includes("maintenance") || 
+    queue.includes("maintenance") || 
+    rType.includes("maintenance") || 
+    pType === "maintenance"
+  ) {
+    template = "maintenance";
+  } else if (
+    classif.includes("engineering") ||
+    queue.includes("engineering") ||
+    rType.includes("new_license") || 
+    rType.includes("license") || 
+    rType.includes("engineering_execution") ||
+    pType === "license"
+  ) {
+    template = "installation_full";
+  } else if (
+    classif.includes("high_hazard") || 
+    queue.includes("high_hazard")
+  ) {
+    template = "installation_full";
+  } else if (
+    classif.includes("fast") ||
+    queue.includes("fast") ||
+    rType.includes("technical_report") ||
+    rType.includes("compliance_report") ||
+    rType.includes("fit_report") ||
+    pType === "engineering"
+  ) {
+    template = "compliance_followup";
+  }
+
+  const silos: SiloExecutionData[] = template === "installation_full" ? [
+    {
+      id: "alarm",
+      status: "pending",
+      laborCount: 0,
+      materialsCount: 0,
+      pendingItemsCount: 0,
+      costSAR: 0,
+      obstaclesCount: 0,
+      photosCount: 0,
+    },
+    {
+      id: "suppression",
+      status: "pending",
+      laborCount: 0,
+      materialsCount: 0,
+      pendingItemsCount: 0,
+      costSAR: 0,
+      obstaclesCount: 0,
+      photosCount: 0,
+    },
+    {
+      id: "ventilation",
+      status: "pending",
+      laborCount: 0,
+      materialsCount: 0,
+      pendingItemsCount: 0,
+      costSAR: 0,
+      obstaclesCount: 0,
+      photosCount: 0,
+    },
+  ] : [];
+
   return {
-    kickoffApproved: false,
-    downPaymentConfirmed: true,
-    assignedInspector: "",
-    kickoffNotes: "",
-    silos: [
-      {
-        id: "alarm",
-        status: "pending",
-        laborCount: 0,
-        materialsCount: 0,
-        pendingItemsCount: 0,
-        costSAR: 0,
-        obstaclesCount: 0,
-        photosCount: 0,
-      },
-      {
-        id: "suppression",
-        status: "pending",
-        laborCount: 0,
-        materialsCount: 0,
-        pendingItemsCount: 0,
-        costSAR: 0,
-        obstaclesCount: 0,
-        photosCount: 0,
-      },
-      {
-        id: "ventilation",
-        status: "pending",
-        laborCount: 0,
-        materialsCount: 0,
-        pendingItemsCount: 0,
-        costSAR: 0,
-        obstaclesCount: 0,
-        photosCount: 0,
-      },
-    ],
+    template,
+    workspace: {
+      kickoffApproved: false,
+      downPaymentConfirmed: true,
+      assignedInspector: "",
+      kickoffNotes: "",
+      silos,
+    }
   };
+}
+
+export function createDefaultWorkspace(): ProjectWorkspaceData {
+  return buildProjectWorkspaceTemplate("license", "new_license").workspace;
 }
 
 export function provisionProjectFromRequest(request: LicensingRequest): Project {
@@ -82,6 +135,13 @@ export function provisionProjectFromRequest(request: LicensingRequest): Project 
     projectType = "maintenance";
   }
 
+  const { workspace, template } = buildProjectWorkspaceTemplate(
+    projectType, 
+    request.requestType,
+    request.classification,
+    request.assignedQueue || undefined
+  );
+
   const newProject: Project = {
     id: `PRJ-${Math.floor(1000 + Math.random() * 9000)}`,
     tenantId: request.tenantId || "default-tenant",
@@ -92,7 +152,8 @@ export function provisionProjectFromRequest(request: LicensingRequest): Project 
     clientId: request.clientId || "client-id",
     status: "planning",
     executionPhase: "created",
-    workspace: createDefaultWorkspace(),
+    workspace,
+    workspaceTemplate: template,
     startDate: new Date().toISOString().split("T")[0],
     tasks: [],
     category: "Fire Safety",
@@ -104,4 +165,5 @@ export function provisionProjectFromRequest(request: LicensingRequest): Project 
   createOrUpdateProject(newProject);
   return newProject;
 }
+
 

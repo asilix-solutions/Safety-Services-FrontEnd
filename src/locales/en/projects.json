@@ -76,5 +76,20 @@
   "obstacles.log": "Field Obstacles Log",
   "obstacles.photos": "Site Photos & Verification",
   "obstacles.noObstacles": "No active obstacles reported.",
-  "obstacles.noPhotos": "No documentation photos uploaded yet."
+  "obstacles.noPhotos": "No documentation photos uploaded yet.",
+  "templates.installation_full": "Full Installation Execution Scope",
+  "templates.maintenance": "Maintenance Operations Program",
+  "templates.compliance_followup": "Compliance Follow-up & Evaluation",
+  "clientView.title": "Compliance Project Status",
+  "clientView.desc": "Monitor progress milestones for your safety licensing and inspections.",
+  "clientView.progress": "Project Milestone Pathway",
+  "clientView.finalPhotos": "Upload Completion Photos",
+  "clientView.finalDocs": "Issued Safety Certificates & Licensure Docs",
+  "procurement.noInvoices": "No procurement invoices logged yet.",
+  "procurement.noMaterials": "No materials logged yet.",
+  "labor.noStaff": "No field technician staff allocated to this site yet.",
+  "maintenance.checks": "Periodic Maintenance Service Log",
+  "maintenance.noVisits": "No service visits scheduled or completed yet.",
+  "compliance.checklist": "Inspection Checklist & Compliance Evaluation",
+  "compliance.noChecks": "No checks pending."
 }

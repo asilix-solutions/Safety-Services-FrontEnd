@@ -7,7 +7,7 @@ import { PageHeader } from "@/shared/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Button } from "@/shared/ui/button";
 import { Badge } from "@/shared/ui/badge";
-import { MapPin, ShieldAlert, ArrowLeft, Clock, Eye, Download, RefreshCw, Send, CreditCard } from "lucide-react";
+import { MapPin, ShieldAlert, ArrowLeft, Clock, Eye, Download, RefreshCw, Send, CreditCard, Activity } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useTranslation } from "@/providers/i18n-provider";
@@ -25,6 +25,9 @@ import { ClientPayment } from "@/domains/payments/types";
 import { getMergedRequests, upsertRequest } from "@/domains/requests/storage";
 import { Quotation } from "@/domains/quotations/types";
 import { confirmMockPaymentAndInitializeProject } from "@/domains/payments/workflow";
+import { Project } from "@/types/project";
+import { getProjects } from "@/domains/projects/storage";
+import { USER_ROLES } from "@/constants/roles";
 
 export default function RequestDetailsPage() {
   const { user } = useAuth();
@@ -33,6 +36,7 @@ export default function RequestDetailsPage() {
   const [request, setRequest] = useState<LicensingRequest | null>(null);
   const [invoice, setInvoice] = useState<ClientInvoice | null>(null);
   const [quotation, setQuotation] = useState<Quotation | null>(null);
+  const [linkedProject, setLinkedProject] = useState<Project | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
   const jobNumber = params?.jobNumber as string;
@@ -53,6 +57,15 @@ export default function RequestDetailsPage() {
         setInvoice(foundInvoice);
       } else {
         setInvoice(null);
+      }
+
+      // Load linked project if exists
+      const projects = getProjects();
+      const foundProject = projects.find((p) => p.jobNumber === jobNumber);
+      if (foundProject) {
+        setLinkedProject(foundProject);
+      } else {
+        setLinkedProject(null);
       }
 
       // Load quotation if exists
@@ -252,8 +265,8 @@ export default function RequestDetailsPage() {
 
   const currentStageIndex = WORKFLOW_STAGES.indexOf(request.currentStage);
 
-  const isConsultingEngineer = user?.role === "Consulting Engineer";
-  const isClient = user?.role === "Client";
+  const isConsultingEngineer = user?.role === USER_ROLES.CONSULTING_ENGINEER;
+  const isClient = user?.role === USER_ROLES.CLIENT;
   const queueNorm = (request.assignedQueue || "").toUpperCase();
   const classNorm = (request.classification || "").toUpperCase().replace(/_/, "");
   const isFastOrMaintenance = queueNorm === "FAST_TRACK" || queueNorm === "MAINTENANCE" || classNorm.includes("FAST") || classNorm.includes("MAINTENANCE");
@@ -509,6 +522,56 @@ export default function RequestDetailsPage() {
 
         {/* Right side tracking timeline */}
         <div className="space-y-4">
+          {/* Linked Project Execution Snapshot */}
+          {linkedProject && (
+            <Card className="border-indigo-500/25 bg-indigo-500/5 shadow-sm">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wide flex items-center gap-1.5">
+                  <Activity className="h-4 w-4" />
+                  Linked Project Execution
+                </CardTitle>
+                <CardDescription className="text-[10px] text-muted-foreground">
+                  Active field operations tracker
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="text-xs space-y-3 pt-1">
+                <div className="space-y-1">
+                  <span className="text-[9px] text-muted-foreground block uppercase">Project ID</span>
+                  <span className="font-mono font-bold text-foreground">{linkedProject.id}</span>
+                </div>
+                
+                {isClient ? (
+                  <div className="space-y-1">
+                    <span className="text-[9px] text-muted-foreground block uppercase">Status</span>
+                    <span className="font-semibold text-foreground capitalize">{linkedProject.status}</span>
+                  </div>
+                ) : (
+                  <>
+                    <div className="space-y-1">
+                      <span className="text-[9px] text-muted-foreground block uppercase">Execution Phase</span>
+                      <span className="font-bold text-indigo-600 dark:text-indigo-400 capitalize">
+                        {linkedProject.executionPhase?.replace("_", " ") || "Created"}
+                      </span>
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-[9px] text-muted-foreground block uppercase">Workspace Profile</span>
+                      <span className="font-semibold text-foreground capitalize">
+                        {linkedProject.workspaceTemplate?.replace("_", " ") || "Full Installation"}
+                      </span>
+                    </div>
+                  </>
+                )}
+
+                <div className="pt-2 border-t border-border">
+                  <Link href={`/projects/${linkedProject.id}`}>
+                    <Button size="sm" className="w-full text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white gap-1.5 h-8">
+                      {isClient ? "View Project Details" : "Open Execution Workspace"}
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          )}
           {/* Workflow Stepper Timeline */}
           <Card className="border-border bg-card">
             <CardHeader>

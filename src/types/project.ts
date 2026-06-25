@@ -9,6 +9,11 @@ export type ProjectExecutionPhase =
   | "ready_for_final_inspection"
   | "completed";
 
+export type ProjectWorkspaceTemplate =
+  | "installation_full"
+  | "maintenance"
+  | "compliance_followup";
+
 export interface SiloExecutionData {
   id: "alarm" | "suppression" | "ventilation";
   status: "pending" | "ready" | "in_progress" | "completed" | "blocked";
@@ -49,6 +54,7 @@ export interface Project {
   status: ProjectStatus;
   executionPhase?: ProjectExecutionPhase;
   workspace?: ProjectWorkspaceData;
+  workspaceTemplate?: ProjectWorkspaceTemplate;
   safetyScore?: number;
   startDate: string;
   endDate?: string;
