@@ -2,6 +2,32 @@ import { ProjectStatus } from "./project-status";
 
 export type ProjectType = "license" | "maintenance" | "engineering";
 
+export type ProjectExecutionPhase =
+  | "created"
+  | "kickoff_ready"
+  | "active_execution"
+  | "ready_for_final_inspection"
+  | "completed";
+
+export interface SiloExecutionData {
+  id: "alarm" | "suppression" | "ventilation";
+  status: "pending" | "ready" | "in_progress" | "completed" | "blocked";
+  laborCount: number;
+  materialsCount: number;
+  pendingItemsCount: number;
+  costSAR: number;
+  obstaclesCount: number;
+  photosCount: number;
+}
+
+export interface ProjectWorkspaceData {
+  kickoffApproved: boolean;
+  downPaymentConfirmed: boolean;
+  assignedInspector?: string;
+  kickoffNotes?: string;
+  silos: SiloExecutionData[];
+}
+
 export interface ProjectTask {
   id: string;
   title: string;
@@ -21,6 +47,8 @@ export interface Project {
   clientId: string;
   assignedEngineerId?: string;
   status: ProjectStatus;
+  executionPhase?: ProjectExecutionPhase;
+  workspace?: ProjectWorkspaceData;
   safetyScore?: number;
   startDate: string;
   endDate?: string;
@@ -30,3 +58,4 @@ export interface Project {
   createdAt: string;
   updatedAt: string;
 }
+

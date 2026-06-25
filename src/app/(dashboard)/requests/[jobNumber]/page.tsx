@@ -22,10 +22,9 @@ import {
 import { ClientInvoice } from "@/domains/invoices/types";
 import { getInvoices, createOrUpdateInvoice } from "@/domains/invoices/storage";
 import { ClientPayment } from "@/domains/payments/types";
-import { createOrUpdatePayment } from "@/domains/payments/storage";
-import { provisionProjectFromRequest } from "@/domains/projects/storage";
 import { getMergedRequests, upsertRequest } from "@/domains/requests/storage";
 import { Quotation } from "@/domains/quotations/types";
+import { confirmMockPaymentAndInitializeProject } from "@/domains/payments/workflow";
 
 export default function RequestDetailsPage() {
   const { user } = useAuth();
@@ -233,59 +232,14 @@ export default function RequestDetailsPage() {
 
   const handleConfirmMockPayment = () => {
     if (!invoice || invoice.status === "paid" || isProcessing) return;
+    if (!request) return;
 
     setIsProcessing(true);
 
     try {
-      const nowStr = new Date().toISOString();
-
-      // 1. Mark Invoice Paid
-      const updatedInvoice: ClientInvoice = {
-        ...invoice,
-        status: "paid",
-        paidAt: nowStr,
-      };
-      createOrUpdateInvoice(updatedInvoice);
+      const { updatedRequest, updatedInvoice } = confirmMockPaymentAndInitializeProject({ request, invoice });
       setInvoice(updatedInvoice);
-
-      // 2. Create Payment Record
-      const newPayment: ClientPayment = {
-        id: `PAY-${Math.floor(1000 + Math.random() * 9000)}`,
-        invoiceId: invoice.id,
-        jobNumber: request.jobNumber,
-        amountPaid: invoice.grandTotal,
-        paymentMethod: "MOCK_PAYMENT",
-        transactionReference: `TXN-${Math.floor(100000 + Math.random() * 900000)}`,
-        paidAt: nowStr,
-        status: "SUCCESS",
-      };
-      createOrUpdatePayment(newPayment);
-
-      // 3. Update Request stage to PROJECT_CREATED and append timeline event
-      const updatedTimeline = [...request.timeline];
-      const hasTimelineMarker = updatedTimeline.some(
-        (t) => t.status === "APPROVED" && t.comment.includes("Payment Confirmed")
-      );
-      if (!hasTimelineMarker) {
-        updatedTimeline.push({
-          status: "APPROVED",
-          comment: `Payment Confirmed. Ref: ${newPayment.transactionReference}`,
-          date: nowStr,
-        });
-      }
-
-      const updatedRequest: LicensingRequest = {
-        ...request,
-        currentStage: "PROJECT_CREATED" as WorkflowStage,
-        updatedAt: nowStr,
-        timeline: updatedTimeline,
-      };
-
-      upsertRequest(updatedRequest);
       setRequest(updatedRequest);
-
-      // 4. Provision Project Record
-      provisionProjectFromRequest(updatedRequest);
 
       alert("Mock payment confirmed successfully. Project has been initialized!");
       loadData();

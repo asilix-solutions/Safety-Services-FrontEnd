@@ -46,6 +46,16 @@ export function mapStatusToStage(status: RequestStatus): WorkflowStage {
   return map[status] || "SUBMITTED";
 }
 
+export function getRequestTypeDisplayName(type: string, t: (key: string) => string): string {
+  const map: Record<string, string> = {
+    new_license: t("requests:new_license") || "New Safety License",
+    maintenance_contract: t("requests:maintenance_contract") || "Maintenance Contract",
+    engineering_blueprint: t("requests:engineering_blueprint") || "Blueprint Review",
+    technical_report: t("requests:technical_report") || "Technical Safety Report",
+  };
+  return map[type] || type;
+}
+
 export function getQueueDisplayName(queue: RequestQueue | null, t: (key: string) => string): string {
   if (!queue) return t("requests:queue.none");
   const map: Record<RequestQueue, string> = {

@@ -5,13 +5,13 @@ import { MaintenanceStatus } from "@/types/maintenance";
 import { CustomerStatus } from "@/types/customer";
 
 export const PROJECT_STATUS_TX: Record<ProjectStatus, TxKey> = {
-  Draft: "common:status_Draft",
-  "Pending Review": "common:status_Pending_Review",
-  "In Review": "common:status_In_Review",
-  "Action Required": "common:status_Action_Required",
-  Approved: "common:status_Approved",
-  Rejected: "common:status_Rejected",
-  "On Hold": "common:status_On_Hold",
+  planning: "projects:status.planning",
+  active: "projects:status.active",
+  scheduled: "projects:status.scheduled",
+  blocked: "projects:status.blocked",
+  awaiting_signature: "projects:status.awaiting_signature",
+  completed: "projects:status.completed",
+  closed: "projects:status.closed",
 };
 
 export const LICENSE_STATUS_TX: Record<LicenseStatus, TxKey> = {

@@ -7,13 +7,13 @@ export const PROJECT_STATUS_METADATA: Record<
   ProjectStatus,
   { label: string; badgeVariant: "default" | "secondary" | "success" | "warning" | "destructive" | "outline" }
 > = {
-  Draft: { label: "Draft", badgeVariant: "secondary" },
-  "Pending Review": { label: "Pending Review", badgeVariant: "warning" },
-  "In Review": { label: "In Review", badgeVariant: "default" },
-  "Action Required": { label: "Action Required", badgeVariant: "destructive" },
-  Approved: { label: "Approved", badgeVariant: "success" },
-  Rejected: { label: "Rejected", badgeVariant: "destructive" },
-  "On Hold": { label: "On Hold", badgeVariant: "outline" },
+  planning: { label: "Planning", badgeVariant: "secondary" },
+  active: { label: "Active Execution", badgeVariant: "success" },
+  scheduled: { label: "Scheduled", badgeVariant: "secondary" },
+  blocked: { label: "Blocked", badgeVariant: "destructive" },
+  awaiting_signature: { label: "Awaiting Signature", badgeVariant: "warning" },
+  completed: { label: "Completed", badgeVariant: "success" },
+  closed: { label: "Closed", badgeVariant: "outline" },
 };
 
 export const LICENSE_STATUS_METADATA: Record<

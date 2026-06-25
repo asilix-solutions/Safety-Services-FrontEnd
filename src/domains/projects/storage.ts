@@ -1,4 +1,4 @@
-import { Project } from "@/types/project";
+import { Project, ProjectWorkspaceData } from "@/types/project";
 import { LicensingRequest } from "@/domains/requests/types";
 
 export function getProjects(): Project[] {
@@ -32,6 +32,47 @@ export function createOrUpdateProject(project: Project): void {
   saveProjects(projects);
 }
 
+export function createDefaultWorkspace(): ProjectWorkspaceData {
+  return {
+    kickoffApproved: false,
+    downPaymentConfirmed: true,
+    assignedInspector: "",
+    kickoffNotes: "",
+    silos: [
+      {
+        id: "alarm",
+        status: "pending",
+        laborCount: 0,
+        materialsCount: 0,
+        pendingItemsCount: 0,
+        costSAR: 0,
+        obstaclesCount: 0,
+        photosCount: 0,
+      },
+      {
+        id: "suppression",
+        status: "pending",
+        laborCount: 0,
+        materialsCount: 0,
+        pendingItemsCount: 0,
+        costSAR: 0,
+        obstaclesCount: 0,
+        photosCount: 0,
+      },
+      {
+        id: "ventilation",
+        status: "pending",
+        laborCount: 0,
+        materialsCount: 0,
+        pendingItemsCount: 0,
+        costSAR: 0,
+        obstaclesCount: 0,
+        photosCount: 0,
+      },
+    ],
+  };
+}
+
 export function provisionProjectFromRequest(request: LicensingRequest): Project {
   // Map RequestType to ProjectType
   let projectType: "license" | "maintenance" | "engineering" = "engineering";
@@ -50,6 +91,8 @@ export function provisionProjectFromRequest(request: LicensingRequest): Project 
     clientName: request.clientName || "Client",
     clientId: request.clientId || "client-id",
     status: "planning",
+    executionPhase: "created",
+    workspace: createDefaultWorkspace(),
     startDate: new Date().toISOString().split("T")[0],
     tasks: [],
     category: "Fire Safety",
@@ -61,3 +104,4 @@ export function provisionProjectFromRequest(request: LicensingRequest): Project 
   createOrUpdateProject(newProject);
   return newProject;
 }
+
