@@ -8,6 +8,7 @@ import { PageHeader } from "@/shared/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Button } from "@/shared/ui/button";
 import { Badge } from "@/shared/ui/badge";
+import { Textarea } from "@/shared/ui/textarea";
 import { EmptyState } from "@/shared/components/empty-state";
 import { MapPin, ShieldAlert, ArrowLeft, FileText, CheckCircle2, AlertTriangle, Play, Check, CornerUpLeft, DollarSign } from "lucide-react";
 import Link from "next/link";
@@ -363,11 +364,11 @@ export default function EngineeringWorkspacePage() {
               <CardDescription>{t("requests:engineeringWorkspace.reviewNotesDesc")}</CardDescription>
             </CardHeader>
             <CardContent>
-              <textarea
+              <Textarea
                 value={engineerNotes}
                 onChange={(e) => setEngineerNotes(e.target.value)}
                 placeholder={t("requests:engineeringWorkspace.notesPlaceholder")}
-                className="w-full h-32 border border-border rounded-lg bg-background p-2.5 text-xs text-foreground focus:ring-1 focus:ring-primary outline-none resize-none leading-relaxed"
+                className="h-32 bg-background"
               />
             </CardContent>
           </Card>
@@ -419,11 +420,11 @@ export default function EngineeringWorkspacePage() {
               <CardDescription>{t("requests:engineeringWorkspace.returnDialogDesc")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <textarea
+              <Textarea
                 value={returnReason}
                 onChange={(e) => setReturnReason(e.target.value)}
                 placeholder={t("requests:engineeringWorkspace.returnReasonPlaceholder")}
-                className="w-full h-28 border border-border rounded-lg bg-background p-2.5 text-xs text-foreground focus:ring-1 focus:ring-primary outline-none resize-none leading-relaxed"
+                className="h-28 bg-background"
               />
               <div className="flex gap-2 justify-end">
                 <Button

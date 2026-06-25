@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/sha
 import { Button } from "@/shared/ui/button";
 import { Badge } from "@/shared/ui/badge";
 import { Label } from "@/shared/ui/label";
+import { Textarea } from "@/shared/ui/textarea";
 import { CheckCircle, AlertTriangle, XCircle, ArrowLeft, Send } from "lucide-react";
 import Link from "next/link";
 import { useTranslation, useNamespaceTranslations } from "@/providers/i18n-provider";
@@ -483,7 +484,7 @@ export default function QuotationApprovalDetailsPage() {
                           ? t("requests:quotations.details.commentsLabel")
                           : t("requests:quotations.details.reasonLabel")}
                       </Label>
-                      <textarea
+                      <Textarea
                         id="reviewText"
                         value={inputText}
                         onChange={(e) => setInputText(e.target.value)}
@@ -492,7 +493,7 @@ export default function QuotationApprovalDetailsPage() {
                             ? t("requests:quotations.details.commentsPlaceholder")
                             : t("requests:quotations.details.reasonPlaceholder")
                         }
-                        className="w-full rounded-md border border-border bg-background p-2 text-sm focus:ring-1 focus:ring-primary min-h-[80px]"
+                        className="bg-background min-h-[80px]"
                       />
                       {errorMsg && <p className="text-xs text-destructive">{errorMsg}</p>}
                     </div>

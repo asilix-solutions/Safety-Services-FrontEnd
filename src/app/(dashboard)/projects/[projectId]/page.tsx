@@ -5,6 +5,10 @@ import { useAuth } from "@/providers/AuthProvider";
 import { PageHeader } from "@/shared/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Button } from "@/shared/ui/button";
+import { Input } from "@/shared/ui/input";
+import { Checkbox } from "@/shared/ui/checkbox";
+import { Textarea } from "@/shared/ui/textarea";
+import { Select } from "@/shared/ui/select";
 import { 
   ArrowLeft, 
   Send, 
@@ -476,12 +480,12 @@ export default function ProjectDetailsPage() {
                     <div className="grid gap-4 sm:grid-cols-2">
                       <div className="space-y-1">
                         <label className="font-semibold text-muted-foreground block">{t("projects:kickoff.inspector") || "Assigned Inspector"}</label>
-                        <input
+                        <Input
                           type="text"
                           value={inspector}
                           onChange={(e) => setInspector(e.target.value)}
                           placeholder={t("projects:kickoff.inspectorPlaceholder")}
-                          className="w-full bg-secondary/50 border border-border rounded p-2 text-foreground focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                          className="bg-secondary/50"
                         />
                       </div>
                       <div className="space-y-1">
@@ -495,22 +499,21 @@ export default function ProjectDetailsPage() {
 
                     <div className="space-y-1">
                       <label className="font-semibold text-muted-foreground block">{t("projects:kickoff.notes") || "Kickoff Directions & Notes"}</label>
-                      <textarea
+                      <Textarea
                         rows={2}
                         value={notes}
                         onChange={(e) => setNotes(e.target.value)}
                         placeholder={t("projects:kickoff.notesPlaceholder")}
-                        className="w-full bg-secondary/50 border border-border rounded p-2 text-foreground focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                        className="bg-secondary/50 min-h-[60px]"
                       />
                     </div>
 
                     <div className="flex items-center justify-between gap-4 pt-2 flex-wrap">
                       <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
+                        <Checkbox
                           checked={isApproved}
                           onChange={(e) => setIsApproved(e.target.checked)}
-                          className="rounded border-border text-indigo-600 focus:ring-indigo-500 h-4 w-4"
+                          className="focus:ring-indigo-500 h-4 w-4"
                         />
                         <span className="font-semibold text-foreground">
                           {t("projects:kickoff.approveCheckbox")}
@@ -566,45 +569,45 @@ export default function ProjectDetailsPage() {
                                   <div className="grid grid-cols-2 gap-1.5">
                                     <div>
                                       <label className="block text-[9px] text-muted-foreground">Status</label>
-                                      <select 
+                                      <Select 
                                         value={siloStatus} 
                                         onChange={(e) => setSiloStatus(e.target.value)}
-                                        className="w-full bg-background border border-border rounded p-1 text-foreground"
+                                        className="h-8 bg-background"
                                       >
                                         <option value="pending">Pending</option>
                                         <option value="ready">Ready</option>
                                         <option value="in_progress">In Progress</option>
                                         <option value="completed">Completed</option>
                                         <option value="blocked">Blocked</option>
-                                      </select>
+                                      </Select>
                                     </div>
                                     <div>
                                       <label className="block text-[9px] text-muted-foreground">Labor Count</label>
-                                      <input 
+                                      <Input 
                                         type="number" 
                                         value={siloLabor} 
                                         onChange={(e) => setSiloLabor(Number(e.target.value))}
-                                        className="w-full bg-background border border-border rounded p-1 text-foreground"
+                                        className="h-8 bg-background"
                                       />
                                     </div>
                                   </div>
                                   <div className="grid grid-cols-2 gap-1.5">
                                     <div>
                                       <label className="block text-[9px] text-muted-foreground">Materials</label>
-                                      <input 
+                                      <Input 
                                         type="number" 
                                         value={siloMaterials} 
                                         onChange={(e) => setSiloMaterials(Number(e.target.value))}
-                                        className="w-full bg-background border border-border rounded p-1 text-foreground"
+                                        className="h-8 bg-background"
                                       />
                                     </div>
                                     <div>
                                       <label className="block text-[9px] text-muted-foreground">Cost (SAR)</label>
-                                      <input 
+                                      <Input 
                                         type="number" 
                                         value={siloCost} 
                                         onChange={(e) => setSiloCost(Number(e.target.value))}
-                                        className="w-full bg-background border border-border rounded p-1 text-foreground"
+                                        className="h-8 bg-background"
                                       />
                                     </div>
                                   </div>
@@ -756,22 +759,21 @@ export default function ProjectDetailsPage() {
                       <label className="font-semibold text-muted-foreground block">
                         {t("projects:completion.notesLabel")}
                       </label>
-                      <textarea
+                      <Textarea
                         rows={3}
                         value={completionNotes}
                         onChange={(e) => setCompletionNotes(e.target.value)}
                         placeholder={t("projects:completion.notesPlaceholder")}
-                        className="w-full bg-secondary/50 border border-border rounded-lg p-2.5 text-foreground focus:outline-none focus:ring-1 focus:ring-indigo-500 text-xs font-sans"
+                        className="bg-secondary/50 min-h-[80px] text-xs font-sans"
                       />
                     </div>
                     
                     <div className="flex items-center justify-between gap-4 pt-2 flex-wrap">
                       <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
+                        <Checkbox
                           checked={readyForFinalInspection}
                           onChange={(e) => setReadyForFinalInspection(e.target.checked)}
-                          className="rounded border-border text-indigo-600 focus:ring-indigo-500 h-4 w-4"
+                          className="focus:ring-indigo-500 h-4 w-4"
                         />
                         <span className="font-semibold text-foreground">
                           {t("projects:completion.readyCheckbox")}
