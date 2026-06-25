@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "@/providers/AuthProvider";
 import { MOCK_REQUESTS } from "@/mock/requests";
 import { LicensingRequest, RequestType } from "@/domains/requests/types";
-import { mapStatusToStage, getQueueDisplayName, getClassificationDisplayName } from "@/domains/requests/workflow";
+import { mapStatusToStage, getQueueDisplayName, getClassificationDisplayName, getCanonicalRequestTypeDisplayName, getReviewPathDisplayName } from "@/domains/requests/workflow";
 import { PageHeader } from "@/shared/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Button } from "@/shared/ui/button";
@@ -173,14 +173,14 @@ export default function QuotationsQueuePage() {
     {
       header: t("requests:quotations.columns.requestType"),
       accessorKey: "requestType",
-      render: (row) => <span>{getRequestTypeLabel(row.requestType)}</span>,
+      render: (row) => <span>{getCanonicalRequestTypeDisplayName(row, t)}</span>,
     },
     {
       header: t("requests:quotations.columns.classification"),
       accessorKey: "classification",
       render: (row) => (
         <span className="capitalize font-medium">
-          {getClassificationDisplayName(row.classification, t)}
+          {getReviewPathDisplayName(row, t)}
         </span>
       ),
     },

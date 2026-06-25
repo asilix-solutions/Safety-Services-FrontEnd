@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "@/providers/AuthProvider";
 import { MOCK_REQUESTS } from "@/mock/requests";
 import { LicensingRequest, WorkflowStage } from "@/domains/requests/types";
-import { getClassificationDisplayName, getQueueDisplayName } from "@/domains/requests/workflow";
+import { getClassificationDisplayName, getQueueDisplayName, getCanonicalRequestTypeDisplayName, getReviewPathDisplayName, getCommercialServiceLabel } from "@/domains/requests/workflow";
 import { PageHeader } from "@/shared/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Button } from "@/shared/ui/button";
@@ -222,13 +222,7 @@ export default function QuotationApprovalDetailsPage() {
   };
 
   const getRequestTypeLabel = (type: string) => {
-    const map: Record<string, string> = {
-      new_license: t("requests:new_license") || "New Safety License",
-      maintenance_contract: t("requests:maintenance_contract") || "Maintenance Contract",
-      engineering_blueprint: t("requests:engineering_blueprint") || "Blueprint Review",
-      technical_report: t("requests:technical_report") || "Technical Safety Report",
-    };
-    return map[type] || type;
+    return getCanonicalRequestTypeDisplayName(request, t);
   };
 
   return (
@@ -288,10 +282,18 @@ export default function QuotationApprovalDetailsPage() {
               </div>
               <div>
                 <span className="text-muted-foreground block text-xs">
-                  {t("requests:list.fields.classification")}
+                  {t("requests:details.reviewPathLabel") || "Review Path"}
                 </span>
                 <span className="font-semibold text-foreground">
-                  {getClassificationDisplayName(request.classification, t)}
+                  {getReviewPathDisplayName(request, t)}
+                </span>
+              </div>
+              <div>
+                <span className="text-muted-foreground block text-xs">
+                  {t("requests:details.serviceScopeLabel") || "Service Scope"}
+                </span>
+                <span className="font-semibold text-foreground">
+                  {getCommercialServiceLabel(request, t)}
                 </span>
               </div>
               <div>
@@ -439,7 +441,7 @@ export default function QuotationApprovalDetailsPage() {
                         : t("requests:quotations.details.rejectDialogTitle")}
                     </span>
                     <Button variant="ghost" size="xs" onClick={() => setActionType(null)} className="text-xs">
-                      {t("requests:details.close") || "Cancel"}
+                      {t("requests:quotations.details.close") || "Cancel"}
                     </Button>
                   </div>
                   

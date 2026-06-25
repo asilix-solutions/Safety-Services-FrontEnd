@@ -28,7 +28,7 @@ import { getProjects } from "@/domains/projects/storage";
 import { LicensingRequest } from "@/domains/requests/types";
 import { getMergedRequests } from "@/domains/requests/storage";
 import { StatusBadge } from "@/shared/components/status-badge";
-import { getRequestTypeDisplayName, getClassificationDisplayName } from "@/domains/requests/workflow";
+import { getCanonicalRequestTypeDisplayName, getReviewPathDisplayName } from "@/domains/requests/workflow";
 import { 
   startProjectExecution,
   updateProjectKickoffDetails,
@@ -58,15 +58,15 @@ function LinkedRequestSnapshotCard({ request, t }: { request: LicensingRequest; 
         </div>
         <div className="space-y-1">
           <span className="text-[10px] text-muted-foreground block uppercase">{t("projects:details.requestType") || "Request Type"}</span>
-          <span className="font-semibold text-foreground">{getRequestTypeDisplayName(request.requestType, t)}</span>
+          <span className="font-semibold text-foreground">{getCanonicalRequestTypeDisplayName(request, t)}</span>
         </div>
         <div className="space-y-1">
-          <span className="text-[10px] text-muted-foreground block uppercase">{t("projects:details.classification") || "Classification"}</span>
-          <span className="font-semibold text-foreground">{getClassificationDisplayName(request.classification, t)}</span>
+          <span className="text-[10px] text-muted-foreground block uppercase">{t("requests:details.reviewPathLabel") || "Review Path"}</span>
+          <span className="font-semibold text-foreground">{getReviewPathDisplayName(request, t)}</span>
         </div>
         <div className="pt-2 border-t border-border">
           <Link href={`/requests/${request.jobNumber}`}>
-            <Button variant="outline" size="sm" className="w-full text-xs gap-1.5 h-8 font-bold">
+            <Button type="button" variant="outline" size="sm" className="w-full text-xs gap-1.5 h-8 font-bold">
               {t("projects:details.viewRequest") || "View Original Request"}
             </Button>
           </Link>
@@ -271,7 +271,10 @@ export default function ProjectDetailsPage() {
         </div>
         <div className="flex items-center gap-4">
           <span className="text-xs bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold px-2 py-1 rounded">
-            {t(`projects:templates.${project.workspaceTemplate || "installation_full"}`)}
+            {(() => {
+              const { getProjectTemplateMetadata } = require("@/domains/projects/storage");
+              return getProjectTemplateMetadata(project.workspaceTemplate || "installation_full", t).projectProgramLabel;
+            })()}
           </span>
           <StatusBadge status={project.status} type="project" />
         </div>
@@ -298,26 +301,53 @@ export default function ProjectDetailsPage() {
                   
                   {/* Client Simplified Timeline */}
                   <div className="relative border-s border-border ps-4 ms-2 space-y-6 text-xs">
-                    <div className="relative">
-                      <div className={`absolute -start-[21px] mt-1 h-2.5 w-2.5 rounded-full ring-4 ring-background ${currentPhaseIndex >= 0 ? "bg-emerald-500" : "bg-muted"}`} />
-                      <div className="font-bold text-foreground">{t("projects:phases.created")}</div>
-                      <p className="text-[10px] text-muted-foreground">Project has been initialized and is under review.</p>
-                    </div>
-                    <div className="relative">
-                      <div className={`absolute -start-[21px] mt-1 h-2.5 w-2.5 rounded-full ring-4 ring-background ${currentPhaseIndex >= 2 ? "bg-emerald-500" : currentPhaseIndex === 1 ? "bg-indigo-600 animate-pulse" : "bg-muted"}`} />
-                      <div className="font-bold text-foreground">{t("projects:phases.active_execution")}</div>
-                      <p className="text-[10px] text-muted-foreground">Silo operations and installation are actively prepared or ongoing on-site.</p>
-                    </div>
-                    <div className="relative">
-                      <div className={`absolute -start-[21px] mt-1 h-2.5 w-2.5 rounded-full ring-4 ring-background ${currentPhaseIndex >= 3 ? "bg-emerald-500" : currentPhaseIndex === 3 ? "bg-indigo-600 animate-pulse" : "bg-muted"}`} />
-                      <div className="font-bold text-foreground">{t("projects:phases.ready_for_final_inspection")}</div>
-                      <p className="text-[10px] text-muted-foreground">Installation completed, awaiting final official compliance check.</p>
-                    </div>
-                    <div className="relative">
-                      <div className={`absolute -start-[21px] mt-1 h-2.5 w-2.5 rounded-full ring-4 ring-background ${currentPhaseIndex >= 4 ? "bg-emerald-500" : "bg-muted"}`} />
-                      <div className="font-bold text-foreground">{t("projects:phases.completed")}</div>
-                      <p className="text-[10px] text-muted-foreground">All tests passed and certificates issued.</p>
-                    </div>
+                    {project.workspaceTemplate === "maintenance" ? (
+                      <>
+                        <div className="relative">
+                          <div className={`absolute -start-[21px] mt-1 h-2.5 w-2.5 rounded-full ring-4 ring-background ${currentPhaseIndex >= 0 ? "bg-emerald-500" : "bg-muted"}`} />
+                          <div className="font-bold text-foreground">{t("projects:milestones.maintenance.created.title") || "Maintenance Plan Initialized"}</div>
+                          <p className="text-[10px] text-muted-foreground">{t("projects:milestones.maintenance.created.desc") || "Maintenance program setup created and assigned."}</p>
+                        </div>
+                        <div className="relative">
+                          <div className={`absolute -start-[21px] mt-1 h-2.5 w-2.5 rounded-full ring-4 ring-background ${currentPhaseIndex >= 2 ? "bg-emerald-500" : currentPhaseIndex === 1 ? "bg-indigo-600 animate-pulse" : "bg-muted"}`} />
+                          <div className="font-bold text-foreground">{t("projects:milestones.maintenance.active.title") || "Maintenance Operations Active"}</div>
+                          <p className="text-[10px] text-muted-foreground">{t("projects:milestones.maintenance.active.desc") || "Scheduled technician maintenance check visits are active."}</p>
+                        </div>
+                        <div className="relative">
+                          <div className={`absolute -start-[21px] mt-1 h-2.5 w-2.5 rounded-full ring-4 ring-background ${currentPhaseIndex >= 3 ? "bg-emerald-500" : currentPhaseIndex === 3 ? "bg-indigo-600 animate-pulse" : "bg-muted"}`} />
+                          <div className="font-bold text-foreground">{t("projects:milestones.maintenance.inspection.title") || "Final Maintenance Review"}</div>
+                          <p className="text-[10px] text-muted-foreground">{t("projects:milestones.maintenance.inspection.desc") || "Annual compliance review and valve diagnostic audit checks."}</p>
+                        </div>
+                        <div className="relative">
+                          <div className={`absolute -start-[21px] mt-1 h-2.5 w-2.5 rounded-full ring-4 ring-background ${currentPhaseIndex >= 4 ? "bg-emerald-500" : "bg-muted"}`} />
+                          <div className="font-bold text-foreground">{t("projects:milestones.maintenance.completed.title") || "Completed"}</div>
+                          <p className="text-[10px] text-muted-foreground">{t("projects:milestones.maintenance.completed.desc") || "All maintenance operations certified and records archived."}</p>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="relative">
+                          <div className={`absolute -start-[21px] mt-1 h-2.5 w-2.5 rounded-full ring-4 ring-background ${currentPhaseIndex >= 0 ? "bg-emerald-500" : "bg-muted"}`} />
+                          <div className="font-bold text-foreground">{t("projects:phases.created")}</div>
+                          <p className="text-[10px] text-muted-foreground">Project has been initialized and is under review.</p>
+                        </div>
+                        <div className="relative">
+                          <div className={`absolute -start-[21px] mt-1 h-2.5 w-2.5 rounded-full ring-4 ring-background ${currentPhaseIndex >= 2 ? "bg-emerald-500" : currentPhaseIndex === 1 ? "bg-indigo-600 animate-pulse" : "bg-muted"}`} />
+                          <div className="font-bold text-foreground">{t("projects:phases.active_execution")}</div>
+                          <p className="text-[10px] text-muted-foreground">Silo operations and installation are actively prepared or ongoing on-site.</p>
+                        </div>
+                        <div className="relative">
+                          <div className={`absolute -start-[21px] mt-1 h-2.5 w-2.5 rounded-full ring-4 ring-background ${currentPhaseIndex >= 3 ? "bg-emerald-500" : currentPhaseIndex === 3 ? "bg-indigo-600 animate-pulse" : "bg-muted"}`} />
+                          <div className="font-bold text-foreground">{t("projects:phases.ready_for_final_inspection")}</div>
+                          <p className="text-[10px] text-muted-foreground">Installation completed, awaiting final official compliance check.</p>
+                        </div>
+                        <div className="relative">
+                          <div className={`absolute -start-[21px] mt-1 h-2.5 w-2.5 rounded-full ring-4 ring-background ${currentPhaseIndex >= 4 ? "bg-emerald-500" : "bg-muted"}`} />
+                          <div className="font-bold text-foreground">{t("projects:phases.completed")}</div>
+                          <p className="text-[10px] text-muted-foreground">All tests passed and certificates issued.</p>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
               </CardContent>

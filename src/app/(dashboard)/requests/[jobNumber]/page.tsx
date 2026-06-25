@@ -15,7 +15,9 @@ import {
   WORKFLOW_STAGES,
   getQueueDisplayName,
   getClassificationDisplayName,
-  getClassificationReason
+  getClassificationReason,
+  getCanonicalRequestTypeDisplayName,
+  getReviewPathDisplayName
 } from "@/domains/requests/workflow";
 
 // Import new storage domains
@@ -132,13 +134,7 @@ export default function RequestDetailsPage() {
   }
 
   const getRequestTypeLabel = (type: RequestType) => {
-    const map: Record<RequestType, string> = {
-      new_license: "New Safety License",
-      maintenance_contract: "Maintenance Contract",
-      engineering_blueprint: "Blueprint Review",
-      technical_report: "Technical Safety Report",
-    };
-    return map[type] || type;
+    return getCanonicalRequestTypeDisplayName(request, t);
   };
 
   const getNextStepInstructions = (req: LicensingRequest) => {
@@ -421,9 +417,9 @@ export default function RequestDetailsPage() {
                 <span className="col-span-2 font-semibold text-foreground">{request.area} m²</span>
               </div>
               <div className="py-2.5 grid grid-cols-3 gap-2">
-                <span className="text-muted-foreground">Classification</span>
+                <span className="text-muted-foreground">{t("requests:details.reviewPathLabel") || "Review Path"}</span>
                 <span className="col-span-2 font-semibold text-foreground">
-                  {getClassificationDisplayName(request.classification, t)}
+                  {getReviewPathDisplayName(request, t)}
                 </span>
               </div>
               <div className="py-2.5 grid grid-cols-3 gap-2">

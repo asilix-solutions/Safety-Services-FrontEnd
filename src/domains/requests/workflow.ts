@@ -46,7 +46,11 @@ export function mapStatusToStage(status: RequestStatus): WorkflowStage {
   return map[status] || "SUBMITTED";
 }
 
-export function getRequestTypeDisplayName(type: string, t: (key: string) => string): string {
+export function getCanonicalRequestTypeDisplayName(
+  request: LicensingRequest | Partial<LicensingRequest>,
+  t: (key: string) => string
+): string {
+  const type = request.requestType || "";
   const map: Record<string, string> = {
     new_license: t("requests:new_license") || "New Safety License",
     maintenance_contract: t("requests:maintenance_contract") || "Maintenance Contract",
@@ -54,6 +58,44 @@ export function getRequestTypeDisplayName(type: string, t: (key: string) => stri
     technical_report: t("requests:technical_report") || "Technical Safety Report",
   };
   return map[type] || type;
+}
+
+export function getReviewPathDisplayName(
+  request: LicensingRequest | Partial<LicensingRequest>,
+  t: (key: string) => string
+): string {
+  const classification = request.classification || "";
+  const queue = request.assignedQueue || "";
+  const normClass = (classification || "").toLowerCase();
+  const normQueue = (queue || "").toLowerCase();
+
+  if (normClass.includes("maintenance") || normQueue.includes("maintenance")) {
+    return t("requests:classification.client.maintenance") || "Maintenance Review";
+  }
+  if (normClass.includes("engineering") || normQueue.includes("engineering")) {
+    return t("requests:classification.client.engineering") || "Engineering Review";
+  }
+  if (normClass.includes("high_hazard") || normClass.includes("hazard") || normQueue.includes("high_hazard")) {
+    return t("requests:classification.client.highHazard") || "Enhanced Safety Review";
+  }
+  return t("requests:classification.client.fastTrack") || "Fast Review";
+}
+
+export function getCommercialServiceLabel(
+  request: LicensingRequest | Partial<LicensingRequest>,
+  t: (key: string) => string
+): string {
+  const rType = (request.requestType || "").toLowerCase();
+  const classif = (request.classification || "").toLowerCase();
+  const queue = (request.assignedQueue || "").toLowerCase();
+
+  if (classif.includes("maintenance") || queue.includes("maintenance") || rType.includes("maintenance")) {
+    return t("requests:commercialServiceLabel.maintenance") || "Maintenance Contract";
+  }
+  if (classif.includes("engineering") || queue.includes("engineering") || rType.includes("engineering_blueprint")) {
+    return t("requests:commercialServiceLabel.installation") || "Installation Compliance";
+  }
+  return t("requests:commercialServiceLabel.compliance") || "Compliance Follow-up";
 }
 
 export function getQueueDisplayName(queue: RequestQueue | null, t: (key: string) => string): string {

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "@/providers/AuthProvider";
 import { MOCK_REQUESTS } from "@/mock/requests";
 import { LicensingRequest, RequestType, WorkflowStage } from "@/domains/requests/types";
-import { mapStatusToStage, getQueueDisplayName, getClassificationDisplayName, WORKFLOW_STAGES } from "@/domains/requests/workflow";
+import { mapStatusToStage, getQueueDisplayName, getClassificationDisplayName, WORKFLOW_STAGES, getCanonicalRequestTypeDisplayName, getReviewPathDisplayName, getCommercialServiceLabel } from "@/domains/requests/workflow";
 import { PageHeader } from "@/shared/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Button } from "@/shared/ui/button";
@@ -100,13 +100,7 @@ export default function QuotationBuilderPage() {
   }
 
   const getRequestTypeLabel = (type: RequestType) => {
-    const map: Record<RequestType, string> = {
-      new_license: "New Safety License",
-      maintenance_contract: "Maintenance Contract",
-      engineering_blueprint: "Blueprint Review",
-      technical_report: "Technical Safety Report",
-    };
-    return map[type] || type;
+    return getCanonicalRequestTypeDisplayName(request, t);
   };
 
   // Financial Calculations
@@ -142,17 +136,16 @@ export default function QuotationBuilderPage() {
     }));
   };
 
-  // Suggestion buttons helper
-  const suggestions = [
-    { label: t("requests:quotations.builder.suggestionEngineering"), value: "Engineering Review" },
-    { label: t("requests:quotations.builder.suggestionSite"), value: "Site Inspection Visit" },
-    { label: t("requests:quotations.builder.suggestionTechnical"), value: "Technical Report" },
-    { label: t("requests:quotations.builder.suggestionMaintenance"), value: "Maintenance Contract" },
-    { label: t("requests:quotations.builder.suggestionAlarm"), value: "Fire Alarm System" },
-    { label: t("requests:quotations.builder.suggestionSuppression"), value: "Fire Suppression System" },
-    { label: t("requests:quotations.builder.suggestionVentilation"), value: "Ventilation / Smoke Control" },
-    { label: t("requests:quotations.builder.suggestionOther"), value: "Other" }
-  ];
+  // Resolve context-aware suggestions
+  const suggestedItems = typeof window !== "undefined" ? (() => {
+    const { getQuotationSuggestedItems } = require("@/domains/quotations/workflow");
+    return getQuotationSuggestedItems({
+      requestType: request.requestType,
+      classification: request.classification,
+      assignedQueue: request.assignedQueue || undefined,
+    }, t);
+  })() : [];
+
 
   // Validation
   const validate = (): boolean => {
@@ -460,12 +453,21 @@ export default function QuotationBuilderPage() {
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-2">
-                {suggestions.map((sug) => (
+                {suggestedItems.map((sug: any) => (
                   <Button
-                    key={sug.value}
+                    key={sug.id}
                     variant="outline"
                     size="sm"
-                    onClick={() => handleAddItem(sug.label)}
+                    onClick={() => {
+                      const newItem = {
+                        id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2),
+                        description: sug.label,
+                        quantity: 1,
+                        unitPrice: sug.defaultUnitPrice || 0,
+                        taxable: sug.taxable !== false
+                      };
+                      setItems([...items, newItem]);
+                    }}
                     disabled={isReadOnly}
                     className="h-8 text-xs font-medium"
                   >
@@ -505,9 +507,15 @@ export default function QuotationBuilderPage() {
                 <span className="font-semibold text-foreground text-right">{getRequestTypeLabel(request.requestType)}</span>
               </div>
               <div className="py-2 grid grid-cols-2 gap-2">
-                <span className="text-muted-foreground">{t("requests:quotations.builder.fieldClassification")}</span>
-                <span className="font-semibold text-foreground capitalize text-right">
-                  {getClassificationDisplayName(request.classification, t)}
+                <span className="text-muted-foreground">{t("requests:details.reviewPathLabel") || "Review Path"}</span>
+                <span className="font-semibold text-foreground text-right">
+                  {getReviewPathDisplayName(request, t)}
+                </span>
+              </div>
+              <div className="py-2 grid grid-cols-2 gap-2">
+                <span className="text-muted-foreground">{t("requests:details.serviceScopeLabel") || "Service Scope"}</span>
+                <span className="font-semibold text-foreground text-right">
+                  {getCommercialServiceLabel(request, t)}
                 </span>
               </div>
               <div className="py-2 grid grid-cols-2 gap-2">

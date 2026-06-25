@@ -91,5 +91,13 @@
   "maintenance.checks": "Periodic Maintenance Service Log",
   "maintenance.noVisits": "No service visits scheduled or completed yet.",
   "compliance.checklist": "Inspection Checklist & Compliance Evaluation",
-  "compliance.noChecks": "No checks pending."
+  "compliance.noChecks": "No checks pending.",
+  "milestones.maintenance.created.title": "Maintenance Plan Initialized",
+  "milestones.maintenance.created.desc": "Maintenance program setup created and assigned.",
+  "milestones.maintenance.active.title": "Maintenance Operations Active",
+  "milestones.maintenance.active.desc": "Scheduled technician maintenance check visits are active.",
+  "milestones.maintenance.inspection.title": "Final Maintenance Review",
+  "milestones.maintenance.inspection.desc": "Annual compliance review and valve diagnostic audit checks.",
+  "milestones.maintenance.completed.title": "Completed",
+  "milestones.maintenance.completed.desc": "All maintenance operations certified and records archived."
 }

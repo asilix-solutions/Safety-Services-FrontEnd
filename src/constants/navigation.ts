@@ -39,6 +39,7 @@ export const ROLE_NAVIGATION: Record<UserRole, NavigationItem[]> = {
   ],
   "Operations Officer": [
     { label: "Dashboard", path: "/", iconName: "LayoutDashboard" },
+    { label: "Requests", path: "/requests", iconName: "Inbox" },
     { label: "Projects", path: "/projects", iconName: "Kanban" },
     { label: "Execution", path: "/execution", iconName: "PlayCircle" },
     { label: "Expenses", path: "/expenses", iconName: "Wallet" },

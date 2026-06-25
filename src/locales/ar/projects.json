@@ -91,5 +91,13 @@
   "maintenance.checks": "سجل زيارات الصيانة الدورية",
   "maintenance.noVisits": "لم يتم تسجيل أي زيارات فنية بعد.",
   "compliance.checklist": "قائمة التحقق وتقييم الامتثال",
-  "compliance.noChecks": "لا توجد فحوصات معلقة."
+  "compliance.noChecks": "لا توجد فحوصات معلقة.",
+  "milestones.maintenance.created.title": "تهيئة خطة الصيانة",
+  "milestones.maintenance.created.desc": "تم إعداد خطة برنامج عمليات الصيانة الدورية وتعيين المفتش المسؤول.",
+  "milestones.maintenance.active.title": "زيارات الصيانة التشغيلية نشطة",
+  "milestones.maintenance.active.desc": "جدول زيارات الصيانة الدورية والتحقق الفني الميداني قيد التنفيذ حاليًا.",
+  "milestones.maintenance.inspection.title": "المراجعة النهائية للامتثال والصيانة",
+  "milestones.maintenance.inspection.desc": "مراجعة تقارير الامتثال السنوية وتدقيق قراءات ضغط المحابس وصمامات السلامة.",
+  "milestones.maintenance.completed.title": "مكتمل",
+  "milestones.maintenance.completed.desc": "تم الانتهاء من كافة عمليات الصيانة الوقائية والتحقق الفني وأرشفة الملفات بنجاح."
 }

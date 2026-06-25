@@ -126,6 +126,43 @@ export function createDefaultWorkspace(): ProjectWorkspaceData {
   return buildProjectWorkspaceTemplate("license", "new_license").workspace;
 }
 
+export function getProjectTemplateMetadata(
+  template: ProjectWorkspaceTemplate,
+  t?: (key: string) => string
+): {
+  projectNameSuffix: string;
+  projectDescription: string;
+  projectProgramLabel: string;
+} {
+  const isAr = t ? t("projects:title") === "المشاريع" : false;
+  if (template === "maintenance") {
+    return {
+      projectNameSuffix: isAr ? "مشروع عمليات الصيانة" : "Maintenance Operations Project",
+      projectDescription: isAr 
+        ? "مشروع إدارة وجدولة عمليات الصيانة الوقائية وفحص أنظمة السلامة الدورية."
+        : "Operational program setup for preventative maintenance and periodic system checks.",
+      projectProgramLabel: isAr ? "برنامج عمليات الصيانة" : "Maintenance Operations Program",
+    };
+  }
+  if (template === "installation_full") {
+    return {
+      projectNameSuffix: isAr ? "مشروع تنفيذ وتركيب أنظمة السلامة" : "Installation Compliance Project",
+      projectDescription: isAr 
+        ? "مشروع تنفيذ وتركيب وفحص أنظمة كشف ومكافحة الحريق والتهوية الميكانيكية بالمنشأة."
+        : "Full engineering execution project for installation, wiring, and commissioning of safety systems.",
+      projectProgramLabel: isAr ? "برنامج تنفيذ وتركيب أنظمة السلامة" : "Installation Execution Program",
+    };
+  }
+  // compliance_followup
+  return {
+    projectNameSuffix: isAr ? "مشروع متابعة وتقييم الامتثال" : "Compliance Follow-up Project",
+    projectDescription: isAr 
+      ? "مشروع فحص ومتابعة الامتثال الفني الخفيف وإعداد تقارير السلامة الميدانية."
+      : "Compliance inspection follow-up, evaluation checklist, and safety review program.",
+    projectProgramLabel: isAr ? "برنامج متابعة وتقييم الامتثال" : "Compliance Follow-up Program",
+  };
+}
+
 export function provisionProjectFromRequest(request: LicensingRequest): Project {
   // Map RequestType to ProjectType
   let projectType: "license" | "maintenance" | "engineering" = "engineering";
@@ -142,12 +179,20 @@ export function provisionProjectFromRequest(request: LicensingRequest): Project 
     request.assignedQueue || undefined
   );
 
+  // Enforce consistent projectType if template is maintenance
+  let finalProjectType = projectType;
+  if (template === "maintenance") {
+    finalProjectType = "maintenance";
+  }
+
+  const meta = getProjectTemplateMetadata(template);
+
   const newProject: Project = {
     id: `PRJ-${Math.floor(1000 + Math.random() * 9000)}`,
     tenantId: request.tenantId || "default-tenant",
     jobNumber: request.jobNumber,
-    name: `${request.facilityName} - Compliance Project`,
-    description: `Safety compliance execution project initialized for request ${request.jobNumber}`,
+    name: `${request.facilityName} - ${meta.projectNameSuffix}`,
+    description: meta.projectDescription,
     clientName: request.clientName || "Client",
     clientId: request.clientId || "client-id",
     status: "planning",
@@ -157,7 +202,7 @@ export function provisionProjectFromRequest(request: LicensingRequest): Project 
     startDate: new Date().toISOString().split("T")[0],
     tasks: [],
     category: "Fire Safety",
-    projectType,
+    projectType: finalProjectType,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
