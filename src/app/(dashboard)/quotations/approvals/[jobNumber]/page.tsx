@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "@/providers/AuthProvider";
 import { MOCK_REQUESTS } from "@/mock/requests";
 import { LicensingRequest, WorkflowStage } from "@/domains/requests/types";
-import { getClassificationDisplayName, getQueueDisplayName, getCanonicalRequestTypeDisplayName, getReviewPathDisplayName, getCommercialServiceLabel } from "@/domains/requests/workflow";
+import { getClassificationDisplayName, getQueueDisplayName, getCanonicalRequestTypeDisplayName, getReviewPathDisplayName, getCommercialServiceLabel, getWorkflowStageDisplayName } from "@/domains/requests/workflow";
 import { PageHeader } from "@/shared/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Button } from "@/shared/ui/button";
@@ -20,6 +20,29 @@ export default function QuotationApprovalDetailsPage() {
   const { user } = useAuth();
   const { t } = useTranslation();
   useNamespaceTranslations(["requests", "dashboard", "common"]);
+
+  const getQuotationItemDescription = (desc: string) => {
+    const map: Record<string, string> = {
+      "Initial Maintenance Audit": t("requests:quotations.presets.initial_audit"),
+      "Preventive Maintenance Visit": t("requests:quotations.presets.preventive_visit"),
+      "Fire Alarm Device Testing": t("requests:quotations.presets.device_testing"),
+      "Pump / Valve Inspection": t("requests:quotations.presets.valve_inspection"),
+      "Emergency Lighting Check": t("requests:quotations.presets.lighting_check"),
+      "Annual Maintenance Contract": t("requests:quotations.presets.annual_contract"),
+      "Corrective Repair Visit": t("requests:quotations.presets.repair_visit"),
+      "Engineering Review": t("requests:quotations.presets.eng_review"),
+      "Shop Drawing Review": t("requests:quotations.presets.drawing_review"),
+      "Site Inspection Visit": t("requests:quotations.presets.site_visit"),
+      "Alarm System Installation": t("requests:quotations.presets.alarm_install"),
+      "Fire Suppression System": t("requests:quotations.presets.suppression_install"),
+      "Ventilation / Smoke Control": t("requests:quotations.presets.ventilation_control"),
+      "Technical Report": t("requests:quotations.presets.tech_report"),
+      "Compliance Report": t("requests:quotations.presets.compliance_report"),
+      "Fit-out Review": t("requests:quotations.presets.fitout_review"),
+      "Document Audit": t("requests:quotations.presets.document_audit"),
+    };
+    return map[desc] || desc;
+  };
   const router = useRouter();
   const params = useParams();
   const jobNumber = params?.jobNumber as string;
@@ -317,7 +340,7 @@ export default function QuotationApprovalDetailsPage() {
                   {t("requests:quotations.builder.fieldCurrentStage")}
                 </span>
                 <Badge variant="outline" className="mt-1">
-                  {t(`requests:${request.currentStage}`) || request.currentStage}
+                  {getWorkflowStageDisplayName(request.currentStage, t)}
                 </Badge>
               </div>
             </CardContent>
@@ -345,7 +368,7 @@ export default function QuotationApprovalDetailsPage() {
                   <tbody>
                     {quotation.items.map((item) => (
                       <tr key={item.id} className="border-b border-border/40 hover:bg-secondary/10 last:border-0">
-                        <td className="p-3 font-medium text-foreground">{item.description}</td>
+                        <td className="p-3 font-medium text-foreground">{getQuotationItemDescription(item.description)}</td>
                         <td className="p-3 text-center text-muted-foreground">{item.quantity}</td>
                         <td className="p-3 text-right text-muted-foreground">
                           {item.unitPrice.toLocaleString()} {t("common:sar") || "SAR"}

@@ -10,14 +10,16 @@ import { Badge } from "@/shared/ui/badge";
 import { MapPin, ShieldAlert, ArrowLeft, Clock, Eye, Download, RefreshCw, Send, CreditCard, Activity } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useTranslation } from "@/providers/i18n-provider";
+import { useTranslation, useNamespaceTranslations } from "@/providers/i18n-provider";
 import {
   WORKFLOW_STAGES,
   getQueueDisplayName,
   getClassificationDisplayName,
   getClassificationReason,
   getCanonicalRequestTypeDisplayName,
-  getReviewPathDisplayName
+  getReviewPathDisplayName,
+  getRequestStatusDisplayName,
+  getWorkflowStageDisplayName
 } from "@/domains/requests/workflow";
 
 // Import new storage domains
@@ -36,6 +38,7 @@ export default function RequestDetailsPage() {
   const { user } = useAuth();
   const params = useParams();
   const { t } = useTranslation();
+  useNamespaceTranslations(["requests", "dashboard", "common", "projects"]);
   const [request, setRequest] = useState<LicensingRequest | null>(null);
   const [invoice, setInvoice] = useState<ClientInvoice | null>(null);
   const [quotation, setQuotation] = useState<Quotation | null>(null);
@@ -114,7 +117,7 @@ export default function RequestDetailsPage() {
       };
 
       createOrUpdateInvoice(newInvoice);
-      alert("Invoice regenerated successfully from approved quotation!");
+      alert(t("requests:details.alertInvoiceRegenerated"));
       loadData();
     } catch (err) {
       console.error("Failed to regenerate invoice", err);
@@ -126,9 +129,9 @@ export default function RequestDetailsPage() {
   if (!request) {
     return (
       <div className="p-6 text-center text-muted-foreground space-y-4">
-        <p>Request with reference {jobNumber} not found.</p>
+        <p>{t("requests:engineeringWorkspace.requestNotFound").replace("{{jobNumber}}", jobNumber)}</p>
         <Link href="/requests">
-          <Button variant="outline" size="sm">Back to Requests</Button>
+          <Button variant="outline" size="sm">{t("requests:engineeringWorkspace.backToRequests")}</Button>
         </Link>
       </div>
     );
@@ -136,6 +139,44 @@ export default function RequestDetailsPage() {
 
   const getRequestTypeLabel = (type: RequestType) => {
     return getCanonicalRequestTypeDisplayName(request, t);
+  };
+
+  const getTimelineEventComment = (event: { status: string; comment: string }) => {
+    const c = event.comment || "";
+    const lower = c.toLowerCase();
+
+    if (lower === "request initialized." || lower === "request draft initialized." || lower === "request draft initialized by client.") {
+      return t("requests:timeline.comments.draft");
+    }
+    if (lower === "request submitted." || lower === "request successfully submitted.") {
+      return t("requests:timeline.comments.submitted");
+    }
+    if (lower === "inspecting engineer assigned for blueprint audit.") {
+      return t("requests:timeline.comments.insulationEngineer");
+    }
+    if (c.startsWith("Payment Confirmed. Ref: ")) {
+      const ref = c.substring("Payment Confirmed. Ref: ".length);
+      return t("requests:timeline.comments.paymentConfirmedRef").replace("{{ref}}", ref);
+    }
+    if (lower === "payment confirmed. safety compliance project has been initialized.") {
+      return t("requests:timeline.comments.paymentConfirmed");
+    }
+    if (c.startsWith("Project Execution Started. Project Ref: ")) {
+      const ref = c.substring("Project Execution Started. Project Ref: ".length);
+      return t("requests:timeline.comments.executionStartedRef").replace("{{ref}}", ref);
+    }
+    if (lower === "project execution started. field team assigned.") {
+      return t("requests:timeline.comments.executionStarted");
+    }
+    if (c.startsWith("Project execution completed. Ready for final inspection. Notes: ")) {
+      const notes = c.substring("Project execution completed. Ready for final inspection. Notes: ".length);
+      return t("requests:timeline.comments.executionCompletedNotes").replace("{{notes}}", notes);
+    }
+    if (lower === "project execution completed. awaiting final inspection.") {
+      return t("requests:timeline.comments.executionCompleted");
+    }
+
+    return c;
   };
 
   const getNextStepInstructions = (req: LicensingRequest) => {
@@ -186,7 +227,7 @@ export default function RequestDetailsPage() {
       case "COMPLETED":
         return t("requests:nextStep.COMPLETED");
       default:
-        return "In progress.";
+        return t("common:inProgress");
     }
   };
 
@@ -199,15 +240,15 @@ export default function RequestDetailsPage() {
   const handleReplaceFile = (docIndex: number) => {
     const rule = isReplaceAllowed(request.currentStage);
     if (rule === "READ_ONLY") {
-      alert("This request is currently under review. Uploaded files are locked and read-only to preserve compliance records.");
+      alert(t("requests:details.alertFileLocked"));
       return;
     }
     if (rule === "CONFIRM_REQUIRED") {
-      const ok = window.confirm("Warning: This request has already been submitted for evaluation. Replacing documents may reset your review position. Do you want to proceed?");
+      const ok = window.confirm(t("requests:details.confirmFileReplace"));
       if (!ok) return;
     }
     
-    const newFileName = prompt("Enter name of document file to replace:", request.documents[docIndex].fileName || "document.pdf");
+    const newFileName = prompt(t("requests:details.promptReplaceFileName"), request.documents[docIndex].fileName || "document.pdf");
     if (newFileName) {
       const updatedDocs = [...request.documents];
       updatedDocs[docIndex] = { ...updatedDocs[docIndex], uploaded: true, fileName: newFileName };
@@ -220,7 +261,7 @@ export default function RequestDetailsPage() {
       } catch(e) {
         console.error("Failed to sync file replacement to localStorage", e);
       }
-      alert("File replaced successfully!");
+      alert(t("requests:details.alertFileReplaced"));
     }
   };
 
@@ -234,7 +275,7 @@ export default function RequestDetailsPage() {
     
     try {
       upsertRequest(updatedRequest);
-      alert("Request successfully approved and transitioned to Quotation phase.");
+      alert(t("requests:details.alertTransitionQuotation"));
     } catch (e) {
       console.error("Failed to transition request to Quotation", e);
     }
@@ -251,7 +292,7 @@ export default function RequestDetailsPage() {
       setInvoice(updatedInvoice);
       setRequest(updatedRequest);
 
-      alert("Mock payment confirmed successfully. Project has been initialized!");
+      alert(t("requests:details.alertPaymentConfirmed"));
       loadData();
     } catch (err) {
       console.error("Failed to complete mock payment", err);
@@ -292,7 +333,7 @@ export default function RequestDetailsPage() {
               <Clock className="h-5 w-5" />
             </div>
             <div className="space-y-1">
-              <h4 className="font-bold text-xs text-foreground uppercase tracking-wide">Next Step / Action Required</h4>
+              <h4 className="font-bold text-xs text-foreground uppercase tracking-wide">{t("requests:details.nextStepTitle")}</h4>
               <p className="text-xs text-muted-foreground leading-relaxed">
                 {getNextStepInstructions(request)}
               </p>
@@ -317,17 +358,17 @@ export default function RequestDetailsPage() {
           <CardHeader className="pb-2">
             <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
               <CreditCard className="h-5 w-5" />
-              <CardTitle className="text-base font-bold">Billing & Invoice Payment</CardTitle>
+              <CardTitle className="text-base font-bold">{t("requests:details.billingTitle")}</CardTitle>
             </div>
             <CardDescription className="text-xs text-muted-foreground">
-              Confirm your payment to initialize the active safety compliance project.
+              {t("requests:details.billingDesc")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {!invoice ? (
               <div className="p-3 border border-amber-500/30 bg-amber-500/10 text-amber-800 dark:text-amber-400 rounded-lg text-xs space-y-2">
                 <p>
-                  <strong>Warning:</strong> Invoice record is missing. Please re-approve quotation or contact support to regenerate invoice.
+                  <strong>{t("common:warning") || "Warning"}:</strong> {t("requests:details.invoiceMissing")}
                 </p>
                 {quotation && quotation.quotationStatus === "APPROVED" && (
                   <div className="pt-1 flex justify-start">
@@ -336,7 +377,7 @@ export default function RequestDetailsPage() {
                       onClick={handleRegenerateInvoice}
                       className="bg-amber-600 hover:bg-amber-700 text-white font-semibold text-[10px] h-7 px-3"
                     >
-                      Regenerate Invoice from Quotation
+                      {t("requests:details.regenerateInvoice")}
                     </Button>
                   </div>
                 )}
@@ -344,26 +385,26 @@ export default function RequestDetailsPage() {
             ) : (
               <div className="divide-y divide-border text-xs">
                 <div className="py-2 grid grid-cols-3 gap-2">
-                  <span className="text-muted-foreground">Invoice Reference:</span>
+                  <span className="text-muted-foreground">{t("requests:details.invoiceRef")}:</span>
                   <span className="col-span-2 font-mono font-semibold text-foreground">{invoice.id}</span>
                 </div>
                 <div className="py-2 grid grid-cols-3 gap-2">
-                  <span className="text-muted-foreground">Amount:</span>
+                  <span className="text-muted-foreground">{t("requests:details.amount")}:</span>
                   <span className="col-span-2 font-semibold text-foreground">{invoice.subtotal.toFixed(2)} {invoice.currency}</span>
                 </div>
                 <div className="py-2 grid grid-cols-3 gap-2">
-                  <span className="text-muted-foreground">VAT (15%):</span>
+                  <span className="text-muted-foreground">{t("requests:details.vat")}:</span>
                   <span className="col-span-2 font-semibold text-foreground">{invoice.vatAmount.toFixed(2)} {invoice.currency}</span>
                 </div>
                 <div className="py-2 grid grid-cols-3 gap-2">
-                  <span className="text-muted-foreground">Grand Total:</span>
+                  <span className="text-muted-foreground">{t("requests:details.grandTotalLabel")}:</span>
                   <span className="col-span-2 font-bold text-foreground text-sm">{invoice.grandTotal.toFixed(2)} {invoice.currency}</span>
                 </div>
                 <div className="py-2 grid grid-cols-3 gap-2">
-                  <span className="text-muted-foreground">Payment Status:</span>
+                  <span className="text-muted-foreground">{t("requests:details.paymentStatus")}:</span>
                   <span className="col-span-2">
                     <Badge variant={invoice.status === "paid" ? "success" : "warning"} className="text-[10px]">
-                      {invoice.status === "paid" ? "Paid" : "Awaiting Client Payment"}
+                      {invoice.status === "paid" ? (t("common:status_Completed") || "Paid") : t("requests:details.awaitingPayment")}
                     </Badge>
                   </span>
                 </div>
@@ -375,7 +416,7 @@ export default function RequestDetailsPage() {
                       disabled={isProcessing}
                       className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-4 py-2"
                     >
-                      {isProcessing ? "Processing Mock Payment..." : "Confirm Mock Payment"}
+                      {isProcessing ? t("requests:details.processingPayment") : t("requests:details.confirmPaymentBtn")}
                     </Button>
                   </div>
                 )}
@@ -395,7 +436,7 @@ export default function RequestDetailsPage() {
                 <CardDescription className="text-muted-foreground">{t("dashboard:verified_municipal_desc")}</CardDescription>
               </div>
               <Badge variant="warning" className="capitalize">
-                {request.status.replace("_", " ")}
+                {getRequestStatusDisplayName(request.status, t)}
               </Badge>
             </CardHeader>
             <CardContent className="divide-y divide-border text-xs space-y-1">
@@ -424,13 +465,13 @@ export default function RequestDetailsPage() {
                 </span>
               </div>
               <div className="py-2.5 grid grid-cols-3 gap-2">
-                <span className="text-muted-foreground">Classification Reason</span>
+                <span className="text-muted-foreground">{t("requests:details.classificationReason") || "Classification Reason"}</span>
                 <span className="col-span-2 font-semibold text-foreground leading-relaxed">
                   {getClassificationReason(request, t)}
                 </span>
               </div>
               <div className="py-2.5 grid grid-cols-3 gap-2">
-                <span className="text-muted-foreground">Assigned Department</span>
+                <span className="text-muted-foreground">{t("requests:details.assignedDepartment") || "Assigned Department"}</span>
                 <span className="col-span-2 font-semibold text-foreground">
                   {getQueueDisplayName(request.assignedQueue, t)}
                 </span>
@@ -462,7 +503,7 @@ export default function RequestDetailsPage() {
                 <div key={idx} className="flex items-center justify-between p-3 border border-border bg-secondary/15 rounded-lg">
                   <div>
                     <span className="font-semibold block text-foreground">{doc.name}</span>
-                    <span className="text-[10px] text-muted-foreground">Formats: {doc.type.toUpperCase()}</span>
+                    <span className="text-[10px] text-muted-foreground">{t("common:fileFormats")}: {doc.type.toUpperCase()}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     {doc.uploaded ? (
@@ -483,7 +524,7 @@ export default function RequestDetailsPage() {
                             variant="outline"
                             size="icon"
                             className="h-8 w-8"
-                            onClick={() => alert(`Simulated View file: ${doc.fileName}`)}
+                            onClick={() => alert(t("requests:details.simulatedView").replace("{{fileName}}", doc.fileName || ""))}
                             title="View"
                           >
                             <Eye className="h-3.5 w-3.5 text-muted-foreground" />
@@ -492,7 +533,7 @@ export default function RequestDetailsPage() {
                             variant="outline"
                             size="icon"
                             className="h-8 w-8"
-                            onClick={() => alert(`Simulated Download file: ${doc.fileName}`)}
+                            onClick={() => alert(t("requests:details.simulatedDownload").replace("{{fileName}}", doc.fileName || ""))}
                             title="Download"
                           >
                             <Download className="h-3.5 w-3.5 text-muted-foreground" />
@@ -525,35 +566,38 @@ export default function RequestDetailsPage() {
               <CardHeader className="pb-2">
                 <CardTitle className="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wide flex items-center gap-1.5">
                   <Activity className="h-4 w-4" />
-                  Linked Project Execution
+                  {t("projects:details.linkedProject") || "Linked Project Execution"}
                 </CardTitle>
                 <CardDescription className="text-[10px] text-muted-foreground">
-                  Active field operations tracker
+                  {t("projects:details.opsDesc") || "Active field operations tracker"}
                 </CardDescription>
               </CardHeader>
               <CardContent className="text-xs space-y-3 pt-1">
                 <div className="space-y-1">
-                  <span className="text-[9px] text-muted-foreground block uppercase">Project ID</span>
+                  <span className="text-[9px] text-muted-foreground block uppercase">{t("projects:details.id") || "Project ID"}</span>
                   <span className="font-mono font-bold text-foreground">{linkedProject.id}</span>
                 </div>
                 
                 {isClient ? (
                   <div className="space-y-1">
-                    <span className="text-[9px] text-muted-foreground block uppercase">Status</span>
-                    <span className="font-semibold text-foreground capitalize">{linkedProject.status}</span>
+                    <span className="text-[9px] text-muted-foreground block uppercase">{t("projects:status") || "Status"}</span>
+                    <span className="font-semibold text-foreground capitalize">{t(`projects:status.${linkedProject.status}`) || linkedProject.status}</span>
                   </div>
                 ) : (
                   <>
                     <div className="space-y-1">
-                      <span className="text-[9px] text-muted-foreground block uppercase">Execution Phase</span>
+                      <span className="text-[9px] text-muted-foreground block uppercase">{t("projects:phases.title") || "Execution Phase"}</span>
                       <span className="font-bold text-indigo-600 dark:text-indigo-400 capitalize">
                         {getProjectExecutionPhaseLabel(linkedProject.executionPhase, t) || t("projects:phases.created")}
                       </span>
                     </div>
                     <div className="space-y-1">
-                      <span className="text-[9px] text-muted-foreground block uppercase">Workspace Profile</span>
+                      <span className="text-[9px] text-muted-foreground block uppercase">{t("projects:details.type") || "Workspace Profile"}</span>
                       <span className="font-semibold text-foreground capitalize">
-                        {linkedProject.workspaceTemplate?.replace("_", " ") || "Full Installation"}
+                        {(() => {
+                          const { getProjectTemplateMetadata } = require("@/domains/projects/storage");
+                          return getProjectTemplateMetadata(linkedProject.workspaceTemplate || "installation_full", t).projectProgramLabel;
+                        })()}
                       </span>
                     </div>
                   </>
@@ -562,7 +606,7 @@ export default function RequestDetailsPage() {
                 <div className="pt-2 border-t border-border">
                   <Link href={`/projects/${linkedProject.id}`}>
                     <Button size="sm" className="w-full text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white gap-1.5 h-8">
-                      {isClient ? "View Project Details" : "Open Execution Workspace"}
+                      {isClient ? t("requests:details.viewProject") : t("requests:details.openWorkspace")}
                     </Button>
                   </Link>
                 </div>
@@ -572,8 +616,8 @@ export default function RequestDetailsPage() {
           {/* Workflow Stepper Timeline */}
           <Card className="border-border bg-card">
             <CardHeader>
-              <CardTitle className="text-base font-bold text-foreground">Workflow Stage Timeline</CardTitle>
-              <CardDescription className="text-muted-foreground">Official lifecycle progress tracking</CardDescription>
+              <CardTitle className="text-base font-bold text-foreground">{t("requests:details.stageTimelineTitle")}</CardTitle>
+              <CardDescription className="text-muted-foreground">{t("requests:details.stageTimelineDesc")}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
@@ -599,7 +643,7 @@ export default function RequestDetailsPage() {
                         )}
                       </div>
                       <span className={`font-semibold ${isActive ? "text-indigo-600 dark:text-indigo-400 font-bold" : isCompleted ? "text-foreground" : "text-muted-foreground"}`}>
-                        {t(`requests:stages.${stage}`) || stage.replace("_", " ")}
+                        {getWorkflowStageDisplayName(stage, t)}
                       </span>
                     </div>
                   );
@@ -624,12 +668,12 @@ export default function RequestDetailsPage() {
                         <span className="font-bold text-foreground capitalize">
                           {event.status === "ready_for_final_inspection"
                             ? (t("requests:timeline.readyForFinalInspection") || "Final Inspection Ready")
-                            : event.status.replace("_", " ")
+                            : getRequestStatusDisplayName(event.status, t)
                           }
                         </span>
                         <span className="text-[10px] text-muted-foreground">{new Date(event.date).toLocaleDateString()}</span>
                       </div>
-                      <p className="text-[11px] text-muted-foreground">{event.comment}</p>
+                      <p className="text-[11px] text-muted-foreground">{getTimelineEventComment(event)}</p>
                     </div>
                   </div>
                 ))}

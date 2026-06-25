@@ -12,7 +12,7 @@ import { DataTable, ColumnDef } from "@/shared/components/data-table/data-table"
 import { Plus, Eye, Calendar } from "lucide-react";
 import Link from "next/link";
 import { useTranslation } from "@/providers/i18n-provider";
-import { getClassificationDisplayName } from "@/domains/requests/workflow";
+import { getClassificationDisplayName, getRequestStatusDisplayName, getCanonicalRequestTypeDisplayName, getWorkflowStageDisplayName } from "@/domains/requests/workflow";
 import { getMergedRequests } from "@/domains/requests/storage";
  
 export default function RequestsPage() {
@@ -28,13 +28,7 @@ export default function RequestsPage() {
   if (!user) return null;
 
   const getRequestTypeLabel = (type: RequestType) => {
-    const map: Record<RequestType, string> = {
-      new_license: "New Safety License",
-      maintenance_contract: "Maintenance Contract",
-      engineering_blueprint: "Blueprint Review",
-      technical_report: "Technical Safety Report",
-    };
-    return map[type] || type;
+    return getCanonicalRequestTypeDisplayName({ requestType: type }, t);
   };
 
   const getStatusBadgeVariant = (status: string) => {
@@ -57,7 +51,7 @@ export default function RequestsPage() {
   };
 
   const getStageBadgeLabel = (stage: string) => {
-    return t(`requests:stages.${stage}`) || stage.replace("_", " ");
+    return getWorkflowStageDisplayName(stage, t);
   };
 
   const getStageBadgeVariant = (stage: string) => {
@@ -175,7 +169,7 @@ export default function RequestsPage() {
       accessorKey: "status",
       render: (row) => (
         <Badge variant={getStatusBadgeVariant(row.status)} className="capitalize">
-          {row.status.replace("_", " ")}
+          {getRequestStatusDisplayName(row.status, t)}
         </Badge>
       ),
     },

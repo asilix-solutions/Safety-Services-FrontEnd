@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "@/providers/AuthProvider";
 import { MOCK_REQUESTS } from "@/mock/requests";
 import { LicensingRequest, RequestType, WorkflowStage } from "@/domains/requests/types";
-import { mapStatusToStage, getQueueDisplayName, getClassificationDisplayName, WORKFLOW_STAGES, getCanonicalRequestTypeDisplayName, getReviewPathDisplayName, getCommercialServiceLabel } from "@/domains/requests/workflow";
+import { mapStatusToStage, getQueueDisplayName, getClassificationDisplayName, WORKFLOW_STAGES, getCanonicalRequestTypeDisplayName, getReviewPathDisplayName, getCommercialServiceLabel, getWorkflowStageDisplayName } from "@/domains/requests/workflow";
 import { PageHeader } from "@/shared/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Button } from "@/shared/ui/button";
@@ -532,7 +532,7 @@ export default function QuotationBuilderPage() {
                 <span className="text-muted-foreground">{t("requests:quotations.builder.fieldCurrentStage")}</span>
                 <div className="text-right">
                   <Badge variant="warning" className="capitalize">
-                    {request.currentStage.replace("_", " ")}
+                    {getWorkflowStageDisplayName(request.currentStage, t)}
                   </Badge>
                 </div>
               </div>

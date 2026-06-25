@@ -190,3 +190,31 @@ export function getClassificationReason(request: Partial<LicensingRequest>, t: (
     return t("requests:classificationReason.ENGINEERING");
   }
 }
+
+export function getRequestStatusDisplayName(
+  status: string,
+  t: (key: string) => string
+): string {
+  const keyMap: Record<string, string> = {
+    draft: "common:status_Draft",
+    submitted: "common:status_Pending_Review",
+    assigned: "common:status_In_Review",
+    under_review: "common:status_In_Review",
+    quotation_created: "common:status_In_Review",
+    awaiting_approval: "common:status_Action_Required",
+    approved: "common:status_Approved",
+    in_execution: "common:status_In_Progress",
+    completed: "common:status_Completed",
+    closed: "common:status_Inactive",
+  };
+  const key = keyMap[status];
+  return key ? t(key) : status.replace(/_/g, " ");
+}
+
+export function getWorkflowStageDisplayName(
+  stage: string,
+  t: (key: string) => string
+): string {
+  return t(`requests:stages.${stage}`) || stage.replace(/_/g, " ");
+}
+

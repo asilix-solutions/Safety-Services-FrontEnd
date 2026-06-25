@@ -18,7 +18,10 @@ import {
   getClassificationDisplayName,
   getClassificationReason,
   mapStatusToStage,
-  canTransition
+  canTransition,
+  getCanonicalRequestTypeDisplayName,
+  getWorkflowStageDisplayName,
+  getReviewPathDisplayName
 } from "@/domains/requests/workflow";
 
 export default function EngineeringWorkspacePage() {
@@ -74,13 +77,7 @@ export default function EngineeringWorkspacePage() {
   }
 
   const getRequestTypeLabel = (type: RequestType) => {
-    const map: Record<RequestType, string> = {
-      new_license: "New Safety License",
-      maintenance_contract: "Maintenance Contract",
-      engineering_blueprint: "Blueprint Review",
-      technical_report: "Technical Safety Report",
-    };
-    return map[type] || type;
+    return getCanonicalRequestTypeDisplayName({ requestType: type }, t);
   };
 
   // Determine if queue is engineering
@@ -118,7 +115,7 @@ export default function EngineeringWorkspacePage() {
       console.error("Failed to persist quotation transition", e);
     }
     
-    setSuccessMessage("Request successfully approved and transitioned to Quotation phase.");
+    setSuccessMessage(t("requests:engineeringWorkspace.successTransition"));
     setTimeout(() => setSuccessMessage(""), 5000);
   };
 
@@ -193,49 +190,51 @@ export default function EngineeringWorkspacePage() {
           <Card className="border-border bg-card">
             <CardHeader className="flex flex-row items-center justify-between pb-3">
               <div>
-                <CardTitle className="text-base font-bold text-foreground">Request Summary</CardTitle>
+                <CardTitle className="text-base font-bold text-foreground">{t("requests:quotations.details.requestSummary")}</CardTitle>
                 <CardDescription className="text-muted-foreground">{getRequestTypeLabel(request.requestType)}</CardDescription>
               </div>
-              <div className="flex gap-1.5">
+              <div className="flex gap-1.5 font-sans">
                 <Badge variant={request.assignedQueue === "HIGH_HAZARD" ? "destructive" : "secondary"}>
-                  {request.currentStage}
+                  {getWorkflowStageDisplayName(request.currentStage, t)}
                 </Badge>
                 <Badge variant="outline" className="capitalize">
-                  {request.classification.replace("_", " ")}
+                  {getReviewPathDisplayName(request, t)}
                 </Badge>
               </div>
             </CardHeader>
-            <CardContent className="grid grid-cols-2 gap-4 text-xs">
-              <div className="space-y-1.5">
-                <span className="text-muted-foreground block">Client Name</span>
-                <span className="font-semibold text-foreground">{request.clientName}</span>
-              </div>
-              <div className="space-y-1.5">
-                <span className="text-muted-foreground block">Facility Name</span>
-                <span className="font-semibold text-foreground">{request.facilityName}</span>
-              </div>
-              <div className="space-y-1.5">
-                <span className="text-muted-foreground block">Activity & ISIC Code</span>
-                <span className="font-semibold text-foreground">{request.activityName} ({request.isicCode})</span>
-              </div>
-              <div className="space-y-1.5">
-                <span className="text-muted-foreground block">Area / Dimensions</span>
-                <span className="font-semibold text-foreground">{request.area} m²</span>
-              </div>
-              <div className="space-y-1.5 col-span-2 border-t border-border pt-2.5">
-                <span className="text-muted-foreground block">Location Address</span>
-                <span className="font-semibold text-foreground flex items-center gap-1">
-                  <MapPin className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                  {request.city}, {request.district} - {request.addressDescription}
-                </span>
-              </div>
-              <div className="space-y-1.5 border-t border-border pt-2.5">
-                <span className="text-muted-foreground block">Representative</span>
-                <span className="font-semibold text-foreground">{request.contactName}</span>
-              </div>
-              <div className="space-y-1.5 border-t border-border pt-2.5">
-                <span className="text-muted-foreground block">Contact Phone</span>
-                <span className="font-semibold text-foreground">{request.contactPhone}</span>
+            <CardContent className="space-y-3 pt-3"> 
+              <div className="grid grid-cols-2 gap-4 text-xs">
+                <div className="space-y-1.5">
+                  <span className="text-muted-foreground block">{t("requests:quotations.builder.fieldClientName")}</span>
+                  <span className="font-semibold text-foreground">{request.clientName}</span>
+                </div>
+                <div className="space-y-1.5">
+                  <span className="text-muted-foreground block">{t("requests:quotations.builder.fieldFacilityName")}</span>
+                  <span className="font-semibold text-foreground">{request.facilityName}</span>
+                </div>
+                <div className="space-y-1.5">
+                  <span className="text-muted-foreground block">{t("dashboard:safety_activity_isic")}</span>
+                  <span className="font-semibold text-foreground">{request.activityName} ({request.isicCode})</span>
+                </div>
+                <div className="space-y-1.5">
+                  <span className="text-muted-foreground block">{t("requests:list.fields.area")}</span>
+                  <span className="font-semibold text-foreground">{request.area} {t("requests:wizard.areaUnit")}</span>
+                </div>
+                <div className="space-y-1.5 col-span-2 border-t border-border pt-2.5">
+                  <span className="text-muted-foreground block">{t("dashboard:location_address")}</span>
+                  <span className="font-semibold text-foreground flex items-center gap-1">
+                    <MapPin className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                    {request.city}, {request.district} - {request.addressDescription}
+                  </span>
+                </div>
+                <div className="space-y-1.5 border-t border-border pt-2.5">
+                  <span className="text-muted-foreground block">{t("dashboard:contact_representative")}</span>
+                  <span className="font-semibold text-foreground">{request.contactName}</span>
+                </div>
+                <div className="space-y-1.5 border-t border-border pt-2.5">
+                  <span className="text-muted-foreground block">{t("requests:wizard.facilityInfo.contactPhone")}</span>
+                  <span className="font-semibold text-foreground">{request.contactPhone}</span>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -243,25 +242,25 @@ export default function EngineeringWorkspacePage() {
           {/* Classification Details */}
           <Card className="border-border bg-card">
             <CardHeader>
-              <CardTitle className="text-sm font-bold text-foreground">Classification & Routing Matrix</CardTitle>
+              <CardTitle className="text-sm font-bold text-foreground">{t("requests:engineeringWorkspace.classificationRoutingMatrix")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3 text-xs">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <span className="text-muted-foreground block mb-1">Workflow Routing Queue</span>
+                  <span className="text-muted-foreground block mb-1">{t("requests:engineeringWorkspace.workflowRoutingQueue")}</span>
                   <Badge variant={request.assignedQueue === "HIGH_HAZARD" ? "destructive" : "default"}>
                     {getQueueDisplayName(request.assignedQueue, t)}
                   </Badge>
                 </div>
                 <div>
-                  <span className="text-muted-foreground block mb-1">Classification Pathway</span>
+                  <span className="text-muted-foreground block mb-1">{t("requests:engineeringWorkspace.classificationPathway")}</span>
                   <span className="font-bold text-foreground capitalize">
                     {getClassificationDisplayName(request.classification, t)}
                   </span>
                 </div>
               </div>
               <div className="pt-2 border-t border-border">
-                <span className="text-muted-foreground block mb-1">Classification Logic Explanation</span>
+                <span className="text-muted-foreground block mb-1">{t("requests:engineeringWorkspace.classificationLogicExplanation")}</span>
                 <p className="text-xs text-foreground leading-relaxed bg-secondary/25 p-2.5 rounded-lg border border-border">
                   {getClassificationReason(request, t)}
                 </p>
@@ -272,25 +271,25 @@ export default function EngineeringWorkspacePage() {
           {/* Document Checklist */}
           <Card className="border-border bg-card">
             <CardHeader>
-              <CardTitle className="text-sm font-bold text-foreground">Compliance Attachments</CardTitle>
+              <CardTitle className="text-sm font-bold text-foreground">{t("requests:engineeringWorkspace.complianceAttachments")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 text-xs">
               {request.documents.map((doc, idx) => (
                 <div key={idx} className="flex items-center justify-between p-2.5 border border-border bg-secondary/10 rounded-lg">
                   <div className="space-y-0.5">
                     <span className="font-semibold text-foreground block">{doc.name}</span>
-                    <span className="text-[10px] text-muted-foreground">Formats: {doc.type.toUpperCase()}</span>
+                    <span className="text-[10px] text-muted-foreground">{t("common:fileFormats")}: {doc.type.toUpperCase()}</span>
                   </div>
                   <div className="flex items-center gap-3">
                     {doc.uploaded ? (
                       <div className="text-end">
-                        <span className="text-emerald-500 font-bold block text-[10px]">✓ Loaded</span>
+                        <span className="text-emerald-500 font-bold block text-[10px]">✓ {t("dashboard:uploaded_label")}</span>
                         <span className="text-[9px] text-muted-foreground font-mono truncate max-w-[140px] block">
                           {doc.fileName}
                         </span>
                       </div>
                     ) : (
-                      <span className="text-amber-500 font-medium">Pending</span>
+                      <span className="text-amber-500 font-medium">{t("requests:wizard.uploads.pending")}</span>
                     )}
 
                     <div className="flex gap-1">
@@ -300,17 +299,17 @@ export default function EngineeringWorkspacePage() {
                             variant="outline"
                             size="sm"
                             className="h-8 px-2.5 text-xs text-muted-foreground"
-                            onClick={() => alert(`Mock View document: ${doc.fileName}`)}
+                            onClick={() => alert(`${t("requests:details.simulatedView").replace("{{fileName}}", doc.fileName || "")}`)}
                           >
-                            View
+                            {t("common:view")}
                           </Button>
                           <Button
                             variant="outline"
                             size="sm"
                             className="h-8 px-2.5 text-xs text-muted-foreground"
-                            onClick={() => alert(`Mock Download document: ${doc.fileName}`)}
+                            onClick={() => alert(`${t("requests:details.simulatedDownload").replace("{{fileName}}", doc.fileName || "")}`)}
                           >
-                            Download
+                            {t("requests:engineeringWorkspace.download") || "Download"}
                           </Button>
                         </>
                       )}
@@ -343,9 +342,9 @@ export default function EngineeringWorkspacePage() {
                     variant="outline"
                     size="sm"
                     className="w-full text-xs"
-                    onClick={() => alert(`Launching mock CAD design file viewer for: ${blueprintDoc.fileName}`)}
+                    onClick={() => alert(`${t("requests:engineeringWorkspace.alertCADViewerLaunch").replace("{{fileName}}", blueprintDoc.fileName || "")}`)}
                   >
-                    Launch Markup Viewer
+                    {t("requests:engineeringWorkspace.launchCAD")}
                   </Button>
                 </div>
               ) : (
@@ -360,8 +359,8 @@ export default function EngineeringWorkspacePage() {
           {/* Internal notes */}
           <Card className="border-border bg-card">
             <CardHeader>
-              <CardTitle className="text-sm font-bold text-foreground">Review Workspace Notes</CardTitle>
-              <CardDescription>Internal safety observations</CardDescription>
+              <CardTitle className="text-sm font-bold text-foreground">{t("requests:engineeringWorkspace.reviewNotesTitle")}</CardTitle>
+              <CardDescription>{t("requests:engineeringWorkspace.reviewNotesDesc")}</CardDescription>
             </CardHeader>
             <CardContent>
               <textarea
@@ -376,7 +375,7 @@ export default function EngineeringWorkspacePage() {
           {/* Decision actions panel */}
           <Card className="border-border bg-card">
             <CardHeader>
-              <CardTitle className="text-sm font-bold text-foreground">Review Actions & Decisions</CardTitle>
+              <CardTitle className="text-sm font-bold text-foreground">{t("requests:engineeringWorkspace.reviewActionsTitle")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2.5">
               <Button
@@ -417,7 +416,7 @@ export default function EngineeringWorkspacePage() {
           <Card className="max-w-md w-full border-border bg-card shadow-2xl">
             <CardHeader>
               <CardTitle className="text-sm font-bold">{t("requests:engineeringWorkspace.decisionReturn")}</CardTitle>
-              <CardDescription>Specify the compliance reason for returning the request</CardDescription>
+              <CardDescription>{t("requests:engineeringWorkspace.returnDialogDesc")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <textarea
@@ -435,14 +434,14 @@ export default function EngineeringWorkspacePage() {
                     setReturnReason("");
                   }}
                 >
-                  Cancel
+                  {t("requests:engineeringWorkspace.cancel")}
                 </Button>
                 <Button
                   size="sm"
                   className="bg-rose-600 text-white hover:bg-rose-600/90"
                   onClick={handleReturnToClient}
                 >
-                  Return Request
+                  {t("requests:engineeringWorkspace.returnRequest")}
                 </Button>
               </div>
             </CardContent>

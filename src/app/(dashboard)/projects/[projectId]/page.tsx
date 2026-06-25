@@ -54,7 +54,7 @@ function LinkedRequestSnapshotCard({ request, t }: { request: LicensingRequest; 
       </CardHeader>
       <CardContent className="text-xs space-y-3 pt-3"> 
         <div className="space-y-1">
-          <span className="text-[10px] text-muted-foreground block uppercase">Request ID</span>
+          <span className="text-[10px] text-muted-foreground block uppercase">{t("projects:details.jobNumber")}</span>
           <span className="font-mono font-bold text-foreground">{request.jobNumber}</span>
         </div>
         <div className="space-y-1">
@@ -200,7 +200,7 @@ export default function ProjectDetailsPage() {
       if (updatedRequest) {
         setRequest(updatedRequest);
       }
-      alert("Project execution started and request transitioned to field execution!");
+      alert(t("projects:details.alertExecutionStarted"));
       loadData();
     } catch (err) {
       console.error(err);
@@ -222,7 +222,7 @@ export default function ProjectDetailsPage() {
       if (updatedRequest) {
         setRequest(updatedRequest);
       }
-      alert("Project execution completed. Awaiting final inspection!");
+      alert(t("projects:details.alertExecutionCompleted"));
       loadData();
     } catch (err) {
       console.error(err);
@@ -392,9 +392,9 @@ export default function ProjectDetailsPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="text-xs text-center py-6 border border-dashed border-border rounded-lg m-4 space-y-2">
-                  <Camera className="h-6 w-6 text-muted-foreground mx-auto" />
-                  <p className="text-[10px] text-muted-foreground">Upload on-site pictures for engineering validation.</p>
-                  <Button variant="outline" size="sm" className="h-7 text-[10px]">Upload Files</Button>
+                   <Camera className="h-6 w-6 text-muted-foreground mx-auto" />
+                  <p className="text-[10px] text-muted-foreground">{t("projects:clientView.uploadDesc")}</p>
+                  <Button variant="outline" size="sm" className="h-7 text-[10px]">{t("projects:clientView.uploadBtn")}</Button>
                 </CardContent>
               </Card>
 
@@ -406,8 +406,8 @@ export default function ProjectDetailsPage() {
                 </CardHeader>
                 <CardContent className="text-xs text-center py-6 border border-dashed border-border rounded-lg m-4 space-y-2">
                   <FileText className="h-6 w-6 text-muted-foreground mx-auto" />
-                  <p className="text-[10px] text-muted-foreground">Download safety license papers once approved.</p>
-                  <Button variant="outline" size="sm" className="h-7 text-[10px]" disabled>No documents available</Button>
+                  <p className="text-[10px] text-muted-foreground">{t("projects:clientView.downloadDesc")}</p>
+                  <Button variant="outline" size="sm" className="h-7 text-[10px]" disabled>{t("projects:clientView.noDocs")}</Button>
                 </CardContent>
               </Card>
             </div>
@@ -480,7 +480,7 @@ export default function ProjectDetailsPage() {
                           type="text"
                           value={inspector}
                           onChange={(e) => setInspector(e.target.value)}
-                          placeholder="e.g. Eng. Ahmad Salem"
+                          placeholder={t("projects:kickoff.inspectorPlaceholder")}
                           className="w-full bg-secondary/50 border border-border rounded p-2 text-foreground focus:outline-none focus:ring-1 focus:ring-indigo-500"
                         />
                       </div>
@@ -499,7 +499,7 @@ export default function ProjectDetailsPage() {
                         rows={2}
                         value={notes}
                         onChange={(e) => setNotes(e.target.value)}
-                        placeholder="Provide execution guidelines, hazard warnings, or initial setup notes..."
+                        placeholder={t("projects:kickoff.notesPlaceholder")}
                         className="w-full bg-secondary/50 border border-border rounded p-2 text-foreground focus:outline-none focus:ring-1 focus:ring-indigo-500"
                       />
                     </div>
@@ -513,7 +513,7 @@ export default function ProjectDetailsPage() {
                           className="rounded border-border text-indigo-600 focus:ring-indigo-500 h-4 w-4"
                         />
                         <span className="font-semibold text-foreground">
-                          {t("projects:kickoff.approved") || "Approve project kickoff"}
+                          {t("projects:kickoff.approveCheckbox")}
                         </span>
                       </label>
                       <Button 
@@ -678,24 +678,24 @@ export default function ProjectDetailsPage() {
                     <div className="divide-y divide-border">
                       <div className="py-2.5 flex justify-between items-center">
                         <div>
-                          <span className="font-bold block text-foreground">Visit #1: Initial Pressure Valve Audit</span>
-                          <span className="text-[10px] text-muted-foreground">Scheduled: 2026-07-10</span>
+                          <span className="font-bold block text-foreground">{t("projects:maintenance.visits.visit1.title")}</span>
+                          <span className="text-[10px] text-muted-foreground">{t("projects:maintenance.visits.scheduledDate").replace("{{date}}", "2026-07-10")}</span>
                         </div>
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-500">Scheduled</span>
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-500">{t("projects:maintenance.status.scheduled")}</span>
                       </div>
                       <div className="py-2.5 flex justify-between items-center">
                         <div>
-                          <span className="font-bold block text-foreground">Visit #2: Smoke Alarm Diagnostics</span>
-                          <span className="text-[10px] text-muted-foreground">Scheduled: 2026-08-15</span>
+                          <span className="font-bold block text-foreground">{t("projects:maintenance.visits.visit2.title")}</span>
+                          <span className="text-[10px] text-muted-foreground">{t("projects:maintenance.visits.scheduledDate").replace("{{date}}", "2026-08-15")}</span>
                         </div>
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-500">Scheduled</span>
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-500">{t("projects:maintenance.status.scheduled")}</span>
                       </div>
                       <div className="py-2.5 flex justify-between items-center">
                         <div>
-                          <span className="font-bold block text-foreground">Visit #3: Pump Test & Certification</span>
-                          <span className="text-[10px] text-muted-foreground">Scheduled: 2026-09-20</span>
+                          <span className="font-bold block text-foreground">{t("projects:maintenance.visits.visit3.title")}</span>
+                          <span className="text-[10px] text-muted-foreground">{t("projects:maintenance.visits.scheduledDate").replace("{{date}}", "2026-09-20")}</span>
                         </div>
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-muted text-muted-foreground">Pending</span>
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-muted text-muted-foreground">{t("projects:maintenance.status.pending")}</span>
                       </div>
                     </div>
                   </CardContent>
@@ -715,24 +715,24 @@ export default function ProjectDetailsPage() {
                     <div className="divide-y divide-border">
                       <div className="py-2.5 flex justify-between items-center">
                         <div>
-                          <span className="font-bold block text-foreground">1. Exit Route Signage Visibilities</span>
-                          <span className="text-[10px] text-muted-foreground">Standard checklist guideline audit</span>
+                          <span className="font-bold block text-foreground">{t("projects:compliance.items.exitRouteSignage.title")}</span>
+                          <span className="text-[10px] text-muted-foreground">{t("projects:compliance.items.exitRouteSignage.desc")}</span>
                         </div>
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-500">Pass</span>
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-500">{t("projects:compliance.status.pass")}</span>
                       </div>
                       <div className="py-2.5 flex justify-between items-center">
                         <div>
-                          <span className="font-bold block text-foreground">2. Portable Extinguishers Charge Pressure Check</span>
-                          <span className="text-[10px] text-muted-foreground">Site safety inspection report reference</span>
+                          <span className="font-bold block text-foreground">{t("projects:compliance.items.extinguisherPressure.title")}</span>
+                          <span className="text-[10px] text-muted-foreground">{t("projects:compliance.items.extinguisherPressure.desc")}</span>
                         </div>
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-500">Awaiting Inspection</span>
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-500">{t("projects:compliance.status.awaiting")}</span>
                       </div>
                       <div className="py-2.5 flex justify-between items-center">
                         <div>
-                          <span className="font-bold block text-foreground">3. Emergency Lighting Power Battery Reserves</span>
-                          <span className="text-[10px] text-muted-foreground">Electrical redundancy inspections</span>
+                          <span className="font-bold block text-foreground">{t("projects:compliance.items.emergencyLightingBattery.title")}</span>
+                          <span className="text-[10px] text-muted-foreground">{t("projects:compliance.items.emergencyLightingBattery.desc")}</span>
                         </div>
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-muted text-muted-foreground">Pending</span>
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-muted text-muted-foreground">{t("projects:compliance.status.pending")}</span>
                       </div>
                     </div>
                   </CardContent>
@@ -745,22 +745,22 @@ export default function ProjectDetailsPage() {
                   <CardHeader className="pb-3 border-b border-border">
                     <CardTitle className="text-sm font-bold flex items-center gap-2">
                       <CheckCircle className="h-4 w-4 text-indigo-500" />
-                      {t("projects:completion.title") || "Execution Completion & Readiness"}
+                      {t("projects:completion.title")}
                     </CardTitle>
                     <CardDescription className="text-xs text-muted-foreground">
-                      {t("projects:completion.desc") || "Submit execution completion notes and mark the project ready for final official safety inspection."}
+                      {t("projects:completion.desc")}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="pt-4 space-y-4 text-xs">
                     <div className="space-y-1.5">
                       <label className="font-semibold text-muted-foreground block">
-                        {t("projects:completion.notesLabel") || "Execution Completion Notes"}
+                        {t("projects:completion.notesLabel")}
                       </label>
                       <textarea
                         rows={3}
                         value={completionNotes}
                         onChange={(e) => setCompletionNotes(e.target.value)}
-                        placeholder="Provide details about completed installations, test pressure values, alarms verified, etc..."
+                        placeholder={t("projects:completion.notesPlaceholder")}
                         className="w-full bg-secondary/50 border border-border rounded-lg p-2.5 text-foreground focus:outline-none focus:ring-1 focus:ring-indigo-500 text-xs font-sans"
                       />
                     </div>
@@ -774,7 +774,7 @@ export default function ProjectDetailsPage() {
                           className="rounded border-border text-indigo-600 focus:ring-indigo-500 h-4 w-4"
                         />
                         <span className="font-semibold text-foreground">
-                          {t("projects:completion.readyCheckbox") || "Confirm all execution items are completed and ready for final inspection"}
+                          {t("projects:completion.readyCheckbox")}
                         </span>
                       </label>
                       <Button
@@ -782,7 +782,7 @@ export default function ProjectDetailsPage() {
                         disabled={isProcessing || !completionNotes.trim() || !readyForFinalInspection}
                         className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold"
                       >
-                        {isProcessing ? "Submitting..." : (t("projects:completion.submitBtn") || "Mark Ready for Final Inspection")}
+                        {isProcessing ? t("projects:completion.submitting") : t("projects:completion.submitBtn")}
                       </Button>
                     </div>
                   </CardContent>
@@ -808,11 +808,11 @@ export default function ProjectDetailsPage() {
                       <>
                         <div className="flex justify-between py-1 border-b border-border">
                           <span className="text-muted-foreground">{t("projects:procurement.invoices") || "Procurement Invoices"}</span>
-                          <span className="font-semibold text-foreground">1 Project Invoice</span>
+                          <span className="font-semibold text-foreground">{t("requests:details.invoicesCount").replace("{{count}}", "1")}</span>
                         </div>
                         <div className="flex justify-between py-1">
                           <span className="text-muted-foreground">{t("projects:procurement.pending") || "Pending Items"}</span>
-                          <span className="font-semibold text-foreground">{totalMaterialsCount} items</span>
+                          <span className="font-semibold text-foreground">{t("requests:details.itemsCount").replace("{{count}}", String(totalMaterialsCount))}</span>
                         </div>
                       </>
                     ) : (
@@ -836,11 +836,11 @@ export default function ProjectDetailsPage() {
                       <>
                         <div className="flex justify-between py-1 border-b border-border">
                           <span className="text-muted-foreground">{t("projects:labor.crewSize") || "On-Site Technicians"}</span>
-                          <span className="font-bold text-foreground">{totalLabor} Techs</span>
+                          <span className="font-bold text-foreground">{t("requests:details.techsCount").replace("{{count}}", String(totalLabor))}</span>
                         </div>
                         <div className="flex justify-between py-1 border-b border-border">
                           <span className="text-muted-foreground">{t("projects:labor.fieldStatus") || "Execution Status"}</span>
-                          <span className="font-semibold text-foreground capitalize">{project.status}</span>
+                          <span className="font-semibold text-foreground capitalize">{t(`projects:status.${project.status}`) || project.status}</span>
                         </div>
                       </>
                     ) : (
@@ -851,7 +851,7 @@ export default function ProjectDetailsPage() {
                     <div className="flex flex-col py-1">
                       <span className="text-muted-foreground block mb-1">{t("projects:labor.fieldNotes") || "Daily Operations Log"}</span>
                       <p className="p-2 bg-secondary/25 border border-border rounded text-[10px] text-muted-foreground italic">
-                        {project.workspace?.kickoffNotes || "No notes logged."}
+                        {project.workspace?.kickoffNotes || t("requests:details.noNotes")}
                       </p>
                     </div>
                   </CardContent>
@@ -911,7 +911,7 @@ export default function ProjectDetailsPage() {
                       {isProcessing 
                         ? (t("projects:actions.activating") || "Activating...") 
                         : !project.workspace?.kickoffApproved
-                        ? "Awaiting Kickoff Approval"
+                        ? t("projects:kickoff.awaitingApproval")
                         : (t("projects:actions.startProject") || "Start Project")
                       }
                     </Button>

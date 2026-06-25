@@ -36,5 +36,15 @@
   "status_Lead": "Lead",
   "status_Inactive": "Inactive",
   "status_Prospect": "Prospect",
-  "noRecordsSubMessage": "Try adjusting filters or filing new requests."
+  "noRecordsSubMessage": "Try adjusting filters or filing new requests.",
+  "actions": "Actions",
+  "view": "View",
+  "warning": "Warning",
+  "yes": "Yes",
+  "no": "No",
+  "sar": "SAR",
+  "fileFormats": "Formats",
+  "inProgress": "In progress.",
+  "unauthorized": "Access Denied",
+  "requiredField": "This field is required"
 }

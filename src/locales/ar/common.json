@@ -36,5 +36,15 @@
   "status_Lead": "مهتم",
   "status_Inactive": "غير نشط",
   "status_Prospect": "محتمل",
-  "noRecordsSubMessage": "حاول تعديل الفلاتر أو تقديم طلب جديد."
+  "noRecordsSubMessage": "حاول تعديل الفلاتر أو تقديم طلب جديد.",
+  "actions": "الإجراءات",
+  "view": "عرض",
+  "warning": "تنبيه",
+  "yes": "نعم",
+  "no": "لا",
+  "sar": "ريال",
+  "fileFormats": "الصيغ",
+  "inProgress": "قيد التنفيذ.",
+  "unauthorized": "الوصول مرفوض",
+  "requiredField": "هذا الحقل مطلوب"
 }
