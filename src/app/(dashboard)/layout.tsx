@@ -7,6 +7,8 @@ import { useTranslation } from "@/providers/i18n-provider";
 import { AdminLayout } from "@/shared/layouts/admin-layout";
 import { OperationsLayout } from "@/shared/layouts/operations-layout";
 import { ClientLayout } from "@/shared/layouts/client-layout";
+import { ROLE_NAVIGATION } from "@/constants/navigation";
+
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -35,7 +37,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       "Client": "/",
     };
 
-    const { ROLE_NAVIGATION } = require("@/constants/navigation");
     const navItems = ROLE_NAVIGATION[user.role] || [];
     const allowedPaths = navItems.map((item: any) => item.path);
     const defaultRoute = ROLE_DEFAULT_ROUTE[user.role] || "/";

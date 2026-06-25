@@ -378,5 +378,6 @@
   "details.serviceScopeLabel": "نطاق الخدمة التجاري",
   "commercialServiceLabel.maintenance": "عقد صيانة دوري",
   "commercialServiceLabel.installation": "تركيبات هندسية وامتثال",
-  "commercialServiceLabel.compliance": "متابعة امتثال وتقييم"
+  "commercialServiceLabel.compliance": "متابعة امتثال وتقييم",
+  "timeline.readyForFinalInspection": "جاهز للفحص الختامي"
 }

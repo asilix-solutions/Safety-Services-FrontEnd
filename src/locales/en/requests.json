@@ -378,5 +378,6 @@
   "details.serviceScopeLabel": "Service Scope",
   "commercialServiceLabel.maintenance": "Maintenance Contract",
   "commercialServiceLabel.installation": "Installation Compliance",
-  "commercialServiceLabel.compliance": "Compliance Follow-up"
+  "commercialServiceLabel.compliance": "Compliance Follow-up",
+  "timeline.readyForFinalInspection": "Final Inspection Ready"
 }

@@ -33,7 +33,8 @@ import {
   startProjectExecution,
   updateProjectKickoffDetails,
   updateProjectSiloStatus,
-  transitionProjectPhase
+  transitionProjectPhase,
+  completeProjectExecution
 } from "@/domains/projects/workflow";
 import { createDefaultWorkspace, buildProjectWorkspaceTemplate } from "@/domains/projects/storage";
 import { USER_ROLES } from "@/constants/roles";
@@ -65,11 +66,11 @@ function LinkedRequestSnapshotCard({ request, t }: { request: LicensingRequest; 
           <span className="font-semibold text-foreground">{getReviewPathDisplayName(request, t)}</span>
         </div>
         <div className="pt-2 border-t border-border">
-          <Link href={`/requests/${request.jobNumber}`}>
-            <Button type="button" variant="outline" size="sm" className="w-full text-xs gap-1.5 h-8 font-bold">
+          <Button asChild type="button" variant="outline" size="sm" className="w-full text-xs gap-1.5 h-8 font-bold">
+            <Link href={`/requests/${request.jobNumber}`}>
               {t("projects:details.viewRequest") || "View Original Request"}
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       </CardContent>
     </Card>
@@ -96,6 +97,10 @@ export default function ProjectDetailsPage() {
   const [siloLabor, setSiloLabor] = useState<number>(0);
   const [siloMaterials, setSiloMaterials] = useState<number>(0);
   const [siloCost, setSiloCost] = useState<number>(0);
+
+  // Completion form states
+  const [completionNotes, setCompletionNotes] = useState("");
+  const [readyForFinalInspection, setReadyForFinalInspection] = useState(false);
 
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -131,6 +136,10 @@ export default function ProjectDetailsPage() {
         setInspector(foundProject.workspace.assignedInspector || "");
         setNotes(foundProject.workspace.kickoffNotes || "");
         setIsApproved(foundProject.workspace.kickoffApproved || false);
+
+        // Populate completion form
+        setCompletionNotes(foundProject.workspace.executionCompletionNotes || "");
+        setReadyForFinalInspection(foundProject.workspace.readyForFinalInspection || false);
 
         // Fetch parent request
         const mergedRequests = getMergedRequests();
@@ -192,6 +201,28 @@ export default function ProjectDetailsPage() {
         setRequest(updatedRequest);
       }
       alert("Project execution started and request transitioned to field execution!");
+      loadData();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleCompleteExecution = () => {
+    if (isProcessing || !completionNotes.trim() || !readyForFinalInspection) return;
+    setIsProcessing(true);
+    try {
+      const { updatedProject, updatedRequest } = completeProjectExecution({
+        project,
+        request,
+        completionNotes,
+      });
+      setProject(updatedProject);
+      if (updatedRequest) {
+        setRequest(updatedRequest);
+      }
+      alert("Project execution completed. Awaiting final inspection!");
       loadData();
     } catch (err) {
       console.error(err);
@@ -703,6 +734,56 @@ export default function ProjectDetailsPage() {
                         </div>
                         <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-muted text-muted-foreground">Pending</span>
                       </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Execution Completion / Readiness - Operations Only */}
+              {project.executionPhase === "active_execution" && (
+                <Card className="border-indigo-500/35 bg-card">
+                  <CardHeader className="pb-3 border-b border-border">
+                    <CardTitle className="text-sm font-bold flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-indigo-500" />
+                      {t("projects:completion.title") || "Execution Completion & Readiness"}
+                    </CardTitle>
+                    <CardDescription className="text-xs text-muted-foreground">
+                      {t("projects:completion.desc") || "Submit execution completion notes and mark the project ready for final official safety inspection."}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="pt-4 space-y-4 text-xs">
+                    <div className="space-y-1.5">
+                      <label className="font-semibold text-muted-foreground block">
+                        {t("projects:completion.notesLabel") || "Execution Completion Notes"}
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={completionNotes}
+                        onChange={(e) => setCompletionNotes(e.target.value)}
+                        placeholder="Provide details about completed installations, test pressure values, alarms verified, etc..."
+                        className="w-full bg-secondary/50 border border-border rounded-lg p-2.5 text-foreground focus:outline-none focus:ring-1 focus:ring-indigo-500 text-xs font-sans"
+                      />
+                    </div>
+                    
+                    <div className="flex items-center justify-between gap-4 pt-2 flex-wrap">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={readyForFinalInspection}
+                          onChange={(e) => setReadyForFinalInspection(e.target.checked)}
+                          className="rounded border-border text-indigo-600 focus:ring-indigo-500 h-4 w-4"
+                        />
+                        <span className="font-semibold text-foreground">
+                          {t("projects:completion.readyCheckbox") || "Confirm all execution items are completed and ready for final inspection"}
+                        </span>
+                      </label>
+                      <Button
+                        onClick={handleCompleteExecution}
+                        disabled={isProcessing || !completionNotes.trim() || !readyForFinalInspection}
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold"
+                      >
+                        {isProcessing ? "Submitting..." : (t("projects:completion.submitBtn") || "Mark Ready for Final Inspection")}
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>

@@ -57,7 +57,7 @@ export default function ProjectsPage() {
       header: t("projects:status") || "Status",
       accessorKey: "status",
       render: (row) => (
-        <StatusBadge status={row.status} type="project" />
+        <StatusBadge status={row.executionPhase === "ready_for_final_inspection" ? "ready_for_final_inspection" : row.status} type="project" />
       ),
     },
     {

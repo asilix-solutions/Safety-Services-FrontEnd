@@ -175,3 +175,76 @@ export function transitionProjectPhase({
   return updatedProject;
 }
 
+export function completeProjectExecution({
+  project,
+  request,
+  completionNotes,
+}: {
+  project: Project;
+  request: LicensingRequest | null;
+  completionNotes: string;
+}): {
+  updatedProject: Project;
+  updatedRequest: LicensingRequest | null;
+} {
+  const nowStr = new Date().toISOString();
+
+  // 1. Update Project executionPhase, notes and readiness
+  const currentWorkspace = project.workspace || createDefaultWorkspace();
+  const updatedWorkspace = {
+    ...currentWorkspace,
+    executionCompletionNotes: completionNotes,
+    readyForFinalInspection: true,
+  };
+
+  const updatedProject: Project = {
+    ...project,
+    executionPhase: "ready_for_final_inspection",
+    workspace: updatedWorkspace,
+    updatedAt: nowStr,
+  };
+  createOrUpdateProject(updatedProject);
+
+  // 2. Transition Linked Request Stage to FINAL_INSPECTION and add timeline log
+  let updatedRequest: LicensingRequest | null = null;
+  if (request) {
+    const updatedTimeline = [...request.timeline];
+    updatedTimeline.push({
+      status: "ready_for_final_inspection",
+      comment: `Project execution completed. Ready for final inspection. Notes: ${completionNotes}`,
+      date: nowStr,
+    });
+
+    updatedRequest = {
+      ...request,
+      currentStage: "FINAL_INSPECTION" as WorkflowStage,
+      updatedAt: nowStr,
+      timeline: updatedTimeline,
+    };
+    upsertRequest(updatedRequest);
+  }
+
+  return {
+    updatedProject,
+    updatedRequest,
+  };
+}
+
+export function getProjectExecutionPhaseLabel(
+  phase: string | undefined,
+  t: (key: string) => string
+): string {
+  if (!phase) return "";
+  const keyMap: Record<string, string> = {
+    created: "projects:phases.created",
+    kickoff_ready: "projects:phases.kickoff_ready",
+    active_execution: "projects:phases.active_execution",
+    ready_for_final_inspection: "projects:phases.ready_for_final_inspection",
+    completed: "projects:phases.completed",
+  };
+  const key = keyMap[phase];
+  return key ? t(key) : phase.replace(/_/g, " ");
+}
+
+
+

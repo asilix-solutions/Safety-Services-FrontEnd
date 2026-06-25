@@ -31,6 +31,8 @@ export interface ProjectWorkspaceData {
   assignedInspector?: string;
   kickoffNotes?: string;
   silos: SiloExecutionData[];
+  executionCompletionNotes?: string;
+  readyForFinalInspection?: boolean;
 }
 
 export interface ProjectTask {

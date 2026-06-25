@@ -28,9 +28,14 @@ export function StatusBadge({ status, type, className }: StatusBadgeProps) {
 
   try {
     if (type === "project") {
-      metadata = PROJECT_STATUS_METADATA[status as ProjectStatus] || metadata;
-      const txKey = PROJECT_STATUS_TX[status as ProjectStatus];
-      if (txKey) translatedLabel = t(txKey);
+      if (status === "ready_for_final_inspection") {
+        metadata = { label: "Awaiting Final Inspection", badgeVariant: "warning" };
+        translatedLabel = t("projects:phases.ready_for_final_inspection");
+      } else {
+        metadata = PROJECT_STATUS_METADATA[status as ProjectStatus] || metadata;
+        const txKey = PROJECT_STATUS_TX[status as ProjectStatus];
+        if (txKey) translatedLabel = t(txKey);
+      }
     } else if (type === "license") {
       metadata = LICENSE_STATUS_METADATA[status as LicenseStatus] || metadata;
       const txKey = LICENSE_STATUS_TX[status as LicenseStatus];

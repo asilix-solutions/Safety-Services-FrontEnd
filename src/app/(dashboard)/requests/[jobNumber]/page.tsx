@@ -30,6 +30,7 @@ import { confirmMockPaymentAndInitializeProject } from "@/domains/payments/workf
 import { Project } from "@/types/project";
 import { getProjects } from "@/domains/projects/storage";
 import { USER_ROLES } from "@/constants/roles";
+import { getProjectExecutionPhaseLabel } from "@/domains/projects/workflow";
 
 export default function RequestDetailsPage() {
   const { user } = useAuth();
@@ -546,7 +547,7 @@ export default function RequestDetailsPage() {
                     <div className="space-y-1">
                       <span className="text-[9px] text-muted-foreground block uppercase">Execution Phase</span>
                       <span className="font-bold text-indigo-600 dark:text-indigo-400 capitalize">
-                        {linkedProject.executionPhase?.replace("_", " ") || "Created"}
+                        {getProjectExecutionPhaseLabel(linkedProject.executionPhase, t) || t("projects:phases.created")}
                       </span>
                     </div>
                     <div className="space-y-1">
@@ -620,7 +621,12 @@ export default function RequestDetailsPage() {
                     <div className="absolute -start-[21px] mt-1 h-2.5 w-2.5 rounded-full bg-indigo-600 ring-4 ring-background" />
                     <div className="space-y-1 text-xs">
                       <div className="flex items-center justify-between">
-                        <span className="font-bold text-foreground capitalize">{event.status.replace("_", " ")}</span>
+                        <span className="font-bold text-foreground capitalize">
+                          {event.status === "ready_for_final_inspection"
+                            ? (t("requests:timeline.readyForFinalInspection") || "Final Inspection Ready")
+                            : event.status.replace("_", " ")
+                          }
+                        </span>
                         <span className="text-[10px] text-muted-foreground">{new Date(event.date).toLocaleDateString()}</span>
                       </div>
                       <p className="text-[11px] text-muted-foreground">{event.comment}</p>
