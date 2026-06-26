@@ -138,13 +138,13 @@ export default function ProjectDetailsPage() {
         setProject(foundProject);
 
         // Populate kickoff form
-        setInspector(foundProject.workspace.assignedInspector || "");
-        setNotes(foundProject.workspace.kickoffNotes || "");
-        setIsApproved(foundProject.workspace.kickoffApproved || false);
+        setInspector(foundProject.workspace.kickoff.assignedInspector || "");
+        setNotes(foundProject.workspace.kickoff.notes || "");
+        setIsApproved(foundProject.workspace.kickoff.approved || false);
 
         // Populate completion form
-        setCompletionNotes(foundProject.workspace.executionCompletionNotes || "");
-        setReadyForFinalInspection(foundProject.workspace.readyForFinalInspection || false);
+        setCompletionNotes(foundProject.workspace.completion.notes || "");
+        setReadyForFinalInspection(foundProject.workspace.completion.readyForFinalInspection || false);
 
         // Fetch parent request
         const mergedRequests = getMergedRequests();
@@ -275,7 +275,7 @@ export default function ProjectDetailsPage() {
   const isClient = isClientRole(user.role);
   const isOperationalRole = !isClient && (user.role === "Operations Officer" || user.role === "Consulting Engineer" || user.role === "Super Admin");
 
-  const silos = project.workspace?.silos || [];
+  const silos = project.workspace?.execution?.silos || [];
   const totalLabor = silos.reduce((sum, s) => sum + s.laborCount, 0);
   const totalMaterialsCost = silos.reduce((sum, s) => sum + s.costSAR, 0);
   const totalMaterialsCount = silos.reduce((sum, s) => sum + s.materialsCount, 0);
@@ -870,7 +870,7 @@ export default function ProjectDetailsPage() {
                     <div className="flex flex-col py-1">
                       <span className="text-muted-foreground block mb-1">{t("projects:labor.fieldNotes") || "Daily Operations Log"}</span>
                       <p className="p-2 bg-secondary/25 border border-border rounded text-[10px] text-muted-foreground italic">
-                        {project.workspace?.kickoff?.notes || (project.workspace as any)?.kickoffNotes || t("requests:details.noNotes")}
+                        {project.workspace?.kickoff?.notes || t("requests:details.noNotes")}
                       </p>
                     </div>
                   </CardContent>
@@ -923,13 +923,13 @@ export default function ProjectDetailsPage() {
                   <CardContent className="pt-2">
                     <Button
                       onClick={handleStartProject}
-                      disabled={isProcessing || !project.workspace?.kickoffApproved}
+                      disabled={isProcessing || !project.workspace?.kickoff?.approved}
                       className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs gap-1.5 h-9"
                     >
                       <Send className="h-3.5 w-3.5" />
                       {isProcessing 
                         ? (t("projects:actions.activating") || "Activating...") 
-                        : !project.workspace?.kickoffApproved
+                        : !project.workspace?.kickoff?.approved
                         ? t("projects:kickoff.awaitingApproval")
                         : (t("projects:actions.startProject") || "Start Project")
                       }

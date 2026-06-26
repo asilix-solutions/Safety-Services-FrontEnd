@@ -69,6 +69,7 @@ export interface ProjectTask {
 export interface Project {
   id: string;
   tenantId: string;
+  jobNumber?: string;
   name: string;
   description: string;
   clientName: string;
