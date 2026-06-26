@@ -134,5 +134,16 @@
   "kickoff.inspectorPlaceholder": "e.g. Eng. Ahmad Salem",
   "kickoff.notesPlaceholder": "Provide execution guidelines, hazard warnings, or initial setup notes...",
   "kickoff.awaitingApproval": "Awaiting Kickoff Approval",
-  "kickoff.approveCheckbox": "Approve project kickoff"
+  "kickoff.approveCheckbox": "Approve project kickoff",
+  "inspection.title": "Final Compliance Inspection & Decision",
+  "inspection.desc": "This project has completed active field installation and is awaiting official compliance inspection checks and final sign-off.",
+  "inspection.completionNotes": "Submitted Execution Details",
+  "inspection.engineerNotes": "Consulting Engineer Final Notes",
+  "inspection.notesPlaceholder": "Provide details about approved regulations, verified equipment, or requested fixes...",
+  "inspection.approveBtn": "Approve Final Inspection",
+  "inspection.requestFixesBtn": "Request Fixes / Return to Execution",
+  "inspection.awaitingDecision": "Awaiting Consulting Engineer Decision",
+  "inspection.awaitingDecisionDesc": "Only assigned consulting engineers can log final official compliance audits and make approval decisions.",
+  "inspection.approvedSuccess": "Final inspection approved successfully. Project completed!",
+  "inspection.returnedSuccess": "Project returned to active execution for fixes successfully."
 }

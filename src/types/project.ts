@@ -25,14 +25,35 @@ export interface SiloExecutionData {
   photosCount: number;
 }
 
-export interface ProjectWorkspaceData {
-  kickoffApproved: boolean;
-  downPaymentConfirmed: boolean;
+export interface ProjectKickoffData {
+  approved: boolean;
   assignedInspector?: string;
-  kickoffNotes?: string;
+  notes?: string;
+}
+
+export interface ProjectExecutionData {
   silos: SiloExecutionData[];
-  executionCompletionNotes?: string;
+  downPaymentConfirmed: boolean;
+}
+
+export interface ProjectCompletionData {
+  notes?: string;
   readyForFinalInspection?: boolean;
+  completedAt?: string;
+}
+
+export interface ProjectInspectionData {
+  approved?: boolean;
+  notes?: string;
+  decisionBy?: string;
+  completedAt?: string;
+}
+
+export interface ProjectWorkspaceData {
+  kickoff: ProjectKickoffData;
+  execution: ProjectExecutionData;
+  completion: ProjectCompletionData;
+  inspection?: ProjectInspectionData;
 }
 
 export interface ProjectTask {

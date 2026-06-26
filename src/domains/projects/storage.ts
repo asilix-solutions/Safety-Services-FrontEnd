@@ -1,11 +1,51 @@
 import { Project, ProjectWorkspaceData, ProjectWorkspaceTemplate, SiloExecutionData } from "@/types/project";
 import { LicensingRequest } from "@/domains/requests/types";
 
+export function migrateProjectWorkspace(project: Project): Project {
+  const ws = project.workspace;
+  if (!ws) return project;
+
+  // Detect format: If 'kickoff' is defined as an object, it is in the new format.
+  const isNewFormat = ws && "kickoff" in ws && typeof (ws as any).kickoff === "object";
+  if (isNewFormat) return project;
+
+  const oldWs = ws as any;
+  const migratedWorkspace: ProjectWorkspaceData = {
+    kickoff: {
+      approved: !!oldWs.kickoffApproved,
+      assignedInspector: oldWs.assignedInspector || "",
+      notes: oldWs.kickoffNotes || "",
+    },
+    execution: {
+      silos: oldWs.silos || [],
+      downPaymentConfirmed: !!oldWs.downPaymentConfirmed,
+    },
+    completion: {
+      notes: oldWs.executionCompletionNotes || "",
+      readyForFinalInspection: !!oldWs.readyForFinalInspection,
+    },
+    inspection: oldWs.finalInspectionNotes || oldWs.finalInspectionApproved
+      ? {
+          approved: oldWs.finalInspectionApproved,
+          notes: oldWs.finalInspectionNotes,
+          decisionBy: oldWs.finalInspectionDecisionBy,
+          completedAt: oldWs.finalInspectionCompletedAt,
+        }
+      : undefined,
+  };
+
+  return {
+    ...project,
+    workspace: migratedWorkspace,
+  };
+}
+
 export function getProjects(): Project[] {
   if (typeof window === "undefined") return [];
   try {
     const raw = localStorage.getItem("SSLM_PROJECTS");
-    return raw ? JSON.parse(raw) : [];
+    const list: Project[] = raw ? JSON.parse(raw) : [];
+    return list.map(migrateProjectWorkspace);
   } catch (err) {
     console.error("Failed to parse SSLM_PROJECTS from localStorage", err);
     return [];
@@ -113,11 +153,20 @@ export function buildProjectWorkspaceTemplate(
   return {
     template,
     workspace: {
-      kickoffApproved: false,
-      downPaymentConfirmed: true,
-      assignedInspector: "",
-      kickoffNotes: "",
-      silos,
+      kickoff: {
+        approved: false,
+        assignedInspector: "",
+        notes: "",
+      },
+      execution: {
+        silos,
+        downPaymentConfirmed: true,
+      },
+      completion: {
+        notes: "",
+        readyForFinalInspection: false,
+      },
+      inspection: undefined,
     }
   };
 }

@@ -42,6 +42,7 @@ import {
 } from "@/domains/projects/workflow";
 import { createDefaultWorkspace, buildProjectWorkspaceTemplate } from "@/domains/projects/storage";
 import { USER_ROLES } from "@/constants/roles";
+import { FinalInspectionPanel } from "@/features/projects/final-inspection";
 
 // Helper to determine if current role is Client
 const isClientRole = (role?: string) => role === USER_ROLES.CLIENT;
@@ -463,9 +464,23 @@ export default function ProjectDetailsPage() {
           <div className="grid gap-6 lg:grid-cols-3">
             {/* Left/Middle Column */}
             <div className="lg:col-span-2 space-y-6">
-              
-              {/* Kickoff Section */}
-              <Card className="border-border bg-card">
+              {project.executionPhase === "ready_for_final_inspection" ? (
+                <FinalInspectionPanel
+                  project={project}
+                  request={request}
+                  userRole={user.role}
+                  userName={user.name}
+                  onSuccess={(updatedProject, updatedRequest) => {
+                    setProject(updatedProject);
+                    if (updatedRequest) {
+                      setRequest(updatedRequest);
+                    }
+                  }}
+                />
+              ) : (
+                <>
+                  {/* Kickoff Section */}
+                  <Card className="border-border bg-card">
                 <CardHeader className="pb-3 border-b border-border">
                   <CardTitle className="text-sm font-bold flex items-center gap-2">
                     <Settings className="h-4 w-4 text-indigo-500" />
@@ -790,6 +805,8 @@ export default function ProjectDetailsPage() {
                   </CardContent>
                 </Card>
               )}
+                </>
+              )}
 
               {/* Consolidated Operations (Procurement & Labor) Snapshots */}
               <div className="grid gap-6 md:grid-cols-2">
@@ -853,7 +870,7 @@ export default function ProjectDetailsPage() {
                     <div className="flex flex-col py-1">
                       <span className="text-muted-foreground block mb-1">{t("projects:labor.fieldNotes") || "Daily Operations Log"}</span>
                       <p className="p-2 bg-secondary/25 border border-border rounded text-[10px] text-muted-foreground italic">
-                        {project.workspace?.kickoffNotes || t("requests:details.noNotes")}
+                        {project.workspace?.kickoff?.notes || (project.workspace as any)?.kickoffNotes || t("requests:details.noNotes")}
                       </p>
                     </div>
                   </CardContent>

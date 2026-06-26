@@ -134,5 +134,16 @@
   "kickoff.inspectorPlaceholder": "مثال: م. أحمد سالم",
   "kickoff.notesPlaceholder": "اكتب توجيهات التنفيذ، أو تحذيرات المخاطر، أو ملاحظات الإعداد الأولية...",
   "kickoff.awaitingApproval": "بانتظار موافقة بدء التشغيل",
-  "kickoff.approveCheckbox": "اعتماد بدء تشغيل المشروع"
+  "kickoff.approveCheckbox": "اعتماد بدء تشغيل المشروع",
+  "inspection.title": "الفحص النهائي للامتثال واتخاذ القرار",
+  "inspection.desc": "أنهى هذا المشروع أعمال التركيبات والتنفيذ الميداني وهو الآن بانتظار الفحص النهائي للامتثال والاعتماد الرسمي.",
+  "inspection.completionNotes": "تفاصيل التنفيذ المستلمة",
+  "inspection.engineerNotes": "الملاحظات النهائية للمهندس الاستشاري",
+  "inspection.notesPlaceholder": "اكتب ملاحظات التقييم الفني، أو متطلبات التعديلات بالتفصيل للرجوع إليها...",
+  "inspection.approveBtn": "اعتماد الفحص النهائي",
+  "inspection.requestFixesBtn": "طلب تعديلات وإعادة للتنفيذ",
+  "inspection.awaitingDecision": "بانتظار قرار المهندس الاستشاري",
+  "inspection.awaitingDecisionDesc": "يسمح فقط للمهندسين الاستشاريين المكلفين بتدوين تقييم الامتثال النهائي واتخاذ قرارات الاعتماد أو الرفض.",
+  "inspection.approvedSuccess": "تم اعتماد الفحص النهائي بنجاح، ووسم المشروع كمكتمل!",
+  "inspection.returnedSuccess": "تمت إعادة المشروع إلى مرحلة التنفيذ لمعالجة الملاحظات والتعديلات المطلوبة بنجاح."
 }
