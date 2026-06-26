@@ -15,6 +15,8 @@ import { Eye, DollarSign } from "lucide-react";
 import Link from "next/link";
 import { useTranslation, useNamespaceTranslations } from "@/providers/i18n-provider";
 import { Quotation } from "@/domains/quotations/types";
+import { getQuotations } from "@/domains/quotations/workflow";
+import { getMergedRequests } from "@/domains/requests/storage";
 
 type DerivedQuotationStatus =
   | "NOT_STARTED"
@@ -32,52 +34,18 @@ export default function QuotationsQueuePage() {
 
   // Load and merge requests
   useEffect(() => {
-    let localList: LicensingRequest[] = [];
-    let localQuotes: Quotation[] = [];
-    try {
-      const localReqs = localStorage.getItem("SSLM_CLIENT_REQUESTS");
-      if (localReqs) {
-        localList = JSON.parse(localReqs);
-      }
-      const quotes = localStorage.getItem("SSLM_QUOTATIONS");
-      if (quotes) {
-        localQuotes = JSON.parse(quotes);
-      }
-    } catch (err) {
-      console.error("Failed to read local data", err);
-    }
-
-    // Merge logic: localStorage overrides MOCK_REQUESTS for identical jobNumbers
-    const mergedMap = new Map<string, LicensingRequest>();
-    
-    MOCK_REQUESTS.forEach((r) => {
-      mergedMap.set(r.jobNumber, r);
-    });
-
-    localList.forEach((r) => {
-      mergedMap.set(r.jobNumber, r);
-    });
+    const merged = getMergedRequests();
+    const localQuotes = getQuotations();
 
     const quoteStatusMap = new Map<string, DerivedQuotationStatus>();
     localQuotes.forEach((q) => {
       quoteStatusMap.set(q.jobNumber, q.quotationStatus as DerivedQuotationStatus);
     });
 
-    const normalizedList = Array.from(mergedMap.values()).map((r) => {
-      const currentStage = r.currentStage || mapStatusToStage(r.status);
-      const assignedQueue = r.assignedQueue || (
-        r.classification === "high_hazard_review" ? "HIGH_HAZARD" :
-        r.classification === "engineering_project" ? "ENGINEERING" :
-        r.classification === "maintenance_strategy" ? "MAINTENANCE" : 
-        "FAST_TRACK"
-      );
-
+    const normalizedList = merged.map((r) => {
       const derivedStatus = quoteStatusMap.get(r.jobNumber) || "NOT_STARTED";
-
       return {
         ...r,
-        currentStage,
-        assignedQueue,
         derivedStatus
       };
     });

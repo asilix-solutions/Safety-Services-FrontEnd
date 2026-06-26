@@ -13,6 +13,8 @@ import { Input } from "@/shared/ui/input";
 import { Checkbox } from "@/shared/ui/checkbox";
 import { Label } from "@/shared/ui/label";
 import { Quotation, QuotationItem, QuotationStatus } from "@/domains/quotations/types";
+import { getMergedRequests } from "@/domains/requests/storage";
+import { getQuotations, persistQuotation, updateQuotationItems, createQuotationDraft, submitQuotationForApproval } from "@/domains/quotations/workflow";
 import { Plus, Trash2, ArrowLeft, Save, Send, X } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -39,47 +41,20 @@ export default function QuotationBuilderPage() {
   // Load request details and existing quotation if any
   useEffect(() => {
     if (jobNumber) {
-      // Find request
-      let localList: LicensingRequest[] = [];
-      try {
-        const local = localStorage.getItem("SSLM_CLIENT_REQUESTS");
-        if (local) {
-          localList = JSON.parse(local);
-        }
-      } catch (err) {
-        console.error("Failed to read requests", err);
-      }
-
-      const merged = [...localList, ...MOCK_REQUESTS].map((r) => ({
-        ...r,
-        currentStage: r.currentStage || mapStatusToStage(r.status),
-        assignedQueue: r.assignedQueue || (
-          r.classification === "high_hazard_review" ? "HIGH_HAZARD" :
-          r.classification === "engineering_project" ? "ENGINEERING" :
-          r.classification === "maintenance_strategy" ? "MAINTENANCE" : 
-          "FAST_TRACK"
-        )
-      }));
-
+      // Find request using domain function
+      const merged = getMergedRequests();
       const foundRequest = merged.find((r) => r.jobNumber === jobNumber);
       if (foundRequest) {
         setRequest(foundRequest);
       }
 
-      // Find existing quotation
-      try {
-        const localQuotes = localStorage.getItem("SSLM_QUOTATIONS");
-        if (localQuotes) {
-          const quotes: Quotation[] = JSON.parse(localQuotes);
-          const foundQuote = quotes.find((q) => q.jobNumber === jobNumber);
-          if (foundQuote) {
-            setExistingQuotation(foundQuote);
-            setItems(foundQuote.items);
-            setQuotationStatus(foundQuote.quotationStatus);
-          }
-        }
-      } catch (err) {
-        console.error("Failed to read quotations", err);
+      // Find existing quotation using domain storage helper
+      const quotes = getQuotations();
+      const foundQuote = quotes.find((q) => q.jobNumber === jobNumber);
+      if (foundQuote) {
+        setExistingQuotation(foundQuote);
+        setItems(foundQuote.items);
+        setQuotationStatus(foundQuote.quotationStatus);
       }
     }
   }, [jobNumber]);
@@ -179,99 +154,35 @@ export default function QuotationBuilderPage() {
     }
 
     try {
-      const localQuotes = localStorage.getItem("SSLM_QUOTATIONS");
-      let quotes: Quotation[] = localQuotes ? JSON.parse(localQuotes) : [];
-
       const userNameOrId = user.id || user.name;
       const timestamp = new Date().toISOString();
 
-      const updatedQuote: Quotation = {
+      let baseQuote = existingQuotation || createQuotationDraft(jobNumber);
+      baseQuote = {
+        ...baseQuote,
         tenantId: request.tenantId,
-        jobNumber,
-        quotationStatus: status,
-        items,
-        subtotal,
-        vat,
-        grandTotal,
-        createdAt: existingQuotation ? existingQuotation.createdAt : timestamp,
+        createdBy: baseQuote.createdBy || userNameOrId,
+        createdAt: baseQuote.createdAt || timestamp,
+        updatedBy: userNameOrId,
         updatedAt: timestamp,
-        createdBy: existingQuotation ? existingQuotation.createdBy : userNameOrId,
-        updatedBy: userNameOrId
       };
 
-      // Set/preserve submission metadata
+      const updated = updateQuotationItems(baseQuote, items);
+
       if (status === "SUBMITTED_FOR_APPROVAL") {
-        updatedQuote.submittedBy = userNameOrId;
-        updatedQuote.submittedAt = timestamp;
+        const { updatedQuotation, updatedRequest } = submitQuotationForApproval({
+          quotation: updated,
+          request,
+          submittedBy: userNameOrId,
+        });
+        setQuotationStatus("SUBMITTED_FOR_APPROVAL");
+        setExistingQuotation(updatedQuotation);
+        setRequest(updatedRequest);
       } else {
-        // Saving draft: preserve existing submitted details if they were already set previously
-        if (existingQuotation?.submittedAt) {
-          updatedQuote.submittedAt = existingQuotation.submittedAt;
-        }
-        if (existingQuotation?.submittedBy) {
-          updatedQuote.submittedBy = existingQuotation.submittedBy;
-        }
+        persistQuotation(updated);
+        setQuotationStatus("DRAFT");
+        setExistingQuotation(updated);
       }
-
-      console.log("Saving quotation", updatedQuote);
-      console.log("Existing quotations", quotes);
-
-      const idx = quotes.findIndex((q) => q.jobNumber === jobNumber);
-      if (idx !== -1) {
-        quotes[idx] = updatedQuote;
-      } else {
-        quotes.push(updatedQuote);
-      }
-
-      console.log("Persisting SSLM_QUOTATIONS");
-      localStorage.setItem("SSLM_QUOTATIONS", JSON.stringify(quotes));
-      console.log("LocalStorage SSLM_QUOTATIONS value:", localStorage.getItem("SSLM_QUOTATIONS"));
-
-      // Synchronize associated request stage in SSLM_CLIENT_REQUESTS
-      if (status === "SUBMITTED_FOR_APPROVAL") {
-        try {
-          const localReqsStr = localStorage.getItem("SSLM_CLIENT_REQUESTS");
-          const localRequests: LicensingRequest[] = localReqsStr ? JSON.parse(localReqsStr) : [];
-          
-          const requestIdx = localRequests.findIndex(r => r.jobNumber === jobNumber);
-          const approvalStageIndex = WORKFLOW_STAGES.indexOf("QUOTATION_APPROVAL");
-          
-          if (requestIdx !== -1) {
-            const currentStageIndex = WORKFLOW_STAGES.indexOf(localRequests[requestIdx].currentStage);
-            if (currentStageIndex < approvalStageIndex) {
-              localRequests[requestIdx].currentStage = "QUOTATION_APPROVAL" as WorkflowStage;
-              localRequests[requestIdx].updatedAt = timestamp;
-            }
-          } else if (request) {
-            const currentStageIndex = WORKFLOW_STAGES.indexOf(request.currentStage);
-            const updatedReq = { ...request };
-            if (currentStageIndex < approvalStageIndex) {
-              updatedReq.currentStage = "QUOTATION_APPROVAL" as WorkflowStage;
-              updatedReq.updatedAt = timestamp;
-            }
-            localRequests.push(updatedReq);
-          }
-          
-          localStorage.setItem("SSLM_CLIENT_REQUESTS", JSON.stringify(localRequests));
-
-          // Sync local request state
-          if (request) {
-            const currentStageIndex = WORKFLOW_STAGES.indexOf(request.currentStage);
-            if (currentStageIndex < approvalStageIndex) {
-              setRequest({
-                ...request,
-                currentStage: "QUOTATION_APPROVAL" as WorkflowStage,
-                updatedAt: timestamp
-              });
-            }
-          }
-        } catch (err) {
-          console.error("Failed to sync request stage to localStorage", err);
-        }
-      }
-
-      setQuotationStatus(status);
-      setExistingQuotation(updatedQuote);
       
       const msg = status === "DRAFT" 
         ? t("requests:quotations.builder.successSave") 

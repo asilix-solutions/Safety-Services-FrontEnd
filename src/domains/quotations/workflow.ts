@@ -24,7 +24,6 @@ export function getQuotationSuggestedItems(
   const pType = (ctx.projectType || "").toLowerCase();
   const tpl = (ctx.workspaceTemplate || "").toLowerCase();
 
-  // Determine if this is a Maintenance path
   const isMaintenance = 
     classif.includes("maintenance") || 
     queue.includes("maintenance") || 
@@ -32,7 +31,6 @@ export function getQuotationSuggestedItems(
     pType === "maintenance" ||
     tpl === "maintenance";
 
-  // Determine if this is an Installation / Engineering path
   const isInstallation = 
     classif.includes("engineering") || 
     queue.includes("engineering") || 
@@ -65,7 +63,6 @@ export function getQuotationSuggestedItems(
     ];
   }
 
-  // Fallback to Compliance presets
   return [
     { id: "sug_c1", label: t("requests:quotations.presets.tech_report"), description: "Technical Report", defaultUnitPrice: 2500, taxable: true },
     { id: "sug_c2", label: t("requests:quotations.presets.compliance_report"), description: "Compliance Report", defaultUnitPrice: 3000, taxable: true },
@@ -73,3 +70,5 @@ export function getQuotationSuggestedItems(
     { id: "sug_c4", label: t("requests:quotations.presets.document_audit"), description: "Document Audit", defaultUnitPrice: 900, taxable: true }
   ];
 }
+
+export * from "./workflow/index";

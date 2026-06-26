@@ -15,6 +15,8 @@ import { Eye, FileCheck } from "lucide-react";
 import Link from "next/link";
 import { useTranslation, useNamespaceTranslations } from "@/providers/i18n-provider";
 import { Quotation } from "@/domains/quotations/types";
+import { getQuotations } from "@/domains/quotations/workflow";
+import { getMergedRequests } from "@/domains/requests/storage";
 
 export default function QuotationApprovalsQueuePage() {
   const { user } = useAuth();
@@ -23,27 +25,13 @@ export default function QuotationApprovalsQueuePage() {
   const [approvals, setApprovals] = useState<(Quotation & { clientName: string; facilityName: string })[]>([]);
 
   useEffect(() => {
-    let localList: LicensingRequest[] = [];
-    let localQuotes: Quotation[] = [];
-
-    try {
-      const localReqs = localStorage.getItem("SSLM_CLIENT_REQUESTS");
-      if (localReqs) {
-        localList = JSON.parse(localReqs);
-      }
-      const quotes = localStorage.getItem("SSLM_QUOTATIONS");
-      if (quotes) {
-        localQuotes = JSON.parse(quotes);
-      }
-    } catch (err) {
-      console.error("Failed to read local data", err);
-    }
-
+    const localQuotes = getQuotations();
+    const merged = getMergedRequests();
+ 
     // Merge requests
     const requestsMap = new Map<string, LicensingRequest>();
-    MOCK_REQUESTS.forEach((r) => requestsMap.set(r.jobNumber, r));
-    localList.forEach((r) => requestsMap.set(r.jobNumber, r));
-
+    merged.forEach((r) => requestsMap.set(r.jobNumber, r));
+ 
     // Map quotations with client metadata and filter for SUBMITTED_FOR_APPROVAL
     const filteredApprovals = localQuotes
       .filter((q) => q.quotationStatus === "SUBMITTED_FOR_APPROVAL")
@@ -55,7 +43,7 @@ export default function QuotationApprovalsQueuePage() {
           facilityName: req ? req.facilityName : t("common:unknown") || "Unknown",
         };
       });
-
+ 
     setApprovals(filteredApprovals);
   }, [t]);
 

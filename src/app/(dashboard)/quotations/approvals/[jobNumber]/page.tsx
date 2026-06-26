@@ -16,6 +16,8 @@ import Link from "next/link";
 import { useTranslation, useNamespaceTranslations } from "@/providers/i18n-provider";
 import { Quotation } from "@/domains/quotations/types";
 import { useRouter, useParams } from "next/navigation";
+import { getQuotations, approveQuotation, rejectQuotation, requestChangesOnQuotation } from "@/domains/quotations/workflow";
+import { getMergedRequests } from "@/domains/requests/storage";
 
 export default function QuotationApprovalDetailsPage() {
   const { user } = useAuth();
@@ -57,31 +59,16 @@ export default function QuotationApprovalDetailsPage() {
   useEffect(() => {
     if (!jobNumber) return;
 
-    let localList: LicensingRequest[] = [];
-    let localQuotes: Quotation[] = [];
-
-    try {
-      const localReqs = localStorage.getItem("SSLM_CLIENT_REQUESTS");
-      if (localReqs) {
-        localList = JSON.parse(localReqs);
-      }
-      const quotes = localStorage.getItem("SSLM_QUOTATIONS");
-      if (quotes) {
-        localQuotes = JSON.parse(quotes);
-      }
-    } catch (err) {
-      console.error("Failed to read local data", err);
-    }
-
-    // Find request
-    const foundReq = localList.find((r) => r.jobNumber === jobNumber) || 
-                     MOCK_REQUESTS.find((r) => r.jobNumber === jobNumber);
+    // Find request using domain function
+    const merged = getMergedRequests();
+    const foundReq = merged.find((r) => r.jobNumber === jobNumber);
     if (foundReq) {
       setRequest(foundReq);
     }
 
-    // Find quotation
-    const foundQuote = localQuotes.find((q) => q.jobNumber === jobNumber);
+    // Find quotation using domain function
+    const quotes = getQuotations();
+    const foundQuote = quotes.find((q) => q.jobNumber === jobNumber);
     if (foundQuote) {
       setQuotation(foundQuote);
     }
@@ -118,129 +105,29 @@ export default function QuotationApprovalDetailsPage() {
       return;
     }
 
-    const timestamp = new Date().toISOString();
     const updaterName = user.name || user.role;
 
-    // Load fresh storage arrays
-    let localQuotes: Quotation[] = [];
-    let localRequests: LicensingRequest[] = [];
-
-    try {
-      const quotesStr = localStorage.getItem("SSLM_QUOTATIONS");
-      if (quotesStr) localQuotes = JSON.parse(quotesStr);
-
-      const reqsStr = localStorage.getItem("SSLM_CLIENT_REQUESTS");
-      if (reqsStr) localRequests = JSON.parse(reqsStr);
-    } catch (err) {
-      console.error(err);
-    }
-
-    // Update Quotation Record
-    const qIndex = localQuotes.findIndex((q) => q.jobNumber === jobNumber);
-    const updatedQuote = { ...quotation };
-
     if (actionType === "APPROVE") {
-      updatedQuote.quotationStatus = "APPROVED";
-      updatedQuote.approvedBy = updaterName;
-      updatedQuote.approvedAt = timestamp;
-      updatedQuote.updatedBy = updaterName;
-      updatedQuote.updatedAt = timestamp;
+      approveQuotation({
+        quotation,
+        request,
+        approvedBy: updaterName,
+      });
     } else if (actionType === "REQUEST_CHANGES") {
-      updatedQuote.quotationStatus = "CHANGES_REQUESTED";
-      updatedQuote.reviewedBy = updaterName;
-      updatedQuote.reviewedAt = timestamp;
-      updatedQuote.reviewComments = inputText;
-      updatedQuote.updatedBy = updaterName;
-      updatedQuote.updatedAt = timestamp;
+      requestChangesOnQuotation({
+        quotation,
+        request,
+        reviewedBy: updaterName,
+        comments: inputText,
+      });
     } else if (actionType === "REJECT") {
-      updatedQuote.quotationStatus = "REJECTED";
-      updatedQuote.rejectedBy = updaterName;
-      updatedQuote.rejectedAt = timestamp;
-      updatedQuote.rejectionReason = inputText;
-      updatedQuote.updatedBy = updaterName;
-      updatedQuote.updatedAt = timestamp;
+      rejectQuotation({
+        quotation,
+        request,
+        rejectedBy: updaterName,
+        reason: inputText,
+      });
     }
-
-    if (qIndex !== -1) {
-      localQuotes[qIndex] = updatedQuote;
-    } else {
-      localQuotes.push(updatedQuote);
-    }
-
-    // Update Request Stage Record
-    const rIndex = localRequests.findIndex((r) => r.jobNumber === jobNumber);
-    let targetRequest = rIndex !== -1 ? localRequests[rIndex] : { ...request };
-
-    const WORKFLOW_STAGES = [
-      "DRAFT",
-      "SUBMITTED",
-      "UNDER_REVIEW",
-      "QUOTATION",
-      "QUOTATION_APPROVAL",
-      "PAYMENT_CONFIRMED",
-      "PROJECT_CREATED",
-      "FIELD_EXECUTION",
-      "FINAL_INSPECTION",
-      "COMPLETED"
-    ];
-
-    if (actionType === "APPROVE") {
-      const currentIdx = WORKFLOW_STAGES.indexOf(targetRequest.currentStage);
-      const targetIdx = WORKFLOW_STAGES.indexOf("PAYMENT_CONFIRMED");
-      if (currentIdx < targetIdx) {
-        targetRequest.currentStage = "PAYMENT_CONFIRMED" as WorkflowStage;
-        targetRequest.updatedAt = timestamp;
-      }
-
-      // Generate invoice
-      try {
-        const invoiceId = `INV-${Math.floor(1000 + Math.random() * 9000)}`;
-        const dueDate = new Date();
-        dueDate.setDate(dueDate.getDate() + 30); // 30 days from now
-
-        const newInvoice = {
-          id: invoiceId,
-          tenantId: targetRequest.tenantId || "default-tenant",
-          jobNumber: targetRequest.jobNumber,
-          quotationJobNumber: targetRequest.jobNumber,
-          subtotal: updatedQuote.subtotal || 0,
-          vatAmount: updatedQuote.vat || 0,
-          grandTotal: updatedQuote.grandTotal || 0,
-          currency: "SAR" as const,
-          status: "unpaid" as const,
-          dueDate: dueDate.toISOString(),
-          issuedAt: timestamp,
-        };
-
-        // Save invoice locally
-        const invoicesStr = localStorage.getItem("SSLM_INVOICES");
-        const invoices = invoicesStr ? JSON.parse(invoicesStr) : [];
-        const invIndex = invoices.findIndex((i: any) => i.jobNumber === targetRequest.jobNumber);
-        if (invIndex !== -1) {
-          invoices[invIndex] = newInvoice;
-        } else {
-          invoices.push(newInvoice);
-        }
-        localStorage.setItem("SSLM_INVOICES", JSON.stringify(invoices));
-      } catch (err) {
-        console.error("Failed to generate or save invoice", err);
-      }
-    } else if (actionType === "REQUEST_CHANGES" || actionType === "REJECT") {
-      if (targetRequest.currentStage === "QUOTATION_APPROVAL") {
-        targetRequest.currentStage = "QUOTATION" as WorkflowStage;
-        targetRequest.updatedAt = timestamp;
-      }
-    }
-
-    if (rIndex !== -1) {
-      localRequests[rIndex] = targetRequest;
-    } else {
-      localRequests.push(targetRequest);
-    }
-
-    // Persist and redirect
-    localStorage.setItem("SSLM_QUOTATIONS", JSON.stringify(localQuotes));
-    localStorage.setItem("SSLM_CLIENT_REQUESTS", JSON.stringify(localRequests));
 
     router.push("/quotations/approvals");
   };
