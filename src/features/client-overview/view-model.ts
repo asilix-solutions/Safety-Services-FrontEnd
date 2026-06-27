@@ -3,71 +3,27 @@ import { Project } from "@/types/project";
 import { ClientInvoice } from "@/domains/invoices/types";
 import { ClientContract } from "@/domains/contracts/types";
 import { ComplianceCertificate } from "@/domains/certificates/types";
-
-export interface ActivityEvent {
-  id: string;
-  type: "request" | "project" | "contract" | "invoice" | "certificate";
-  titleKey: string;
-  titleFallback: string;
-  date: string;
-  referenceId: string;
-}
-
-export interface ActionItem {
-  id: string;
-  type: "pay_invoice" | "sign_contract" | "fix_request_action";
-  titleKey: string;
-  titleFallback: string;
-  referenceId: string;
-  route: string;
-}
-
-export interface ClientOverviewProject {
-  id: string;
-  name: string;
-  executionPhase: string;
-  displayProgress: number;
-  updatedAt: string;
-}
+import {
+  OverviewWelcomeBtn,
+  OverviewStatItem,
+  OverviewActionItem,
+  OverviewEntityItem,
+  OverviewActivityItem,
+  OverviewQuickAccessItem,
+} from "../dashboard-overview";
 
 export interface ClientOverviewViewModel {
-  welcomeStats: {
-    clientName: string;
-    companyName: string;
-    activeRequestsCount: number;
-    activeProjectsCount: number;
+  welcomeCardProps: {
+    name: string;
+    subtitle: string;
+    stats: OverviewStatItem[];
+    actions: OverviewWelcomeBtn[];
   };
-  recentRequests: ClientRequest[];
-  activeProjects: ClientOverviewProject[];
-  actionItems: ActionItem[];
-  recentActivity: ActivityEvent[];
-  quickAccessCounts: {
-    requests: number;
-    projects: number;
-    invoices: number;
-    contracts: number;
-    certificates: number;
-  };
-}
-
-export function formatDate(dateStr?: string | null): string {
-  if (!dateStr) return "—";
-  try {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  } catch {
-    return String(dateStr);
-  }
-}
-
-export function getProgressColor(progress: number): string {
-  if (progress >= 80) return "bg-emerald-500";
-  if (progress >= 40) return "bg-sky-500";
-  return "bg-amber-500";
+  recentRequests: OverviewEntityItem[];
+  activeProjects: OverviewEntityItem[];
+  actionItems: OverviewActionItem[];
+  recentActivity: OverviewActivityItem[];
+  quickAccessLinks: OverviewQuickAccessItem[];
 }
 
 export function prepareClientOverviewViewModel(
@@ -93,8 +49,40 @@ export function prepareClientOverviewViewModel(
   const activeRequests = clientRequests.filter((r) => r.status !== "Approved" && r.status !== "Rejected");
   const activeProjects = clientProjects.filter((p) => p.status === "in_progress" || p.status === "active");
 
+  const welcomeStats: OverviewStatItem[] = [
+    {
+      labelKey: "overview_active_requests",
+      labelFallback: "Active Requests",
+      count: activeRequests.length,
+      badgeVariant: "success",
+    },
+    {
+      labelKey: "overview_active_projects",
+      labelFallback: "Active Projects",
+      count: activeProjects.length,
+      badgeVariant: "info",
+    },
+  ];
+
+  const welcomeActions: OverviewWelcomeBtn[] = [
+    {
+      labelKey: "overview_new_request",
+      labelFallback: "New Request",
+      href: "/requests/new",
+      iconName: "plus",
+      variant: "default",
+    },
+    {
+      labelKey: "overview_track_requests",
+      labelFallback: "Track Requests",
+      href: "/requests",
+      iconName: "search",
+      variant: "outline",
+    },
+  ];
+
   // Action Items
-  const actionItems: ActionItem[] = [];
+  const actionItems: OverviewActionItem[] = [];
 
   // 1. Unpaid Invoices
   clientInvoices
@@ -102,11 +90,13 @@ export function prepareClientOverviewViewModel(
     .forEach((inv) => {
       actionItems.push({
         id: `invoice-action-${inv.id}`,
-        type: "pay_invoice",
         titleKey: "overview_action_pay",
         titleFallback: "Pay Invoice",
         referenceId: inv.id,
-        route: "/invoices",
+        href: "/invoices",
+        actionLabelKey: "view",
+        actionLabelFallback: "View",
+        type: "pay_invoice",
       });
     });
 
@@ -116,45 +106,56 @@ export function prepareClientOverviewViewModel(
     .forEach((c) => {
       actionItems.push({
         id: `contract-action-${c.id}`,
-        type: "sign_contract",
         titleKey: "overview_action_sign",
         titleFallback: "Sign Contract",
         referenceId: c.id,
-        route: "/contracts",
+        href: "/contracts",
+        actionLabelKey: "view",
+        actionLabelFallback: "View",
+        type: "sign_contract",
       });
     });
 
   // Recent Requests (max 5)
-  const sortedRequests = [...clientRequests]
-    .sort((a, b) => new Date(b.updatedAt || b.createdAt).getTime() - new Date(a.updatedAt || a.createdAt).getTime())
-    .slice(0, 5);
-
-  // Active Projects (max 5) - shaped to ClientOverviewProject safely
-  const sortedProjects = [...activeProjects]
+  const recentRequests = [...clientRequests]
     .sort((a, b) => new Date(b.updatedAt || b.createdAt).getTime() - new Date(a.updatedAt || a.createdAt).getTime())
     .slice(0, 5)
-    .map((p): ClientOverviewProject => {
-      let displayProgress = 30; // Default kickoff
-      if (p.executionPhase === "completed") {
-        displayProgress = 100;
-      } else if (p.executionPhase === "ready_for_final_inspection") {
-        displayProgress = 85;
-      } else if (p.executionPhase === "active_execution") {
-        displayProgress = 60;
-      } else if (p.executionPhase === "kickoff_ready") {
-        displayProgress = 20;
+    .map((req): OverviewEntityItem => ({
+      id: req.id,
+      title: req.jobNumber,
+      subtitle: req.buildingType || req.inspectionType || "—",
+      statusKey: `status_${req.status}`,
+      statusFallback: req.status,
+      metaText: new Date(req.updatedAt || req.createdAt).toLocaleDateString(),
+      href: `/requests/${req.jobNumber}`,
+    }));
+
+  // Active Projects (max 5)
+  const recentProjects = [...activeProjects]
+    .sort((a, b) => new Date(b.updatedAt || b.createdAt).getTime() - new Date(a.updatedAt || a.createdAt).getTime())
+    .slice(0, 5)
+    .map((proj): OverviewEntityItem => {
+      let progress = 30;
+      if (proj.executionPhase === "completed") {
+        progress = 100;
+      } else if (proj.executionPhase === "ready_for_final_inspection") {
+        progress = 85;
+      } else if (proj.executionPhase === "active_execution") {
+        progress = 60;
+      } else if (proj.executionPhase === "kickoff_ready") {
+        progress = 20;
       }
       return {
-        id: p.id,
-        name: p.name,
-        executionPhase: p.executionPhase || "created",
-        displayProgress,
-        updatedAt: p.updatedAt || p.createdAt || new Date().toISOString(),
+        id: proj.id,
+        title: proj.name,
+        subtitle: proj.executionPhase,
+        progress,
+        href: `/projects`,
       };
     });
 
   // Recent Activity Feed (max 10)
-  const activities: ActivityEvent[] = [];
+  const activities: OverviewActivityItem[] = [];
 
   clientRequests.forEach((req) => {
     activities.push({
@@ -162,8 +163,9 @@ export function prepareClientOverviewViewModel(
       type: "request",
       titleKey: `request_status_${req.status}`,
       titleFallback: `Request ${req.jobNumber} status: ${req.status}`,
-      date: req.updatedAt || req.createdAt,
+      timestamp: req.updatedAt || req.createdAt,
       referenceId: req.jobNumber,
+      href: `/requests/${req.jobNumber}`,
     });
   });
 
@@ -173,8 +175,9 @@ export function prepareClientOverviewViewModel(
       type: "project",
       titleKey: `project_stage_${proj.executionPhase}`,
       titleFallback: `Project ${proj.name} reached phase ${proj.executionPhase}`,
-      date: proj.updatedAt || proj.createdAt || new Date().toISOString(),
+      timestamp: proj.updatedAt || proj.createdAt || new Date().toISOString(),
       referenceId: proj.id,
+      href: `/projects`,
     });
   });
 
@@ -184,8 +187,9 @@ export function prepareClientOverviewViewModel(
       type: "invoice",
       titleKey: `invoice_status_${inv.status}`,
       titleFallback: `Invoice ${inv.id} is ${inv.status}`,
-      date: inv.paidAt || inv.issuedAt,
+      timestamp: inv.paidAt || inv.issuedAt,
       referenceId: inv.id,
+      href: `/invoices`,
     });
   });
 
@@ -195,32 +199,71 @@ export function prepareClientOverviewViewModel(
       type: "certificate",
       titleKey: "certificates_milestone_issued",
       titleFallback: `Compliance Certificate issued for ${cert.id}`,
-      date: cert.issuedAt,
+      timestamp: cert.issuedAt,
       referenceId: cert.id,
+      href: `/certificates`,
     });
   });
 
   const sortedActivities = activities
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
     .slice(0, 10);
 
-  return {
-    welcomeStats: {
-      clientName: user.name,
-      companyName: user.companyName || "SSLM Client Group",
-      activeRequestsCount: activeRequests.length,
-      activeProjectsCount: activeProjects.length,
+  // Quick Access
+  const quickAccessLinks: OverviewQuickAccessItem[] = [
+    {
+      id: "qa-requests",
+      labelKey: "overview_type_request",
+      labelFallback: "Request",
+      count: clientRequests.length,
+      href: "/requests",
+      iconName: "request",
     },
-    recentRequests: sortedRequests,
-    activeProjects: sortedProjects,
+    {
+      id: "qa-projects",
+      labelKey: "overview_type_project",
+      labelFallback: "Project",
+      count: clientProjects.length,
+      href: "/projects",
+      iconName: "project",
+    },
+    {
+      id: "qa-invoices",
+      labelKey: "overview_type_invoice",
+      labelFallback: "Invoice",
+      count: clientInvoices.length,
+      href: "/invoices",
+      iconName: "invoice",
+    },
+    {
+      id: "qa-contracts",
+      labelKey: "overview_type_contract",
+      labelFallback: "Contract",
+      count: clientContracts.length,
+      href: "/contracts",
+      iconName: "contract",
+    },
+    {
+      id: "qa-certificates",
+      labelKey: "overview_type_certificate",
+      labelFallback: "Certificate",
+      count: clientCertificates.length,
+      href: "/certificates",
+      iconName: "certificate",
+    },
+  ];
+
+  return {
+    welcomeCardProps: {
+      name: user.name,
+      subtitle: user.companyName || "SSLM Client Group",
+      stats: welcomeStats,
+      actions: welcomeActions,
+    },
+    recentRequests,
+    activeProjects: recentProjects,
     actionItems,
     recentActivity: sortedActivities,
-    quickAccessCounts: {
-      requests: clientRequests.length,
-      projects: clientProjects.length,
-      invoices: clientInvoices.length,
-      contracts: clientContracts.length,
-      certificates: clientCertificates.length,
-    },
+    quickAccessLinks,
   };
 }

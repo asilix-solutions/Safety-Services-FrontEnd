@@ -208,6 +208,8 @@
   "overview_track_requests": "تتبع الطلبات",
   "overview_actions_required": "الإجراءات المطلوبة",
   "overview_no_actions": "لا توجد إجراءات مطلوبة حالياً.",
+  "overview_no_items": "لا توجد عناصر لعرضها.",
+  "overview_recent_activity": "آخر الأنشطة",
   "overview_recent_requests": "آخر الطلبات",
   "overview_active_projects_section": "المشاريع النشطة",
   "overview_recent_updates": "آخر التحديثات",

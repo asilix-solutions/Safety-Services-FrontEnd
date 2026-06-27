@@ -208,6 +208,8 @@
   "overview_track_requests": "Track Requests",
   "overview_actions_required": "Actions Required",
   "overview_no_actions": "No actions required currently.",
+  "overview_no_items": "No items to display.",
+  "overview_recent_activity": "Recent Activity",
   "overview_recent_requests": "My Recent Requests",
   "overview_active_projects_section": "Active Projects",
   "overview_recent_updates": "Recent Updates",
