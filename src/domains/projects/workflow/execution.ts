@@ -4,6 +4,7 @@ import { createDefaultWorkspace } from "@/domains/projects/storage";
 import { persistProject, persistRequest } from "./helpers/persist";
 import { appendTimelineEvent } from "./helpers/timeline";
 import { synchronizeProjectAndRequest } from "./helpers/sync";
+import { canStartProjectExecution } from "@/domains/workflow-validation";
 
 export function startProjectExecution({
   project,
@@ -15,8 +16,6 @@ export function startProjectExecution({
   updatedProject: Project;
   updatedRequest: LicensingRequest | null;
 } {
-  const nowStr = new Date().toISOString();
-
   // 1. If project is already active, return immediately (Idempotency)
   if (project.status === "active" && project.executionPhase === "active_execution") {
     return {
@@ -24,6 +23,14 @@ export function startProjectExecution({
       updatedRequest: request,
     };
   }
+
+  const validation = canStartProjectExecution(project, request);
+  if (!validation.valid) {
+    throw new Error(validation.reason);
+  }
+
+  const nowStr = new Date().toISOString();
+
 
   let updatedProject = { ...project };
   let updatedRequest = request;

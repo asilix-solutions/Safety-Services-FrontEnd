@@ -145,5 +145,10 @@
   "inspection.awaitingDecision": "بانتظار قرار المهندس الاستشاري",
   "inspection.awaitingDecisionDesc": "يسمح فقط للمهندسين الاستشاريين المكلفين بتدوين تقييم الامتثال النهائي واتخاذ قرارات الاعتماد أو الرفض.",
   "inspection.approvedSuccess": "تم اعتماد الفحص النهائي بنجاح، ووسم المشروع كمكتمل!",
-  "inspection.returnedSuccess": "تمت إعادة المشروع إلى مرحلة التنفيذ لمعالجة الملاحظات والتعديلات المطلوبة بنجاح."
+  "inspection.returnedSuccess": "تمت إعادة المشروع إلى مرحلة التنفيذ لمعالجة الملاحظات والتعديلات المطلوبة بنجاح.",
+  "completed.title": "تم اكتمال المشروع واعتماده",
+  "completed.desc": "تم فحص مشروع الامتثال هذا رسمياً واعتماده.",
+  "inspection.completedAt": "تاريخ الانتهاء والاعتماد",
+  "inspection.decisionBy": "اعتُمد بواسطة",
+  "inspection.notesLabel": "ملاحظات قرار الفحص النهائي"
 }

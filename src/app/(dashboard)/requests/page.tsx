@@ -14,18 +14,26 @@ import Link from "next/link";
 import { useTranslation } from "@/providers/i18n-provider";
 import { getClassificationDisplayName, getRequestStatusDisplayName, getCanonicalRequestTypeDisplayName, getWorkflowStageDisplayName } from "@/domains/requests/workflow";
 import { getMergedRequests } from "@/domains/requests/storage";
+import { getProjects } from "@/domains/projects/storage";
+import { Project } from "@/types/project";
  
 export default function RequestsPage() {
   const { user } = useAuth();
   const { t } = useTranslation();
   const [requests, setRequests] = useState<LicensingRequest[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
  
   // Load from localStorage and merge with mock requests
   useEffect(() => {
     setRequests(getMergedRequests());
+    setProjects(getProjects());
   }, []);
  
   if (!user) return null;
+
+  const projectsByJobNumber = new Map(
+    projects.map((project) => [project.jobNumber, project])
+  );
 
   const getRequestTypeLabel = (type: RequestType) => {
     return getCanonicalRequestTypeDisplayName({ requestType: type }, t);
@@ -180,8 +188,19 @@ export default function RequestsPage() {
         const queue = row.assignedQueue || (row.classification === "high_hazard_review" ? "HIGH_HAZARD" : row.classification === "engineering_project" ? "ENGINEERING" : row.classification === "maintenance_strategy" ? "MAINTENANCE" : "FAST_TRACK");
         const isEngQueue = queue === "ENGINEERING" || queue === "HIGH_HAZARD";
         const isConsultingEngineer = user.role === "Consulting Engineer";
+        const linkedProject = projectsByJobNumber.get(row.jobNumber);
 
         if (isConsultingEngineer && isEngQueue) {
+          if (linkedProject && (row.currentStage === "FINAL_INSPECTION" || row.currentStage === "COMPLETED")) {
+            return (
+              <Link href={`/projects/${linkedProject.id}`}>
+                <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs text-indigo-600 border-indigo-500/20 hover:bg-indigo-500/5 hover:text-indigo-600 font-semibold">
+                  <Eye className="h-3.5 w-3.5" /> {t("requests:details.openWorkspace") || "Open Workspace"}
+                </Button>
+              </Link>
+            );
+          }
+
           return (
             <Link href={`/blueprint-review/${row.jobNumber}`}>
               <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs text-primary border-primary/20 hover:bg-primary/5 hover:text-primary">

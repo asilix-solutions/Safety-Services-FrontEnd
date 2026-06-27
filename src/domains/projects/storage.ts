@@ -2,7 +2,6 @@ import { Project, ProjectWorkspaceData, ProjectWorkspaceTemplate, SiloExecutionD
 import { LicensingRequest } from "@/domains/requests/types";
 
 export function migrateProjectWorkspace(project: Project): Project {
-  // Ensure root-level jobNumber is preserved or derived
   let jobNumber = project.jobNumber;
   if (!jobNumber) {
     const match = project.name.match(/SSLM-\d+-\d+/);
@@ -17,7 +16,6 @@ export function migrateProjectWorkspace(project: Project): Project {
     };
   }
 
-  // Detect format: If 'kickoff' is defined as an object, it is in the new format.
   const isNewFormat = ws && "kickoff" in ws && typeof (ws as any).kickoff === "object";
   if (isNewFormat) {
     return {

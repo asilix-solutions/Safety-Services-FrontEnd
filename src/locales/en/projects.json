@@ -145,5 +145,10 @@
   "inspection.awaitingDecision": "Awaiting Consulting Engineer Decision",
   "inspection.awaitingDecisionDesc": "Only assigned consulting engineers can log final official compliance audits and make approval decisions.",
   "inspection.approvedSuccess": "Final inspection approved successfully. Project completed!",
-  "inspection.returnedSuccess": "Project returned to active execution for fixes successfully."
+  "inspection.returnedSuccess": "Project returned to active execution for fixes successfully.",
+  "completed.title": "Project Completed & Approved",
+  "completed.desc": "This compliance project has been officially inspected and certified.",
+  "inspection.completedAt": "Completion Date",
+  "inspection.decisionBy": "Approved By",
+  "inspection.notesLabel": "Inspection Decision Notes"
 }

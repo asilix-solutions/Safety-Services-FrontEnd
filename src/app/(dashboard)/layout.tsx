@@ -8,6 +8,7 @@ import { AdminLayout } from "@/shared/layouts/admin-layout";
 import { OperationsLayout } from "@/shared/layouts/operations-layout";
 import { ClientLayout } from "@/shared/layouts/client-layout";
 import { ROLE_NAVIGATION } from "@/constants/navigation";
+import { getProjects } from "@/domains/projects/storage";
 
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -41,17 +42,34 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const allowedPaths = navItems.map((item: any) => item.path);
     const defaultRoute = ROLE_DEFAULT_ROUTE[user.role] || "/";
 
-    const isAllowed = allowedPaths.some((path: string) => {
+    let isAllowed = allowedPaths.some((path: string) => {
       if (path === "/") {
         return pathname === "/" || pathname === "/overview";
       }
       return pathname === path || pathname.startsWith(path + "/");
     });
 
+    // Special allowance for Consulting Engineer accessing ready/completed project workspaces
+    if (!isAllowed && user.role === "Consulting Engineer" && pathname.startsWith("/projects/")) {
+      const projectId = pathname.split("/")[2];
+      if (projectId) {
+        const projects = getProjects();
+        const project = projects.find((p) => p.id === projectId);
+        if (
+          project &&
+          (project.executionPhase === "ready_for_final_inspection" ||
+            project.executionPhase === "completed")
+        ) {
+          isAllowed = true;
+        }
+      }
+    }
+
     if (!isAllowed) {
       router.push(defaultRoute);
     }
   }, [user?.role, pathname, isLoading, isAuthenticated, router]);
+
 
   if (isLoading) {
     return (

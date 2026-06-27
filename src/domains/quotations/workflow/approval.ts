@@ -4,6 +4,7 @@ import { syncQuotationAndRequest } from "./helpers/sync";
 import { appendTimelineEvent } from "./helpers/timeline";
 import { persistQuotation, persistRequest, persistInvoice } from "./helpers/persist";
 import { createInvoiceForQuotation } from "./payment";
+import { canSubmitQuotation, canApproveQuotation } from "@/domains/workflow-validation";
 
 export function submitQuotationForApproval({
   quotation,
@@ -14,6 +15,11 @@ export function submitQuotationForApproval({
   request: LicensingRequest;
   submittedBy: string;
 }): { updatedQuotation: Quotation; updatedRequest: LicensingRequest } {
+  const validation = canSubmitQuotation(quotation, request);
+  if (!validation.valid) {
+    throw new Error(validation.reason);
+  }
+
   const nowStr = new Date().toISOString();
 
   const draftQuote = {
@@ -54,6 +60,11 @@ export function approveQuotation({
   request: LicensingRequest;
   approvedBy: string;
 }): { updatedQuotation: Quotation; updatedRequest: LicensingRequest } {
+  const validation = canApproveQuotation(quotation, request);
+  if (!validation.valid) {
+    throw new Error(validation.reason);
+  }
+
   const nowStr = new Date().toISOString();
 
   const approvedQuote = {
@@ -62,6 +73,7 @@ export function approveQuotation({
     approvedBy,
     approvedAt: nowStr,
   };
+
 
   // Business decision: Transition to PAYMENT_CONFIRMED
   const { updatedQuotation, updatedRequest: syncedRequest } = syncQuotationAndRequest(

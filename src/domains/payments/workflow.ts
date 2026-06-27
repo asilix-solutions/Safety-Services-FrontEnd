@@ -6,6 +6,8 @@ import { getPayments, createOrUpdatePayment } from "@/domains/payments/storage";
 import { upsertRequest } from "@/domains/requests/storage";
 import { provisionProjectFromRequest } from "@/domains/projects/storage";
 import { Project } from "@/types/project";
+import { canConfirmPayment } from "@/domains/workflow-validation";
+import { getQuotations } from "@/domains/quotations/storage";
 
 export function confirmMockPaymentAndInitializeProject({
   request,
@@ -19,7 +21,16 @@ export function confirmMockPaymentAndInitializeProject({
   payment: ClientPayment;
   project?: Project;
 } {
+  const quotations = getQuotations();
+  const quotation = quotations.find((q) => q.jobNumber === request.jobNumber);
+
+  const validation = canConfirmPayment(invoice, quotation);
+  if (!validation.valid) {
+    throw new Error(validation.reason);
+  }
+
   const nowStr = new Date().toISOString();
+
 
   // 1. Mark Invoice Paid idempotently
   let updatedInvoice = { ...invoice };

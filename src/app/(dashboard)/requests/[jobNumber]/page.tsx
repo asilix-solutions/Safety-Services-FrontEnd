@@ -349,6 +349,17 @@ export default function RequestDetailsPage() {
               {t("requests:engineeringWorkspace.decisionApprove") || "Approve for Quotation"}
             </Button>
           )}
+          {request.currentStage === "FINAL_INSPECTION" && linkedProject && (
+            <Link href={`/projects/${linkedProject.id}`}>
+              <Button
+                size="sm"
+                className="bg-indigo-600 hover:bg-indigo-700 text-white shrink-0 shadow-sm gap-1.5 text-xs h-9 font-semibold"
+              >
+                <Eye className="h-3.5 w-3.5" />
+                {t("requests:details.openWorkspace") || "Open Workspace"}
+              </Button>
+            </Link>
+          )}
         </CardContent>
       </Card>
 

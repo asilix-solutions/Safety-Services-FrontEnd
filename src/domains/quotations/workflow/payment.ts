@@ -7,6 +7,8 @@ import { syncInvoiceAndRequest } from "./helpers/sync";
 import { appendTimelineEvent } from "./helpers/timeline";
 import { persistInvoice, persistRequest, persistProject } from "./helpers/persist";
 import { createOrUpdatePayment } from "@/domains/payments/storage";
+import { canConfirmPayment } from "@/domains/workflow-validation";
+import { getQuotations } from "../storage";
 
 export function confirmPaymentAndCreateProject({
   request,
@@ -26,7 +28,16 @@ export function confirmPaymentAndCreateProject({
   payment: ClientPayment;
   project: Project;
 } {
+  const quotations = getQuotations();
+  const quotation = quotations.find((q) => q.jobNumber === request.jobNumber);
+
+  const validation = canConfirmPayment(invoice, quotation);
+  if (!validation.valid) {
+    throw new Error(validation.reason);
+  }
+
   const nowStr = new Date().toISOString();
+
 
   // Create payment record
   const payment: ClientPayment = {

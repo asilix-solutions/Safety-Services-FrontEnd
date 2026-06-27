@@ -4,6 +4,7 @@ import { createDefaultWorkspace } from "@/domains/projects/storage";
 import { persistProject, persistRequest } from "./helpers/persist";
 import { appendTimelineEvent } from "./helpers/timeline";
 import { synchronizeProjectAndRequest } from "./helpers/sync";
+import { canApproveInspection, canReturnInspection } from "@/domains/workflow-validation";
 
 export function approveFinalInspection({
   project,
@@ -19,7 +20,13 @@ export function approveFinalInspection({
   updatedProject: Project;
   updatedRequest: LicensingRequest | null;
 } {
+  const validation = canApproveInspection(project, request, notes);
+  if (!validation.valid) {
+    throw new Error(validation.reason);
+  }
+
   const nowStr = new Date().toISOString();
+
   const currentWorkspace = project.workspace || createDefaultWorkspace();
 
   const isNew = currentWorkspace && 'inspection' in currentWorkspace;
@@ -92,7 +99,13 @@ export function requestFinalInspectionFixes({
   updatedProject: Project;
   updatedRequest: LicensingRequest | null;
 } {
+  const validation = canReturnInspection(project, request, notes);
+  if (!validation.valid) {
+    throw new Error(validation.reason);
+  }
+
   const nowStr = new Date().toISOString();
+
   const currentWorkspace = project.workspace || createDefaultWorkspace();
 
   const isNew = currentWorkspace && 'inspection' in currentWorkspace;

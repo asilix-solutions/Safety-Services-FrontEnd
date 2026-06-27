@@ -4,6 +4,7 @@ import { createDefaultWorkspace } from "@/domains/projects/storage";
 import { persistProject, persistRequest } from "./helpers/persist";
 import { appendTimelineEvent } from "./helpers/timeline";
 import { synchronizeProjectAndRequest } from "./helpers/sync";
+import { canCompleteExecution } from "@/domains/workflow-validation";
 
 export function completeProjectExecution({
   project,
@@ -17,7 +18,13 @@ export function completeProjectExecution({
   updatedProject: Project;
   updatedRequest: LicensingRequest | null;
 } {
+  const validation = canCompleteExecution(project, request);
+  if (!validation.valid) {
+    throw new Error(validation.reason);
+  }
+
   const nowStr = new Date().toISOString();
+
   const currentWorkspace = project.workspace || createDefaultWorkspace();
 
   const isNew = currentWorkspace && 'completion' in currentWorkspace && typeof (currentWorkspace as any).completion === 'object';
