@@ -200,7 +200,31 @@
   "contract_status_generated": "صادر",
   "contract_status_signed": "تم التوقيع",
   "contract_status_archived": "مؤرشف",
-  "contract_status_terminated": "ملغى"
+  "contract_status_terminated": "ملغى",
+  "overview_welcome_back": "مرحباً،",
+  "overview_active_requests": "الطلبات النشطة",
+  "overview_active_projects": "المشاريع النشطة",
+  "overview_new_request": "طلب جديد",
+  "overview_track_requests": "تتبع الطلبات",
+  "overview_actions_required": "الإجراءات المطلوبة",
+  "overview_no_actions": "لا توجد إجراءات مطلوبة حالياً.",
+  "overview_recent_requests": "آخر الطلبات",
+  "overview_active_projects_section": "المشاريع النشطة",
+  "overview_recent_updates": "آخر التحديثات",
+  "overview_quick_access": "وصول سريع",
+  "overview_view_all": "عرض الكل",
+  "overview_view_project": "عرض المشروع",
+  "overview_action_pay": "سداد الفاتورة",
+  "overview_action_sign": "توقيع العقد",
+  "overview_action_fix": "تعديل الملاحظات",
+  "overview_days_ago": "قبل {days} أيام",
+  "overview_yesterday": "أمس",
+  "overview_today": "اليوم",
+  "overview_type_request": "طلب سلامة",
+  "overview_type_project": "مشروع سلامة",
+  "overview_type_contract": "عقد إكمال",
+  "overview_type_invoice": "فاتورة",
+  "overview_type_certificate": "شهادة امتثال"
 }
 
 
