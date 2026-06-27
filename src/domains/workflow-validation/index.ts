@@ -3,5 +3,5 @@ export * from "./quotation.validators";
 export * from "./payment.validators";
 export * from "./project.validators";
 export * from "./inspection.validators";
+export * from "./contract.validators";
 
-// TODO: Implement Contracts and Certificates validators once their requirements are ready.
