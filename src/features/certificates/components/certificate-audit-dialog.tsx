@@ -32,7 +32,7 @@ export function CertificateAuditDialog({
   const warningBadgeVariant = getExpirationBadgeVariant(certificate.expiresAt, certificate.status);
 
   const formatDateTime = (dateStr?: string | null): string => {
-    if (!dateStr) return t("certificates_milestone_not_reached") || "Not Reached";
+    if (!dateStr) return t("common:certificates_milestone_not_reached") || "Not Reached";
     try {
       return new Date(dateStr).toLocaleString();
     } catch (e) {
@@ -49,10 +49,10 @@ export function CertificateAuditDialog({
         <CardHeader className="border-b border-border pb-4">
           <CardTitle className="text-sm font-bold flex items-center gap-2">
             <Award className="h-4.5 w-4.5 text-primary" />
-            {t("certificates_audit_title")}
+            {t("common:certificates_audit_title")}
           </CardTitle>
           <CardDescription className="text-xs">
-            {t("certificates_audit_desc")}
+            {t("common:certificates_audit_desc")}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4 pt-4 text-xs max-h-[75vh] overflow-y-auto">
@@ -60,29 +60,33 @@ export function CertificateAuditDialog({
           {/* 1. Certificate Summary Section */}
           <div className="space-y-3 bg-secondary/20 p-3 rounded-lg border border-border">
             <h4 className="font-semibold text-[10px] text-muted-foreground tracking-wider uppercase">
-              {t("certificateSummary.title")}
+              {t("common:certificateSummary.title")}
             </h4>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <span className="text-muted-foreground block mb-0.5">{t("certificateSummary.type")}</span>
-                <span className="font-semibold text-foreground">{t(`certificateTypes.${certificate.type}`)}</span>
+                <span className="text-muted-foreground block mb-0.5">{t("common:certificateSummary.type")}</span>
+                <span className="font-semibold text-foreground">
+                  {certificate.type && ["safety", "installation", "maintenance"].includes(certificate.type)
+                    ? t(`common:certificateTypes.${certificate.type}`)
+                    : t("common:certificateTypes.safety")}
+                </span>
               </div>
               <div>
-                <span className="text-muted-foreground block mb-0.5">{t("certificateSummary.facilityName")}</span>
-                <span className="font-semibold text-foreground">{certificate.facilityName}</span>
+                <span className="text-muted-foreground block mb-0.5">{t("common:certificateSummary.facilityName")}</span>
+                <span className="font-semibold text-foreground">{certificate.facilityName || certificate.title || "—"}</span>
               </div>
               <div>
-                <span className="text-muted-foreground block mb-0.5">{t("certificateSummary.duration")}</span>
-                <span className="font-semibold text-foreground">365 {t("remainingValidity.days") || "Days"}</span>
+                <span className="text-muted-foreground block mb-0.5">{t("common:certificateSummary.duration")}</span>
+                <span className="font-semibold text-foreground">365 {t("common:remainingValidity.days") || "Days"}</span>
               </div>
               <div>
-                <span className="text-muted-foreground block mb-0.5">{t("certificateSummary.validityDays")}</span>
+                <span className="text-muted-foreground block mb-0.5">{t("common:certificateSummary.validityDays")}</span>
                 <span className="font-semibold text-foreground">{remainingDays}</span>
               </div>
               <div className="col-span-2">
-                <span className="text-muted-foreground block mb-0.5">{t("certificateSummary.warningLevel")}</span>
+                <span className="text-muted-foreground block mb-0.5">{t("common:certificateSummary.warningLevel")}</span>
                 <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium border ${warningBadgeVariant} uppercase`}>
-                  {t(`warningLevels.${warningLevel}`)}
+                  {t(`common:warningLevels.${warningLevel}`)}
                 </span>
               </div>
             </div>
@@ -93,12 +97,12 @@ export function CertificateAuditDialog({
           {/* 2. Lifecycle Section */}
           <div className="space-y-3">
             <h4 className="font-semibold text-[10px] text-muted-foreground tracking-wider uppercase">
-              {t("certificates_lifecycle")}
+              {t("common:certificates_lifecycle")}
             </h4>
             <div className="flex flex-col items-center gap-1.5 pt-1">
               {/* Contract Archived */}
               <div className="w-full flex items-center justify-between text-foreground">
-                <span className="font-semibold">{t("certificates_milestone_contract_archived")}</span>
+                <span className="font-semibold">{t("common:certificates_milestone_contract_archived")}</span>
                 <span className="text-muted-foreground font-mono text-[10px]">{formatDateTime(archivedDate)}</span>
               </div>
 
@@ -106,7 +110,7 @@ export function CertificateAuditDialog({
 
               {/* Certificate Issued */}
               <div className="w-full flex items-center justify-between text-foreground">
-                <span className="font-semibold">{t("certificates_milestone_issued")}</span>
+                <span className="font-semibold">{t("common:certificates_milestone_issued")}</span>
                 <span className="text-muted-foreground font-mono text-[10px]">{formatDateTime(certificate.issuedAt)}</span>
               </div>
 
@@ -114,7 +118,7 @@ export function CertificateAuditDialog({
 
               {/* Certificate Valid Until */}
               <div className="w-full flex items-center justify-between text-foreground">
-                <span className="font-semibold">{t("certificates_milestone_valid_until")}</span>
+                <span className="font-semibold">{t("common:certificates_milestone_valid_until")}</span>
                 <span className="text-muted-foreground font-mono text-[10px]">{formatDateTime(certificate.expiresAt)}</span>
               </div>
 
@@ -124,7 +128,7 @@ export function CertificateAuditDialog({
 
                   {/* Certificate Revoked */}
                   <div className="w-full flex items-center justify-between text-red-600 dark:text-red-400">
-                    <span className="font-bold">{t("certificates_milestone_revoked")}</span>
+                    <span className="font-bold">{t("common:certificates_milestone_revoked")}</span>
                     <span className="font-mono text-[10px]">{formatDateTime(certificate.revokedAt)}</span>
                   </div>
                 </>
@@ -137,51 +141,51 @@ export function CertificateAuditDialog({
           {/* 3. Audit Trail Section (General Information + Issued Logs) */}
           <div className="space-y-3">
             <h4 className="font-semibold text-[10px] text-muted-foreground tracking-wider uppercase">
-              {t("certificates_general_info")} & {t("certificates_audit_trail")}
+              {t("common:certificates_general_info")} & {t("common:certificates_audit_trail")}
             </h4>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <span className="text-muted-foreground block mb-0.5">{t("certificates_id")}</span>
+                <span className="text-muted-foreground block mb-0.5">{t("common:certificates_id")}</span>
                 <span className="font-mono font-semibold text-foreground">{certificate.id}</span>
               </div>
               <div>
-                <span className="text-muted-foreground block mb-0.5">{t("certificates_contract_id")}</span>
+                <span className="text-muted-foreground block mb-0.5">{t("common:certificates_contract_id")}</span>
                 <span className="font-mono font-semibold text-foreground">{certificate.contractId}</span>
               </div>
               <div>
-                <span className="text-muted-foreground block mb-0.5">{t("certificates_project_id")}</span>
+                <span className="text-muted-foreground block mb-0.5">{t("common:certificates_project_id")}</span>
                 <span className="font-mono font-semibold text-foreground">{certificate.projectId}</span>
               </div>
               <div>
-                <span className="text-muted-foreground block mb-0.5">{t("certificates_job_number")}</span>
+                <span className="text-muted-foreground block mb-0.5">{t("common:certificates_job_number")}</span>
                 <span className="font-mono font-semibold text-foreground">{certificate.jobNumber || "—"}</span>
               </div>
               <div>
-                <span className="text-muted-foreground block mb-0.5">{t("certificates_client_company")}</span>
+                <span className="text-muted-foreground block mb-0.5">{t("common:certificates_client_company")}</span>
                 <span className="font-semibold text-foreground">{certificate.clientId}</span>
               </div>
               <div>
-                <span className="text-muted-foreground block mb-0.5">{t("certificates_tenant")}</span>
+                <span className="text-muted-foreground block mb-0.5">{t("common:certificates_tenant")}</span>
                 <span className="font-semibold text-foreground">{certificate.tenantId}</span>
               </div>
               <div>
-                <span className="text-muted-foreground block mb-0.5">{t("certificates_display_status")}</span>
+                <span className="text-muted-foreground block mb-0.5">{t("common:certificates_display_status")}</span>
                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-primary/10 text-primary uppercase">
-                  {t(`certificates_tab_${displayStatus}`)}
+                  {t(`common:certificates_tab_${displayStatus}`)}
                 </span>
               </div>
               <div>
-                <span className="text-muted-foreground block mb-0.5">{t("certificates_workflow_status")}</span>
+                <span className="text-muted-foreground block mb-0.5">{t("common:certificates_workflow_status")}</span>
                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-secondary text-secondary-foreground uppercase">
-                  {t(`certificates_tab_${certificate.status}`)}
+                  {t(`common:certificates_tab_${certificate.status}`)}
                 </span>
               </div>
               <div>
-                <span className="text-muted-foreground block mb-0.5">{t("certificates_issued_by")}</span>
+                <span className="text-muted-foreground block mb-0.5">{t("common:certificates_issued_by")}</span>
                 <span className="font-semibold text-foreground">{certificate.issuedBy}</span>
               </div>
               <div>
-                <span className="text-muted-foreground block mb-0.5">{t("certificates_issued_at")}</span>
+                <span className="text-muted-foreground block mb-0.5">{t("common:certificates_issued_at")}</span>
                 <span className="font-semibold text-foreground">{formatDateTime(certificate.issuedAt)}</span>
               </div>
             </div>
@@ -192,19 +196,19 @@ export function CertificateAuditDialog({
               <div className="border-t border-border" />
               <div className="space-y-3">
                 <h4 className="font-semibold text-[10px] text-red-500 tracking-wider uppercase">
-                  {t("certificates_revocation_info")}
+                  {t("common:certificates_revocation_info")}
                 </h4>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <span className="text-muted-foreground block mb-0.5">{t("certificates_revoked_at")}</span>
+                    <span className="text-muted-foreground block mb-0.5">{t("common:certificates_revoked_at")}</span>
                     <span className="font-semibold text-red-600 dark:text-red-400">{formatDateTime(certificate.revokedAt)}</span>
                   </div>
                   <div>
-                    <span className="text-muted-foreground block mb-0.5">{t("certificates_revoked_by")}</span>
+                    <span className="text-muted-foreground block mb-0.5">{t("common:certificates_revoked_by")}</span>
                     <span className="font-semibold text-foreground">{certificate.revokedBy || "—"}</span>
                   </div>
                   <div className="col-span-2">
-                    <span className="text-muted-foreground block mb-0.5">{t("certificates_revocation_reason")}</span>
+                    <span className="text-muted-foreground block mb-0.5">{t("common:certificates_revocation_reason")}</span>
                     <span className="font-semibold text-foreground">{certificate.revokedReason || "—"}</span>
                   </div>
                 </div>
@@ -223,7 +227,7 @@ export function CertificateAuditDialog({
               className="gap-1.5 h-8 text-xs"
             >
               <Download className="h-3.5 w-3.5" />
-              {t("certificates_download_btn")}
+              {t("common:certificates_download_btn")}
             </Button>
             <Button
               size="sm"

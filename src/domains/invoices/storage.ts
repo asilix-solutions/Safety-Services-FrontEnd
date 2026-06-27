@@ -63,7 +63,9 @@ const MOCK_INVOICES: ClientInvoice[] = [
 
 export function getMergedInvoices(): ClientInvoice[] {
   const localList = getInvoices();
-  if (localList.length === 0) {
+  const hasOldSchema = localList.length > 0 && localList.some(inv => !inv.tenantId);
+  
+  if (localList.length === 0 || hasOldSchema) {
     // Seed initial mock invoices
     saveInvoices(MOCK_INVOICES);
     return MOCK_INVOICES;

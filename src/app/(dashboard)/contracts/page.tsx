@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "@/providers/AuthProvider";
 import { PageHeader } from "@/shared/components/page-header";
 import { CheckCircle2 } from "lucide-react";
-import { useTranslation } from "@/providers/i18n-provider";
+import { useTranslation, useNamespaceTranslations } from "@/providers/i18n-provider";
 import { Project } from "@/types/project";
 import { getProjects } from "@/domains/projects/storage";
 import { getRequests } from "@/domains/requests/storage";
@@ -21,6 +21,8 @@ import {
 export default function ContractsDashboardPage() {
   const { user } = useAuth();
   const { t } = useTranslation();
+  useNamespaceTranslations(["common", "dashboard", "projects", "requests"]);
+
   
   const [contracts, setContracts] = useState<ClientContract[]>([]);
   const [completedProjectsWithoutContracts, setCompletedProjectsWithoutContracts] = useState<Project[]>([]);
@@ -94,8 +96,8 @@ export default function ContractsDashboardPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Contracts & Completion Agreements"
-        description="Review, sign, download, and archive post-completion compliance documentation."
+        title={t("common:contracts_title")}
+        description={t("common:contracts_desc")}
       />
 
       {alertMsg && (
@@ -108,8 +110,8 @@ export default function ContractsDashboardPage() {
         >
           <CheckCircle2 className="h-5 w-5 shrink-0" />
           <div className="flex-1 text-sm font-semibold">{alertMsg.text}</div>
-          <button onClick={() => setAlertMsg(null)} className="text-xs opacity-75 hover:opacity-100">
-            Dismiss
+          <button onClick={() => setAlertMsg(null)} className="text-xs opacity-75 hover:opacity-100 font-semibold cursor-pointer">
+            {t("common:dismiss")}
           </button>
         </div>
       )}

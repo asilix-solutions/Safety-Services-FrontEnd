@@ -5,6 +5,8 @@ import { Button } from "@/shared/ui/button";
 import { FileCheck2, Download } from "lucide-react";
 import { formatSARCurrency, formatDateTime } from "../helpers/formatters";
 
+import { useTranslation } from "@/providers/i18n-provider";
+
 interface ContractAuditDialogProps {
   contract: ClientContract | null;
   onClose: () => void;
@@ -16,6 +18,8 @@ export function ContractAuditDialog({
   onClose,
   onDownloadContract,
 }: ContractAuditDialogProps) {
+  const { t } = useTranslation();
+
   if (!contract) return null;
 
   return (
@@ -24,45 +28,45 @@ export function ContractAuditDialog({
         <CardHeader className="border-b border-border pb-4">
           <CardTitle className="text-sm font-bold flex items-center gap-2">
             <FileCheck2 className="h-4.5 w-4.5 text-primary" />
-            Completion Agreement Details
+            {t("common:contracts_dialog_title")}
           </CardTitle>
           <CardDescription className="text-xs">
-            Detailed audit trail and legal completion metadata.
+            {t("common:contracts_dialog_desc")}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4 pt-4 text-xs max-h-[75vh] overflow-y-auto">
           {/* General Information Section */}
           <div className="space-y-3">
-            <h4 className="font-semibold text-[10px] text-muted-foreground tracking-wider uppercase">General Information</h4>
+            <h4 className="font-semibold text-[10px] text-muted-foreground tracking-wider uppercase">{t("common:contracts_general_info")}</h4>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <span className="text-muted-foreground block mb-0.5">Contract ID</span>
+                <span className="text-muted-foreground block mb-0.5">{t("common:contracts_id")}</span>
                 <span className="font-mono font-semibold text-foreground">{contract.id}</span>
               </div>
               <div>
-                <span className="text-muted-foreground block mb-0.5">Project ID</span>
-                <span className="font-mono font-semibold text-foreground">{contract.projectId}</span>
+                <span className="text-muted-foreground block mb-0.5">{t("common:contracts_project_id")}</span>
+                <span className="font-mono font-semibold text-foreground">{contract.projectId || "—"}</span>
               </div>
               <div>
-                <span className="text-muted-foreground block mb-0.5">Job Number</span>
+                <span className="text-muted-foreground block mb-0.5">{t("common:contracts_job_number")}</span>
                 <span className="font-mono font-semibold text-foreground">{contract.jobNumber || "—"}</span>
               </div>
               <div>
-                <span className="text-muted-foreground block mb-0.5">Client Company</span>
-                <span className="font-semibold text-foreground">{contract.clientId}</span>
+                <span className="text-muted-foreground block mb-0.5">{t("common:contracts_client_company")}</span>
+                <span className="font-semibold text-foreground">{contract.clientId || "—"}</span>
               </div>
               <div>
-                <span className="text-muted-foreground block mb-0.5">Tenant</span>
-                <span className="font-semibold text-foreground">{contract.tenantId}</span>
+                <span className="text-muted-foreground block mb-0.5">{t("common:contracts_tenant")}</span>
+                <span className="font-semibold text-foreground">{contract.tenantId || "—"}</span>
               </div>
               <div>
-                <span className="text-muted-foreground block mb-0.5">Contract Value</span>
+                <span className="text-muted-foreground block mb-0.5">{t("common:contracts_value")}</span>
                 <span className="font-semibold text-foreground">{formatSARCurrency(contract.value)}</span>
               </div>
               <div>
-                <span className="text-muted-foreground block mb-0.5">Current Status</span>
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-primary/10 text-primary uppercase">
-                  {contract.status}
+                <span className="text-muted-foreground block mb-0.5">{t("common:contracts_current_status")}</span>
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-primary/10 text-primary">
+                  {t(`common:contract_status_${contract.status}`)}
                 </span>
               </div>
             </div>
@@ -72,26 +76,26 @@ export function ContractAuditDialog({
 
           {/* Lifecycle Audit Section */}
           <div className="space-y-3">
-            <h4 className="font-semibold text-[10px] text-muted-foreground tracking-wider uppercase">Lifecycle & Audit Trail</h4>
+            <h4 className="font-semibold text-[10px] text-muted-foreground tracking-wider uppercase">{t("common:contracts_lifecycle_trail")}</h4>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <span className="text-muted-foreground block mb-0.5">Created At</span>
+                <span className="text-muted-foreground block mb-0.5">{t("common:contracts_created_at")}</span>
                 <span className="font-semibold text-foreground">{formatDateTime(contract.createdAt)}</span>
               </div>
               <div>
-                <span className="text-muted-foreground block mb-0.5">Signed By</span>
+                <span className="text-muted-foreground block mb-0.5">{t("common:contracts_signed_by")}</span>
                 <span className="font-semibold text-foreground">{contract.signedBy || "—"}</span>
               </div>
               <div>
-                <span className="text-muted-foreground block mb-0.5">Signed At</span>
+                <span className="text-muted-foreground block mb-0.5">{t("common:contracts_signed_at")}</span>
                 <span className="font-semibold text-foreground">{formatDateTime(contract.signedAt)}</span>
               </div>
               <div>
-                <span className="text-muted-foreground block mb-0.5">Archived By</span>
+                <span className="text-muted-foreground block mb-0.5">{t("common:contracts_archived_by")}</span>
                 <span className="font-semibold text-foreground">{contract.archivedBy || "—"}</span>
               </div>
               <div>
-                <span className="text-muted-foreground block mb-0.5">Archived At</span>
+                <span className="text-muted-foreground block mb-0.5">{t("common:contracts_archived_at")}</span>
                 <span className="font-semibold text-foreground">{formatDateTime(contract.archivedAt)}</span>
               </div>
             </div>
@@ -108,14 +112,14 @@ export function ContractAuditDialog({
               className="gap-1.5 h-8 text-xs"
             >
               <Download className="h-3.5 w-3.5" />
-              Download Contract
+              {t("common:contracts_download_btn")}
             </Button>
             <Button
               size="sm"
               onClick={onClose}
               className="h-8 text-xs"
             >
-              Close
+              {t("common:contracts_close")}
             </Button>
           </div>
         </CardContent>

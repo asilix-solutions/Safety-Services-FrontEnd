@@ -7,6 +7,8 @@ import { DataTable, ColumnDef } from "@/shared/tables/data-table";
 import { FileCheck2, FileSignature, Archive, Download, Eye } from "lucide-react";
 import { getContractStatusBadgeClass, formatSARCurrency } from "../helpers/formatters";
 
+import { useTranslation } from "@/providers/i18n-provider";
+
 interface ContractsTableProps {
   contracts: ClientContract[];
   isAdmin: boolean;
@@ -30,6 +32,8 @@ export function ContractsTable({
   onDownloadContract,
   onViewDetails,
 }: ContractsTableProps) {
+  const { t } = useTranslation();
+
   const filteredContracts = statusFilter === "all"
     ? contracts
     : contracts.filter((c) => c.status === statusFilter);
@@ -43,36 +47,36 @@ export function ContractsTable({
 
   const contractColumns: ColumnDef<ClientContract>[] = [
     {
-      header: "Contract ID",
+      header: t("common:contracts_id"),
       accessorKey: "id",
       render: (row) => <span className="font-mono text-xs font-bold text-primary">{row.id}</span>,
     },
     {
-      header: "Title",
+      header: t("common:contract_title"),
       accessorKey: "title",
-      render: (row) => <span className="font-semibold text-foreground">{row.title}</span>,
+      render: (row) => <span className="font-semibold text-foreground">{row.title || "—"}</span>,
     },
     {
-      header: "Value (SAR)",
+      header: t("common:contracts_value"),
       accessorKey: "value",
       render: (row) => <span>{formatSARCurrency(row.value)}</span>,
     },
     {
-      header: "Status",
+      header: t("common:status"),
       accessorKey: "status",
       render: (row) => (
         <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getContractStatusBadgeClass(row.status)}`}>
-          {row.status.toUpperCase()}
+          {t(`common:contract_status_${row.status}`)}
         </span>
       ),
     },
     {
-      header: "Created Date",
+      header: t("common:contracts_created_at"),
       accessorKey: "createdAt",
       render: (row) => <span className="text-muted-foreground text-xs">{new Date(row.createdAt).toLocaleDateString()}</span>,
     },
     {
-      header: "Actions",
+      header: t("common:actions"),
       render: (row) => (
         <div className="flex gap-2">
           {row.status === "generated" && userRole === "Client" && (
@@ -83,7 +87,7 @@ export function ContractsTable({
               className="h-8 gap-1 text-xs border-emerald-500/30 text-emerald-600 hover:bg-emerald-500/10 hover:text-emerald-700"
             >
               <FileSignature className="h-3.5 w-3.5" />
-              Sign & Approve
+              {t("common:contracts_sign_approve")}
             </Button>
           )}
           {row.status === "signed" && isAdmin && (
@@ -94,7 +98,7 @@ export function ContractsTable({
               className="h-8 gap-1 text-xs border-blue-500/30 text-blue-600 hover:bg-blue-500/10 hover:text-blue-700"
             >
               <Archive className="h-3.5 w-3.5" />
-              Archive
+              {t("common:contracts_archive")}
             </Button>
           )}
           <Button
@@ -104,7 +108,7 @@ export function ContractsTable({
             className="h-8 gap-1 text-xs border-border hover:bg-secondary/40"
           >
             <Eye className="h-3.5 w-3.5" />
-            Audit Details
+            {t("common:contracts_audit_details_btn")}
           </Button>
           <Button
             size="sm"
@@ -113,7 +117,7 @@ export function ContractsTable({
             className="h-8 gap-1 text-xs hover:bg-secondary/60 text-muted-foreground hover:text-foreground"
           >
             <Download className="h-3.5 w-3.5" />
-            Download
+            {t("common:contracts_download_btn")}
           </Button>
         </div>
       ),
@@ -124,7 +128,7 @@ export function ContractsTable({
     <Card className="border-border bg-card shadow-sm">
       <CardHeader className="pb-3">
         <CardTitle className="text-base font-semibold">
-          {isAdmin ? "All Compliance Agreements" : "My Agreements"}
+          {isAdmin ? t("common:contracts_table_title_admin") : t("common:contracts_table_title_client")}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -136,7 +140,7 @@ export function ContractsTable({
               size="sm"
               className="h-8 gap-1.5 text-xs"
             >
-              All
+              {t("common:contracts_tab_all")}
               <span className={`px-1.5 py-0.5 rounded-full text-[10px] ${statusFilter === "all" ? "bg-primary-foreground text-primary" : "bg-muted text-muted-foreground"}`}>
                 {counts.all}
               </span>
@@ -147,7 +151,7 @@ export function ContractsTable({
               size="sm"
               className="h-8 gap-1.5 text-xs"
             >
-              Generated
+              {t("common:contracts_tab_generated")}
               <span className={`px-1.5 py-0.5 rounded-full text-[10px] ${statusFilter === "generated" ? "bg-primary-foreground text-primary" : "bg-muted text-muted-foreground"}`}>
                 {counts.generated}
               </span>
@@ -158,7 +162,7 @@ export function ContractsTable({
               size="sm"
               className="h-8 gap-1.5 text-xs"
             >
-              Signed
+              {t("common:contracts_tab_signed")}
               <span className={`px-1.5 py-0.5 rounded-full text-[10px] ${statusFilter === "signed" ? "bg-primary-foreground text-primary" : "bg-muted text-muted-foreground"}`}>
                 {counts.signed}
               </span>
@@ -169,7 +173,7 @@ export function ContractsTable({
               size="sm"
               className="h-8 gap-1.5 text-xs"
             >
-              Archived
+              {t("common:contracts_tab_archived")}
               <span className={`px-1.5 py-0.5 rounded-full text-[10px] ${statusFilter === "archived" ? "bg-primary-foreground text-primary" : "bg-muted text-muted-foreground"}`}>
                 {counts.archived}
               </span>
@@ -179,18 +183,18 @@ export function ContractsTable({
 
         {contracts.length === 0 ? (
           <EmptyState
-            title="No agreements found"
+            title={t("common:contracts_empty_state_title")}
             description={
               isAdmin
-                ? "Contracts will appear here once generated for completed projects."
-                : "No completion agreements have been issued to your account yet."
+                ? t("common:contracts_empty_state_desc_admin")
+                : t("common:contracts_empty_state_desc_client")
             }
             icon={<FileCheck2 className="h-6 w-6 text-muted-foreground" />}
           />
         ) : filteredContracts.length === 0 ? (
           <EmptyState
-            title="No matching agreements"
-            description={`There are no contracts currently in the "${statusFilter}" status.`}
+            title={t("common:contracts_no_matching")}
+            description={t("common:contracts_no_matching_desc")}
             icon={<FileCheck2 className="h-6 w-6 text-muted-foreground" />}
           />
         ) : (

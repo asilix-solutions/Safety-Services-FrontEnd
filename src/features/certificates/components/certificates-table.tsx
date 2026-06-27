@@ -56,19 +56,25 @@ export function CertificatesTable({
 
   const columns: ColumnDef<ClientCertificate>[] = [
     {
-      header: t("certificates_id"),
+      header: t("common:certificates_id"),
       accessorKey: "id",
       render: (row) => <span className="font-mono text-xs font-bold text-primary">{row.id}</span>,
     },
     {
-      header: t("certificateSummary.facilityName"),
+      header: t("common:certificateSummary.facilityName"),
       accessorKey: "facilityName",
-      render: (row) => <span className="font-semibold text-foreground">{row.facilityName}</span>,
+      render: (row) => <span className="font-semibold text-foreground">{row.facilityName || row.title || "—"}</span>,
     },
     {
-      header: t("certificateSummary.type"),
+      header: t("common:certificateSummary.type"),
       accessorKey: "type",
-      render: (row) => <span>{t(`certificateTypes.${row.type}`)}</span>,
+      render: (row) => (
+        <span>
+          {row.type && ["safety", "installation", "maintenance"].includes(row.type)
+            ? t(`common:certificateTypes.${row.type}`)
+            : t("common:certificateTypes.safety")}
+        </span>
+      ),
     },
     {
       header: t("common:status") || "Status",
@@ -82,13 +88,13 @@ export function CertificatesTable({
               row.expiresAt
             )}`}
           >
-            {t(transKey).toUpperCase()}
+            {t(`common:${transKey}`).toUpperCase()}
           </span>
         );
       },
     },
     {
-      header: t("certificateSummary.validityDays"),
+      header: t("common:certificateSummary.validityDays"),
       render: (row) => {
         const text = getRemainingValidityText(row.expiresAt, row.status, t);
         const badgeClass = getExpirationBadgeVariant(row.expiresAt, row.status);
@@ -100,7 +106,7 @@ export function CertificatesTable({
       },
     },
     {
-      header: t("certificates_issued_at"),
+      header: t("common:certificates_issued_at"),
       accessorKey: "issuedAt",
       render: (row) => (
         <span className="text-muted-foreground text-xs">
@@ -109,7 +115,7 @@ export function CertificatesTable({
       ),
     },
     {
-      header: t("certificates_expires_at"),
+      header: t("common:certificates_expires_at"),
       accessorKey: "expiresAt",
       render: (row) => (
         <span className="text-muted-foreground text-xs">
@@ -131,7 +137,7 @@ export function CertificatesTable({
                 className="h-8 gap-1 text-xs border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
               >
                 <XCircle className="h-3.5 w-3.5" />
-                {t("certificates_revoke_action")}
+                {t("common:certificates_revoke_action")}
               </Button>
             )}
             <Button
@@ -141,7 +147,7 @@ export function CertificatesTable({
               className="h-8 gap-1 text-xs border-border hover:bg-secondary/40"
             >
               <Eye className="h-3.5 w-3.5" />
-              {t("certificates_audit_details_btn")}
+              {t("common:certificates_audit_details_btn")}
             </Button>
             <Button
               size="sm"
@@ -150,7 +156,7 @@ export function CertificatesTable({
               className="h-8 gap-1 text-xs hover:bg-secondary/60 text-muted-foreground hover:text-foreground"
             >
               <Download className="h-3.5 w-3.5" />
-              {t("certificates_download_btn")}
+              {t("common:certificates_download_btn")}
             </Button>
           </div>
         );
@@ -162,7 +168,7 @@ export function CertificatesTable({
     <Card className="border-border bg-card shadow-sm">
       <CardHeader className="pb-3">
         <CardTitle className="text-base font-semibold">
-          {isAdmin ? t("certificates_table_title_admin") : t("certificates_table_title_client")}
+          {isAdmin ? t("common:certificates_table_title_admin") : t("common:certificates_table_title_client")}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -174,7 +180,7 @@ export function CertificatesTable({
               size="sm"
               className="h-8 gap-1.5 text-xs"
             >
-              {t("certificates_tab_all")}
+              {t("common:certificates_tab_all")}
               <span
                 className={`px-1.5 py-0.5 rounded-full text-[10px] ${
                   statusFilter === "all"
@@ -191,7 +197,7 @@ export function CertificatesTable({
               size="sm"
               className="h-8 gap-1.5 text-xs"
             >
-              {t("certificates_tab_active")}
+              {t("common:certificates_tab_active")}
               <span
                 className={`px-1.5 py-0.5 rounded-full text-[10px] ${
                   statusFilter === "active"
@@ -208,7 +214,7 @@ export function CertificatesTable({
               size="sm"
               className="h-8 gap-1.5 text-xs"
             >
-              {t("certificates_tab_expired")}
+              {t("common:certificates_tab_expired")}
               <span
                 className={`px-1.5 py-0.5 rounded-full text-[10px] ${
                   statusFilter === "expired"
@@ -225,7 +231,7 @@ export function CertificatesTable({
               size="sm"
               className="h-8 gap-1.5 text-xs"
             >
-              {t("certificates_tab_revoked")}
+              {t("common:certificates_tab_revoked")}
               <span
                 className={`px-1.5 py-0.5 rounded-full text-[10px] ${
                   statusFilter === "revoked"
@@ -241,18 +247,18 @@ export function CertificatesTable({
 
         {certificates.length === 0 ? (
           <EmptyState
-            title={t("certificates_empty_state_title")}
+            title={t("common:certificates_empty_state_title")}
             description={
               isAdmin
-                ? t("certificates_empty_state_desc_admin")
-                : t("certificates_empty_state_desc_client")
+                ? t("common:certificates_empty_state_desc_admin")
+                : t("common:certificates_empty_state_desc_client")
             }
             icon={<Award className="h-6 w-6 text-muted-foreground" />}
           />
         ) : filteredCertificates.length === 0 ? (
           <EmptyState
-            title={t("certificates_no_matching")}
-            description={t("certificates_no_matching_desc")}
+            title={t("common:certificates_no_matching")}
+            description={t("common:certificates_no_matching_desc")}
             icon={<Award className="h-6 w-6 text-muted-foreground" />}
           />
         ) : (

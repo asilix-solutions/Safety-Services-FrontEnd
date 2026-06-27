@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "@/providers/AuthProvider";
 import { PageHeader } from "@/shared/components/page-header";
 import { CheckCircle2 } from "lucide-react";
-import { useTranslation } from "@/providers/i18n-provider";
+import { useTranslation, useNamespaceTranslations } from "@/providers/i18n-provider";
 import { ClientContract } from "@/domains/contracts/types";
 import { getContracts } from "@/domains/contracts/storage";
 import { ClientCertificate } from "@/domains/certificates/types";
@@ -20,6 +20,8 @@ import {
 export default function CertificatesDashboardPage() {
   const { user } = useAuth();
   const { t } = useTranslation();
+  useNamespaceTranslations(["common", "dashboard"]);
+
 
   const [certificates, setCertificates] = useState<ClientCertificate[]>([]);
   const [archivedContractsWithoutCertificates, setArchivedContractsWithoutCertificates] = useState<ClientContract[]>([]);

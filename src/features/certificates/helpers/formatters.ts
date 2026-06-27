@@ -35,13 +35,13 @@ export function getRemainingValidityDays(expiresAt: string): number {
 
 export function getRemainingValidityText(expiresAt: string, status: "active" | "revoked", t: any): string {
   if (status === "revoked") {
-    return t("remainingValidity.revoked") || "Revoked";
+    return t("common:remainingValidity.revoked") || "Revoked";
   }
   const days = getRemainingValidityDays(expiresAt);
   if (days <= 0) {
-    return t("remainingValidity.expired") || "Expired";
+    return t("common:remainingValidity.expired") || "Expired";
   }
-  const text = t("remainingValidity.daysRemaining") || "{days} days remaining";
+  const text = t("common:remainingValidity.daysRemaining") || "{days} days remaining";
   return text.replace("{days}", String(days));
 }
 
