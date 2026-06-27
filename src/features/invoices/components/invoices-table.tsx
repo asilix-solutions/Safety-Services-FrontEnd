@@ -1,0 +1,197 @@
+import React from "react";
+import { ClientInvoice } from "@/domains/invoices/types";
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
+import { Button } from "@/shared/ui/button";
+import { Badge } from "@/shared/ui/badge";
+import { EmptyState } from "@/shared/components/empty-state";
+import { DataTable, ColumnDef } from "@/shared/tables/data-table";
+import { FileText, Eye, CreditCard } from "lucide-react";
+import { useTranslation } from "@/providers/i18n-provider";
+import { SearchInput } from "@/shared/components/search-input";
+import {
+  formatCurrency,
+  formatDate,
+  getStatusLabel,
+  getStatusBadgeVariant,
+  filterBySearch,
+  filterByStatus,
+} from "../helpers/helpers";
+
+interface InvoicesTableProps {
+  invoices: ClientInvoice[];
+  userRole: string;
+  statusFilter: "all" | "paid" | "unpaid";
+  onStatusFilterChange: (filter: "all" | "paid" | "unpaid") => void;
+  searchQuery: string;
+  onSearchQueryChange: (query: string) => void;
+  onPayInvoice: (invoice: ClientInvoice) => void;
+  onViewDetails: (invoice: ClientInvoice) => void;
+}
+
+export function InvoicesTable({
+  invoices,
+  userRole,
+  statusFilter,
+  onStatusFilterChange,
+  searchQuery,
+  onSearchQueryChange,
+  onPayInvoice,
+  onViewDetails,
+}: InvoicesTableProps) {
+  const { t } = useTranslation();
+
+  // Filter invoices locally based on search query and selected tab
+  const searchedInvoices = filterBySearch(invoices, searchQuery);
+  const filteredInvoices = filterByStatus(searchedInvoices, statusFilter);
+
+  // Count helper
+  const counts = {
+    all: invoices.length,
+    paid: invoices.filter((i) => i.status === "paid").length,
+    unpaid: invoices.filter((i) => i.status === "unpaid").length,
+  };
+
+  const columns: ColumnDef<ClientInvoice>[] = [
+    {
+      header: t("invoices_table_id"),
+      accessorKey: "id",
+      render: (row) => (
+        <span className="font-mono text-xs font-bold text-primary">{row.id}</span>
+      ),
+    },
+    {
+      header: t("invoices_table_job"),
+      accessorKey: "jobNumber",
+      render: (row) => (
+        <span className="font-medium text-foreground">{row.jobNumber}</span>
+      ),
+    },
+    {
+      header: t("invoices_table_amount"),
+      accessorKey: "grandTotal",
+      render: (row) => (
+        <span className="font-semibold">{formatCurrency(row.grandTotal, row.currency)}</span>
+      ),
+    },
+    {
+      header: t("invoices_table_due"),
+      accessorKey: "dueDate",
+      render: (row) => (
+        <span className="text-muted-foreground text-xs">{formatDate(row.dueDate)}</span>
+      ),
+    },
+    {
+      header: t("invoices_table_status"),
+      accessorKey: "status",
+      render: (row) => {
+        const variant = getStatusBadgeVariant(row.status);
+        return (
+          <Badge variant={variant} className="uppercase text-[10px]">
+            {getStatusLabel(row.status, t)}
+          </Badge>
+        );
+      },
+    },
+    {
+      header: t("invoices_table_actions"),
+      render: (row) => {
+        const isPaid = row.status === "paid";
+        // Button label changes by role: Client pays, Admins mark as paid.
+        const actionLabel = userRole === "Client" ? t("invoices_pay_client") : t("invoices_pay_admin");
+
+        return (
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="xs"
+              className="h-7 px-2 text-xs flex items-center gap-1"
+              onClick={() => onViewDetails(row)}
+            >
+              <Eye className="h-3.5 w-3.5" />
+              <span>{t("invoices_view_details")}</span>
+            </Button>
+            {!isPaid && (
+              <Button
+                variant="default"
+                size="xs"
+                className="h-7 px-2 text-xs flex items-center gap-1"
+                onClick={() => onPayInvoice(row)}
+              >
+                <CreditCard className="h-3.5 w-3.5" />
+                <span>{actionLabel}</span>
+              </Button>
+            )}
+          </div>
+        );
+      },
+    },
+  ];
+
+  return (
+    <Card className="border-border bg-card shadow-sm">
+      <CardHeader className="pb-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <CardTitle className="text-lg font-bold flex items-center gap-2">
+              <FileText className="h-5 w-5 text-primary" />
+              {t("invoices_title")}
+            </CardTitle>
+          </div>
+          <div className="w-full md:w-72">
+            <SearchInput
+              value={searchQuery}
+              onChange={onSearchQueryChange}
+              placeholder={t("invoices_search_placeholder")}
+            />
+          </div>
+        </div>
+
+        {/* Status Filter Tabs */}
+        <div className="flex border-b border-border mt-4">
+          {(["all", "paid", "unpaid"] as const).map((tab) => {
+            const isActive = statusFilter === tab;
+            const count = counts[tab];
+            let label = t(`invoices_status_${tab}`);
+            return (
+              <button
+                key={tab}
+                onClick={() => onStatusFilterChange(tab)}
+                className={`py-2 px-4 text-xs font-semibold border-b-2 transition-all flex items-center gap-2 cursor-pointer ${
+                  isActive
+                    ? "border-primary text-primary"
+                    : "border-transparent text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <span>{label}</span>
+                <span
+                  className={`text-[10px] px-1.5 py-0.5 rounded-full ${
+                    isActive ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+                  }`}
+                >
+                  {count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </CardHeader>
+
+      <CardContent>
+        {filteredInvoices.length === 0 ? (
+          <EmptyState
+            title={t("invoices_empty_title")}
+            description={t("invoices_empty_desc")}
+            icon={<FileText className="h-8 w-8 text-muted-foreground" />}
+          />
+        ) : (
+          <DataTable
+            data={filteredInvoices}
+            columns={columns}
+            isLoading={false}
+          />
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+export default InvoicesTable;

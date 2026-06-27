@@ -22,7 +22,7 @@ export function saveInvoices(invoices: ClientInvoice[]): void {
 
 export function createOrUpdateInvoice(invoice: ClientInvoice): void {
   const invoices = getInvoices();
-  const index = invoices.findIndex((i) => i.jobNumber === invoice.jobNumber);
+  const index = invoices.findIndex((i) => i.id === invoice.id || i.jobNumber === invoice.jobNumber);
   if (index !== -1) {
     invoices[index] = invoice;
   } else {
@@ -30,3 +30,44 @@ export function createOrUpdateInvoice(invoice: ClientInvoice): void {
   }
   saveInvoices(invoices);
 }
+
+const MOCK_INVOICES: ClientInvoice[] = [
+  {
+    id: "INV-2026-001",
+    tenantId: "c-102", // client companyId
+    jobNumber: "SSLM-2026-000001",
+    quotationJobNumber: "SSLM-2026-000001",
+    subtotal: 5000,
+    vatAmount: 750,
+    grandTotal: 5750,
+    currency: "SAR",
+    status: "unpaid",
+    dueDate: "2026-07-28T00:00:00Z",
+    issuedAt: "2026-06-25T08:00:00Z",
+  },
+  {
+    id: "INV-2026-002",
+    tenantId: "c-103", // client companyId
+    jobNumber: "SSLM-2026-000002",
+    quotationJobNumber: "SSLM-2026-000002",
+    subtotal: 12000,
+    vatAmount: 1800,
+    grandTotal: 13800,
+    currency: "SAR",
+    status: "paid",
+    dueDate: "2026-06-30T00:00:00Z",
+    issuedAt: "2026-05-31T09:00:00Z",
+    paidAt: "2026-06-10T14:30:00Z",
+  }
+];
+
+export function getMergedInvoices(): ClientInvoice[] {
+  const localList = getInvoices();
+  if (localList.length === 0) {
+    // Seed initial mock invoices
+    saveInvoices(MOCK_INVOICES);
+    return MOCK_INVOICES;
+  }
+  return localList;
+}
+
