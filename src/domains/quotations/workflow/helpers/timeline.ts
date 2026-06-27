@@ -6,6 +6,11 @@ export function appendTimelineEvent(
   status: RequestStatus,
   comment: string
 ): LicensingRequest {
+  const lastEvent = request.timeline[request.timeline.length - 1];
+  if (lastEvent && lastEvent.status === status && lastEvent.comment === comment) {
+    return request;
+  }
+
   const nowStr = new Date().toISOString();
   const updatedTimeline = [...request.timeline];
   updatedTimeline.push({
@@ -20,3 +25,4 @@ export function appendTimelineEvent(
     updatedAt: nowStr,
   };
 }
+
