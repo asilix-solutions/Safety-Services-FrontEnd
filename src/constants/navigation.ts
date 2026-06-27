@@ -15,6 +15,7 @@ export const ROLE_NAVIGATION: Record<UserRole, NavigationItem[]> = {
     { label: "Companies", path: "/companies", iconName: "Building2" },
     { label: "Subscriptions", path: "/subscriptions", iconName: "CreditCard" },
     { label: "Users", path: "/users", iconName: "Users" },
+    { label: "Certificates", path: "/certificates", iconName: "Award" },
     { label: "Settings", path: "/settings", iconName: "Settings" },
   ],
   "Company Admin": [
@@ -26,6 +27,7 @@ export const ROLE_NAVIGATION: Record<UserRole, NavigationItem[]> = {
     { label: "Employees", path: "/employees", iconName: "Users2" },
     { label: "Reports", path: "/reports", iconName: "FileSpreadsheet" },
     { label: "Contracts", path: "/contracts", iconName: "FileCheck2" },
+    { label: "Certificates", path: "/certificates", iconName: "Award" },
     { label: "Invoices", path: "/invoices", iconName: "Receipt" },
     { label: "Settings", path: "/settings", iconName: "Settings2" },
   ],
@@ -57,6 +59,7 @@ export const ROLE_NAVIGATION: Record<UserRole, NavigationItem[]> = {
     { label: "My Requests", path: "/requests", iconName: "FileQuestion" },
     { label: "Projects", path: "/projects", iconName: "Layers" },
     { label: "Contracts", path: "/contracts", iconName: "FileCheck2" },
+    { label: "Certificates", path: "/certificates", iconName: "Award" },
     { label: "Invoices", path: "/invoices", iconName: "Receipt" },
   ],
 };

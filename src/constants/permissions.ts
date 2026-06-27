@@ -10,6 +10,8 @@ export const ROLE_PERMISSIONS: Record<UserRole, RolePermissionKey[]> = {
     "reports.view",
     "licenses.view",
     "customers.view",
+    "certificates.view",
+    "certificates.manage",
   ],
   "Company Admin": [
     "projects.view",
@@ -29,6 +31,9 @@ export const ROLE_PERMISSIONS: Record<UserRole, RolePermissionKey[]> = {
     "invoices.approve",
     "invoices.manage",
     "requests.view",
+    "certificates.view",
+    "certificates.create",
+    "certificates.manage",
   ],
   "Consulting Engineer": [
     "projects.view",
@@ -59,6 +64,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, RolePermissionKey[]> = {
     "invoices.view",
     "invoices.download",
     "requests.view",
+    "certificates.view",
   ],
 };
 

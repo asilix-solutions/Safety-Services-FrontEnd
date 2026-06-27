@@ -30,4 +30,7 @@ export type RolePermissionKey =
   | "invoices.approve"
   | "invoices.manage"
   | "invoices.download"
-  | "requests.view";
+  | "requests.view"
+  | "certificates.view"
+  | "certificates.create"
+  | "certificates.manage";

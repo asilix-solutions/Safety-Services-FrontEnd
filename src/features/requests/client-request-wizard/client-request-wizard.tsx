@@ -9,6 +9,7 @@ import { useAuth } from "@/providers/AuthProvider";
 import { RequiredDocument, RequestType, RequestClassification, RequestQueue, LicensingRequest } from "@/domains/requests/types";
 import { DEFAULT_REQUIRED_DOCUMENTS, HIGH_HAZARD_KEYWORDS, HIGH_HAZARD_ISIC_CODES } from "@/domains/requests/constants";
 import { getClassificationReason, getQueueDisplayName } from "@/domains/requests/workflow";
+import { getRequests, saveRequests, getRequestDraft, saveRequestDraft, deleteRequestDraft } from "@/domains/requests/storage";
 
 // Steps Components
 import { WizardProgress } from "./wizard-progress";
@@ -90,15 +91,14 @@ export function ClientRequestWizard() {
   const selectedRequestType = form.watch("requestType");
   const formValues = form.watch();
 
-  // Load draft from localStorage on mount
+  // Load draft on mount
   useEffect(() => {
     try {
-      const draft = localStorage.getItem("SSLM_CLIENT_REQUEST_DRAFT");
+      const draft = getRequestDraft();
       if (draft) {
-        const parsed = JSON.parse(draft);
-        form.reset(parsed.values);
-        setDocuments(parsed.documents || []);
-        setStep(parsed.step || 1);
+        form.reset(draft.values);
+        setDocuments(draft.documents || []);
+        setStep(draft.step || 1);
       } else {
         // Init default docs
         initDefaultDocuments("new_license");
@@ -116,10 +116,9 @@ export function ClientRequestWizard() {
   // Re-init docs when requestType changes, only if not restored from draft
   useEffect(() => {
     if (selectedRequestType) {
-      const draft = localStorage.getItem("SSLM_CLIENT_REQUEST_DRAFT");
+      const draft = getRequestDraft();
       if (draft) {
-        const parsed = JSON.parse(draft);
-        if (parsed.values.requestType === selectedRequestType) {
+        if (draft.values.requestType === selectedRequestType) {
           // restored values match
           return;
         }
@@ -147,7 +146,7 @@ export function ClientRequestWizard() {
       documents: docs,
       updatedAt: new Date().toISOString(),
     };
-    localStorage.setItem("SSLM_CLIENT_REQUEST_DRAFT", JSON.stringify(state));
+    saveRequestDraft(state);
   };
 
   const handleNext = () => {
@@ -213,16 +212,8 @@ export function ClientRequestWizard() {
     // Simulate submission delay
     await new Promise((resolve) => setTimeout(resolve, 1500));
 
-    // Get current requests list from local storage or empty array
-    let currentRequests: LicensingRequest[] = [];
-    try {
-      const local = localStorage.getItem("SSLM_CLIENT_REQUESTS");
-      if (local) {
-        currentRequests = JSON.parse(local);
-      }
-    } catch (err) {
-      console.error("Failed to read requests from localstorage", err);
-    }
+    // Get current requests list from storage
+    const currentRequests = getRequests();
 
     // Generate Job Number
     const count = currentRequests.length + 1;
@@ -279,12 +270,12 @@ export function ClientRequestWizard() {
       ],
     };
 
-    // Store in localStorage
+    // Store in storage
     currentRequests.push(newRequest);
-    localStorage.setItem("SSLM_CLIENT_REQUESTS", JSON.stringify(currentRequests));
+    saveRequests(currentRequests);
 
     // Clear draft
-    localStorage.removeItem("SSLM_CLIENT_REQUEST_DRAFT");
+    deleteRequestDraft();
 
     setSubmittedRequest(newRequest);
     setSubmitting(false);

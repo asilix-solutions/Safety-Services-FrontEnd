@@ -52,3 +52,32 @@ export function upsertRequest(request: LicensingRequest): void {
   }
   saveRequests(localList);
 }
+
+export function getRequestDraft(): any | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const draft = localStorage.getItem("SSLM_CLIENT_REQUEST_DRAFT");
+    return draft ? JSON.parse(draft) : null;
+  } catch (err) {
+    console.error("Failed to parse SSLM_CLIENT_REQUEST_DRAFT", err);
+    return null;
+  }
+}
+
+export function saveRequestDraft(draft: any): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem("SSLM_CLIENT_REQUEST_DRAFT", JSON.stringify(draft));
+  } catch (err) {
+    console.error("Failed to save SSLM_CLIENT_REQUEST_DRAFT", err);
+  }
+}
+
+export function deleteRequestDraft(): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.removeItem("SSLM_CLIENT_REQUEST_DRAFT");
+  } catch (err) {
+    console.error("Failed to remove SSLM_CLIENT_REQUEST_DRAFT", err);
+  }
+}

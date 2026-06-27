@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "@/providers/AuthProvider";
 import { MOCK_REQUESTS } from "@/mock/requests";
 import { LicensingRequest, RequestType, WorkflowStage, RequestQueue } from "@/domains/requests/types";
+import { getMergedRequests, upsertRequest } from "@/domains/requests/storage";
 import { PageHeader } from "@/shared/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Button } from "@/shared/ui/button";
@@ -41,22 +42,7 @@ export default function EngineeringWorkspacePage() {
 
   useEffect(() => {
     if (jobNumber) {
-      let localList: LicensingRequest[] = [];
-      try {
-        const local = localStorage.getItem("SSLM_CLIENT_REQUESTS");
-        if (local) {
-          localList = JSON.parse(local);
-        }
-      } catch (err) {
-        console.error("Failed to read requests", err);
-      }
-
-      const merged = [...localList, ...MOCK_REQUESTS].map((r) => ({
-        ...r,
-        currentStage: r.currentStage || mapStatusToStage(r.status),
-        assignedQueue: r.assignedQueue || (r.classification === "high_hazard_review" ? "HIGH_HAZARD" : r.classification === "engineering_project" ? "ENGINEERING" : r.classification === "maintenance_strategy" ? "MAINTENANCE" : "FAST_TRACK")
-      }));
-
+      const merged = getMergedRequests();
       const found = merged.find((r) => r.jobNumber === jobNumber);
       if (found) {
         setRequest(found);
@@ -99,19 +85,9 @@ export default function EngineeringWorkspacePage() {
     const updatedRequest = { ...request, currentStage: "QUOTATION" as WorkflowStage };
     setRequest(updatedRequest);
     
-    // Save state in localStorage
+    // Save state in storage
     try {
-      const local = localStorage.getItem("SSLM_CLIENT_REQUESTS");
-      const list: LicensingRequest[] = local ? JSON.parse(local) : [];
-      const idx = list.findIndex(r => r.jobNumber === request.jobNumber);
-
-      if (idx !== -1) {
-        list[idx] = updatedRequest;
-      } else {
-        list.unshift(updatedRequest);
-      }
-
-      localStorage.setItem("SSLM_CLIENT_REQUESTS", JSON.stringify(list));
+      upsertRequest(updatedRequest);
     } catch(e) {
       console.error("Failed to persist quotation transition", e);
     }

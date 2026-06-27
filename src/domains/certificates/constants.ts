@@ -1,0 +1,1 @@
+export const CERTIFICATE_VALIDITY_DAYS = 365;

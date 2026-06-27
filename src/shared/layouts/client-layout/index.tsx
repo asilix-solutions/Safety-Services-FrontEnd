@@ -32,6 +32,7 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
       "My Requests": "dashboard:nav_requests",
       "Projects": "dashboard:nav_projects",
       "Contracts": "dashboard:nav_contracts",
+      "Certificates": "dashboard:nav_certificates",
       "Invoices": "dashboard:nav_invoices",
     };
     return map[label] || label;
