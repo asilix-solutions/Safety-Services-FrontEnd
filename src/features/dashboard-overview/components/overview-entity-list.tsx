@@ -49,9 +49,10 @@ export function OverviewEntityList({
           </Link>
         )
       }
+      contentClassName={items.length === 0 ? "flex-1 p-6 pt-0 flex flex-col items-center justify-center min-h-[120px]" : "flex-1 p-6 pt-0 flex flex-col justify-start space-y-3"}
     >
       {items.length === 0 ? (
-        <div className="text-xs text-muted-foreground text-center py-6">
+        <div className="text-xs text-muted-foreground text-center py-6 flex-1 flex items-center justify-center">
           {t("common:overview_no_items")}
         </div>
       ) : (

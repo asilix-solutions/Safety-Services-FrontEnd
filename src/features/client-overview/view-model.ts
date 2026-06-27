@@ -124,7 +124,7 @@ export function prepareClientOverviewViewModel(
       id: req.id,
       title: req.jobNumber,
       subtitle: req.buildingType || req.inspectionType || "—",
-      statusKey: `status_${req.status}`,
+      statusKey: `status_${(req.status || "").toLowerCase()}`,
       statusFallback: req.status,
       metaText: new Date(req.updatedAt || req.createdAt).toLocaleDateString(),
       href: `/requests/${req.jobNumber}`,
@@ -148,7 +148,8 @@ export function prepareClientOverviewViewModel(
       return {
         id: proj.id,
         title: proj.name,
-        subtitle: proj.executionPhase,
+        statusKey: `project_stage_${(proj.executionPhase || "").toLowerCase()}`,
+        statusFallback: proj.executionPhase,
         progress,
         href: `/projects`,
       };
@@ -161,7 +162,7 @@ export function prepareClientOverviewViewModel(
     activities.push({
       id: `act-req-${req.id}`,
       type: "request",
-      titleKey: `request_status_${req.status}`,
+      titleKey: `request_status_${(req.status || "").toLowerCase()}`,
       titleFallback: `Request ${req.jobNumber} status: ${req.status}`,
       timestamp: req.updatedAt || req.createdAt,
       referenceId: req.jobNumber,
@@ -173,7 +174,7 @@ export function prepareClientOverviewViewModel(
     activities.push({
       id: `act-proj-${proj.id}`,
       type: "project",
-      titleKey: `project_stage_${proj.executionPhase}`,
+      titleKey: `project_stage_${(proj.executionPhase || "").toLowerCase()}`,
       titleFallback: `Project ${proj.name} reached phase ${proj.executionPhase}`,
       timestamp: proj.updatedAt || proj.createdAt || new Date().toISOString(),
       referenceId: proj.id,

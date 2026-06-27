@@ -15,12 +15,12 @@ export function OverviewSection({
   description,
   actionButton,
   children,
-  className = "border-border bg-card shadow-sm h-full flex flex-col justify-between",
-  contentClassName = "space-y-3",
+  className = "border-border bg-card shadow-sm h-full flex flex-col",
+  contentClassName = "flex-1 p-6 pt-0 flex flex-col justify-start space-y-3",
 }: OverviewSectionProps) {
   return (
     <Card className={className}>
-      <CardHeader className="flex flex-row items-center justify-between pb-4">
+      <CardHeader className="flex flex-row items-center justify-between p-6 pb-4">
         <div className="space-y-1.5 min-w-0">
           <CardTitle className="text-sm font-bold text-foreground flex items-center gap-2 flex-wrap">
             {title}

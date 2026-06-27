@@ -46,8 +46,8 @@ export function OverviewActionList({
           )}
         </>
       }
-      className="border-border bg-card shadow-sm h-full flex flex-col justify-between"
-      contentClassName="p-0"
+      className="border-border bg-card shadow-sm h-full flex flex-col"
+      contentClassName={items.length === 0 ? "flex-1 flex flex-col items-center justify-center p-6" : "flex-1 p-0"}
     >
       {items.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-10 px-4 text-center">
