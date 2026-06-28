@@ -41,12 +41,12 @@ export function OverviewEntityList({
       }
       actionButton={
         viewAllHref && (
-          <Link href={viewAllHref} passHref legacyBehavior>
-            <Button variant="ghost" size="sm" className="h-8 text-xs font-semibold gap-1 text-primary hover:text-primary/95 cursor-pointer">
+          <Button asChild variant="ghost" size="sm" className="h-8 text-xs font-semibold gap-1 text-primary hover:text-primary/95 cursor-pointer">
+            <Link href={viewAllHref}>
               {viewAllLabel}
               <ArrowRight className="h-3 w-3 rtl:rotate-180" />
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         )
       }
       contentClassName={items.length === 0 ? "flex-1 p-6 pt-0 flex flex-col items-center justify-center min-h-[120px]" : "flex-1 p-6 pt-0 flex flex-col justify-start space-y-3"}

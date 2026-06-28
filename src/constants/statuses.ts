@@ -1,4 +1,4 @@
-import { ProjectStatus } from "@/types/project";
+import { ProjectStatus } from "@/types/project-status";
 import { LicenseStatus } from "@/types/license";
 import { MaintenanceStatus } from "@/types/maintenance";
 import { CustomerStatus } from "@/types/customer";

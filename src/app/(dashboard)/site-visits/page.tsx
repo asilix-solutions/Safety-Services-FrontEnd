@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useAuth } from "@/providers/AuthProvider";
+import { useTranslation } from "@/providers/i18n-provider";
 import { PageHeader } from "@/shared/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Button } from "@/shared/ui/button";

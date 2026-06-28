@@ -52,7 +52,7 @@ export function approveFinalInspection({
     };
   }
 
-  let updatedProject = { ...project, workspace: updatedWorkspace };
+  let updatedProject: Project = { ...project, workspace: updatedWorkspace };
   let updatedRequest = request;
 
   if (request) {
@@ -136,7 +136,7 @@ export function requestFinalInspectionFixes({
     };
   }
 
-  let updatedProject = { ...project, workspace: updatedWorkspace };
+  let updatedProject: Project = { ...project, workspace: updatedWorkspace };
   let updatedRequest = request;
 
   if (request) {

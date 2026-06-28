@@ -3,7 +3,7 @@ import { Badge } from "@/shared/ui/badge";
 import { useTranslation } from "@/providers/i18n-provider";
 import { PROJECT_STATUS_METADATA, LICENSE_STATUS_METADATA, MAINTENANCE_STATUS_METADATA, CUSTOMER_STATUS_METADATA } from "@/constants/statuses";
 import { PROJECT_STATUS_TX, LICENSE_STATUS_TX, MAINTENANCE_STATUS_TX, CUSTOMER_STATUS_TX } from "@/constants/status-translations";
-import { ProjectStatus } from "@/types/project";
+import { ProjectStatus } from "@/types/project-status";
 import { LicenseStatus } from "@/types/license";
 import { MaintenanceStatus } from "@/types/maintenance";
 import { CustomerStatus } from "@/types/customer";

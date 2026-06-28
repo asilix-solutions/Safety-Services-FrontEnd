@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { clientRequestSchema, ClientRequestFormValues } from "@/schemas/client-request.schema";
@@ -63,8 +63,8 @@ export function ClientRequestWizard() {
   const [submitting, setSubmitting] = useState(false);
   const [submittedRequest, setSubmittedRequest] = useState<LicensingRequest | null>(null);
 
-  const form = useForm<ClientRequestFormValues>({
-    resolver: zodResolver(clientRequestSchema),
+  const form = useForm<ClientRequestFormValues, unknown, ClientRequestFormValues>({
+    resolver: zodResolver(clientRequestSchema) as Resolver<ClientRequestFormValues>,
     defaultValues: {
       requestType: "new_license",
       facilityName: "",
@@ -89,7 +89,7 @@ export function ClientRequestWizard() {
   });
 
   const selectedRequestType = form.watch("requestType");
-  const formValues = form.watch();
+  const formValues = form.watch() as ClientRequestFormValues;
 
   // Load draft on mount
   useEffect(() => {

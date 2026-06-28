@@ -677,10 +677,7 @@ export default function RequestDetailsPage() {
                     <div className="space-y-1 text-xs">
                       <div className="flex items-center justify-between">
                         <span className="font-bold text-foreground capitalize">
-                          {event.status === "ready_for_final_inspection"
-                            ? (t("requests:timeline.readyForFinalInspection") || "Final Inspection Ready")
-                            : getRequestStatusDisplayName(event.status, t)
-                          }
+                          {getRequestStatusDisplayName(event.status, t)}
                         </span>
                         <span className="text-[10px] text-muted-foreground">{new Date(event.date).toLocaleDateString()}</span>
                       </div>

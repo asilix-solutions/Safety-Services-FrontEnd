@@ -63,11 +63,11 @@ export function confirmMockPaymentAndInitializeProject({
   // 3. Update Request stage to PROJECT_CREATED and append timeline event idempotently
   const updatedTimeline = [...request.timeline];
   const hasTimelineMarker = updatedTimeline.some(
-    (t) => t.status === "APPROVED" && t.comment.includes("Payment Confirmed")
+    (t) => t.status === "approved" && t.comment.includes("Payment Confirmed")
   );
   if (!hasTimelineMarker) {
     updatedTimeline.push({
-      status: "APPROVED",
+      status: "approved",
       comment: `Payment Confirmed. Ref: ${payment.transactionReference}`,
       date: nowStr,
     });

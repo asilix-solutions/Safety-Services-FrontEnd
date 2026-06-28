@@ -65,15 +65,17 @@ export function OverviewWelcomeCard({
         {actions && actions.length > 0 && (
           <div className="flex flex-wrap gap-3 shrink-0">
             {actions.map((act, idx) => (
-              <Link key={idx} href={act.href} passHref legacyBehavior>
-                <Button
-                  variant={act.variant || "default"}
-                  className="h-9 gap-1.5 text-xs font-semibold cursor-pointer border-border"
-                >
+              <Button
+                key={idx}
+                asChild
+                variant={act.variant || "default"}
+                className="h-9 gap-1.5 text-xs font-semibold cursor-pointer border-border"
+              >
+                <Link href={act.href}>
                   {act.iconName && getOverviewIcon(act.iconName, "h-4 w-4")}
                   {t(`common:${act.labelKey}`) !== `common:${act.labelKey}` ? t(`common:${act.labelKey}`) : act.labelFallback}
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             ))}
           </div>
         )}

@@ -70,11 +70,11 @@ export function OverviewActionList({
                   )}
                 </div>
               </div>
-              <Link href={item.href} passHref legacyBehavior>
-                <Button size="sm" className="h-8 text-xs font-semibold shrink-0 cursor-pointer">
+              <Button asChild size="sm" className="h-8 text-xs font-semibold shrink-0 cursor-pointer">
+                <Link href={item.href}>
                   {t(`common:${item.actionLabelKey}`) !== `common:${item.actionLabelKey}` ? t(`common:${item.actionLabelKey}`) : item.actionLabelFallback}
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </div>
           ))}
         </div>

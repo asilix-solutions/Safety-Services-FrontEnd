@@ -47,7 +47,7 @@ export function completeProjectExecution({
     };
   }
 
-  let updatedProject = { ...project, workspace: updatedWorkspace };
+  let updatedProject: Project = { ...project, workspace: updatedWorkspace };
   let updatedRequest = request;
 
   if (request) {
@@ -61,7 +61,7 @@ export function completeProjectExecution({
     
     updatedRequest = appendTimelineEvent(
       synced.updatedRequest,
-      "ready_for_final_inspection",
+      "in_execution",
       `Project execution completed. Ready for final inspection. Notes: ${completionNotes}`
     );
 

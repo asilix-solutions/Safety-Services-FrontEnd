@@ -25,7 +25,7 @@ export function OverviewQuickAccess({
       <h3 className="text-sm font-bold text-foreground">{title}</h3>
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         {links.map((link) => (
-          <Link key={link.id} href={link.href} passHref legacyBehavior>
+          <Link key={link.id} href={link.href}>
             <Card className="border-border bg-card shadow-sm hover:border-primary/30 transition-all cursor-pointer group">
               <CardContent className="p-4 flex flex-col items-center text-center space-y-2">
                 <div className="p-2 rounded-xl bg-muted/40 group-hover:bg-primary/5 transition-all">

@@ -23,7 +23,7 @@ export function ClientDashboard() {
   const [viewModel, setViewModel] = useState<ClientOverviewViewModel | null>(null);
 
   const loadData = () => {
-    if (!user) return;
+    if (!user || !user.companyId) return;
 
     const requests = getMergedRequests();
     const projects = getProjects();
@@ -35,7 +35,7 @@ export function ClientDashboard() {
       {
         name: user.name,
         companyId: user.companyId,
-        companyName: user.companyName,
+        companyName: user.name ?? "—",
       },
       {
         requests,
@@ -53,7 +53,7 @@ export function ClientDashboard() {
     loadData();
   }, [user]);
 
-  if (!user || !viewModel) {
+  if (!user || !user.companyId || !viewModel) {
     return (
       <div className="flex items-center justify-center min-h-[50vh] text-xs text-muted-foreground">
         {t("common:loading")}

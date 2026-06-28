@@ -1,8 +1,9 @@
-import { ClientRequest } from "@/domains/requests/types";
+import { LicensingRequest } from "@/domains/requests/types";
+import { RequestStatus } from "@/types/request-status";
 import { Project } from "@/types/project";
 import { ClientInvoice } from "@/domains/invoices/types";
 import { ClientContract } from "@/domains/contracts/types";
-import { ComplianceCertificate } from "@/domains/certificates/types";
+import { ClientCertificate } from "@/domains/certificates/types";
 import {
   OverviewWelcomeBtn,
   OverviewStatItem,
@@ -29,11 +30,11 @@ export interface ClientOverviewViewModel {
 export function prepareClientOverviewViewModel(
   user: { name: string; companyId: string; companyName?: string },
   data: {
-    requests: ClientRequest[];
+    requests: LicensingRequest[];
     projects: Project[];
     invoices: ClientInvoice[];
     contracts: ClientContract[];
-    certificates: ComplianceCertificate[];
+    certificates: ClientCertificate[];
   }
 ): ClientOverviewViewModel {
   const companyId = user.companyId;
@@ -46,8 +47,11 @@ export function prepareClientOverviewViewModel(
   const clientCertificates = data.certificates.filter((c) => c.clientId === companyId);
 
   // Welcome Stats
-  const activeRequests = clientRequests.filter((r) => r.status !== "Approved" && r.status !== "Rejected");
-  const activeProjects = clientProjects.filter((p) => p.status === "in_progress" || p.status === "active");
+  const inactiveRequestStatuses: RequestStatus[] = ["completed", "closed"];
+  const activeRequests = clientRequests.filter(
+    (r) => !inactiveRequestStatuses.includes(r.status)
+  );
+  const activeProjects = clientProjects.filter((p) => p.status === "active");
 
   const welcomeStats: OverviewStatItem[] = [
     {
@@ -123,7 +127,7 @@ export function prepareClientOverviewViewModel(
     .map((req): OverviewEntityItem => ({
       id: req.id,
       title: req.jobNumber,
-      subtitle: req.buildingType || req.inspectionType || "—",
+      subtitle: req.facilityName || req.activityName || req.requestType || "—",
       statusKey: `status_${(req.status || "").toLowerCase()}`,
       statusFallback: req.status,
       metaText: new Date(req.updatedAt || req.createdAt).toLocaleDateString(),

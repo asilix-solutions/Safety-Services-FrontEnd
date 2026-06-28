@@ -45,7 +45,7 @@ export function confirmPaymentAndCreateProject({
     invoiceId: invoice.id,
     jobNumber: request.jobNumber,
     amountPaid,
-    paymentMethod,
+    paymentMethod: paymentMethod as "MOCK_PAYMENT",
     transactionReference,
     paidAt: nowStr,
     status: "SUCCESS",
@@ -61,7 +61,7 @@ export function confirmPaymentAndCreateProject({
 
   const updatedRequest = appendTimelineEvent(
     syncedRequest,
-    "APPROVED", // status in timeline schema matches Payment APPROVED
+    "approved", // status in timeline schema matches Payment approved
     `Payment Confirmed. Ref: ${transactionReference}`
   );
 

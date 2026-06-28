@@ -86,7 +86,7 @@ export default function QuotationApprovalDetailsPage() {
     return (
       <div className="flex h-[50vh] flex-col items-center justify-center space-y-4">
         <p className="text-muted-foreground">
-          {t("requests:quotations.builder.notFound", { jobNumber }) || "Quotation not found"}
+          {`${t("requests:quotations.builder.notFound") || "Quotation not found"} ${jobNumber}`}
         </p>
         <Link href="/quotations/approvals">
           <Button variant="outline" size="sm" className="gap-1">
@@ -351,7 +351,7 @@ export default function QuotationApprovalDetailsPage() {
                         ? t("requests:quotations.details.requestChangesDialogTitle")
                         : t("requests:quotations.details.rejectDialogTitle")}
                     </span>
-                    <Button variant="ghost" size="xs" onClick={() => setActionType(null)} className="text-xs">
+                    <Button variant="ghost" size="sm" onClick={() => setActionType(null)} className="text-xs">
                       {t("requests:quotations.details.close") || "Cancel"}
                     </Button>
                   </div>

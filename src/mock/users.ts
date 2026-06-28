@@ -7,7 +7,7 @@ export const MOCK_USERS: Record<string, UserProfile> = {
     email: "alexander.vance@safetysystem.com",
     role: "Super Admin",
     avatarUrl: "https://api.dicebear.com/7.x/adventurer/svg?seed=Alexander",
-    permissions: ["users.manage", "analytics.view", "projects.view", "reports.view", "licenses.view", "customers.view"],
+    permissions: ["users.manage", "projects.view", "reports.view", "licenses.view", "customers.view"],
     active: true,
   },
   "Company Admin": {
@@ -17,7 +17,7 @@ export const MOCK_USERS: Record<string, UserProfile> = {
     role: "Company Admin",
     companyId: "c-101",
     avatarUrl: "https://api.dicebear.com/7.x/adventurer/svg?seed=Sarah",
-    permissions: ["projects.view", "projects.create", "projects.edit", "projects.delete", "reports.view", "reports.create", "analytics.view", "customers.view", "customers.manage"],
+    permissions: ["projects.view", "projects.create", "projects.edit", "projects.delete", "reports.view", "reports.create", "customers.view", "customers.manage"],
     active: true,
   },
   "Consulting Engineer": {
@@ -36,7 +36,7 @@ export const MOCK_USERS: Record<string, UserProfile> = {
     role: "Operations Officer",
     companyId: "c-101",
     avatarUrl: "https://api.dicebear.com/7.x/adventurer/svg?seed=Elena",
-    permissions: ["projects.view", "maintenance.view", "maintenance.create", "maintenance.complete", "reports.view"],
+    permissions: ["projects.view", "reports.view"],
     active: true,
   },
   "Sales Agent": {
@@ -45,7 +45,7 @@ export const MOCK_USERS: Record<string, UserProfile> = {
     email: "james.s@safetysystem.com",
     role: "Sales Agent",
     avatarUrl: "https://api.dicebear.com/7.x/adventurer/svg?seed=James",
-    permissions: ["customers.view", "customers.manage", "analytics.view"],
+    permissions: ["customers.view", "customers.manage"],
     active: true,
   },
   Client: {

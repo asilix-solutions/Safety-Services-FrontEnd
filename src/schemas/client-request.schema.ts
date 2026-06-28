@@ -9,10 +9,7 @@ export const clientRequestSchema = z.object({
   crNumber: z.string().regex(/^\d{10}$/, "CR / 700 Number must be exactly 10 digits"),
   activityName: z.string().min(2, "Activity name is required"),
   isicCode: z.string().min(2, "ISIC code is required"),
-  area: z.preprocess(
-    (val) => (val === "" ? undefined : Number(val)),
-    z.number({ required_error: "Area must be a number" }).positive("Area must be greater than 0")
-  ),
+  area: z.coerce.number().positive("Area must be greater than 0"),
   city: z.string().min(2, "City name is required"),
   district: z.string().min(2, "District name is required"),
   addressDescription: z.string().min(5, "Address details must be at least 5 characters"),

@@ -159,7 +159,7 @@ export function InvoiceAuditDialog({
             </h4>
             <div className="grid grid-cols-2 gap-2">
               <Link href={`/requests/${invoice.jobNumber}`} className="w-full">
-                <Button variant="outline" size="xs" className="w-full justify-start text-[10px] h-8 gap-1.5 font-normal">
+                <Button variant="outline" size="sm" className="w-full justify-start text-[10px] h-8 gap-1.5 font-normal">
                   <ClipboardList className="h-3.5 w-3.5 text-primary shrink-0" />
                   <span className="truncate">{t("invoices_relation_request")}</span>
                 </Button>
@@ -167,7 +167,7 @@ export function InvoiceAuditDialog({
 
               {hasLinkedProject && (
                 <Link href="/projects" className="w-full">
-                  <Button variant="outline" size="xs" className="w-full justify-start text-[10px] h-8 gap-1.5 font-normal">
+                  <Button variant="outline" size="sm" className="w-full justify-start text-[10px] h-8 gap-1.5 font-normal">
                     <Layers className="h-3.5 w-3.5 text-indigo-500 shrink-0" />
                     <span className="truncate">{t("invoices_relation_project")}</span>
                   </Button>
@@ -176,7 +176,7 @@ export function InvoiceAuditDialog({
 
               {hasLinkedContract && (
                 <Link href="/contracts" className="w-full">
-                  <Button variant="outline" size="xs" className="w-full justify-start text-[10px] h-8 gap-1.5 font-normal">
+                  <Button variant="outline" size="sm" className="w-full justify-start text-[10px] h-8 gap-1.5 font-normal">
                     <FileCheck className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
                     <span className="truncate">{t("invoices_relation_contract")}</span>
                   </Button>
@@ -185,7 +185,7 @@ export function InvoiceAuditDialog({
 
               {hasLinkedQuotation && (
                 <Link href="/quotations" className="w-full">
-                  <Button variant="outline" size="xs" className="w-full justify-start text-[10px] h-8 gap-1.5 font-normal">
+                  <Button variant="outline" size="sm" className="w-full justify-start text-[10px] h-8 gap-1.5 font-normal">
                     <Landmark className="h-3.5 w-3.5 text-amber-500 shrink-0" />
                     <span className="truncate">{t("invoices_relation_quotation")}</span>
                   </Button>

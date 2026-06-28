@@ -49,8 +49,11 @@ export function generateContractFromCompletedProject(
 
 export function signContract(contractId: string, signerName: string): ClientContract {
   const contract = getContractById(contractId);
+  if (!contract) {
+    throw new Error("Contract not found");
+  }
   const validation = canSignContract(contract);
-  if (!validation.valid || !contract) {
+  if (!validation.valid) {
     throw new Error(validation.reason);
   }
 
@@ -67,8 +70,11 @@ export function signContract(contractId: string, signerName: string): ClientCont
 
 export function archiveContract(contractId: string, archivedBy?: string): ClientContract {
   const contract = getContractById(contractId);
+  if (!contract) {
+    throw new Error("Contract not found");
+  }
   const validation = canArchiveContract(contract);
-  if (!validation.valid || !contract) {
+  if (!validation.valid) {
     throw new Error(validation.reason);
   }
 

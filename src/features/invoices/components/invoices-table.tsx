@@ -103,7 +103,7 @@ export function InvoicesTable({
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
-              size="xs"
+              size="sm"
               className="h-7 px-2 text-xs flex items-center gap-1"
               onClick={() => onViewDetails(row)}
             >
@@ -113,7 +113,7 @@ export function InvoicesTable({
             {!isPaid && (
               <Button
                 variant="default"
-                size="xs"
+                size="sm"
                 className="h-7 px-2 text-xs flex items-center gap-1"
                 onClick={() => onPayInvoice(row)}
               >

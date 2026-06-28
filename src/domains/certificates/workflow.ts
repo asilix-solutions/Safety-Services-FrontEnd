@@ -57,8 +57,11 @@ export function revokeCertificate(
   reason?: string
 ): ClientCertificate {
   const certificate = getCertificateById(certificateId);
+  if (!certificate) {
+    throw new Error("Certificate not found");
+  }
   const validation = canRevokeCertificate(certificate, reason);
-  if (!validation.valid || !certificate) {
+  if (!validation.valid) {
     throw new Error(validation.reason);
   }
 
