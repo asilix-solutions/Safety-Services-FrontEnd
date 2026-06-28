@@ -3,6 +3,7 @@ import { OverviewEntityItem } from "../types";
 import { OverviewSection } from "./overview-section";
 import { Button } from "@/shared/ui/button";
 import { useTranslation } from "@/providers/i18n-provider";
+import { EmptyState } from "@/shared/components/empty-state";
 import { getOverviewProgressColor } from "../helpers/overview-helpers";
 import Link from "next/link";
 import { ArrowRight, FileText } from "lucide-react";
@@ -49,12 +50,15 @@ export function OverviewEntityList({
           </Button>
         )
       }
+      className={items.length === 0 ? "border-border bg-card shadow-sm h-auto flex flex-col" : "border-border bg-card shadow-sm h-full flex flex-col"}
       contentClassName={items.length === 0 ? "flex-1 p-6 pt-0 flex flex-col items-center justify-center min-h-[120px]" : "flex-1 p-6 pt-0 flex flex-col justify-start space-y-3"}
     >
       {items.length === 0 ? (
-        <div className="text-xs text-muted-foreground text-center py-6 flex-1 flex items-center justify-center">
-          {t("common:overview_no_items")}
-        </div>
+        <EmptyState
+          title={t("common:overview_no_items") || "No items to display"}
+          description={t("common:overview_no_items") || "No items found."}
+          compact
+        />
       ) : (
         <div className="space-y-3">
           {items.map((item) => (

@@ -74,6 +74,9 @@ export function OverviewRecentActivity({
                 {event.referenceId && (
                   <p className="text-[10px] font-mono text-muted-foreground">{event.referenceId}</p>
                 )}
+                {event.descriptionFallback && (
+                  <p className="text-[10px] text-muted-foreground mt-0.5">{event.descriptionFallback}</p>
+                )}
               </div>
             </div>
           ))}

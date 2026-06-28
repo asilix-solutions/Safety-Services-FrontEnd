@@ -23,12 +23,12 @@ export function OverviewQuickAccess({
   return (
     <div className="space-y-3">
       <h3 className="text-sm font-bold text-foreground">{title}</h3>
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
         {links.map((link) => (
           <Link key={link.id} href={link.href}>
             <Card className="border-border bg-card shadow-sm hover:border-primary/30 transition-all cursor-pointer group">
-              <CardContent className="p-4 flex flex-col items-center text-center space-y-2">
-                <div className="p-2 rounded-xl bg-muted/40 group-hover:bg-primary/5 transition-all">
+              <CardContent className="p-5 md:p-6 flex flex-col items-center text-center space-y-3">
+                <div className="p-2.5 rounded-xl bg-muted/40 group-hover:bg-primary/5 transition-all">
                   {link.iconName && getOverviewIcon(link.iconName, "h-5 w-5")}
                 </div>
                 <div className="space-y-0.5">

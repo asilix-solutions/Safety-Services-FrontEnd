@@ -9,54 +9,7 @@ import { Button } from "@/shared/ui/button";
 import { Badge } from "@/shared/ui/badge";
 import { MapPin, Calendar as CalendarIcon, ClipboardList, CheckCircle2, ChevronLeft, ChevronRight, Clock } from "lucide-react";
 
-interface SiteVisit {
-  id: string;
-  projectName: string;
-  location: string;
-  inspectorName: string;
-  scheduledDate: string;
-  status: "upcoming" | "completed" | "cancelled";
-  notes: string;
-}
-
-const MOCK_VISITS: SiteVisit[] = [
-  {
-    id: "SV-101",
-    projectName: "Skyline Tower Fire Certification",
-    location: "Skyline Tower, Floor 14-20",
-    inspectorName: "Eng. Tariq Al-Mansoor",
-    scheduledDate: "2026-06-12T10:00:00Z",
-    status: "upcoming",
-    notes: "Conduct final water pressure test on the primary wet riser system.",
-  },
-  {
-    id: "SV-102",
-    projectName: "Marina Retail Electrical Inspection",
-    location: "Marina Mall, Unit B22",
-    inspectorName: "Eng. Tariq Al-Mansoor",
-    scheduledDate: "2026-06-15T09:00:00Z",
-    status: "upcoming",
-    notes: "Review automatic transfer switch calibration log.",
-  },
-  {
-    id: "SV-103",
-    projectName: "Gulf Industrial Gas Pipe Audit",
-    location: "Industrial Sector 4, Depot C",
-    inspectorName: "Eng. Tariq Al-Mansoor",
-    scheduledDate: "2026-06-08T11:00:00Z",
-    status: "completed",
-    notes: "Hydrostatic pipe tests verified. Safety certification document signed.",
-  },
-  {
-    id: "SV-104",
-    projectName: "Vertex Structural Blueprint Review",
-    location: "Vertex HQ site, Zone A",
-    inspectorName: "Eng. Tariq Al-Mansoor",
-    scheduledDate: "2026-05-24T14:30:00Z",
-    status: "completed",
-    notes: "Core load-bearing columns inspected. Rebar reinforcement approved.",
-  },
-];
+import { SiteVisit, MOCK_VISITS } from "@/domains/site-visits/storage";
 
 export default function SiteVisitsPage() {
   const { user } = useAuth();

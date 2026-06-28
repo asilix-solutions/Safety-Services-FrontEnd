@@ -3,6 +3,7 @@ import { OverviewActionItem } from "../types";
 import { OverviewSection } from "./overview-section";
 import { Button } from "@/shared/ui/button";
 import { useTranslation } from "@/providers/i18n-provider";
+import { EmptyState } from "@/shared/components/empty-state";
 import { AlertCircle, CreditCard, FileSignature, AlertOctagon } from "lucide-react";
 import Link from "next/link";
 
@@ -46,13 +47,15 @@ export function OverviewActionList({
           )}
         </>
       }
-      className="border-border bg-card shadow-sm h-full flex flex-col"
+      className={items.length === 0 ? "border-border bg-card shadow-sm h-auto flex flex-col" : "border-border bg-card shadow-sm h-full flex flex-col"}
       contentClassName={items.length === 0 ? "flex-1 flex flex-col items-center justify-center p-6" : "flex-1 p-0"}
     >
       {items.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-10 px-4 text-center">
-          <span className="text-muted-foreground text-xs font-semibold">{t("common:overview_no_actions")}</span>
-        </div>
+        <EmptyState
+          title={t("common:operations_no_actions") || "No actions required"}
+          description={t("common:overview_no_actions") || "No actions currently required."}
+          compact
+        />
       ) : (
         <div className="divide-y divide-border">
           {items.map((item) => (

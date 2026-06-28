@@ -8,6 +8,7 @@ import { FileCheck2, FileSignature, Archive, Download, Eye } from "lucide-react"
 import { getContractStatusBadgeClass, formatSARCurrency } from "../helpers/formatters";
 
 import { useTranslation } from "@/providers/i18n-provider";
+import { ActionMenu } from "@/shared/components/action-menu";
 
 interface ContractsTableProps {
   contracts: ClientContract[];
@@ -77,50 +78,49 @@ export function ContractsTable({
     },
     {
       header: t("common:actions"),
-      render: (row) => (
-        <div className="flex gap-2">
-          {row.status === "generated" && userRole === "Client" && (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => onSignContract(row.id)}
-              className="h-8 gap-1 text-xs border-emerald-500/30 text-emerald-600 hover:bg-emerald-500/10 hover:text-emerald-700"
-            >
-              <FileSignature className="h-3.5 w-3.5" />
-              {t("common:contracts_sign_approve")}
-            </Button>
-          )}
-          {row.status === "signed" && isAdmin && (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => onArchiveContract(row.id)}
-              className="h-8 gap-1 text-xs border-blue-500/30 text-blue-600 hover:bg-blue-500/10 hover:text-blue-700"
-            >
-              <Archive className="h-3.5 w-3.5" />
-              {t("common:contracts_archive")}
-            </Button>
-          )}
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => onViewDetails(row)}
-            className="h-8 gap-1 text-xs border-border hover:bg-secondary/40"
-          >
-            <Eye className="h-3.5 w-3.5" />
-            {t("common:contracts_audit_details_btn")}
-          </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => onDownloadContract(row)}
-            className="h-8 gap-1 text-xs hover:bg-secondary/60 text-muted-foreground hover:text-foreground"
-          >
-            <Download className="h-3.5 w-3.5" />
-            {t("common:contracts_download_btn")}
-          </Button>
-        </div>
-      ),
+      render: (row) => {
+        const canSign = row.status === "generated" && userRole === "Client";
+        const canArchive = row.status === "signed" && isAdmin;
+
+        const menuItems = [
+          {
+            id: "view-details",
+            label: t("common:contracts_audit_details_btn"),
+            icon: Eye,
+            onClick: () => onViewDetails(row),
+          },
+          {
+            id: "download",
+            label: t("common:contracts_download_btn"),
+            icon: Download,
+            onClick: () => onDownloadContract(row),
+          },
+          ...(canSign
+            ? [
+                {
+                  id: "sign",
+                  label: t("common:contracts_sign_approve"),
+                  icon: FileSignature,
+                  onClick: () => onSignContract(row.id),
+                  separatorBefore: true,
+                },
+              ]
+            : []),
+          ...(canArchive
+            ? [
+                {
+                  id: "archive",
+                  label: t("common:contracts_archive"),
+                  icon: Archive,
+                  onClick: () => onArchiveContract(row.id),
+                  separatorBefore: true,
+                },
+              ]
+            : []),
+        ];
+
+        return <ActionMenu items={menuItems} />;
+      },
     },
   ];
 

@@ -163,13 +163,28 @@ export function prepareClientOverviewViewModel(
   const activities: OverviewActivityItem[] = [];
 
   clientRequests.forEach((req) => {
+    const statusMap: Record<string, string> = {
+      draft: "request_status_draft",
+      submitted: "request_status_pending_review",
+      under_review: "request_status_in_review",
+      assigned: "request_status_in_review",
+      quotation_created: "request_status_in_review",
+      awaiting_approval: "request_status_action_required",
+      approved: "request_status_approved",
+      rejected: "request_status_rejected",
+      completed: "request_status_approved",
+      closed: "request_status_rejected",
+    };
+    const mappedTitleKey = statusMap[(req.status || "").toLowerCase()] || `request_status_${(req.status || "").toLowerCase()}`;
+
     activities.push({
       id: `act-req-${req.id}`,
       type: "request",
-      titleKey: `request_status_${(req.status || "").toLowerCase()}`,
+      titleKey: mappedTitleKey,
       titleFallback: `Request ${req.jobNumber} status: ${req.status}`,
       timestamp: req.updatedAt || req.createdAt,
       referenceId: req.jobNumber,
+      descriptionFallback: req.facilityName,
       href: `/requests/${req.jobNumber}`,
     });
   });
@@ -181,7 +196,8 @@ export function prepareClientOverviewViewModel(
       titleKey: `project_stage_${(proj.executionPhase || "").toLowerCase()}`,
       titleFallback: `Project ${proj.name} reached phase ${proj.executionPhase}`,
       timestamp: proj.updatedAt || proj.createdAt || new Date().toISOString(),
-      referenceId: proj.id,
+      referenceId: proj.jobNumber || proj.id,
+      descriptionFallback: proj.name,
       href: `/projects`,
     });
   });
@@ -212,7 +228,7 @@ export function prepareClientOverviewViewModel(
 
   const sortedActivities = activities
     .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-    .slice(0, 10);
+    .slice(0, 5);
 
   // Quick Access
   const quickAccessLinks: OverviewQuickAccessItem[] = [

@@ -35,7 +35,7 @@ export function OverviewWelcomeCard({
 
   return (
     <Card className="border-border bg-card shadow-sm overflow-hidden">
-      <CardContent className="p-6 md:p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+      <CardContent className="p-4 md:p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="space-y-2">
           <h2 className="text-xl md:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2 flex-wrap">
             <span>{t("common:overview_welcome_back")}</span>

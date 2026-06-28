@@ -14,6 +14,7 @@ import { DataTable, ColumnDef } from "@/shared/components/data-table/data-table"
 import { Eye, DollarSign } from "lucide-react";
 import Link from "next/link";
 import { useTranslation, useNamespaceTranslations } from "@/providers/i18n-provider";
+import { ActionMenu } from "@/shared/components/action-menu";
 import { Quotation } from "@/domains/quotations/types";
 import { getQuotations } from "@/domains/quotations/workflow";
 import { getMergedRequests } from "@/domains/requests/storage";
@@ -174,22 +175,24 @@ export default function QuotationsQueuePage() {
     {
       header: t("requests:quotations.columns.actions"),
       accessorKey: "id",
-      render: (row) => (
-        <div className="flex items-center gap-2">
-          <Link href={`/quotations/${row.jobNumber}`}>
-            <Button size="sm" className="h-8 gap-1 text-xs bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm">
-              <DollarSign className="h-3.5 w-3.5" />
-              {getActionButtonLabel(row.derivedStatus)}
-            </Button>
-          </Link>
-          <Link href={`/requests/${row.jobNumber}`}>
-            <Button variant="outline" size="sm" className="h-8 gap-1 text-xs">
-              <Eye className="h-3.5 w-3.5" />
-              {t("requests:quotations.queue.viewRequest")}
-            </Button>
-          </Link>
-        </div>
-      ),
+      render: (row) => {
+        const menuItems = [
+          {
+            id: "action-button",
+            label: getActionButtonLabel(row.derivedStatus),
+            icon: DollarSign,
+            href: `/quotations/${row.jobNumber}`,
+          },
+          {
+            id: "view-request",
+            label: t("requests:quotations.queue.viewRequest"),
+            icon: Eye,
+            href: `/requests/${row.jobNumber}`,
+          },
+        ];
+
+        return <ActionMenu items={menuItems} />;
+      },
     },
   ];
 

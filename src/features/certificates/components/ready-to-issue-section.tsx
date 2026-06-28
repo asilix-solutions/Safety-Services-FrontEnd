@@ -2,7 +2,7 @@ import React from "react";
 import { ClientContract } from "@/domains/contracts/types";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
 import { DataTable, ColumnDef } from "@/shared/tables/data-table";
-import { Button } from "@/shared/ui/button";
+import { ActionButton } from "@/shared/components/action-button";
 import { Plus, Award } from "lucide-react";
 import { useTranslation } from "@/providers/i18n-provider";
 
@@ -46,14 +46,12 @@ export function ReadyToIssueSection({
     {
       header: t("common:actions") || "Actions",
       render: (row) => (
-        <Button
-          size="sm"
+        <ActionButton
+          label={t("common:certificates_issue_btn")}
+          icon={Plus}
           onClick={() => onIssueCertificate(row)}
-          className="h-8 gap-1 text-xs bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm"
-        >
-          <Plus className="h-3.5 w-3.5" />
-          {t("common:certificates_issue_btn")}
-        </Button>
+          className="h-8 text-xs bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm border-none"
+        />
       ),
     },
   ];

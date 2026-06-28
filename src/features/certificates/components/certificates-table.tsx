@@ -6,6 +6,7 @@ import { EmptyState } from "@/shared/components/empty-state";
 import { DataTable, ColumnDef } from "@/shared/tables/data-table";
 import { Award, Eye, Download, XCircle } from "lucide-react";
 import { useTranslation } from "@/providers/i18n-provider";
+import { ActionMenu } from "@/shared/components/action-menu";
 import {
   deriveCertificateDisplayStatus,
   getCertificateStatusBadgeClass,
@@ -127,39 +128,34 @@ export function CertificatesTable({
       header: t("common:actions") || "Actions",
       render: (row) => {
         const canRevoke = isAdmin && row.status === "active";
-        return (
-          <div className="flex gap-2">
-            {canRevoke && (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => onRevokeCertificate(row.id)}
-                className="h-8 gap-1 text-xs border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
-              >
-                <XCircle className="h-3.5 w-3.5" />
-                {t("common:certificates_revoke_action")}
-              </Button>
-            )}
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => onViewDetails(row)}
-              className="h-8 gap-1 text-xs border-border hover:bg-secondary/40"
-            >
-              <Eye className="h-3.5 w-3.5" />
-              {t("common:certificates_audit_details_btn")}
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => onDownloadCertificate(row)}
-              className="h-8 gap-1 text-xs hover:bg-secondary/60 text-muted-foreground hover:text-foreground"
-            >
-              <Download className="h-3.5 w-3.5" />
-              {t("common:certificates_download_btn")}
-            </Button>
-          </div>
-        );
+        const menuItems = [
+          {
+            id: "view-details",
+            label: t("common:certificates_audit_details_btn"),
+            icon: Eye,
+            onClick: () => onViewDetails(row),
+          },
+          {
+            id: "download",
+            label: t("common:certificates_download_btn"),
+            icon: Download,
+            onClick: () => onDownloadCertificate(row),
+          },
+          ...(canRevoke
+            ? [
+                {
+                  id: "revoke",
+                  label: t("common:certificates_revoke_action"),
+                  icon: XCircle,
+                  onClick: () => onRevokeCertificate(row.id),
+                  destructive: true,
+                  separatorBefore: true,
+                },
+              ]
+            : []),
+        ];
+
+        return <ActionMenu items={menuItems} />;
       },
     },
   ];

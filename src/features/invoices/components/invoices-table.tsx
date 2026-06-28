@@ -8,6 +8,7 @@ import { DataTable, ColumnDef } from "@/shared/tables/data-table";
 import { FileText, Eye, CreditCard } from "lucide-react";
 import { useTranslation } from "@/providers/i18n-provider";
 import { SearchInput } from "@/shared/components/search-input";
+import { ActionMenu } from "@/shared/components/action-menu";
 import {
   formatCurrency,
   formatDate,
@@ -96,33 +97,28 @@ export function InvoicesTable({
       header: t("invoices_table_actions"),
       render: (row) => {
         const isPaid = row.status === "paid";
-        // Button label changes by role: Client pays, Admins mark as paid.
         const actionLabel = userRole === "Client" ? t("invoices_pay_client") : t("invoices_pay_admin");
 
-        return (
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-7 px-2 text-xs flex items-center gap-1"
-              onClick={() => onViewDetails(row)}
-            >
-              <Eye className="h-3.5 w-3.5" />
-              <span>{t("invoices_view_details")}</span>
-            </Button>
-            {!isPaid && (
-              <Button
-                variant="default"
-                size="sm"
-                className="h-7 px-2 text-xs flex items-center gap-1"
-                onClick={() => onPayInvoice(row)}
-              >
-                <CreditCard className="h-3.5 w-3.5" />
-                <span>{actionLabel}</span>
-              </Button>
-            )}
-          </div>
-        );
+        const menuItems = [
+          {
+            id: "view-details",
+            label: t("invoices_view_details"),
+            icon: Eye,
+            onClick: () => onViewDetails(row),
+          },
+          ...(!isPaid
+            ? [
+                {
+                  id: "pay-invoice",
+                  label: actionLabel,
+                  icon: CreditCard,
+                  onClick: () => onPayInvoice(row),
+                },
+              ]
+            : []),
+        ];
+
+        return <ActionMenu items={menuItems} />;
       },
     },
   ];
