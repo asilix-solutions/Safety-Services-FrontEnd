@@ -320,7 +320,30 @@
   "consultingEngineer.overview.module.blueprintReview": "مراجعة المخططات",
   "consultingEngineer.overview.module.quotations": "عروض الأسعار",
   "consultingEngineer.overview.module.siteVisits": "الزيارات الميدانية",
-  "consultingEngineer.overview.module.projects": "المشاريع"
+  "consultingEngineer.overview.module.projects": "المشاريع",
+  "salesAgent.overview.assignedCustomers": "العملاء المعينون",
+  "salesAgent.overview.newRequests": "الطلبات الجديدة",
+  "salesAgent.overview.awaitingFollowUp": "في انتظار المتابعة",
+  "salesAgent.overview.activePipelines": "الطلبات النشطة",
+  "salesAgent.overview.customerFollowUpQueue": "طابور متابعة العملاء",
+  "salesAgent.overview.recentCustomerRequests": "طلبات العملاء الأخيرة",
+  "salesAgent.overview.requiredActions": "الإجراءات المطلوبة",
+  "salesAgent.overview.recentActivity": "آخر أنشطة العملاء",
+  "salesAgent.overview.quickAccess": "وصول سريع",
+  "salesAgent.overview.contactCustomer": "الاتصال بالعميل",
+  "salesAgent.overview.trackRequest": "متابعة حالة الطلب",
+  "salesAgent.overview.customers": "العملاء",
+  "salesAgent.overview.requests": "الطلبات",
+  "salesAgent.overview.followUpPendingRequest": "متابعة الطلب المعلق",
+  "salesAgent.overview.reviewCustomerRequest": "مراجعة طلب العميل",
+  "salesAgent.overview.noActions": "لا توجد إجراءات مطلوبة حالياً.",
+  "salesAgent.overview.noSchedule": "لا يوجد عملاء بحاجة إلى متابعة حالياً.",
+  "salesAgent.overview.activity.newCustomer": "تم تعيين عميل جديد",
+  "salesAgent.overview.activity.submitted": "تم تقديم طلب العميل",
+  "salesAgent.overview.activity.followUp": "تم تحديث متابعة العميل",
+  "salesAgent.overview.activity.review": "بدأت مراجعة الطلب",
+  "salesAgent.overview.activity.quotationReady": "عرض السعر جاهز",
+  "salesAgent.overview.activity.waiting": "في انتظار العميل"
 }
 
 
