@@ -15,7 +15,7 @@ export function OverviewSection({
   description,
   actionButton,
   children,
-  className = "border-border bg-card shadow-sm h-full flex flex-col",
+  className = "border-border bg-card shadow-sm min-h-[260px] max-h-[360px] flex flex-col h-full",
   contentClassName = "flex-1 p-6 pt-0 flex flex-col justify-start space-y-3",
 }: OverviewSectionProps) {
   return (

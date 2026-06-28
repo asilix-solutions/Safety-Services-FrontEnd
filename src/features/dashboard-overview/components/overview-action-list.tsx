@@ -47,8 +47,8 @@ export function OverviewActionList({
           )}
         </>
       }
-      className={items.length === 0 ? "border-border bg-card shadow-sm h-auto flex flex-col" : "border-border bg-card shadow-sm h-full flex flex-col"}
-      contentClassName={items.length === 0 ? "flex-1 flex flex-col items-center justify-center p-6" : "flex-1 p-0"}
+      className="border-border bg-card shadow-sm min-h-[260px] max-h-[360px] flex flex-col h-full"
+      contentClassName={items.length === 0 ? "flex-1 flex flex-col items-center justify-center p-6" : "flex-1 overflow-y-auto p-0"}
     >
       {items.length === 0 ? (
         <EmptyState

@@ -3,6 +3,7 @@ import { ClientOverviewViewModel } from "./view-model";
 import {
   OverviewShell,
   OverviewWelcomeCard,
+  OverviewSummaryCard,
   OverviewActionList,
   OverviewEntityList,
   OverviewRecentActivity,
@@ -20,17 +21,16 @@ export function ClientOverview({ viewModel }: ClientOverviewProps) {
       {/* 1. Welcome Card */}
       <OverviewWelcomeCard
         name={viewModel.welcomeCardProps.name}
+        roleLabel={viewModel.welcomeCardProps.roleLabel}
         subtitle={viewModel.welcomeCardProps.subtitle}
-        stats={viewModel.welcomeCardProps.stats}
-        actions={viewModel.welcomeCardProps.actions}
       />
 
-      {/* 2. Quick Access Shortcut Cards */}
-      <OverviewQuickAccess
-        titleKey="overview_quick_access"
-        titleFallback="Quick Access"
-        links={viewModel.quickAccessLinks}
-      />
+      {/* 2. Summary KPI Grid */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {viewModel.summaryCards.map((card) => (
+          <OverviewSummaryCard key={card.id} card={card} />
+        ))}
+      </div>
 
       {/* 3. Primary Dashboard Grid */}
       <div className="grid gap-6 md:grid-cols-3">
@@ -72,6 +72,13 @@ export function ClientOverview({ viewModel }: ClientOverviewProps) {
           />
         </div>
       </div>
+
+      {/* 4. Quick Access Shortcut Cards */}
+      <OverviewQuickAccess
+        titleKey="overview_quick_access"
+        titleFallback="Quick Access"
+        links={viewModel.quickAccessLinks}
+      />
     </OverviewShell>
   );
 }

@@ -23,7 +23,7 @@ export function SafetyRiskStep({ form, onNext, onPrev }: SafetyRiskStepProps) {
   return (
     <div className="space-y-6">
       <div className="text-center max-w-lg mx-auto space-y-1.5">
-        <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">
+        <h2 className="text-xl font-bold text-foreground">
           {t("requests:wizard.safetyRisk.title")}
         </h2>
         <p className="text-xs text-muted-foreground">

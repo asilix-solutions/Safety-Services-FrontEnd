@@ -306,7 +306,7 @@ export function prepareOperationsOverviewViewModel(
       labelFallback: "Site Visits",
       count: data.siteVisits.length,
       href: "/site-visits",
-      iconName: "search",
+      iconName: "project",
     },
     {
       id: "qa-requests",

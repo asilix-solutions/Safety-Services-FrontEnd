@@ -25,9 +25,15 @@ export default function RequestsPage() {
  
   // Load from localStorage and merge with mock requests
   useEffect(() => {
-    setRequests(getMergedRequests());
+    const list = getMergedRequests();
+    if (user?.role === "Client") {
+      const filtered = list.filter((r) => r.clientId === user.id || r.clientId === user.companyId);
+      setRequests(filtered);
+    } else {
+      setRequests(list);
+    }
     setProjects(getProjects());
-  }, []);
+  }, [user]);
  
   if (!user) return null;
 

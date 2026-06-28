@@ -33,6 +33,7 @@ export function ClientDashboard() {
 
     const vm = prepareClientOverviewViewModel(
       {
+        id: user.id,
         name: user.name,
         companyId: user.companyId,
         companyName: user.name ?? "—",
@@ -61,24 +62,7 @@ export function ClientDashboard() {
     );
   }
 
-  return (
-    <div className="space-y-6">
-      <PageHeader
-        title={t("dashboard:client_welcome_title")}
-        description={t("dashboard:client_welcome_desc")}
-        actions={
-          <Button
-            onClick={loadData}
-            className="h-9 gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/10 font-semibold cursor-pointer"
-          >
-            <RefreshCw className="h-4 w-4" /> {t("dashboard:refresh_portal")}
-          </Button>
-        }
-      />
-
-      <ClientOverview viewModel={viewModel} />
-    </div>
-  );
+  return <ClientOverview viewModel={viewModel} />;
 }
 
 export default ClientDashboard;

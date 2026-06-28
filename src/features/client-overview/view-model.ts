@@ -5,21 +5,20 @@ import { ClientInvoice } from "@/domains/invoices/types";
 import { ClientContract } from "@/domains/contracts/types";
 import { ClientCertificate } from "@/domains/certificates/types";
 import {
-  OverviewWelcomeBtn,
-  OverviewStatItem,
   OverviewActionItem,
   OverviewEntityItem,
   OverviewActivityItem,
   OverviewQuickAccessItem,
-} from "../dashboard-overview";
+  OverviewStatCard,
+} from "@/features/dashboard-overview";
 
 export interface ClientOverviewViewModel {
   welcomeCardProps: {
     name: string;
+    roleLabel?: string;
     subtitle: string;
-    stats: OverviewStatItem[];
-    actions: OverviewWelcomeBtn[];
   };
+  summaryCards: OverviewStatCard[];
   recentRequests: OverviewEntityItem[];
   activeProjects: OverviewEntityItem[];
   actionItems: OverviewActionItem[];
@@ -28,7 +27,7 @@ export interface ClientOverviewViewModel {
 }
 
 export function prepareClientOverviewViewModel(
-  user: { name: string; companyId: string; companyName?: string },
+  user: { id: string; name: string; companyId: string; companyName?: string },
   data: {
     requests: LicensingRequest[];
     projects: Project[];
@@ -40,11 +39,11 @@ export function prepareClientOverviewViewModel(
   const companyId = user.companyId;
 
   // Filter client-scoped data
-  const clientRequests = data.requests.filter((r) => r.clientId === companyId);
-  const clientProjects = data.projects.filter((p) => p.clientId === companyId);
-  const clientInvoices = data.invoices.filter((i) => i.tenantId === companyId);
-  const clientContracts = data.contracts.filter((c) => c.clientId === companyId);
-  const clientCertificates = data.certificates.filter((c) => c.clientId === companyId);
+  const clientRequests = data.requests.filter((r) => r.clientId === user.id || r.clientId === user.companyId);
+  const clientProjects = data.projects.filter((p) => p.clientId === user.id || p.clientName === user.name);
+  const clientInvoices = data.invoices.filter((i) => i.tenantId === user.id || i.tenantId === user.companyId);
+  const clientContracts = data.contracts.filter((c) => c.clientId === user.id || c.clientId === user.companyId);
+  const clientCertificates = data.certificates.filter((c) => c.clientId === user.id || c.clientId === user.companyId);
 
   // Welcome Stats
   const inactiveRequestStatuses: RequestStatus[] = ["completed", "closed"];
@@ -53,35 +52,44 @@ export function prepareClientOverviewViewModel(
   );
   const activeProjects = clientProjects.filter((p) => p.status === "active");
 
-  const welcomeStats: OverviewStatItem[] = [
+  const unpaidInvoicesCount = clientInvoices.filter((inv) => inv.status === "unpaid").length;
+
+  const summaryCards: OverviewStatCard[] = [
     {
+      id: "client-active-requests",
       labelKey: "overview_active_requests",
       labelFallback: "Active Requests",
-      count: activeRequests.length,
-      badgeVariant: "success",
+      value: activeRequests.length,
+      iconName: "request",
+      href: "/requests",
+      variant: "success",
     },
     {
+      id: "client-active-projects",
       labelKey: "overview_active_projects",
       labelFallback: "Active Projects",
-      count: activeProjects.length,
-      badgeVariant: "info",
+      value: activeProjects.length,
+      iconName: "project",
+      href: "/projects",
+      variant: "info",
     },
-  ];
-
-  const welcomeActions: OverviewWelcomeBtn[] = [
     {
-      labelKey: "overview_new_request",
-      labelFallback: "New Request",
-      href: "/requests/new",
-      iconName: "plus",
+      id: "client-pending-invoices",
+      labelKey: "pay_invoice",
+      labelFallback: "Pending Invoices",
+      value: unpaidInvoicesCount,
+      iconName: "invoice",
+      href: "/invoices",
+      variant: "warning",
+    },
+    {
+      id: "client-certificates",
+      labelKey: "overview_type_certificate",
+      labelFallback: "Certificates",
+      value: clientCertificates.length,
+      iconName: "certificate",
+      href: "/certificates",
       variant: "default",
-    },
-    {
-      labelKey: "overview_track_requests",
-      labelFallback: "Track Requests",
-      href: "/requests",
-      iconName: "search",
-      variant: "outline",
     },
   ];
 
@@ -98,8 +106,8 @@ export function prepareClientOverviewViewModel(
         titleFallback: "Pay Invoice",
         referenceId: inv.id,
         href: "/invoices",
-        actionLabelKey: "view",
-        actionLabelFallback: "View",
+        actionLabelKey: "pay_invoice",
+        actionLabelFallback: "Pay Now",
         type: "pay_invoice",
       });
     });
@@ -114,8 +122,8 @@ export function prepareClientOverviewViewModel(
         titleFallback: "Sign Contract",
         referenceId: c.id,
         href: "/contracts",
-        actionLabelKey: "view",
-        actionLabelFallback: "View",
+        actionLabelKey: "overview_action_sign",
+        actionLabelFallback: "Sign Contract",
         type: "sign_contract",
       });
     });
@@ -249,20 +257,20 @@ export function prepareClientOverviewViewModel(
       iconName: "project",
     },
     {
-      id: "qa-invoices",
-      labelKey: "overview_type_invoice",
-      labelFallback: "Invoice",
-      count: clientInvoices.length,
-      href: "/invoices",
-      iconName: "invoice",
-    },
-    {
       id: "qa-contracts",
       labelKey: "overview_type_contract",
       labelFallback: "Contract",
       count: clientContracts.length,
       href: "/contracts",
       iconName: "contract",
+    },
+    {
+      id: "qa-invoices",
+      labelKey: "overview_type_invoice",
+      labelFallback: "Invoice",
+      count: clientInvoices.length,
+      href: "/invoices",
+      iconName: "invoice",
     },
     {
       id: "qa-certificates",
@@ -277,10 +285,10 @@ export function prepareClientOverviewViewModel(
   return {
     welcomeCardProps: {
       name: user.name,
+      roleLabel: "Client",
       subtitle: user.companyName || "SSLM Client Group",
-      stats: welcomeStats,
-      actions: welcomeActions,
     },
+    summaryCards,
     recentRequests,
     activeProjects: recentProjects,
     actionItems,
