@@ -1,5 +1,5 @@
 import React from "react";
-import { ClientOverviewViewModel } from "./view-model";
+import { CompanyAdminOverviewViewModel } from "./view-model";
 import {
   OverviewShell,
   OverviewWelcomeCard,
@@ -11,11 +11,11 @@ import {
 } from "../dashboard-overview";
 import { FileQuestion, FolderOpen } from "lucide-react";
 
-interface ClientOverviewProps {
-  viewModel: ClientOverviewViewModel;
+interface CompanyAdminOverviewProps {
+  viewModel: CompanyAdminOverviewViewModel;
 }
 
-export function ClientOverview({ viewModel }: ClientOverviewProps) {
+export function CompanyAdminOverview({ viewModel }: CompanyAdminOverviewProps) {
   return (
     <OverviewShell>
       {/* 1. Welcome Card */}
@@ -37,24 +37,25 @@ export function ClientOverview({ viewModel }: ClientOverviewProps) {
         {/* Actions Required column */}
         <div className="md:col-span-1">
           <OverviewActionList
-            titleKey="overview_actions_required"
+            titleKey="companyAdmin.overview.requiredActions"
             titleFallback="Actions Required"
             items={viewModel.actionItems}
           />
         </div>
-                    
+
         {/* Requests & Projects column */}
         <div className="md:col-span-1 space-y-4">
           <OverviewEntityList
-            titleKey="overview_recent_requests"
-            titleFallback="My Recent Requests"
+            titleKey="companyAdmin.overview.recentRequestsQueue"
+            titleFallback="Recent Requests Queue"
             viewAllKey="overview_view_all"
             viewAllHref="/requests"
             items={viewModel.recentRequests}
             icon={<FileQuestion className="h-4.5 w-4.5 text-primary" />}
           />
+
           <OverviewEntityList
-            titleKey="overview_active_projects_section"
+            titleKey="companyAdmin.overview.activeProjectsList"
             titleFallback="Active Projects"
             viewAllKey="overview_view_all"
             viewAllHref="/projects"
@@ -63,11 +64,11 @@ export function ClientOverview({ viewModel }: ClientOverviewProps) {
           />
         </div>
 
-        {/* Recent Activity Timeline column */}
+        {/* Recent Activity Feed column */}
         <div className="md:col-span-1">
           <OverviewRecentActivity
-            titleKey="overview_recent_updates"
-            titleFallback="Recent Updates"
+            titleKey="companyAdmin.overview.recentActivity"
+            titleFallback="Recent Activity"
             events={viewModel.recentActivity}
           />
         </div>
@@ -75,11 +76,11 @@ export function ClientOverview({ viewModel }: ClientOverviewProps) {
 
       {/* 4. Quick Access Shortcut Cards */}
       <OverviewQuickAccess
-        titleKey="overview_quick_access"
+        titleKey="companyAdmin.overview.quickAccess"
         titleFallback="Quick Access"
         links={viewModel.quickAccessLinks}
       />
     </OverviewShell>
   );
 }
-
+export default CompanyAdminOverview;

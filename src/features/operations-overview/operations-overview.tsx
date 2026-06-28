@@ -48,7 +48,7 @@ export function OperationsOverview({ viewModel }: OperationsOverviewProps) {
         </div>
 
         {/* Schedule & Active Projects column */}
-        <div className="md:col-span-1 space-y-6">
+        <div className="md:col-span-1 space-y-4">
           <OverviewEntityList
             titleKey="operations_today_schedule"
             titleFallback="Today's Schedule"
@@ -57,7 +57,7 @@ export function OperationsOverview({ viewModel }: OperationsOverviewProps) {
             items={viewModel.todaySchedule}
             icon={<Calendar className="h-4.5 w-4.5 text-primary" />}
           />
-          
+
           <OverviewEntityList
             titleKey="operations_active_projects"
             titleFallback="Active Projects"

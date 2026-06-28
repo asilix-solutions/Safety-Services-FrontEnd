@@ -275,6 +275,17 @@
   "operations_no_obstacles": "No open obstacles.",
   "operations_action_signature_pending": "Client Signature Missing",
   "operations_action_inspection_pending": "Inspection Report Pending",
-  "operations_action_obstacle_unresolved": "Obstacle Unresolved"
+  "operations_action_obstacle_unresolved": "Obstacle Unresolved",
+  "companyAdmin.overview.totalRequests": "Total Requests",
+  "companyAdmin.overview.activeProjects": "Active Projects",
+  "companyAdmin.overview.pendingQuotationApprovals": "Pending Approvals",
+  "companyAdmin.overview.contractsAwaitingSignature": "Contracts Pending",
+  "companyAdmin.overview.recentRequestsQueue": "Recent Requests Queue",
+  "companyAdmin.overview.requiredActions": "Actions Required",
+  "companyAdmin.overview.recentActivity": "Recent Activity",
+  "companyAdmin.overview.activeProjectsList": "Active Projects",
+  "companyAdmin.overview.quickAccess": "Quick Access",
+  "companyAdmin.overview.reviewInvoice": "Review Invoice",
+  "companyAdmin.overview.certificatesIssued": "Certificates Issued"
 }
 

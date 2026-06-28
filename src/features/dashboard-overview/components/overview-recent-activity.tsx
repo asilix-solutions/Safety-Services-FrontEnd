@@ -47,8 +47,8 @@ export function OverviewRecentActivity({
           {title}
         </>
       }
-      className="border-border bg-card shadow-sm min-h-[260px] max-h-[360px] flex flex-col h-full"
-      contentClassName={events.length === 0 ? "flex-1 p-6 pt-0 flex flex-col items-center justify-center min-h-[120px]" : "flex-1 overflow-y-auto p-6 pt-0 flex flex-col justify-start space-y-3"}
+      className="border-border bg-card shadow-sm min-h-[260px] flex flex-col w-full"
+      contentClassName={events.length === 0 ? "flex-1 p-6 pt-0 flex flex-col items-center justify-center min-h-[120px]" : "flex-1 p-6 pt-0 flex flex-col justify-start space-y-3"}
     >
       {events.length === 0 ? (
         <div className="text-xs text-muted-foreground text-center py-6 flex-1 flex items-center justify-center">

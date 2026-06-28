@@ -275,7 +275,18 @@
   "operations_no_obstacles": "لا توجد معوقات مفتوحة.",
   "operations_action_signature_pending": "توقيع العميل مفقود",
   "operations_action_inspection_pending": "تقرير الفحص معلق",
-  "operations_action_obstacle_unresolved": "العائق لم يحل بعد"
+  "operations_action_obstacle_unresolved": "العائق لم يحل بعد",
+  "companyAdmin.overview.totalRequests": "إجمالي الطلبات",
+  "companyAdmin.overview.activeProjects": "المشاريع النشطة",
+  "companyAdmin.overview.pendingQuotationApprovals": "عروض أسعار معلقة",
+  "companyAdmin.overview.contractsAwaitingSignature": "عقود معلقة",
+  "companyAdmin.overview.recentRequestsQueue": "طابور الطلبات الأخيرة",
+  "companyAdmin.overview.requiredActions": "الإجراءات المطلوبة",
+  "companyAdmin.overview.recentActivity": "آخر الأنشطة",
+  "companyAdmin.overview.activeProjectsList": "المشاريع النشطة",
+  "companyAdmin.overview.quickAccess": "وصول سريع",
+  "companyAdmin.overview.reviewInvoice": "مراجعة الفاتورة",
+  "companyAdmin.overview.certificatesIssued": "الشهادات الصادرة"
 }
 
 
