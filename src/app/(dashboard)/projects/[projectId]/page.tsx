@@ -572,6 +572,7 @@ export default function ProjectDetailsPage() {
                     if (updatedRequest) {
                       setRequest(updatedRequest);
                     }
+                    loadData();
                   }}
                 />
               ) : (
