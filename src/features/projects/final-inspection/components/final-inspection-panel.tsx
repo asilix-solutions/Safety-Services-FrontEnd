@@ -11,6 +11,8 @@ import { InspectionDecision } from "./inspection-decision";
 import { Card, CardHeader, CardTitle, CardContent } from "@/shared/ui/card";
 import { ShieldAlert } from "lucide-react";
 
+import { USER_ROLES } from "@/constants/roles";
+
 interface FinalInspectionPanelProps {
   project: Project;
   request: LicensingRequest | null;
@@ -36,7 +38,7 @@ export function FinalInspectionPanel({
     onSuccess,
   });
 
-  const isConsultingEngineer = userRole === "ConsultingEngineer" || userRole === "Consulting Engineer" || userRole === "Super Admin";
+  const isConsultingEngineer = userRole === USER_ROLES.CONSULTING_ENGINEER || userRole === USER_ROLES.SUPER_ADMIN || userRole === "ConsultingEngineer";
 
   // Check if project is in ready_for_final_inspection phase
   if (project.executionPhase !== "ready_for_final_inspection") {

@@ -382,7 +382,19 @@
   "projects.kickoff.activeExecution": "قيد التنفيذ النشط",
   "projects.kickoff.planning": "التخطيط",
   "projects.kickoff.cannotApproveKickoff": "لا يمكن اعتماد بدء المشروع",
-  "projects.kickoff.cannotStartExecution": "لا يمكن بدء التنفيذ"
+  "projects.kickoff.cannotStartExecution": "لا يمكن بدء التنفيذ",
+  "projects.inspection.finalInspection": "الفحص النهائي",
+  "projects.inspection.passInspection": "اجتياز الفحص النهائي",
+  "projects.inspection.failInspection": "رسوب الفحص النهائي",
+  "projects.inspection.requireCorrections": "طلب تعديلات",
+  "projects.inspection.inspectionPassed": "اجتاز الفحص النهائي",
+  "projects.inspection.inspectionFailed": "فشل الفحص النهائي",
+  "projects.inspection.correctionsRequired": "التعديلات المطلوبة",
+  "projects.inspection.inspectionNotes": "ملاحظات الفحص",
+  "projects.inspection.readyForFinalInspection": "جاهز للفحص النهائي",
+  "projects.inspection.completed": "مكتمل",
+  "projects.inspection.cannotPassInspection": "لا يمكن تمرير الفحص",
+  "projects.inspection.cannotFailInspection": "لا يمكن ترسيب الفحص"
 }
 
 

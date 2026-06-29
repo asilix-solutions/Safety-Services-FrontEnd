@@ -5,6 +5,7 @@ import { useAuth } from "@/providers/AuthProvider";
 import { UserRole } from "@/types/role";
 import { ShieldAlert } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { USER_ROLES } from "@/constants/roles";
 
 export function RoleSwitcher() {
   const { user, switchRole } = useAuth();
@@ -13,9 +14,21 @@ export function RoleSwitcher() {
   if (!user) return null;
 
   const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedRole = e.target.value as UserRole;
-    switchRole(selectedRole);
+    const val = e.target.value;
+    if (val.startsWith("Client:")) {
+      const companyId = val.split(":")[1];
+      switchRole(USER_ROLES.CLIENT, companyId);
+    } else {
+      switchRole(val as UserRole);
+    }
     router.push("/");
+  };
+
+  const getSelectValue = () => {
+    if (user.role === USER_ROLES.CLIENT) {
+      return `Client:${user.companyId || "c-102"}`;
+    }
+    return user.role;
   };
 
   return (
@@ -25,7 +38,7 @@ export function RoleSwitcher() {
         Switch Workspace:
       </span>
       <select
-        value={user.role}
+        value={getSelectValue()}
         onChange={handleRoleChange}
         className="bg-transparent text-xs font-semibold text-primary outline-none cursor-pointer focus:ring-0 border-0 p-0 pr-6"
       >
@@ -34,7 +47,8 @@ export function RoleSwitcher() {
         <option value="Consulting Engineer">Consulting Engineer</option>
         <option value="Operations Officer">Operations Officer</option>
         <option value="Sales Agent">Sales Agent</option>
-        <option value="Client">Client</option>
+        <option value="Client:c-102">Client - Emaar Properties (c-102)</option>
+        <option value="Client:c-103">Client - Gulf Petroleum (c-103)</option>
       </select>
     </div>
   );

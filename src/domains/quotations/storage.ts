@@ -4,7 +4,8 @@ export function getQuotations(): Quotation[] {
   if (typeof window === "undefined") return [];
   try {
     const raw = localStorage.getItem("SSLM_QUOTATIONS");
-    return raw ? JSON.parse(raw) : [];
+    const list: Quotation[] = raw ? JSON.parse(raw) : [];
+    return list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   } catch (err) {
     console.error("Failed to parse SSLM_QUOTATIONS", err);
     return [];

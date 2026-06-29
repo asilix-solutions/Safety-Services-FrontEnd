@@ -4,7 +4,8 @@ export function getInvoices(): ClientInvoice[] {
   if (typeof window === "undefined") return [];
   try {
     const raw = localStorage.getItem("SSLM_INVOICES");
-    return raw ? JSON.parse(raw) : [];
+    const list: ClientInvoice[] = raw ? JSON.parse(raw) : [];
+    return list.sort((a, b) => new Date(b.issuedAt).getTime() - new Date(a.issuedAt).getTime());
   } catch (err) {
     console.error("Failed to parse SSLM_INVOICES from localStorage", err);
     return [];
@@ -66,10 +67,19 @@ export function getMergedInvoices(): ClientInvoice[] {
   const hasOldSchema = localList.length > 0 && localList.some(inv => !inv.tenantId);
   
   if (localList.length === 0 || hasOldSchema) {
-    // Seed initial mock invoices
+    // Seed initial mock invoices if local storage is clean or outdated
     saveInvoices(MOCK_INVOICES);
-    return MOCK_INVOICES;
+    return [...MOCK_INVOICES].sort((a, b) => new Date(b.issuedAt).getTime() - new Date(a.issuedAt).getTime());
   }
-  return localList;
-}
 
+  // Merge mock invoices and local modifications safely
+  const mergedMap = new Map<string, ClientInvoice>();
+  MOCK_INVOICES.forEach((inv) => {
+    mergedMap.set(inv.id, inv);
+  });
+  localList.forEach((inv) => {
+    mergedMap.set(inv.id, inv);
+  });
+
+  return Array.from(mergedMap.values()).sort((a, b) => new Date(b.issuedAt).getTime() - new Date(a.issuedAt).getTime());
+}

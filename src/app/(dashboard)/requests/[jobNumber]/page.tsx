@@ -28,6 +28,7 @@ import { getInvoices, createOrUpdateInvoice } from "@/domains/invoices/storage";
 import { ClientPayment } from "@/domains/payments/types";
 import { getMergedRequests, upsertRequest } from "@/domains/requests/storage";
 import { Quotation } from "@/domains/quotations/types";
+import { getQuotations } from "@/domains/quotations/storage";
 import { confirmMockPayment } from "@/domains/payments/workflow";
 import { Project } from "@/types/project";
 import { getProjects } from "@/domains/projects/storage";
@@ -76,8 +77,7 @@ export default function RequestDetailsPage() {
 
       // Load quotation if exists
       try {
-        const quotesStr = localStorage.getItem("SSLM_QUOTATIONS");
-        const quotes: Quotation[] = quotesStr ? JSON.parse(quotesStr) : [];
+        const quotes = getQuotations();
         const foundQuote = quotes.find((q) => q.jobNumber === jobNumber);
         if (foundQuote) {
           setQuotation(foundQuote);

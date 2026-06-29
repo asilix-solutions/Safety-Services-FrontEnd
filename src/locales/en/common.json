@@ -382,6 +382,18 @@
   "projects.kickoff.activeExecution": "Active Execution",
   "projects.kickoff.planning": "Planning",
   "projects.kickoff.cannotApproveKickoff": "Cannot Approve Kickoff",
-  "projects.kickoff.cannotStartExecution": "Cannot Start Execution"
+  "projects.kickoff.cannotStartExecution": "Cannot Start Execution",
+  "projects.inspection.finalInspection": "Final Inspection",
+  "projects.inspection.passInspection": "Pass Final Inspection",
+  "projects.inspection.failInspection": "Fail Final Inspection",
+  "projects.inspection.requireCorrections": "Require Corrections",
+  "projects.inspection.inspectionPassed": "Final Inspection Passed",
+  "projects.inspection.inspectionFailed": "Final Inspection Failed",
+  "projects.inspection.correctionsRequired": "Corrections Required",
+  "projects.inspection.inspectionNotes": "Inspection Notes",
+  "projects.inspection.readyForFinalInspection": "Ready for Final Inspection",
+  "projects.inspection.completed": "Completed",
+  "projects.inspection.cannotPassInspection": "Cannot Pass Inspection",
+  "projects.inspection.cannotFailInspection": "Cannot Fail Inspection"
 }
 

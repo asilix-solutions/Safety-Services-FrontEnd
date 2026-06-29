@@ -6,7 +6,8 @@ export function getRequests(): LicensingRequest[] {
   if (typeof window === "undefined") return [];
   try {
     const raw = localStorage.getItem("SSLM_CLIENT_REQUESTS");
-    return raw ? JSON.parse(raw) : [];
+    const list: LicensingRequest[] = raw ? JSON.parse(raw) : [];
+    return list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   } catch (err) {
     console.error("Failed to parse SSLM_CLIENT_REQUESTS", err);
     return [];
@@ -35,11 +36,13 @@ export function getMergedRequests(): LicensingRequest[] {
     mergedMap.set(r.jobNumber, r);
   });
 
-  return Array.from(mergedMap.values()).map((r) => ({
+  const mergedList = Array.from(mergedMap.values()).map((r) => ({
     ...r,
     currentStage: r.currentStage || mapStatusToStage(r.status),
     assignedQueue: r.assignedQueue || (r.classification === "high_hazard_review" ? "HIGH_HAZARD" : r.classification === "engineering_project" ? "ENGINEERING" : r.classification === "maintenance_strategy" ? "MAINTENANCE" : "FAST_TRACK")
   }));
+
+  return mergedList.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 }
 
 export function upsertRequest(request: LicensingRequest): void {

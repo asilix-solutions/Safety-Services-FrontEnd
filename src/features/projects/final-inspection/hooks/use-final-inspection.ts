@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Project } from "@/types/project";
 import { LicensingRequest } from "@/domains/requests/types";
-import { approveFinalInspection, requestFinalInspectionFixes } from "@/domains/projects/workflow";
+import { passFinalInspection, failFinalInspection } from "@/domains/projects/workflow";
 
 interface UseFinalInspectionProps {
   project: Project;
@@ -32,16 +32,15 @@ export function useFinalInspection({
       // Simulate network request delay if any
       await new Promise((resolve) => setTimeout(resolve, 800));
 
-      const { updatedProject, updatedRequest } = approveFinalInspection({
+      const updatedProject = passFinalInspection({
         project,
-        request,
+        inspectedBy: engineerName,
         notes,
-        engineerName,
       });
 
       setSuccessMessage("projects:inspection.approvedSuccess");
       if (onSuccess) {
-        onSuccess(updatedProject, updatedRequest);
+        onSuccess(updatedProject, null);
       }
     } catch (err: any) {
       setError(err?.message || "An unexpected error occurred during approval.");
@@ -58,16 +57,15 @@ export function useFinalInspection({
     try {
       await new Promise((resolve) => setTimeout(resolve, 800));
 
-      const { updatedProject, updatedRequest } = requestFinalInspectionFixes({
+      const updatedProject = failFinalInspection({
         project,
-        request,
+        inspectedBy: engineerName,
         notes,
-        engineerName,
       });
 
       setSuccessMessage("projects:inspection.returnedSuccess");
       if (onSuccess) {
-        onSuccess(updatedProject, updatedRequest);
+        onSuccess(updatedProject, null);
       }
     } catch (err: any) {
       setError(err?.message || "An unexpected error occurred during rejection.");

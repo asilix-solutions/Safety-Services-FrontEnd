@@ -4,14 +4,13 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { UserRole } from "@/types/role";
 import { UserProfile } from "@/types/user";
 import { ROLE_PERMISSIONS } from "@/constants/permissions";
-
 interface AuthContextType {
   user: UserProfile | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (role: UserRole) => Promise<void>;
   logout: () => void;
-  switchRole: (role: UserRole) => void;
+  switchRole: (role: UserRole, companyId?: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -107,18 +106,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     localStorage.removeItem("sslm_user_profile");
   };
-
-  const switchRole = (role: UserRole) => {
+  const switchRole = (role: UserRole, companyId?: string) => {
     const baseProfile = MOCK_PROFILES[role];
-    const profile: UserProfile = {
+    let profile: UserProfile = {
       ...baseProfile,
       permissions: ROLE_PERMISSIONS[role],
     };
     
+    if (role === "Client" && companyId) {
+      if (companyId === "c-103") {
+        profile = {
+          ...profile,
+          id: "u-7",
+          name: "Gulf Petroleum Representative",
+          email: "client@gulfpetroleum.com",
+          companyId: "c-103",
+        };
+      } else {
+        profile = {
+          ...profile,
+          id: "u-6",
+          name: "Rayyan Al-Mansoor",
+          email: "rayyan@gulfpetroleum.com",
+          companyId: "c-102",
+        };
+      }
+    }
+    
     setUser(profile);
     localStorage.setItem("sslm_user_profile", JSON.stringify(profile));
   };
-
   return (
     <AuthContext.Provider
       value={{

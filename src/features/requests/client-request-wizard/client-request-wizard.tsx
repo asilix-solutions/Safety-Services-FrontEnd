@@ -9,7 +9,7 @@ import { useAuth } from "@/providers/AuthProvider";
 import { RequiredDocument, RequestType, RequestClassification, RequestQueue, LicensingRequest } from "@/domains/requests/types";
 import { DEFAULT_REQUIRED_DOCUMENTS, HIGH_HAZARD_KEYWORDS, HIGH_HAZARD_ISIC_CODES } from "@/domains/requests/constants";
 import { getClassificationReason, getQueueDisplayName } from "@/domains/requests/workflow";
-import { getRequests, saveRequests, getRequestDraft, saveRequestDraft, deleteRequestDraft } from "@/domains/requests/storage";
+import { getRequests, saveRequests, getRequestDraft, saveRequestDraft, deleteRequestDraft, getMergedRequests } from "@/domains/requests/storage";
 
 // Steps Components
 import { WizardProgress } from "./wizard-progress";
@@ -211,15 +211,14 @@ export function ClientRequestWizard() {
 
     // Simulate submission delay
     await new Promise((resolve) => setTimeout(resolve, 1500));
-
     // Get current requests list from storage
     const currentRequests = getRequests();
+    const allRequests = getMergedRequests();
 
     // Generate Job Number
-    const count = currentRequests.length + 1;
+    const count = allRequests.length + 1;
     const year = new Date().getFullYear();
     const jobNumber = `SSLM-${year}-${String(count).padStart(6, "0")}`;
-
     let assignedQueue: RequestQueue = "FAST_TRACK";
     if (classification === "high_hazard_review") {
       assignedQueue = "HIGH_HAZARD";

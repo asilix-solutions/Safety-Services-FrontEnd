@@ -6,6 +6,114 @@ import { appendTimelineEvent } from "./helpers/timeline";
 import { synchronizeProjectAndRequest } from "./helpers/sync";
 import { canApproveInspection, canReturnInspection } from "@/domains/workflow-validation";
 
+export function passFinalInspection({
+  project,
+  inspectedBy,
+  notes,
+}: {
+  project: Project;
+  inspectedBy: string;
+  notes: string;
+}): Project {
+  if (project.status !== "active" || project.executionPhase !== "ready_for_final_inspection") {
+    throw new Error("Cannot pass inspection: Project status must be active and executionPhase must be ready_for_final_inspection.");
+  }
+
+  if (!notes || !notes.trim()) {
+    throw new Error("Cannot pass inspection: Notes are required.");
+  }
+
+  const nowStr = new Date().toISOString();
+  const currentWorkspace = project.workspace || createDefaultWorkspace();
+  const updatedWorkspace: typeof currentWorkspace = {
+    ...currentWorkspace,
+    inspection: {
+      approved: true,
+      notes,
+      decisionBy: inspectedBy,
+      completedAt: nowStr,
+    },
+  };
+
+  const updatedTasks = [...(project.tasks || [])];
+  updatedTasks.push({
+    id: `TSK-${Math.floor(1000 + Math.random() * 9000)}`,
+    title: "Final Inspection Passed",
+    description: `Project final inspection passed. Inspected by: ${inspectedBy}. Notes: ${notes}`,
+    completed: true,
+    dueDate: nowStr.split("T")[0],
+    priority: "Medium",
+  });
+
+  const updatedProject: Project = {
+    ...project,
+    status: "completed",
+    executionPhase: "completed",
+    workspace: updatedWorkspace,
+    tasks: updatedTasks,
+    updatedAt: nowStr,
+  };
+
+  persistProject(updatedProject);
+  return updatedProject;
+}
+
+export function failFinalInspection({
+  project,
+  inspectedBy,
+  notes,
+}: {
+  project: Project;
+  inspectedBy: string;
+  notes: string;
+}): Project {
+  if (project.status !== "active" || project.executionPhase !== "ready_for_final_inspection") {
+    throw new Error("Cannot fail inspection: Project status must be active and executionPhase must be ready_for_final_inspection.");
+  }
+
+  if (!notes || !notes.trim()) {
+    throw new Error("Cannot fail inspection: Notes/corrections are required.");
+  }
+
+  const nowStr = new Date().toISOString();
+  const currentWorkspace = project.workspace || createDefaultWorkspace();
+  const updatedWorkspace: typeof currentWorkspace = {
+    ...currentWorkspace,
+    completion: {
+      ...currentWorkspace.completion,
+      readyForFinalInspection: false,
+    },
+    inspection: {
+      approved: false,
+      notes,
+      decisionBy: inspectedBy,
+      completedAt: nowStr,
+    },
+  };
+
+  const updatedTasks = [...(project.tasks || [])];
+  updatedTasks.push({
+    id: `TSK-${Math.floor(1000 + Math.random() * 9000)}`,
+    title: "Final Inspection Failed — Corrections Required",
+    description: `Project final inspection failed. Inspected by: ${inspectedBy}. Notes/Corrections: ${notes}`,
+    completed: true,
+    dueDate: nowStr.split("T")[0],
+    priority: "High",
+  });
+
+  const updatedProject: Project = {
+    ...project,
+    status: "active",
+    executionPhase: "active_execution",
+    workspace: updatedWorkspace,
+    tasks: updatedTasks,
+    updatedAt: nowStr,
+  };
+
+  persistProject(updatedProject);
+  return updatedProject;
+}
+
 export function approveFinalInspection({
   project,
   request,

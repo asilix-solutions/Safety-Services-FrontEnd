@@ -61,7 +61,8 @@ export function getProjects(): Project[] {
   try {
     const raw = localStorage.getItem("SSLM_PROJECTS");
     const list: Project[] = raw ? JSON.parse(raw) : [];
-    return list.map(migrateProjectWorkspace);
+    const migrated = list.map(migrateProjectWorkspace);
+    return migrated.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   } catch (err) {
     console.error("Failed to parse SSLM_PROJECTS from localStorage", err);
     return [];
