@@ -43,11 +43,7 @@ export const ROLE_NAVIGATION: Record<UserRole, NavigationItem[]> = {
     { label: "Dashboard", path: "/", iconName: "LayoutDashboard" },
     { label: "Requests", path: "/requests", iconName: "Inbox" },
     { label: "Projects", path: "/projects", iconName: "Kanban" },
-    { label: "Execution", path: "/execution", iconName: "PlayCircle" },
-    { label: "Expenses", path: "/expenses", iconName: "Wallet" },
-    { label: "Labor", path: "/labor", iconName: "Hammer" },
-    { label: "Obstacles", path: "/obstacles", iconName: "AlertOctagon" },
-    { label: "Documents", path: "/documents", iconName: "FolderOpen" },
+    { label: "Site Visits", path: "/site-visits", iconName: "MapPin" },
   ],
   "Sales Agent": [
     { label: "Dashboard", path: "/", iconName: "LayoutDashboard" },
