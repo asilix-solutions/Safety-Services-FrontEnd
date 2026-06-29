@@ -4,6 +4,8 @@ import { syncQuotationAndRequest } from "./helpers/sync";
 import { appendTimelineEvent } from "./helpers/timeline";
 import { persistQuotation, persistRequest } from "./helpers/persist";
 import { canSubmitQuotation, canApproveQuotation } from "@/domains/workflow-validation";
+import { createInvoiceFromApprovedQuotation } from "@/domains/invoices/workflow";
+
 
 export function submitQuotationForApproval({
   quotation,
@@ -100,6 +102,13 @@ export function approveQuotation({
 
   persistQuotation(updatedQuotation);
   persistRequest(updatedRequest);
+
+  // Generate unpaid invoice through Invoice Domain workflow
+  createInvoiceFromApprovedQuotation({
+    quotation: updatedQuotation,
+    request: updatedRequest,
+    approvedBy,
+  });
 
   return {
     updatedQuotation,
