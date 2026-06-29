@@ -2,8 +2,7 @@ import { Quotation } from "../types";
 import { LicensingRequest, WorkflowStage } from "@/domains/requests/types";
 import { syncQuotationAndRequest } from "./helpers/sync";
 import { appendTimelineEvent } from "./helpers/timeline";
-import { persistQuotation, persistRequest, persistInvoice } from "./helpers/persist";
-import { createInvoiceForQuotation } from "./payment";
+import { persistQuotation, persistRequest } from "./helpers/persist";
 import { canSubmitQuotation, canApproveQuotation } from "@/domains/workflow-validation";
 
 export function submitQuotationForApproval({
@@ -29,17 +28,23 @@ export function submitQuotationForApproval({
     submittedAt: nowStr,
   };
 
-  // Business decision: Transition to QUOTATION_APPROVAL
+  // Keep in QUOTATION stage
   const { updatedQuotation, updatedRequest: syncedRequest } = syncQuotationAndRequest(
     draftQuote,
     request,
-    "QUOTATION_APPROVAL" as WorkflowStage
+    "QUOTATION" as WorkflowStage
   );
 
+  // Explicitly update request status to quotation_created
+  const requestWithUpdatedStatus = {
+    ...syncedRequest,
+    status: "quotation_created" as const,
+  };
+
   const updatedRequest = appendTimelineEvent(
-    syncedRequest,
-    "submitted",
-    `Quotation submitted for client review by ${submittedBy}. Total: SAR ${quotation.grandTotal.toLocaleString()}`
+    requestWithUpdatedStatus,
+    "quotation_created",
+    `Quotation submitted for review by ${submittedBy}. Total: SAR ${quotation.grandTotal.toLocaleString()}`
   );
 
   persistQuotation(updatedQuotation);
@@ -74,23 +79,24 @@ export function approveQuotation({
     approvedAt: nowStr,
   };
 
-
-  // Business decision: Transition to PAYMENT_CONFIRMED
+  // Keep in QUOTATION stage
   const { updatedQuotation, updatedRequest: syncedRequest } = syncQuotationAndRequest(
     approvedQuote,
     request,
-    "PAYMENT_CONFIRMED" as WorkflowStage
+    "QUOTATION" as WorkflowStage
   );
+
+  // Explicitly update request status to quotation_created
+  const requestWithUpdatedStatus = {
+    ...syncedRequest,
+    status: "quotation_created" as const,
+  };
 
   const updatedRequest = appendTimelineEvent(
-    syncedRequest,
-    "approved",
-    `Quotation approved by client. Awaiting down-payment confirmation.`
+    requestWithUpdatedStatus,
+    "quotation_created",
+    `Quotation approved internally by ${approvedBy}.`
   );
-
-  // Generate and save invoice
-  const invoice = createInvoiceForQuotation(updatedRequest, updatedQuotation);
-  persistInvoice(invoice);
 
   persistQuotation(updatedQuotation);
   persistRequest(updatedRequest);
@@ -122,16 +128,22 @@ export function rejectQuotation({
     rejectionReason: reason,
   };
 
-  // Business decision: Move stage back to QUOTATION
+  // Keep in QUOTATION stage
   const { updatedQuotation, updatedRequest: syncedRequest } = syncQuotationAndRequest(
     rejectedQuote,
     request,
     "QUOTATION" as WorkflowStage
   );
 
+  // Explicitly update request status to closed
+  const requestWithUpdatedStatus = {
+    ...syncedRequest,
+    status: "closed" as const,
+  };
+
   const updatedRequest = appendTimelineEvent(
-    syncedRequest,
-    "under_review",
+    requestWithUpdatedStatus,
+    "closed",
     `Quotation rejected. Reason: ${reason}`
   );
 
@@ -165,16 +177,22 @@ export function requestChangesOnQuotation({
     reviewComments: comments,
   };
 
-  // Business decision: Move stage back to QUOTATION
+  // Keep in QUOTATION stage
   const { updatedQuotation, updatedRequest: syncedRequest } = syncQuotationAndRequest(
     reviewedQuote,
     request,
     "QUOTATION" as WorkflowStage
   );
 
+  // Explicitly update request status to quotation_created
+  const requestWithUpdatedStatus = {
+    ...syncedRequest,
+    status: "quotation_created" as const,
+  };
+
   const updatedRequest = appendTimelineEvent(
-    syncedRequest,
-    "under_review",
+    requestWithUpdatedStatus,
+    "quotation_created",
     `Quotation changes requested. Comments: ${comments}`
   );
 
