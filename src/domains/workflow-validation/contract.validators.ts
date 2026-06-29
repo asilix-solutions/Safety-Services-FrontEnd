@@ -2,6 +2,8 @@ import { Project } from "../../types/project";
 import { ClientContract } from "../contracts/types";
 import { ValidationResult } from "./types";
 
+import { getQuotations } from "../quotations/storage";
+
 export function canGenerateContract(
   project?: Project | null,
   existingContract?: ClientContract | null
@@ -22,6 +24,25 @@ export function canGenerateContract(
     return {
       valid: false,
       reason: `A contract already exists for this project (Contract ID: ${existingContract.id}).`,
+    };
+  }
+
+  // 4. Approved quotation exists for the same jobNumber
+  if (project.jobNumber) {
+    const quotations = getQuotations();
+    const approvedQuotation = quotations.find(
+      (q) => q.jobNumber === project.jobNumber && q.quotationStatus === "APPROVED"
+    );
+    if (!approvedQuotation) {
+      return {
+        valid: false,
+        reason: "projects:contracts.errors.noApprovedQuotation",
+      };
+    }
+  } else {
+    return {
+      valid: false,
+      reason: "projects:contracts.errors.noApprovedQuotation",
     };
   }
 

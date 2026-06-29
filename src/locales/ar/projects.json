@@ -150,5 +150,6 @@
   "completed.desc": "تم فحص مشروع الامتثال هذا رسمياً واعتماده.",
   "inspection.completedAt": "تاريخ الانتهاء والاعتماد",
   "inspection.decisionBy": "اعتُمد بواسطة",
-  "inspection.notesLabel": "ملاحظات قرار الفحص النهائي"
+  "inspection.notesLabel": "ملاحظات قرار الفحص النهائي",
+  "contracts.errors.noApprovedQuotation": "لا يمكن إنشاء العقد لعدم وجود عرض سعر معتمد لهذا المشروع."
 }

@@ -65,7 +65,7 @@ export default function ContractsDashboardPage() {
       setAlertMsg({ type: "success", text: `Contract successfully generated for ${project.name}` });
       loadData();
     } catch (err: any) {
-      setAlertMsg({ type: "error", text: err.message || "Failed to generate contract" });
+      setAlertMsg({ type: "error", text: t(err.message) || "Failed to generate contract" });
     }
   };
 
@@ -75,7 +75,7 @@ export default function ContractsDashboardPage() {
       setAlertMsg({ type: "success", text: "Completion agreement signed successfully." });
       loadData();
     } catch (err: any) {
-      setAlertMsg({ type: "error", text: err.message || "Failed to sign contract" });
+      setAlertMsg({ type: "error", text: t(err.message) || "Failed to sign contract" });
     }
   };
 
@@ -85,7 +85,7 @@ export default function ContractsDashboardPage() {
       setAlertMsg({ type: "success", text: "Contract archived successfully." });
       loadData();
     } catch (err: any) {
-      setAlertMsg({ type: "error", text: err.message || "Failed to archive contract" });
+      setAlertMsg({ type: "error", text: t(err.message) || "Failed to archive contract" });
     }
   };
 

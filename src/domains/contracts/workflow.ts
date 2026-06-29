@@ -14,20 +14,15 @@ export function generateContractFromCompletedProject(
   if (!validation.valid) {
     throw new Error(validation.reason);
   }
-
-  // Look for quotation to get the contract value, or fallback to a default
-  let value = 15000;
-  if (project.jobNumber) {
-    try {
-      const quotations = getQuotations();
-      const quotation = quotations.find((q) => q.jobNumber === project.jobNumber);
-      if (quotation) {
-        value = quotation.grandTotal;
-      }
-    } catch (e) {
-      console.error("Failed to read quotation grand total", e);
-    }
+  // Look for approved quotation to get the contract value
+  const quotations = getQuotations();
+  const approvedQuotation = quotations.find(
+    (q) => q.jobNumber === project.jobNumber && q.quotationStatus === "APPROVED"
+  );
+  if (!approvedQuotation) {
+    throw new Error("projects:contracts.errors.noApprovedQuotation");
   }
+  const value = approvedQuotation.grandTotal;
 
   const nowStr = new Date().toISOString();
   const contract: ClientContract = {

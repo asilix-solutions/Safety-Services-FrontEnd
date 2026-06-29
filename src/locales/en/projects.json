@@ -150,5 +150,6 @@
   "completed.desc": "This compliance project has been officially inspected and certified.",
   "inspection.completedAt": "Completion Date",
   "inspection.decisionBy": "Approved By",
-  "inspection.notesLabel": "Inspection Decision Notes"
+  "inspection.notesLabel": "Inspection Decision Notes",
+  "contracts.errors.noApprovedQuotation": "Cannot generate contract because no approved quotation was found for this project."
 }
