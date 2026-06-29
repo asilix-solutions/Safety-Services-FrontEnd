@@ -372,7 +372,17 @@
   "superAdmin.overview.activity.subscriptionExpiring": "الاشتراك ينتهي قريباً",
   "superAdmin.overview.activity.subscriptionExpired": "انتهى الاشتراك",
   "superAdmin.overview.activity.planChanged": "تغيير باقة الاشتراك",
-  "superAdmin.overview.activity.userCreated": "إنشاء حساب مستخدم جديد"
+  "superAdmin.overview.activity.userCreated": "إنشاء حساب مستخدم جديد",
+  "projects.kickoff.approveKickoff": "اعتماد بدء المشروع",
+  "projects.kickoff.startExecution": "بدء التنفيذ",
+  "projects.kickoff.kickoffApproved": "تم اعتماد بدء المشروع",
+  "projects.kickoff.executionStarted": "بدأ التنفيذ",
+  "projects.kickoff.kickoffNotes": "ملاحظات بدء المشروع",
+  "projects.kickoff.kickoffReady": "جاهز للبدء",
+  "projects.kickoff.activeExecution": "قيد التنفيذ النشط",
+  "projects.kickoff.planning": "التخطيط",
+  "projects.kickoff.cannotApproveKickoff": "لا يمكن اعتماد بدء المشروع",
+  "projects.kickoff.cannotStartExecution": "لا يمكن بدء التنفيذ"
 }
 
 

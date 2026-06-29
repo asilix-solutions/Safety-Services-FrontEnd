@@ -4,91 +4,90 @@ import { createOrUpdateInvoice } from "@/domains/invoices/storage";
 import { ClientPayment } from "@/domains/payments/types";
 import { getPayments, createOrUpdatePayment } from "@/domains/payments/storage";
 import { upsertRequest } from "@/domains/requests/storage";
-import { provisionProjectFromRequest } from "@/domains/projects/storage";
-import { Project } from "@/types/project";
-import { canConfirmPayment } from "@/domains/workflow-validation";
-import { getQuotations } from "@/domains/quotations/storage";
 
-export function confirmMockPaymentAndInitializeProject({
-  request,
+
+import { provisionProjectWorkspace } from "@/domains/projects/workflow";
+import { getMergedRequests } from "@/domains/requests/storage";
+
+export function confirmMockPayment({
   invoice,
+  request,
+  paidBy,
 }: {
-  request: LicensingRequest;
   invoice: ClientInvoice;
+  request: LicensingRequest;
+  paidBy: string;
 }): {
-  updatedRequest: LicensingRequest;
   updatedInvoice: ClientInvoice;
-  payment: ClientPayment;
-  project?: Project;
+  paymentRecord: ClientPayment;
+  updatedRequest: LicensingRequest;
 } {
-  const quotations = getQuotations();
-  const quotation = quotations.find((q) => q.jobNumber === request.jobNumber);
+  // Step 1: Validate invoice
+  if (invoice.status === "paid") {
+    throw new Error("Invoice is already paid.");
+  }
 
-  const validation = canConfirmPayment(invoice, quotation);
-  if (!validation.valid) {
-    throw new Error(validation.reason);
+  // Step 2: Prevent duplicate payments
+  const payments = getPayments();
+  const existingPayment = payments.find((p) => p.invoiceId === invoice.id);
+  if (existingPayment) {
+    throw new Error("A payment record already exists for this invoice.");
   }
 
   const nowStr = new Date().toISOString();
 
+  // Step 3: Create ClientPayment
+  const paymentRecord: ClientPayment = {
+    id: `PAY-${Math.floor(1000 + Math.random() * 9000)}`,
+    invoiceId: invoice.id,
+    jobNumber: request.jobNumber,
+    amountPaid: invoice.grandTotal,
+    paymentMethod: "MOCK_PAYMENT",
+    transactionReference: `TXN-${Math.floor(100000 + Math.random() * 900000)}`,
+    paidAt: nowStr,
+    status: "SUCCESS",
+  };
+  createOrUpdatePayment(paymentRecord);
 
-  // 1. Mark Invoice Paid idempotently
-  let updatedInvoice = { ...invoice };
-  if (invoice.status !== "paid") {
-    updatedInvoice = {
-      ...invoice,
-      status: "paid",
-      paidAt: nowStr,
-    };
-    createOrUpdateInvoice(updatedInvoice);
-  }
+  // Step 4: Update Invoice
+  const updatedInvoice: ClientInvoice = {
+    ...invoice,
+    status: "paid",
+    paidAt: nowStr,
+  };
+  createOrUpdateInvoice(updatedInvoice);
 
-  // 2. Create / Fetch Payment Record idempotently
-  const payments = getPayments();
-  let payment = payments.find((p) => p.invoiceId === invoice.id);
-  if (!payment) {
-    payment = {
-      id: `PAY-${Math.floor(1000 + Math.random() * 9000)}`,
-      invoiceId: invoice.id,
-      jobNumber: request.jobNumber,
-      amountPaid: invoice.grandTotal,
-      paymentMethod: "MOCK_PAYMENT",
-      transactionReference: `TXN-${Math.floor(100000 + Math.random() * 900000)}`,
-      paidAt: nowStr,
-      status: "SUCCESS",
-    };
-    createOrUpdatePayment(payment);
-  }
-
-  // 3. Update Request stage to PROJECT_CREATED and append timeline event idempotently
-  const updatedTimeline = [...request.timeline];
-  const hasTimelineMarker = updatedTimeline.some(
-    (t) => t.status === "approved" && t.comment.includes("Payment Confirmed")
-  );
-  if (!hasTimelineMarker) {
-    updatedTimeline.push({
-      status: "approved",
-      comment: `Payment Confirmed. Ref: ${payment.transactionReference}`,
-      date: nowStr,
-    });
-  }
-
-  const updatedRequest: LicensingRequest = {
+  // Step 5: Update Request stage to PAYMENT_CONFIRMED
+  const requestWithUpdatedStage: LicensingRequest = {
     ...request,
-    currentStage: "PROJECT_CREATED" as WorkflowStage,
+    currentStage: "PAYMENT_CONFIRMED" as WorkflowStage,
+    status: "quotation_created" as const,
     updatedAt: nowStr,
+  };
+
+  // Step 6: Timeline Event
+  const updatedTimeline = [...requestWithUpdatedStage.timeline];
+  updatedTimeline.push({
+    status: "quotation_created",
+    comment: `Payment Confirmed. Ref: ${paymentRecord.transactionReference} by ${paidBy}`,
+    date: nowStr,
+  });
+
+  const requestWithPayment: LicensingRequest = {
+    ...requestWithUpdatedStage,
     timeline: updatedTimeline,
   };
 
-  upsertRequest(updatedRequest);
+  // Automatically provision the project workspace (domain orchestration)
+  provisionProjectWorkspace({ request: requestWithPayment, payment: paymentRecord });
 
-  // 4. Provision Project Record (uses updatedRequest as approved)
-  const project = provisionProjectFromRequest(updatedRequest);
+  // Retrieve the final updated request state from the storage layer
+  const updatedRequest = getMergedRequests().find((r) => r.jobNumber === request.jobNumber) || requestWithPayment;
 
   return {
-    updatedRequest,
     updatedInvoice,
-    payment,
-    project,
+    paymentRecord,
+    updatedRequest,
   };
 }
+

@@ -102,6 +102,11 @@ export function buildProjectWorkspaceTemplate(
   const queue = (assignedQueue || "").toLowerCase();
   
   if (
+    classif.includes("fast") ||
+    queue.includes("fast")
+  ) {
+    template = "installation_fast";
+  } else if (
     classif.includes("maintenance") || 
     queue.includes("maintenance") || 
     rType.includes("maintenance") || 
@@ -121,19 +126,10 @@ export function buildProjectWorkspaceTemplate(
     classif.includes("high_hazard") || 
     queue.includes("high_hazard")
   ) {
-    template = "installation_full";
-  } else if (
-    classif.includes("fast") ||
-    queue.includes("fast") ||
-    rType.includes("technical_report") ||
-    rType.includes("compliance_report") ||
-    rType.includes("fit_report") ||
-    pType === "engineering"
-  ) {
     template = "compliance_followup";
   }
 
-  const silos: SiloExecutionData[] = template === "installation_full" ? [
+  const silos: SiloExecutionData[] = (template === "installation_full" || template === "installation_fast") ? [
     {
       id: "alarm",
       status: "pending",

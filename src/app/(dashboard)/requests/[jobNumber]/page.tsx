@@ -28,7 +28,7 @@ import { getInvoices, createOrUpdateInvoice } from "@/domains/invoices/storage";
 import { ClientPayment } from "@/domains/payments/types";
 import { getMergedRequests, upsertRequest } from "@/domains/requests/storage";
 import { Quotation } from "@/domains/quotations/types";
-import { confirmMockPaymentAndInitializeProject } from "@/domains/payments/workflow";
+import { confirmMockPayment } from "@/domains/payments/workflow";
 import { Project } from "@/types/project";
 import { getProjects } from "@/domains/projects/storage";
 import { USER_ROLES } from "@/constants/roles";
@@ -288,7 +288,7 @@ export default function RequestDetailsPage() {
     setIsProcessing(true);
 
     try {
-      const { updatedRequest, updatedInvoice } = confirmMockPaymentAndInitializeProject({ request, invoice });
+      const { updatedInvoice, updatedRequest } = confirmMockPayment({ request, invoice, paidBy: user.name || user.role });
       setInvoice(updatedInvoice);
       setRequest(updatedRequest);
 

@@ -372,6 +372,16 @@
   "superAdmin.overview.activity.subscriptionExpiring": "Subscription Expiring Soon",
   "superAdmin.overview.activity.subscriptionExpired": "Subscription Expired",
   "superAdmin.overview.activity.planChanged": "Plan Changed",
-  "superAdmin.overview.activity.userCreated": "New Platform User Created"
+  "superAdmin.overview.activity.userCreated": "New Platform User Created",
+  "projects.kickoff.approveKickoff": "Approve Kickoff",
+  "projects.kickoff.startExecution": "Start Execution",
+  "projects.kickoff.kickoffApproved": "Kickoff Approved",
+  "projects.kickoff.executionStarted": "Execution Started",
+  "projects.kickoff.kickoffNotes": "Kickoff Notes",
+  "projects.kickoff.kickoffReady": "Kickoff Ready",
+  "projects.kickoff.activeExecution": "Active Execution",
+  "projects.kickoff.planning": "Planning",
+  "projects.kickoff.cannotApproveKickoff": "Cannot Approve Kickoff",
+  "projects.kickoff.cannotStartExecution": "Cannot Start Execution"
 }
 

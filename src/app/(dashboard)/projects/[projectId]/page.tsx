@@ -34,11 +34,13 @@ import { getMergedRequests } from "@/domains/requests/storage";
 import { StatusBadge } from "@/shared/components/status-badge";
 import { getCanonicalRequestTypeDisplayName, getReviewPathDisplayName } from "@/domains/requests/workflow";
 import { 
-  startProjectExecution,
-  updateProjectKickoffDetails,
+  approveKickoff,
+  startExecution,
   updateProjectSiloStatus,
   transitionProjectPhase,
-  completeProjectExecution
+  completeProjectExecution,
+  startExecutionSilo,
+  completeExecutionSilo
 } from "@/domains/projects/workflow";
 import { createDefaultWorkspace, buildProjectWorkspaceTemplate } from "@/domains/projects/storage";
 import { USER_ROLES } from "@/constants/roles";
@@ -227,39 +229,81 @@ export default function ProjectDetailsPage() {
     );
   }
 
-  const handleSaveKickoff = (e: React.FormEvent) => {
+  const handleApproveKickoff = (e: React.FormEvent) => {
     e.preventDefault();
     setIsProcessing(true);
     try {
-      const updated = updateProjectKickoffDetails({
+      const updated = approveKickoff({
         project,
-        assignedInspector: inspector,
-        kickoffNotes: notes,
-        kickoffApproved: isApproved,
+        notes,
+        approvedBy: user?.name || user?.role || "Operations Officer",
       });
       setProject(updated);
-      alert(t("projects:kickoff.savedSuccess") || "Kickoff settings saved!");
+      alert(t("projects:kickoff.savedSuccess") || "Kickoff approved successfully!");
       loadData();
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      alert(err.message || "Failed to approve kickoff.");
     } finally {
       setIsProcessing(false);
     }
   };
 
-  const handleStartProject = () => {
+  const handleStartExecution = () => {
     if (isProcessing) return;
     setIsProcessing(true);
     try {
-      const { updatedProject, updatedRequest } = startProjectExecution({ project, request });
-      setProject(updatedProject);
-      if (updatedRequest) {
-        setRequest(updatedRequest);
-      }
-      alert(t("projects:details.alertExecutionStarted"));
+      const updated = startExecution({
+        project,
+        startedBy: user?.name || user?.role || "Operations Officer",
+      });
+      setProject(updated);
+      alert(t("projects:details.alertExecutionStarted") || "Execution started successfully!");
       loadData();
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      alert(err.message || "Failed to start execution.");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleStartSilo = (siloId: "alarm" | "suppression" | "ventilation") => {
+    if (isProcessing) return;
+    setIsProcessing(true);
+    try {
+      const updated = startExecutionSilo({
+        project,
+        siloId,
+        startedBy: user?.name || user?.role || "Operations Officer",
+      });
+      setProject(updated);
+      alert(t("projects.execution.moduleStarted") || "Silo execution started!");
+      loadData();
+    } catch (err: any) {
+      console.error(err);
+      alert(err.message || "Failed to start silo execution.");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleCompleteSilo = (siloId: "alarm" | "suppression" | "ventilation", notes: string) => {
+    if (isProcessing) return;
+    setIsProcessing(true);
+    try {
+      const updated = completeExecutionSilo({
+        project,
+        siloId,
+        completedBy: user?.name || user?.role || "Operations Officer",
+        notes,
+      });
+      setProject(updated);
+      alert(t("projects.execution.moduleCompleted") || "Silo execution completed!");
+      loadData();
+    } catch (err: any) {
+      console.error(err);
+      alert(err.message || "Failed to complete silo execution.");
     } finally {
       setIsProcessing(false);
     }
@@ -533,77 +577,49 @@ export default function ProjectDetailsPage() {
               ) : (
                 <>
                   {/* Kickoff Section */}
-                  <Card className="border-border bg-card">
-                <CardHeader className="pb-3 border-b border-border">
-                  <CardTitle className="text-sm font-bold flex items-center gap-2">
-                    <Settings className="h-4 w-4 text-indigo-500" />
-                    {t("projects:kickoff.title") || "Project Setup & Kickoff"}
-                  </CardTitle>
-                  <CardDescription className="text-xs text-muted-foreground">
-                    {t("projects:kickoff.desc") || "Operational setup before active execution."}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="pt-4">
-                  <form onSubmit={handleSaveKickoff} className="space-y-4 text-xs">
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <div className="space-y-1">
-                        <label className="font-semibold text-muted-foreground block">{t("projects:kickoff.inspector") || "Assigned Inspector"}</label>
-                        <Input
-                          type="text"
-                          value={inspector}
-                          onChange={(e) => setInspector(e.target.value)}
-                          placeholder={t("projects:kickoff.inspectorPlaceholder")}
-                          className="bg-secondary/50"
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <label className="font-semibold text-muted-foreground block">{t("projects:kickoff.downPayment") || "Down Payment"}</label>
-                        <div className="p-2 border border-emerald-500/20 bg-emerald-500/5 text-emerald-600 rounded font-semibold flex items-center gap-2">
-                          <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                          100% {t("projects:kickoff.approved") || "Confirmed (Invoice Paid)"}
-                        </div>
-                      </div>
-                    </div>
+                  {user.role === USER_ROLES.OPERATIONS_OFFICER && project.executionPhase === "created" && (
+                    <Card className="border-border bg-card">
+                      <CardHeader className="pb-3 border-b border-border">
+                        <CardTitle className="text-sm font-bold flex items-center gap-2">
+                          <Settings className="h-4 w-4 text-indigo-500" />
+                          {t("projects:kickoff.title") || "Project Setup & Kickoff"}
+                        </CardTitle>
+                        <CardDescription className="text-xs text-muted-foreground">
+                          {t("projects:kickoff.desc") || "Operational setup before active execution."}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="pt-4">
+                        <form onSubmit={handleApproveKickoff} className="space-y-4 text-xs">
+                          <div className="space-y-1">
+                            <label className="font-semibold text-muted-foreground block">{t("projects.kickoff.kickoffNotes") || "Kickoff Directions & Notes"}</label>
+                            <Textarea
+                              rows={3}
+                              value={notes}
+                              onChange={(e) => setNotes(e.target.value)}
+                              placeholder={t("projects:kickoff.notesPlaceholder") || "Enter kickoff instructions..."}
+                              className="bg-secondary/50 min-h-[80px]"
+                            />
+                          </div>
 
-                    <div className="space-y-1">
-                      <label className="font-semibold text-muted-foreground block">{t("projects:kickoff.notes") || "Kickoff Directions & Notes"}</label>
-                      <Textarea
-                        rows={2}
-                        value={notes}
-                        onChange={(e) => setNotes(e.target.value)}
-                        placeholder={t("projects:kickoff.notesPlaceholder")}
-                        className="bg-secondary/50 min-h-[60px]"
-                      />
-                    </div>
-
-                    <div className="flex items-center justify-between gap-4 pt-2 flex-wrap">
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <Checkbox
-                          checked={isApproved}
-                          onChange={(e) => setIsApproved(e.target.checked)}
-                          className="focus:ring-indigo-500 h-4 w-4"
-                        />
-                        <span className="font-semibold text-foreground">
-                          {t("projects:kickoff.approveCheckbox")}
-                        </span>
-                      </label>
-                      <Button 
-                        type="submit" 
-                        size="sm" 
-                        disabled={isProcessing}
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold"
-                      >
-                        {t("projects:kickoff.save") || "Save Settings"}
-                      </Button>
-                    </div>
-                  </form>
-                </CardContent>
-              </Card>
+                          <div className="flex justify-end pt-2">
+                            <Button 
+                              type="submit" 
+                              size="sm" 
+                              disabled={isProcessing}
+                              className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold"
+                            >
+                              {t("projects.kickoff.approveKickoff") || "Approve Kickoff"}
+                            </Button>
+                          </div>
+                        </form>
+                      </CardContent>
+                    </Card>
+                  )}
 
               {/* Template Render Logic */}
               
-              {/* Template: installation_full */}
-              {project.workspaceTemplate === "installation_full" && (
+              {/* Template: installation_full / installation_fast */}
+              {(project.workspaceTemplate === "installation_full" || project.workspaceTemplate === "installation_fast") && (
                 <Card className="border-border bg-card">
                   <CardHeader className="pb-3 border-b border-border">
                     <CardTitle className="text-sm font-bold flex items-center gap-2">
@@ -698,34 +714,55 @@ export default function ProjectDetailsPage() {
                               )}
                             </div>
 
-                            <div className="p-2 bg-secondary/35 border-t border-border flex justify-end">
-                              {isEditing ? (
-                                <div className="flex gap-1">
-                                  <Button 
-                                    size="sm" 
-                                    variant="ghost" 
-                                    className="h-6 text-[9px] px-2"
-                                    onClick={() => setEditingSilo(null)}
-                                  >
-                                    Cancel
-                                  </Button>
-                                  <Button 
-                                    size="sm" 
-                                    className="h-6 text-[9px] px-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold"
-                                    onClick={() => handleSaveSilo(silo.id)}
-                                  >
-                                    Save
-                                  </Button>
+                            <div className="p-2 bg-secondary/35 border-t border-border flex justify-between items-center text-[10px]">
+                              {user.role === USER_ROLES.OPERATIONS_OFFICER && project.executionPhase === "active_execution" ? (
+                                <div className="w-full flex justify-end">
+                                  {(silo.status === "pending" || silo.status === "ready") && (
+                                    <Button
+                                      size="sm"
+                                      className="h-7 text-[10px] px-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold"
+                                      onClick={() => handleStartSilo(silo.id)}
+                                      disabled={isProcessing}
+                                    >
+                                      {t("projects.execution.startModule") || "Start"}
+                                    </Button>
+                                  )}
+                                  {silo.status === "in_progress" && (
+                                    <div className="flex gap-1.5 items-center w-full">
+                                      <Input
+                                        type="text"
+                                        placeholder={t("projects.execution.completionNotes") || "Completion notes..."}
+                                        id={`notes-${silo.id}`}
+                                        className="h-7 text-[10px] bg-background flex-1"
+                                      />
+                                      <Button
+                                        size="sm"
+                                        className="h-7 text-[10px] px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold"
+                                        onClick={() => {
+                                          const inputEl = document.getElementById(`notes-${silo.id}`) as HTMLInputElement;
+                                          handleCompleteSilo(silo.id, inputEl?.value || "");
+                                        }}
+                                        disabled={isProcessing}
+                                      >
+                                        {t("projects.execution.completeModule") || "Complete"}
+                                      </Button>
+                                    </div>
+                                  )}
+                                  {silo.status === "completed" && (
+                                    <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                                      {t("projects.execution.completed") || "Completed"}
+                                    </span>
+                                  )}
                                 </div>
                               ) : (
-                                <Button 
-                                  size="sm" 
-                                  variant="outline" 
-                                  className="h-6 text-[9px] px-2"
-                                  onClick={() => startEditingSilo(silo)}
-                                >
-                                  Edit Silo
-                                </Button>
+                                <div className="w-full flex justify-between items-center text-[10px]">
+                                  <span className="text-muted-foreground">
+                                    {t("projects:silos.status") || "Status"}:
+                                  </span>
+                                  <span className="font-semibold text-foreground uppercase">
+                                    {silo.status}
+                                  </span>
+                                </div>
                               )}
                             </div>
                           </Card>
@@ -963,7 +1000,7 @@ export default function ProjectDetailsPage() {
               {request && <LinkedRequestSnapshotCard request={request} t={t} />}
 
               {/* Operational action card */}
-              {project.status === "planning" && (
+              {user.role === USER_ROLES.OPERATIONS_OFFICER && (
                 <Card className="border-indigo-500/20 bg-indigo-500/5 shadow-sm">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
@@ -974,19 +1011,30 @@ export default function ProjectDetailsPage() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="pt-2">
-                    <Button
-                      onClick={handleStartProject}
-                      disabled={isProcessing || !project.workspace?.kickoff?.approved}
-                      className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs gap-1.5 h-9"
-                    >
-                      <Send className="h-3.5 w-3.5" />
-                      {isProcessing 
-                        ? (t("projects:actions.activating") || "Activating...") 
-                        : !project.workspace?.kickoff?.approved
-                        ? t("projects:kickoff.awaitingApproval")
-                        : (t("projects:actions.startProject") || "Start Project")
-                      }
-                    </Button>
+                    {project.executionPhase === "created" && (
+                      <div className="text-xs text-muted-foreground py-2 text-center font-semibold">
+                        {t("projects.kickoff.awaitingApproval") || "Awaiting Kickoff Approval"}
+                      </div>
+                    )}
+                    {project.executionPhase === "kickoff_ready" && (
+                      <Button
+                        onClick={handleStartExecution}
+                        disabled={isProcessing}
+                        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs gap-1.5 h-9"
+                      >
+                        <Send className="h-3.5 w-3.5" />
+                        {isProcessing 
+                          ? (t("projects:actions.activating") || "Activating...") 
+                          : (t("projects.kickoff.startExecution") || "Start Execution")
+                        }
+                      </Button>
+                    )}
+                    {project.executionPhase === "active_execution" && (
+                      <div className="p-2 border border-emerald-500/20 bg-emerald-500/5 text-emerald-600 rounded font-semibold text-center text-xs flex items-center justify-center gap-2">
+                        <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                        {t("projects.kickoff.executionStarted") || "Execution Started"}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               )}

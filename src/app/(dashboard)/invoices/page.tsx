@@ -11,7 +11,7 @@ import { getMergedRequests } from "@/domains/requests/storage";
 import { getProjects } from "@/domains/projects/storage";
 import { getContracts } from "@/domains/contracts/storage";
 import { getQuotations } from "@/domains/quotations/storage";
-import { confirmMockPaymentAndInitializeProject } from "@/domains/payments/workflow";
+import { confirmMockPayment } from "@/domains/payments/workflow";
 
 import {
   InvoicesTable,
@@ -75,8 +75,8 @@ export default function InvoicesDashboardPage() {
         throw new Error("Associated safety request not found.");
       }
 
-      // Executes the domain-level workflow (Mark invoice as paid, create payment record, initialize project)
-      confirmMockPaymentAndInitializeProject({ request, invoice });
+      // Executes the domain-level workflow (Mark invoice as paid, create payment record)
+      confirmMockPayment({ request, invoice, paidBy: user.name || user.role });
       
       setAlertMsg({
         type: "success",

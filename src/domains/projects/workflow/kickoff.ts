@@ -1,54 +1,84 @@
-import { Project } from "@/types/project";
+import { Project, ProjectWorkspaceData } from "@/types/project";
 import { createDefaultWorkspace } from "@/domains/projects/storage";
 import { persistProject } from "./helpers/persist";
 
-export function updateProjectKickoffDetails({
+export function approveKickoff({
   project,
-  assignedInspector,
-  kickoffNotes,
-  kickoffApproved,
+  notes,
+  approvedBy,
 }: {
   project: Project;
-  assignedInspector: string;
-  kickoffNotes: string;
-  kickoffApproved: boolean;
+  notes: string;
+  approvedBy: string;
 }): Project {
+  if (project.status !== "planning" || project.executionPhase !== "created") {
+    throw new Error("Cannot approve kickoff: Project status must be planning and executionPhase must be created.");
+  }
+
   const nowStr = new Date().toISOString();
-  
+
+  // Create workspace metadata with kickoff notes if supported, preserving existing data
   const currentWorkspace = project.workspace || createDefaultWorkspace();
+  const updatedWorkspace: ProjectWorkspaceData = {
+    ...currentWorkspace,
+    kickoff: {
+      ...currentWorkspace.kickoff,
+      approved: true,
+      notes: notes || "",
+    },
+  };
 
-  let updatedWorkspace: any;
-  if (currentWorkspace && 'kickoff' in currentWorkspace && typeof (currentWorkspace as any).kickoff === 'object') {
-    updatedWorkspace = {
-      ...currentWorkspace,
-      kickoff: {
-        approved: kickoffApproved,
-        assignedInspector,
-        notes: kickoffNotes,
-      }
-    };
-  } else {
-    // Legacy support
-    updatedWorkspace = {
-      ...currentWorkspace,
-      assignedInspector,
-      kickoffNotes,
-      kickoffApproved,
-    };
-  }
-
-  // If kickoff is approved and we are in "created" phase, advance to "kickoff_ready"
-  let newPhase = project.executionPhase || "created";
-  if (kickoffApproved && newPhase === "created") {
-    newPhase = "kickoff_ready";
-  } else if (!kickoffApproved && newPhase === "kickoff_ready") {
-    newPhase = "created";
-  }
+  // Add timeline event
+  const updatedTasks = [...(project.tasks || [])];
+  updatedTasks.push({
+    id: `TSK-${Math.floor(1000 + Math.random() * 9000)}`,
+    title: "Kickoff Approved",
+    description: `Project kickoff approved by ${approvedBy}. Notes: ${notes}`,
+    completed: true,
+    dueDate: nowStr.split("T")[0],
+    priority: "Medium",
+  });
 
   const updatedProject: Project = {
     ...project,
-    executionPhase: newPhase,
+    executionPhase: "kickoff_ready",
     workspace: updatedWorkspace,
+    tasks: updatedTasks,
+    updatedAt: nowStr,
+  };
+
+  persistProject(updatedProject);
+  return updatedProject;
+}
+
+export function startExecution({
+  project,
+  startedBy,
+}: {
+  project: Project;
+  startedBy: string;
+}): Project {
+  if (project.executionPhase !== "kickoff_ready") {
+    throw new Error("Cannot start execution: Project executionPhase must be kickoff_ready.");
+  }
+
+  const nowStr = new Date().toISOString();
+
+  const updatedTasks = [...(project.tasks || [])];
+  updatedTasks.push({
+    id: `TSK-${Math.floor(1000 + Math.random() * 9000)}`,
+    title: "Execution Started",
+    description: `Project execution started by ${startedBy}.`,
+    completed: true,
+    dueDate: nowStr.split("T")[0],
+    priority: "Medium",
+  });
+
+  const updatedProject: Project = {
+    ...project,
+    status: "active",
+    executionPhase: "active_execution",
+    tasks: updatedTasks,
     updatedAt: nowStr,
   };
 

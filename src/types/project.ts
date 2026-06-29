@@ -11,6 +11,7 @@ export type ProjectExecutionPhase =
 
 export type ProjectWorkspaceTemplate =
   | "installation_full"
+  | "installation_fast"
   | "maintenance"
   | "compliance_followup";
 

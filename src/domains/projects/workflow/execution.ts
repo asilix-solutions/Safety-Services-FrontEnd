@@ -1,4 +1,4 @@
-import { Project } from "@/types/project";
+import { Project, ProjectExecutionPhase } from "@/types/project";
 import { LicensingRequest, WorkflowStage } from "@/domains/requests/types";
 import { createDefaultWorkspace } from "@/domains/projects/storage";
 import { persistProject, persistRequest } from "./helpers/persist";
@@ -132,3 +132,144 @@ export function updateProjectSiloStatus({
   persistProject(updatedProject);
   return updatedProject;
 }
+
+export function startExecutionSilo({
+  project,
+  siloId,
+  startedBy,
+}: {
+  project: Project;
+  siloId: "alarm" | "suppression" | "ventilation";
+  startedBy: string;
+}): Project {
+  if (project.status !== "active" || project.executionPhase !== "active_execution") {
+    throw new Error("Cannot start silo: Project status must be active and executionPhase must be active_execution.");
+  }
+
+  const currentWorkspace = project.workspace || createDefaultWorkspace();
+  const silos = currentWorkspace.execution?.silos || [];
+  const targetSilo = silos.find((s) => s.id === siloId);
+
+  if (!targetSilo) {
+    throw new Error(`Silo ${siloId} not found in project workspace.`);
+  }
+
+  if (targetSilo.status === "in_progress" || targetSilo.status === "completed") {
+    throw new Error(`Silo ${siloId} is already in progress or completed.`);
+  }
+
+  const updatedSilos = silos.map((s) => {
+    if (s.id === siloId) {
+      return {
+        ...s,
+        status: "in_progress" as const,
+      };
+    }
+    return s;
+  });
+
+  const nowStr = new Date().toISOString();
+  const updatedWorkspace = {
+    ...currentWorkspace,
+    execution: {
+      ...currentWorkspace.execution,
+      silos: updatedSilos,
+    },
+  };
+
+  const updatedTasks = [...(project.tasks || [])];
+  updatedTasks.push({
+    id: `TSK-${Math.floor(1000 + Math.random() * 9000)}`,
+    title: `Silo ${siloId.toUpperCase()} Started`,
+    description: `Execution silo ${siloId} started by ${startedBy}.`,
+    completed: true,
+    dueDate: nowStr.split("T")[0],
+    priority: "Medium",
+  });
+
+  const updatedProject: Project = {
+    ...project,
+    workspace: updatedWorkspace,
+    tasks: updatedTasks,
+    updatedAt: nowStr,
+  };
+
+  persistProject(updatedProject);
+  return updatedProject;
+}
+
+export function completeExecutionSilo({
+  project,
+  siloId,
+  completedBy,
+  notes,
+}: {
+  project: Project;
+  siloId: "alarm" | "suppression" | "ventilation";
+  completedBy: string;
+  notes: string;
+}): Project {
+  if (project.status !== "active" || project.executionPhase !== "active_execution") {
+    throw new Error("Cannot complete silo: Project status must be active and executionPhase must be active_execution.");
+  }
+
+  const currentWorkspace = project.workspace || createDefaultWorkspace();
+  const silos = currentWorkspace.execution?.silos || [];
+  const targetSilo = silos.find((s) => s.id === siloId);
+
+  if (!targetSilo) {
+    throw new Error(`Silo ${siloId} not found in project workspace.`);
+  }
+
+  if (targetSilo.status !== "in_progress") {
+    throw new Error(`Silo ${siloId} is not in progress.`);
+  }
+
+  const updatedSilos = silos.map((s) => {
+    if (s.id === siloId) {
+      return {
+        ...s,
+        status: "completed" as const,
+      };
+    }
+    return s;
+  });
+
+  const nowStr = new Date().toISOString();
+  const updatedWorkspace = {
+    ...currentWorkspace,
+    execution: {
+      ...currentWorkspace.execution,
+      silos: updatedSilos,
+    },
+  };
+
+  const updatedTasks = [...(project.tasks || [])];
+  updatedTasks.push({
+    id: `TSK-${Math.floor(1000 + Math.random() * 9000)}`,
+    title: `Silo ${siloId.toUpperCase()} Completed`,
+    description: `Execution silo ${siloId} completed by ${completedBy}. Notes: ${notes}`,
+    completed: true,
+    dueDate: nowStr.split("T")[0],
+    priority: "Medium",
+  });
+
+  // Check if all silos are now completed
+  const allCompleted = updatedSilos.every((s) => s.status === "completed");
+  let nextPhase: ProjectExecutionPhase | undefined = project.executionPhase;
+  if (allCompleted) {
+    nextPhase = "ready_for_final_inspection";
+  }
+
+  const updatedProject: Project = {
+    ...project,
+    executionPhase: nextPhase,
+    workspace: updatedWorkspace,
+    tasks: updatedTasks,
+    updatedAt: nowStr,
+  };
+
+  persistProject(updatedProject);
+  return updatedProject;
+}
+
