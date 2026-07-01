@@ -12,8 +12,8 @@ export function ProjectCompletedCard({ project, t }: ProjectCompletedCardProps) 
   const inspection = project.workspace?.inspection;
   const decisionBy = inspection?.decisionBy || "Consulting Engineer";
   const notes = inspection?.notes || "Compliance checks passed successfully.";
-  const completedAt = inspection?.completedAt 
-    ? new Date(inspection.completedAt).toLocaleDateString() 
+  const completedAt = inspection?.completedAt
+    ? new Date(inspection.completedAt).toLocaleDateString()
     : new Date().toLocaleDateString();
 
   return (
@@ -37,7 +37,7 @@ export function ProjectCompletedCard({ project, t }: ProjectCompletedCardProps) 
             <div className="space-y-1">
               <span className="text-[10px] text-muted-foreground block uppercase">{t("projects:inspection.completedAt") || "Completion Date"}</span>
               <span className="font-semibold text-foreground">{completedAt}</span>
-            </div>
+            </div>dwf
           </div>
           <div className="pt-2.5 border-t border-border">
             <span className="text-[10px] text-muted-foreground block uppercase mb-1">{t("projects:inspection.notesLabel") || "Inspection Decision Notes"}</span>

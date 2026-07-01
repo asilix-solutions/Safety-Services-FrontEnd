@@ -84,3 +84,27 @@ export function deleteRequestDraft(): void {
     console.error("Failed to remove SSLM_CLIENT_REQUEST_DRAFT", err);
   }
 }
+
+export function getActiveRequests(userId?: string, companyId?: string): LicensingRequest[] {
+  const requests = getMergedRequests();
+  const active = requests.filter((r) => r.status !== "completed" && r.status !== "closed");
+  if (companyId) {
+    return active.filter((r) => r.clientId === companyId);
+  }
+  if (userId) {
+    return active.filter((r) => r.clientId === userId);
+  }
+  return active;
+}
+
+export function getEngineeringRequests(): LicensingRequest[] {
+  const requests = getMergedRequests();
+  return requests.filter(
+    (r) =>
+      r.currentStage === "UNDER_REVIEW" &&
+      (r.classification === "engineering_project" ||
+        r.classification === "high_hazard_review" ||
+        r.engineeringReviewRequired)
+  );
+}
+

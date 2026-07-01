@@ -2,7 +2,7 @@ import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Button } from "@/shared/ui/button";
 import { Textarea } from "@/shared/ui/textarea";
-import { Settings } from "lucide-react";
+import { Settings, Send } from "lucide-react";
 import { Project } from "@/types/project";
 import { LicensingRequest } from "@/domains/requests/types";
 import { OverviewViewModel } from "../view-models/project-workspace.viewmodel";

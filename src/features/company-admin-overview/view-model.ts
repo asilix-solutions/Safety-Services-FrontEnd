@@ -4,6 +4,9 @@ import { ClientContract } from "@/domains/contracts/types";
 import { ClientCertificate } from "@/domains/certificates/types";
 import { LicensingRequest } from "@/domains/requests/types";
 import { Quotation } from "@/domains/quotations/types";
+import { getActiveProjects } from "@/domains/projects/storage";
+import { getPendingQuotationApprovals } from "@/domains/quotations/storage";
+import { getPendingContracts } from "@/domains/contracts/storage";
 import {
   OverviewStatCard,
   OverviewActionItem,
@@ -37,9 +40,10 @@ export function prepareCompanyAdminOverviewViewModel(
     quotations: Quotation[];
   }
 ): CompanyAdminOverviewViewModel {
-  const activeProjectsList = data.projects.filter((p) => p.status === "active");
-  const pendingApprovalsCount = data.quotations.filter((q) => q.quotationStatus === "SUBMITTED_FOR_APPROVAL").length;
-  const pendingContractsCount = data.contracts.filter((c) => c.status === "generated").length;
+  const activeProjectsList = getActiveProjects();
+  const pendingApprovalsCount = getPendingQuotationApprovals().length;
+  const pendingContractsCount = getPendingContracts().length;
+
 
   const summaryCards: OverviewStatCard[] = [
     {

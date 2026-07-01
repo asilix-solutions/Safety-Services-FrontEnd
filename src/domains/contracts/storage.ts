@@ -40,3 +40,16 @@ export function getContractByProjectId(projectId: string): ClientContract | null
   const contracts = getContracts();
   return contracts.find((c) => c.projectId === projectId) || null;
 }
+
+export function getPendingContracts(userId?: string, companyId?: string): ClientContract[] {
+  const contracts = getContracts();
+  const pending = contracts.filter((c) => c.status === "generated");
+  if (companyId) {
+    return pending.filter((c) => c.clientId === companyId);
+  }
+  if (userId) {
+    return pending.filter((c) => c.clientId === userId);
+  }
+  return pending;
+}
+

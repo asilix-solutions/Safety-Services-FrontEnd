@@ -4,6 +4,7 @@ import { ClientContract } from "@/domains/contracts/types";
 import { ClientCertificate } from "@/domains/certificates/types";
 import { LicensingRequest } from "@/domains/requests/types";
 import { SiteVisit } from "@/domains/site-visits/storage";
+import { getActiveProjects, getPendingReports } from "@/domains/projects/storage";
 import {
   OverviewStatCard,
   OverviewActionItem,
@@ -44,14 +45,12 @@ export function prepareOperationsOverviewViewModel(
 ): OperationsOverviewViewModel {
   const todayStr = "2026-06-28"; // Consistent with local system time in metadata
 
-  // 1. Summary Counts
-  const activeProjectsList = data.projects.filter((p) => p.status === "active");
-  
+  // 1. Summary Counts using centralized selectors
+  const activeProjectsList = getActiveProjects();
+  const pendingReportsCount = getPendingReports().length;
   const todayVisits = data.siteVisits.filter((v) => v.scheduledDate.startsWith(todayStr));
-  
-  const pendingReportsCount = data.projects.filter(
-    (p) => p.executionPhase === "ready_for_final_inspection" && !p.workspace?.inspection?.completedAt
-  ).length;
+
+
 
   const openObstaclesCount = data.projects.reduce(
     (sum, p) =>

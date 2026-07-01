@@ -2,6 +2,9 @@ import { Project } from "@/types/project";
 import { LicensingRequest } from "@/domains/requests/types";
 import { Quotation } from "@/domains/quotations/types";
 import { SiteVisit } from "@/domains/site-visits/types";
+import { getEngineeringRequests } from "@/domains/requests/storage";
+import { getPendingQuotations } from "@/domains/quotations/storage";
+import { getPendingReports } from "@/domains/projects/storage";
 import {
   OverviewStatCard,
   OverviewActionItem,
@@ -37,25 +40,14 @@ export function prepareConsultingEngineerOverviewViewModel(
   const todayStr = "2026-06-28"; // System date for consistent display
 
   // Filter requests that require engineering/blueprint/high hazard review
-  const engineeringRequests = data.requests.filter(
-    (r) =>
-      r.currentStage === "UNDER_REVIEW" &&
-      (r.classification === "engineering_project" ||
-        r.classification === "high_hazard_review" ||
-        r.engineeringReviewRequired)
-  );
+  const engineeringRequests = getEngineeringRequests();
 
   // Filter pending quotations
-  const pendingQuotations = data.quotations.filter(
-    (q) => q.quotationStatus === "DRAFT" || q.quotationStatus === "CHANGES_REQUESTED"
-  );
+  const pendingQuotations = getPendingQuotations();
 
-  // Filter pending reports (Projects in final inspection phase needing approval/completedAt)
-  const pendingReports = data.projects.filter(
-    (p) =>
-      p.executionPhase === "ready_for_final_inspection" &&
-      (!p.workspace?.inspection?.completedAt || !p.workspace?.inspection?.approved)
-  );
+  // Filter pending reports
+  const pendingReports = getPendingReports();
+
 
   // Filter upcoming site visits
   const upcomingVisitsList = data.siteVisits.filter((v) => v.status === "upcoming");

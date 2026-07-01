@@ -83,3 +83,16 @@ export function getMergedInvoices(): ClientInvoice[] {
 
   return Array.from(mergedMap.values()).sort((a, b) => new Date(b.issuedAt).getTime() - new Date(a.issuedAt).getTime());
 }
+
+export function getUnpaidInvoices(userId?: string, companyId?: string): ClientInvoice[] {
+  const invoices = getMergedInvoices();
+  const unpaid = invoices.filter((i) => i.status === "unpaid");
+  if (companyId) {
+    return unpaid.filter((i) => i.tenantId === companyId);
+  }
+  if (userId) {
+    return unpaid.filter((i) => i.tenantId === userId);
+  }
+  return unpaid;
+}
+

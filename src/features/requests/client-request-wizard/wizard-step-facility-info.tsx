@@ -84,11 +84,11 @@ export function FacilityInfoStep({ form, onNext, onPrev }: FacilityInfoStepProps
           />
           {errors.crNumber && (
             <p className="text-[10px] text-destructive font-medium">
-              {errors.crNumber.message === "This field is required" 
-                ? t("requests:wizard.validation.required") 
+              {errors.crNumber.message === "This field is required"
+                ? t("requests:wizard.validation.required")
                 : errors.crNumber.message === "Commercial Registration number must be 10 digits"
-                ? t("requests:wizard.validation.invalidCr")
-                : errors.crNumber.message}
+                  ? t("requests:wizard.validation.invalidCr")
+                  : errors.crNumber.message}
             </p>
           )}
         </div>
@@ -142,11 +142,11 @@ export function FacilityInfoStep({ form, onNext, onPrev }: FacilityInfoStepProps
           />
           {errors.area && (
             <p className="text-[10px] text-destructive font-medium">
-              {errors.area.message === "This field is required" 
-                ? t("requests:wizard.validation.required") 
+              {errors.area.message === "This field is required"
+                ? t("requests:wizard.validation.required")
                 : errors.area.message === "Facility area must be a positive number"
-                ? t("requests:wizard.validation.invalidArea")
-                : errors.area.message}
+                  ? t("requests:wizard.validation.invalidArea")
+                  : errors.area.message}
             </p>
           )}
         </div>
@@ -236,11 +236,11 @@ export function FacilityInfoStep({ form, onNext, onPrev }: FacilityInfoStepProps
           />
           {errors.contactPhone && (
             <p className="text-[10px] text-destructive font-medium">
-              {errors.contactPhone.message === "This field is required" 
-                ? t("requests:wizard.validation.required") 
+              {errors.contactPhone.message === "This field is required"
+                ? t("requests:wizard.validation.required")
                 : errors.contactPhone.message === "Contact phone number must start with 05 and be 10 digits"
-                ? t("requests:wizard.validation.invalidPhone")
-                : errors.contactPhone.message}
+                  ? t("requests:wizard.validation.invalidPhone")
+                  : errors.contactPhone.message}
             </p>
           )}
         </div>

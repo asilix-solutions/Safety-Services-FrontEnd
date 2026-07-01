@@ -273,4 +273,27 @@ export function provisionProjectFromRequest(request: LicensingRequest): Project 
   return newProject;
 }
 
+export function getActiveProjects(userId?: string, companyId?: string): Project[] {
+  const projects = getProjects();
+  const active = projects.filter((p) => p.status === "active" || p.executionPhase === "active_execution");
+  if (companyId) {
+    return active.filter((p) => p.tenantId === companyId || p.clientId === companyId);
+  }
+  if (userId) {
+    return active.filter((p) => p.clientId === userId);
+  }
+  return active;
+}
+
+export function getPendingReports(inspectorName?: string): Project[] {
+  const projects = getProjects();
+  return projects.filter(
+    (p) =>
+      p.executionPhase === "ready_for_final_inspection" &&
+      (!p.workspace?.inspection?.completedAt || !p.workspace?.inspection?.approved) &&
+      (!inspectorName || p.workspace?.kickoff.assignedInspector === inspectorName)
+  );
+}
+
+
 

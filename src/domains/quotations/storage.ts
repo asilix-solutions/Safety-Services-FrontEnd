@@ -31,3 +31,14 @@ export function createOrUpdateQuotation(quotation: Quotation): void {
   }
   saveQuotations(quotations);
 }
+
+export function getPendingQuotationApprovals(): Quotation[] {
+  const quotations = getQuotations();
+  return quotations.filter((q) => q.quotationStatus === "SUBMITTED_FOR_APPROVAL");
+}
+
+export function getPendingQuotations(): Quotation[] {
+  const quotations = getQuotations();
+  return quotations.filter((q) => q.quotationStatus === "DRAFT" || q.quotationStatus === "CHANGES_REQUESTED");
+}
+

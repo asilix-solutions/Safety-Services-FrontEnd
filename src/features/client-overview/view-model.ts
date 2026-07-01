@@ -4,6 +4,9 @@ import { Project } from "@/types/project";
 import { ClientInvoice } from "@/domains/invoices/types";
 import { ClientContract } from "@/domains/contracts/types";
 import { ClientCertificate } from "@/domains/certificates/types";
+import { getActiveRequests } from "@/domains/requests/storage";
+import { getActiveProjects } from "@/domains/projects/storage";
+import { getUnpaidInvoices } from "@/domains/invoices/storage";
 import {
   OverviewActionItem,
   OverviewEntityItem,
@@ -45,14 +48,11 @@ export function prepareClientOverviewViewModel(
   const clientContracts = data.contracts.filter((c) => c.clientId === user.id || c.clientId === user.companyId);
   const clientCertificates = data.certificates.filter((c) => c.clientId === user.id || c.clientId === user.companyId);
 
-  // Welcome Stats
-  const inactiveRequestStatuses: RequestStatus[] = ["completed", "closed"];
-  const activeRequests = clientRequests.filter(
-    (r) => !inactiveRequestStatuses.includes(r.status)
-  );
-  const activeProjects = clientProjects.filter((p) => p.status === "active");
+  // Welcome Stats using centralized domain selectors
+  const activeRequests = getActiveRequests(user.id, user.companyId);
+  const activeProjects = getActiveProjects(user.id, user.companyId);
+  const unpaidInvoicesCount = getUnpaidInvoices(user.id, user.companyId).length;
 
-  const unpaidInvoicesCount = clientInvoices.filter((inv) => inv.status === "unpaid").length;
 
   const summaryCards: OverviewStatCard[] = [
     {

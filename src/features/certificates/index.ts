@@ -1,4 +1,1 @@
-export * from "./components/ready-to-issue-section";
-export * from "./components/certificates-table";
-export * from "./components/certificate-audit-dialog";
-export * from "./helpers/formatters";
+export { CertificateList } from "./certificate-list/certificate-list";
