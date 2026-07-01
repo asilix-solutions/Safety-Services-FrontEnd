@@ -8,12 +8,14 @@ import { Badge } from "@/shared/ui/badge";
 import { CheckCircle2, X, AlertTriangle, CreditCard, Layers } from "lucide-react";
 import Link from "next/link";
 import { useTranslation } from "@/providers/i18n-provider";
-import { formatCurrency, getStatusLabel, getStatusBadgeVariant } from "../helpers/helpers";
+import { formatCurrency as localFormatCurrency } from "@/lib/formatters";
+import { getStatusLabel, getStatusBadgeVariant } from "../helpers/helpers";
 
 interface PaymentConfirmDialogProps {
   invoice: ClientInvoice;
   isPaying: boolean;
   isSuccess: boolean;
+  createdProjectId?: string | null;
   onConfirm: () => void;
   onCancel: () => void;
 }
@@ -22,10 +24,11 @@ export function PaymentConfirmDialog({
   invoice,
   isPaying,
   isSuccess,
+  createdProjectId,
   onConfirm,
   onCancel,
 }: PaymentConfirmDialogProps) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm">
@@ -86,7 +89,7 @@ export function PaymentConfirmDialog({
                   {t("common:invoices_pay_confirm_amount")}
                 </span>
                 <span className="text-base font-bold text-primary">
-                  {formatCurrency(invoice.grandTotal, invoice.currency)}
+                  {localFormatCurrency(invoice.grandTotal, locale, invoice.currency)}
                 </span>
               </div>
 
@@ -142,7 +145,7 @@ export function PaymentConfirmDialog({
               </p>
 
               <div className="flex flex-col gap-2 pt-2">
-                <Link href="/projects" className="w-full" onClick={onCancel}>
+                <Link href={createdProjectId ? `/projects/${createdProjectId}` : "/projects"} className="w-full" onClick={onCancel}>
                   <Button size="sm" className="w-full h-9 text-xs gap-2">
                     <Layers className="h-3.5 w-3.5" />
                     {t("common:invoices_pay_success_go_projects")}

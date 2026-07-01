@@ -4,6 +4,7 @@ import { InvoiceWithFacility } from "../hooks/use-invoice-list";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
 import { EmptyState } from "@/shared/components/empty-state";
 import { DataTable, ColumnDef } from "@/shared/tables/data-table";
+import { Badge } from "@/shared/ui/badge";
 import {
   FileText,
   Eye,
@@ -18,8 +19,10 @@ import { useTranslation } from "@/providers/i18n-provider";
 import { SearchInput } from "@/shared/components/search-input";
 import { ActionMenu } from "@/shared/components/action-menu";
 import {
-  formatCurrency,
-  formatDate,
+  formatCurrency as localFormatCurrency,
+  formatDate as localFormatDate,
+} from "@/lib/formatters";
+import {
   getStatusLabel,
   filterBySearch,
   filterByStatus,
@@ -38,22 +41,22 @@ interface InvoiceTableProps {
   onDownloadInvoice: (invoice: ClientInvoice) => void;
 }
 
-/** Semantic status pill — replaces plain Badge */
+/** Semantic status pill — replaces plain Badge with visual consistency */
 function StatusPill({ status }: { status: "paid" | "unpaid" }) {
   const { t } = useTranslation();
   if (status === "paid") {
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+      <Badge variant="success" className="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[11px] font-semibold">
         <CheckCircle2 className="h-3 w-3" />
         {getStatusLabel(status, t)}
-      </span>
+      </Badge>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20">
+    <Badge variant="destructive" className="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[11px] font-semibold">
       <AlertCircle className="h-3 w-3" />
       {getStatusLabel(status, t)}
-    </span>
+    </Badge>
   );
 }
 
@@ -88,6 +91,7 @@ function InvoiceMobileCard({
   onPayInvoice,
   onDownloadInvoice,
   t,
+  locale,
 }: {
   invoice: InvoiceWithFacility;
   userRole: string;
@@ -95,6 +99,7 @@ function InvoiceMobileCard({
   onPayInvoice: (inv: ClientInvoice) => void;
   onDownloadInvoice: (inv: ClientInvoice) => void;
   t: (key: string) => string;
+  locale: any;
 }) {
   const isPaid = invoice.status === "paid";
   return (
@@ -118,12 +123,14 @@ function InvoiceMobileCard({
         <div>
           <p className="text-[10px] text-muted-foreground">{t("invoices_table_amount")}</p>
           <p className="text-sm font-bold text-foreground">
-            {formatCurrency(invoice.grandTotal, invoice.currency)}
+            {localFormatCurrency(invoice.grandTotal, locale, invoice.currency)}
           </p>
         </div>
         <div className="text-right">
           <p className="text-[10px] text-muted-foreground">{t("invoices_table_due")}</p>
-          <p className="text-xs font-medium text-foreground">{formatDate(invoice.dueDate)}</p>
+          <p className="text-xs font-medium text-foreground">
+            {localFormatDate(invoice.dueDate, locale, { dateStyle: "medium" })}
+          </p>
         </div>
       </div>
 
@@ -169,7 +176,7 @@ export function InvoiceTable({
   onViewDetails,
   onDownloadInvoice,
 }: InvoiceTableProps) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
 
   const searchedInvoices = filterBySearch(invoices, searchQuery);
   const filteredInvoices = filterByStatus(searchedInvoices, statusFilter) as InvoiceWithFacility[];
@@ -210,7 +217,7 @@ export function InvoiceTable({
       accessorKey: "grandTotal",
       render: (row) => (
         <span className="text-sm font-bold text-foreground tabular-nums text-start block">
-          {formatCurrency(row.grandTotal, row.currency)}
+          {localFormatCurrency(row.grandTotal, locale, row.currency)}
         </span>
       ),
     },
@@ -218,7 +225,9 @@ export function InvoiceTable({
       header: t("invoices_table_due"),
       accessorKey: "dueDate",
       render: (row) => (
-        <span className="text-xs text-muted-foreground tabular-nums text-start block">{formatDate(row.dueDate)}</span>
+        <span className="text-xs text-muted-foreground tabular-nums text-start block">
+          {localFormatDate(row.dueDate, locale, { dateStyle: "medium" })}
+        </span>
       ),
     },
     {
@@ -351,6 +360,7 @@ export function InvoiceTable({
                   onPayInvoice={onPayInvoice}
                   onDownloadInvoice={onDownloadInvoice}
                   t={t}
+                  locale={locale}
                 />
               ))
             )}

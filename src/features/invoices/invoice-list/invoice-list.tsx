@@ -28,6 +28,7 @@ export function InvoiceList() {
     payingInvoice,
     isPayingConfirm,
     paymentSuccess,
+    createdProjectId,
     handleCancelPayment,
     handleConfirmPayment,
     t,
@@ -103,6 +104,7 @@ export function InvoiceList() {
           invoice={payingInvoice}
           isPaying={isPayingConfirm}
           isSuccess={paymentSuccess}
+          createdProjectId={createdProjectId}
           onConfirm={handleConfirmPayment}
           onCancel={handleCancelPayment}
         />

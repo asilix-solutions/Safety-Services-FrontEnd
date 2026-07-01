@@ -59,7 +59,9 @@ export function useProjectWorkspace() {
   const loadData = () => {
     if (projectId) {
       const list = getProjects();
-      const foundProject = list.find((p) => p.id === projectId);
+      const foundProject = list.find(
+        (p) => p.id === projectId || p.jobNumber === projectId
+      );
       if (foundProject) {
         if (!foundProject.workspace) {
           foundProject.workspace = createDefaultWorkspace();

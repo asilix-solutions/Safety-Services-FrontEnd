@@ -8,6 +8,7 @@ import Link from "next/link";
 import { useTranslation } from "@/providers/i18n-provider";
 import { useAuth } from "@/providers/AuthProvider";
 import { USER_ROLES } from "@/constants/roles";
+import { getProjects } from "@/domains/projects/storage";
 import { formatCurrency, formatDate, getStatusBadgeVariant, getStatusLabel } from "../helpers/helpers";
 
 interface InvoiceActionsProps {
@@ -215,15 +216,22 @@ export function InvoiceActions({
               )}
 
               {hasLinkedProject && (
-                <Link href={`/projects/${invoice.jobNumber}`} className="w-full">
-                  <Button variant="ghost" size="sm" className="w-full justify-between text-xs h-9 text-muted-foreground hover:text-foreground cursor-pointer">
-                    <span className="flex items-center gap-2">
-                      <Layers className="h-4 w-4 text-primary" />
-                      {t("invoices_link_project")}
-                    </span>
-                    <ArrowRight className="h-3.5 w-3.5 opacity-60 rtl:rotate-180" />
-                  </Button>
-                </Link>
+                (() => {
+                  const projectsList = getProjects();
+                  const linkedProj = projectsList.find((p) => p.jobNumber === invoice.jobNumber);
+                  const href = linkedProj ? `/projects/${linkedProj.id}` : `/projects/${invoice.jobNumber}`;
+                  return (
+                    <Link href={href} className="w-full">
+                      <Button variant="ghost" size="sm" className="w-full justify-between text-xs h-9 text-muted-foreground hover:text-foreground cursor-pointer">
+                        <span className="flex items-center gap-2">
+                          <Layers className="h-4 w-4 text-primary" />
+                          {t("invoices_link_project")}
+                        </span>
+                        <ArrowRight className="h-3.5 w-3.5 opacity-60 rtl:rotate-180" />
+                      </Button>
+                    </Link>
+                  );
+                })()
               )}
 
               {hasLinkedContract && (

@@ -29,6 +29,7 @@ export function useInvoiceList() {
   const [payingInvoice, setPayingInvoice] = useState<ClientInvoice | null>(null);
   const [isPayingConfirm, setIsPayingConfirm] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [createdProjectId, setCreatedProjectId] = useState<string | null>(null);
 
   const loadData = () => {
     if (!user) return;
@@ -55,6 +56,7 @@ export function useInvoiceList() {
   /** Opens the confirmation dialog — does NOT execute payment */
   const handlePayInvoice = (invoice: ClientInvoice) => {
     setPaymentSuccess(false);
+    setCreatedProjectId(null);
     setPayingInvoice(invoice);
   };
 
@@ -63,6 +65,7 @@ export function useInvoiceList() {
     setPayingInvoice(null);
     setIsPayingConfirm(false);
     setPaymentSuccess(false);
+    setCreatedProjectId(null);
   };
 
   /** Executes the actual domain payment after user confirms in dialog */
@@ -77,7 +80,14 @@ export function useInvoiceList() {
         throw new Error("Associated safety request not found.");
       }
 
-      confirmMockPayment({ request, invoice: payingInvoice, paidBy: user.name || user.role });
+      const result = confirmMockPayment({ request, invoice: payingInvoice, paidBy: user.name || user.role });
+
+      // Retrieve the generated project to get its exact ID
+      const projectsList = getProjects();
+      const generatedProject = projectsList.find((p) => p.jobNumber === payingInvoice.jobNumber);
+      if (generatedProject) {
+        setCreatedProjectId(generatedProject.id);
+      }
 
       setPaymentSuccess(true);
       loadData();
@@ -132,6 +142,7 @@ export function useInvoiceList() {
     payingInvoice,
     isPayingConfirm,
     paymentSuccess,
+    createdProjectId,
     handleCancelPayment,
     handleConfirmPayment,
     t,
