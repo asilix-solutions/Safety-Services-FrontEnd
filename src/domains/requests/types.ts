@@ -26,6 +26,7 @@ export interface RequiredDocument {
   name: string;
   type: string;
   uploaded: boolean;
+  required: boolean;
   fileName?: string;
 }
 
@@ -59,6 +60,31 @@ export interface LicensingRequest {
   hazardousMaterials: boolean;
   riskCategory: "low" | "medium" | "high";
   notes?: string;
+
+  // Service-specific dynamic fields
+  landPlotNumber?: string;
+  gpsCoordinates?: string;
+  currentSafetyEquipment?: string;
+  buildingStatus?: string;
+  licensePurpose?: string;
+
+  existingSafetySystems?: string;
+  lastMaintenanceDate?: string;
+  preferredVisitDate?: string;
+  onSiteCoordinatorName?: string;
+  onSiteCoordinatorPhone?: string;
+  oldContractAvailable?: boolean;
+
+  blueprintScope?: string;
+  buildingFloors?: number;
+  constructionStatus?: string;
+  requiredSystems?: string;
+  engineeringNotes?: string;
+
+  reportType?: "instant" | "non_instant" | "compliance";
+  caseDescription?: string;
+  buildingLicenseContext?: string;
+  inspectionNeeded?: boolean;
 
   // Classification results
   classification: RequestClassification;

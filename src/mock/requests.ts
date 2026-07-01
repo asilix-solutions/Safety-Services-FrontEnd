@@ -33,8 +33,8 @@ export const MOCK_REQUESTS: LicensingRequest[] = [
     currentStage: "SUBMITTED",
     assignedQueue: "FAST_TRACK",
     documents: [
-      { name: "Commercial Registration / 700 Document", type: "pdf,image", uploaded: true, fileName: "cr_emaar.pdf" },
-      { name: "Building Permit", type: "pdf", uploaded: true, fileName: "permit_90221.pdf" },
+      { name: "Commercial Registration / 700 Document", type: "pdf,image", uploaded: true, fileName: "cr_emaar.pdf", required: true },
+      { name: "Building Permit", type:  "pdf", uploaded: true, fileName: "permit_90221.pdf", required: true },
     ],
     createdAt: "2026-06-01T08:00:00Z",
     updatedAt: "2026-06-01T08:30:00Z",
@@ -75,8 +75,8 @@ export const MOCK_REQUESTS: LicensingRequest[] = [
     currentStage: "UNDER_REVIEW",
     assignedQueue: "HIGH_HAZARD",
     documents: [
-      { name: "Rental/Lease Contract", type: "pdf", uploaded: true, fileName: "lease_gulf.pdf" },
-      { name: "Building Permit", type: "pdf", uploaded: true, fileName: "permit_gulf.pdf" },
+      { name: "Rental/Lease Contract", type: "pdf", uploaded: true, fileName: "lease_gulf.pdf", required: true },
+      { name: "Building Permit", type: "pdf", uploaded: true, fileName: "permit_gulf.pdf", required: true },
     ],
     createdAt: "2026-06-04T09:15:00Z",
     updatedAt: "2026-06-05T10:00:00Z",

@@ -85,6 +85,26 @@ export function ClientRequestWizard() {
       hazardousMaterials: false,
       riskCategory: "low",
       notes: "",
+      landPlotNumber: "",
+      gpsCoordinates: "",
+      currentSafetyEquipment: "",
+      buildingStatus: "",
+      licensePurpose: "",
+      existingSafetySystems: "",
+      lastMaintenanceDate: "",
+      preferredVisitDate: "",
+      onSiteCoordinatorName: "",
+      onSiteCoordinatorPhone: "",
+      oldContractAvailable: false,
+      blueprintScope: "",
+      buildingFloors: undefined,
+      constructionStatus: "",
+      requiredSystems: "",
+      engineeringNotes: "",
+      reportType: undefined,
+      caseDescription: "",
+      buildingLicenseContext: "",
+      inspectionNeeded: false,
     },
   });
 
@@ -110,7 +130,7 @@ export function ClientRequestWizard() {
 
   const initDefaultDocuments = (type: RequestType) => {
     const defaultDocs = DEFAULT_REQUIRED_DOCUMENTS[type] || [];
-    setDocuments(defaultDocs.map((doc) => ({ ...doc, uploaded: false })));
+    setDocuments(defaultDocs.map((doc) => ({ ...doc, uploaded: false, required: doc.required })));
   };
 
   // Re-init docs when requestType changes, only if not restored from draft
@@ -151,8 +171,8 @@ export function ClientRequestWizard() {
 
   const handleNext = () => {
     if (step === 4) {
-      const allUploaded = documents.every((doc) => doc.uploaded);
-      if (!allUploaded) {
+      const missingRequired = documents.some((doc) => doc.required && !doc.uploaded);
+      if (missingRequired) {
         alert(t("requests:wizard.validation.missingDocuments") || "Please upload all required documents before proceeding.");
         return;
       }
@@ -254,6 +274,26 @@ export function ClientRequestWizard() {
       hazardousMaterials: formValues.hazardousMaterials,
       riskCategory: formValues.riskCategory,
       notes: formValues.notes,
+      landPlotNumber: formValues.landPlotNumber,
+      gpsCoordinates: formValues.gpsCoordinates,
+      currentSafetyEquipment: formValues.currentSafetyEquipment,
+      buildingStatus: formValues.buildingStatus,
+      licensePurpose: formValues.licensePurpose,
+      existingSafetySystems: formValues.existingSafetySystems,
+      lastMaintenanceDate: formValues.lastMaintenanceDate,
+      preferredVisitDate: formValues.preferredVisitDate,
+      onSiteCoordinatorName: formValues.onSiteCoordinatorName,
+      onSiteCoordinatorPhone: formValues.onSiteCoordinatorPhone,
+      oldContractAvailable: formValues.oldContractAvailable,
+      blueprintScope: formValues.blueprintScope,
+      buildingFloors: formValues.buildingFloors ? Number(formValues.buildingFloors) : undefined,
+      constructionStatus: formValues.constructionStatus,
+      requiredSystems: formValues.requiredSystems,
+      engineeringNotes: formValues.engineeringNotes,
+      reportType: formValues.reportType,
+      caseDescription: formValues.caseDescription,
+      buildingLicenseContext: formValues.buildingLicenseContext,
+      inspectionNeeded: formValues.inspectionNeeded,
       classification,
       siteVisitRequired,
       engineeringReviewRequired,

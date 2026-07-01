@@ -4,8 +4,8 @@ import React from "react";
 import { UseFormReturn } from "react-hook-form";
 import { ClientRequestFormValues } from "@/schemas/client-request.schema";
 import { Button } from "@/shared/ui/button";
-import { ShieldAlert, Info, Flame, EyeOff, ClipboardList, PenTool } from "lucide-react";
 import { useTranslation } from "@/providers/i18n-provider";
+import { Label } from "@/shared/ui/label";
 
 interface SafetyRiskStepProps {
   form: UseFormReturn<ClientRequestFormValues>;
@@ -15,16 +15,33 @@ interface SafetyRiskStepProps {
 
 export function SafetyRiskStep({ form, onNext, onPrev }: SafetyRiskStepProps) {
   const { t } = useTranslation();
-  const { register, watch, setValue } = form;
+  const { register, watch, trigger, formState: { errors } } = form;
 
-  const gasExtensions = watch("gasExtensions");
-  const hazardousMaterials = watch("hazardousMaterials");
+  const requestType = watch("requestType");
+
+  const handleNextStep = async () => {
+    let fieldsToValidate: (keyof ClientRequestFormValues)[] = [];
+    if (requestType === "new_license") {
+      fieldsToValidate = ["landPlotNumber", "buildingStatus", "licensePurpose"];
+    } else if (requestType === "maintenance_contract") {
+      fieldsToValidate = ["existingSafetySystems", "preferredVisitDate", "onSiteCoordinatorName", "onSiteCoordinatorPhone"];
+    } else if (requestType === "engineering_blueprint") {
+      fieldsToValidate = ["blueprintScope", "buildingFloors", "constructionStatus"];
+    } else if (requestType === "technical_report") {
+      fieldsToValidate = ["reportType", "caseDescription"];
+    }
+
+    const isValid = await trigger(fieldsToValidate);
+    if (isValid) {
+      onNext();
+    }
+  };
 
   return (
     <div className="space-y-6">
       <div className="text-center max-w-lg mx-auto space-y-1.5">
         <h2 className="text-xl font-bold text-foreground">
-          {t("requests:wizard.safetyRisk.title")}
+          {t("requests:wizard.serviceDetails.title")}
         </h2>
         <p className="text-xs text-muted-foreground">
           {t("requests:wizard.safetyRisk.subtitle")}
@@ -32,169 +49,301 @@ export function SafetyRiskStep({ form, onNext, onPrev }: SafetyRiskStepProps) {
       </div>
 
       <div className="space-y-4">
-        {/* Toggles Grid */}
-        <div className="grid gap-3 sm:grid-cols-2">
-          {/* Safety Equipment */}
-          <label className="flex items-center gap-3 p-4 rounded-xl border border-border bg-card cursor-pointer hover:bg-accent/50 transition-all select-none">
-            <input
-              type="checkbox"
-              {...register("safetyEquipment")}
-              className="h-4 w-4 rounded border-input text-indigo-600 focus:ring-indigo-500"
-            />
-            <div className="space-y-0.5">
-              <span className="text-xs font-semibold text-foreground">
-                {t("requests:wizard.safetyRisk.equipmentTitle")}
-              </span>
-              <span className="text-[10px] text-muted-foreground block">
-                {t("requests:wizard.safetyRisk.equipmentDesc")}
-              </span>
-            </div>
-          </label>
+        {/* NEW SAFETY LICENSE FIELDS */}
+        {requestType === "new_license" && (
+          <div className="space-y-4">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-foreground/80">
+                  {t("requests:wizard.serviceDetails.landPlotNumber")}
+                </Label>
+                <input
+                  type="text"
+                  {...register("landPlotNumber")}
+                  className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary placeholder-muted-foreground/60"
+                />
+                {errors.landPlotNumber && (
+                  <p className="text-[10px] text-destructive">{errors.landPlotNumber.message}</p>
+                )}
+              </div>
 
-          {/* Fire Alarm System */}
-          <label className="flex items-center gap-3 p-4 rounded-xl border border-border bg-card cursor-pointer hover:bg-accent/50 transition-all select-none">
-            <input
-              type="checkbox"
-              {...register("fireAlarm")}
-              className="h-4 w-4 rounded border-input text-indigo-600 focus:ring-indigo-500"
-            />
-            <div className="space-y-0.5">
-              <span className="text-xs font-semibold text-foreground">
-                {t("requests:wizard.safetyRisk.alarmTitle")}
-              </span>
-              <span className="text-[10px] text-muted-foreground block">
-                {t("requests:wizard.safetyRisk.alarmDesc")}
-              </span>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-foreground/80">
+                  {t("requests:wizard.serviceDetails.gpsCoordinates")}
+                </Label>
+                <input
+                  type="text"
+                  {...register("gpsCoordinates")}
+                  className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary placeholder-muted-foreground/60"
+                />
+              </div>
             </div>
-          </label>
 
-          {/* Fire Extinguishers */}
-          <label className="flex items-center gap-3 p-4 rounded-xl border border-border bg-card cursor-pointer hover:bg-accent/50 transition-all select-none">
-            <input
-              type="checkbox"
-              {...register("fireExtinguishers")}
-              className="h-4 w-4 rounded border-input text-indigo-600 focus:ring-indigo-500"
-            />
-            <div className="space-y-0.5">
-              <span className="text-xs font-semibold text-foreground">
-                {t("requests:wizard.safetyRisk.extinguishersTitle")}
-              </span>
-              <span className="text-[10px] text-muted-foreground block">
-                {t("requests:wizard.safetyRisk.extinguishersDesc")}
-              </span>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-foreground/80">
+                  {t("requests:wizard.serviceDetails.buildingStatus")}
+                </Label>
+                <select
+                  {...register("buildingStatus")}
+                  className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+                >
+                  <option value="">{t("requests:wizard.serviceDetails.placeholderSelectStatus")}</option>
+                  <option value="ready">{t("requests:wizard.serviceDetails.buildingStatusReady")}</option>
+                  <option value="under_construction">{t("requests:wizard.serviceDetails.buildingStatusUnderConstruction")}</option>
+                  <option value="renovation">{t("requests:wizard.serviceDetails.buildingStatusRenovation")}</option>
+                </select>
+                {errors.buildingStatus && (
+                  <p className="text-[10px] text-destructive">{errors.buildingStatus.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-foreground/80">
+                  {t("requests:wizard.serviceDetails.licensePurpose")}
+                </Label>
+                <input
+                  type="text"
+                  {...register("licensePurpose")}
+                  className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary placeholder-muted-foreground/60"
+                />
+                {errors.licensePurpose && (
+                  <p className="text-[10px] text-destructive">{errors.licensePurpose.message}</p>
+                )}
+              </div>
             </div>
-          </label>
 
-          {/* Emergency Exits */}
-          <label className="flex items-center gap-3 p-4 rounded-xl border border-border bg-card cursor-pointer hover:bg-accent/50 transition-all select-none">
-            <input
-              type="checkbox"
-              {...register("emergencyExits")}
-              className="h-4 w-4 rounded border-input text-indigo-600 focus:ring-indigo-500"
-            />
-            <div className="space-y-0.5">
-              <span className="text-xs font-semibold text-foreground">
-                {t("requests:wizard.safetyRisk.exitsTitle")}
-              </span>
-              <span className="text-[10px] text-muted-foreground block">
-                {t("requests:wizard.safetyRisk.exitsDesc")}
-              </span>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold text-foreground/80">
+                {t("requests:wizard.serviceDetails.currentSafetyEquipment")}
+              </Label>
+              <textarea
+                rows={3}
+                {...register("currentSafetyEquipment")}
+                className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary placeholder-muted-foreground/60 resize-none"
+              />
             </div>
-          </label>
-
-          {/* Gas Extensions */}
-          <label className={`flex items-center gap-3 p-4 rounded-xl border cursor-pointer hover:bg-accent/50 transition-all select-none ${
-            gasExtensions ? "border-amber-500/30 bg-amber-500/5" : "border-border bg-card"
-          }`}>
-            <input
-              type="checkbox"
-              {...register("gasExtensions")}
-              className="h-4 w-4 rounded border-input text-amber-500 focus:ring-amber-500"
-            />
-            <div className="space-y-0.5">
-              <span className="text-xs font-semibold text-foreground">
-                {t("requests:wizard.safetyRisk.gasTitle")}
-              </span>
-              <span className="text-[10px] text-amber-600 dark:text-amber-400 block font-medium">
-                {t("requests:wizard.safetyRisk.gasDesc")}
-              </span>
-            </div>
-          </label>
-
-          {/* Hazardous Materials */}
-          <label className={`flex items-center gap-3 p-4 rounded-xl border cursor-pointer hover:bg-accent/50 transition-all select-none ${
-            hazardousMaterials ? "border-amber-500/30 bg-amber-500/5" : "border-border bg-card"
-          }`}>
-            <input
-              type="checkbox"
-              {...register("hazardousMaterials")}
-              className="h-4 w-4 rounded border-input text-amber-500 focus:ring-amber-500"
-            />
-            <div className="space-y-0.5">
-              <span className="text-xs font-semibold text-foreground">
-                {t("requests:wizard.safetyRisk.hazardousTitle")}
-              </span>
-              <span className="text-[10px] text-amber-600 dark:text-amber-400 block font-medium">
-                {t("requests:wizard.safetyRisk.hazardousDesc")}
-              </span>
-            </div>
-          </label>
-        </div>
-
-        {/* Hazard Risk category select */}
-        <div className="space-y-2 pt-2">
-          <label className="text-xs font-semibold text-foreground/80 flex items-center gap-1.5">
-            <ClipboardList className="h-3.5 w-3.5 text-muted-foreground" /> {t("requests:wizard.safetyRisk.declaredRisk")}
-          </label>
-          <div className="grid grid-cols-3 gap-2">
-            {["low", "medium", "high"].map((risk) => (
-              <Button
-                key={risk}
-                type="button"
-                variant={form.watch("riskCategory") === risk ? "default" : "outline"}
-                className={`text-xs capitalize py-2.5 h-auto ${
-                  form.watch("riskCategory") === risk && risk === "high"
-                    ? "bg-rose-600 text-white hover:bg-rose-700"
-                    : form.watch("riskCategory") === risk && risk === "medium"
-                    ? "bg-amber-600 text-white hover:bg-amber-700"
-                    : form.watch("riskCategory") === risk
-                    ? "bg-emerald-600 text-white hover:bg-emerald-700"
-                    : ""
-                }`}
-                onClick={() => setValue("riskCategory", risk as "low" | "medium" | "high")}
-              >
-                {risk === "low" 
-                  ? t("requests:wizard.safetyRisk.riskLow") 
-                  : risk === "medium"
-                  ? t("requests:wizard.safetyRisk.riskMedium")
-                  : t("requests:wizard.safetyRisk.riskHigh")}
-              </Button>
-            ))}
           </div>
-        </div>
+        )}
 
-        {/* Notes */}
-        <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-foreground/80 flex items-center gap-1.5">
-            <PenTool className="h-3.5 w-3.5 text-muted-foreground" /> {t("requests:wizard.safetyRisk.notes")}
-          </label>
-          <textarea
-            rows={3}
-            placeholder={t("requests:wizard.safetyRisk.notesPlaceholder")}
-            {...register("notes")}
-            className="w-full bg-background/50 border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary placeholder-muted-foreground/60 resize-none"
-          />
-        </div>
-
-        {(gasExtensions || hazardousMaterials) && (
-          <div className="flex gap-2.5 p-3 rounded-lg border border-amber-500/20 bg-amber-500/5 text-amber-700 dark:text-amber-400 text-xs">
-            <ShieldAlert className="h-4 w-4 shrink-0 mt-0.5" />
-            <div>
-              <p className="font-bold">{t("requests:wizard.safetyRisk.hazardWarningTitle")}</p>
-              <p className="text-[10px] text-muted-foreground leading-relaxed mt-0.5">
-                {t("requests:wizard.safetyRisk.hazardWarningDesc")}
-              </p>
+        {/* MAINTENANCE CONTRACT FIELDS */}
+        {requestType === "maintenance_contract" && (
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold text-foreground/80">
+                {t("requests:wizard.serviceDetails.existingSafetySystems")}
+              </Label>
+              <textarea
+                rows={3}
+                {...register("existingSafetySystems")}
+                className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary placeholder-muted-foreground/60 resize-none"
+              />
+              {errors.existingSafetySystems && (
+                <p className="text-[10px] text-destructive">{errors.existingSafetySystems.message}</p>
+              )}
             </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-foreground/80">
+                  {t("requests:wizard.serviceDetails.lastMaintenanceDate")}
+                </Label>
+                <input
+                  type="date"
+                  {...register("lastMaintenanceDate")}
+                  className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-foreground/80">
+                  {t("requests:wizard.serviceDetails.preferredVisitDate")}
+                </Label>
+                <input
+                  type="date"
+                  {...register("preferredVisitDate")}
+                  className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+                />
+                {errors.preferredVisitDate && (
+                  <p className="text-[10px] text-destructive">{errors.preferredVisitDate.message}</p>
+                )}
+              </div>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-foreground/80">
+                  {t("requests:wizard.serviceDetails.onSiteCoordinatorName")}
+                </Label>
+                <input
+                  type="text"
+                  {...register("onSiteCoordinatorName")}
+                  className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary placeholder-muted-foreground/60"
+                />
+                {errors.onSiteCoordinatorName && (
+                  <p className="text-[10px] text-destructive">{errors.onSiteCoordinatorName.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-foreground/80">
+                  {t("requests:wizard.serviceDetails.onSiteCoordinatorPhone")}
+                </Label>
+                <input
+                  type="text"
+                  {...register("onSiteCoordinatorPhone")}
+                  className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary placeholder-muted-foreground/60"
+                />
+                {errors.onSiteCoordinatorPhone && (
+                  <p className="text-[10px] text-destructive">{errors.onSiteCoordinatorPhone.message}</p>
+                )}
+              </div>
+            </div>
+
+            <label className="flex items-center gap-2 p-2 rounded bg-muted/40 cursor-pointer">
+              <input
+                type="checkbox"
+                {...register("oldContractAvailable")}
+                className="h-4 w-4 rounded border-input text-indigo-600 focus:ring-indigo-500"
+              />
+              <span className="text-xs font-medium text-foreground">
+                {t("requests:wizard.serviceDetails.oldContractAvailable")}
+              </span>
+            </label>
+          </div>
+        )}
+
+        {/* BLUEPRINT REVIEW FIELDS */}
+        {requestType === "engineering_blueprint" && (
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold text-foreground/80">
+                {t("requests:wizard.serviceDetails.blueprintScope")}
+              </Label>
+              <textarea
+                rows={3}
+                {...register("blueprintScope")}
+                className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary placeholder-muted-foreground/60 resize-none"
+              />
+              {errors.blueprintScope && (
+                <p className="text-[10px] text-destructive">{errors.blueprintScope.message}</p>
+              )}
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-foreground/80">
+                  {t("requests:wizard.serviceDetails.buildingFloors")}
+                </Label>
+                <input
+                  type="number"
+                  {...register("buildingFloors")}
+                  className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary placeholder-muted-foreground/60"
+                />
+                {errors.buildingFloors && (
+                  <p className="text-[10px] text-destructive">{errors.buildingFloors.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-foreground/80">
+                  {t("requests:wizard.serviceDetails.constructionStatus")}
+                </Label>
+                <select
+                  {...register("constructionStatus")}
+                  className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+                >
+                  <option value="">{t("requests:wizard.serviceDetails.placeholderSelectConstStatus")}</option>
+                  <option value="not_started">{t("requests:wizard.serviceDetails.constructionStatusNotStarted")}</option>
+                  <option value="foundation">{t("requests:wizard.serviceDetails.constructionStatusFoundation")}</option>
+                  <option value="finishing">{t("requests:wizard.serviceDetails.constructionStatusFinishing")}</option>
+                </select>
+                {errors.constructionStatus && (
+                  <p className="text-[10px] text-destructive">{errors.constructionStatus.message}</p>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold text-foreground/80">
+                {t("requests:wizard.serviceDetails.requiredSystems")}
+              </Label>
+              <textarea
+                rows={2}
+                {...register("requiredSystems")}
+                className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary placeholder-muted-foreground/60 resize-none"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold text-foreground/80">
+                {t("requests:wizard.serviceDetails.engineeringNotes")}
+              </Label>
+              <textarea
+                rows={2}
+                {...register("engineeringNotes")}
+                className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary placeholder-muted-foreground/60 resize-none"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* TECHNICAL SAFETY REPORT FIELDS */}
+        {requestType === "technical_report" && (
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold text-foreground/80">
+                {t("requests:wizard.serviceDetails.reportType")}
+              </Label>
+              <select
+                {...register("reportType")}
+                className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+              >
+                <option value="">{t("requests:wizard.serviceDetails.placeholderSelectReportType")}</option>
+                <option value="instant">{t("requests:wizard.serviceDetails.reportTypeInstant")}</option>
+                <option value="non_instant">{t("requests:wizard.serviceDetails.reportTypeNonInstant")}</option>
+                <option value="compliance">{t("requests:wizard.serviceDetails.reportTypeCompliance")}</option>
+              </select>
+              {errors.reportType && (
+                <p className="text-[10px] text-destructive">{errors.reportType.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold text-foreground/80">
+                {t("requests:wizard.serviceDetails.caseDescription")}
+              </Label>
+              <textarea
+                rows={3}
+                {...register("caseDescription")}
+                className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary placeholder-muted-foreground/60 resize-none"
+              />
+              {errors.caseDescription && (
+                <p className="text-[10px] text-destructive">{errors.caseDescription.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold text-foreground/80">
+                {t("requests:wizard.serviceDetails.buildingLicenseContext")}
+              </Label>
+              <textarea
+                rows={2}
+                {...register("buildingLicenseContext")}
+                className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary placeholder-muted-foreground/60 resize-none"
+              />
+            </div>
+
+            <label className="flex items-center gap-2 p-2 rounded bg-muted/40 cursor-pointer">
+              <input
+                type="checkbox"
+                {...register("inspectionNeeded")}
+                className="h-4 w-4 rounded border-input text-indigo-600 focus:ring-indigo-500"
+              />
+              <span className="text-xs font-medium text-foreground">
+                {t("requests:wizard.serviceDetails.inspectionNeeded")}
+              </span>
+            </label>
           </div>
         )}
       </div>
@@ -203,7 +352,7 @@ export function SafetyRiskStep({ form, onNext, onPrev }: SafetyRiskStepProps) {
         <Button type="button" variant="outline" size="sm" onClick={onPrev}>
           {t("requests:wizard.buttons.previous")}
         </Button>
-        <Button type="button" size="sm" onClick={onNext}>
+        <Button type="button" size="sm" onClick={handleNextStep}>
           {t("requests:wizard.safetyRisk.continueToDocuments")}
         </Button>
       </div>

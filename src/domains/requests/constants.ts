@@ -26,24 +26,25 @@ export const HIGH_HAZARD_ISIC_CODES = [
 
 export const DEFAULT_REQUIRED_DOCUMENTS: Record<RequestType, Omit<RequiredDocument, "uploaded">[]> = {
   new_license: [
-    { name: "Commercial Registration / 700 Document", type: "pdf,image" },
-    { name: "Building Permit", type: "pdf" },
-    { name: "Deed of Ownership / Rental Contract", type: "pdf" },
-    { name: "Site Photos", type: "image,zip" },
+    { name: "Commercial Registration / 700 Document", type: "pdf,image", required: true },
+    { name: "Building Permit", type: "pdf", required: true },
+    { name: "Deed of Ownership / Rental Contract", type: "pdf", required: true },
+    { name: "Site Photos", type: "image,zip", required: true },
   ],
   maintenance_contract: [
-    { name: "Existing Maintenance Agreement (if any)", type: "pdf" },
-    { name: "Safety Systems Photos", type: "image,zip" },
-    { name: "Site access details", type: "pdf,text" },
+    { name: "Old Maintenance Contract (Optional)", type: "pdf", required: false },
+    { name: "Current Systems Photos", type: "image,zip", required: true },
+    { name: "Site Access/Contact Document (Optional)", type: "pdf,text", required: false },
   ],
   engineering_blueprint: [
-    { name: "Blueprint Design PDF", type: "pdf" },
-    { name: "DWG / DXF CAD Files (optional)", type: "dwg,zip" },
-    { name: "Building Permit", type: "pdf" },
+    { name: "Blueprint File (PDF/DWG/DXF)", type: "pdf,dwg,zip", required: true },
+    { name: "Building Permit", type: "pdf", required: true },
+    { name: "Architectural Plan (Optional)", type: "pdf", required: false },
   ],
   technical_report: [
-    { name: "Rental/Lease Contract", type: "pdf" },
-    { name: "Building Permit", type: "pdf" },
-    { name: "Facility Photos", type: "image,zip" },
+    { name: "Rental Contract", type: "pdf", required: true },
+    { name: "Building License", type: "pdf", required: true },
+    { name: "Site Photos", type: "image,zip", required: true },
+    { name: "Case Documents", type: "pdf,image", required: true },
   ],
 };
