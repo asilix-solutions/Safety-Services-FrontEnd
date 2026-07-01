@@ -9,12 +9,15 @@ import { getContracts } from "@/domains/contracts/storage";
 import { getQuotations } from "@/domains/quotations/storage";
 import { confirmMockPayment } from "@/domains/payments/workflow";
 
+/** Presentation-layer only extension — adds facilityName for display */
+export type InvoiceWithFacility = ClientInvoice & { facilityName: string };
+
 export function useInvoiceList() {
   const { user } = useAuth();
   const { t } = useTranslation();
   useNamespaceTranslations(["common", "dashboard", "projects", "requests"]);
 
-  const [invoices, setInvoices] = useState<ClientInvoice[]>([]);
+  const [invoices, setInvoices] = useState<InvoiceWithFacility[]>([]);
   const [alertMsg, setAlertMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   // UI States
@@ -22,13 +25,25 @@ export function useInvoiceList() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedInvoice, setSelectedInvoice] = useState<ClientInvoice | null>(null);
 
+  // Payment dialog states
+  const [payingInvoice, setPayingInvoice] = useState<ClientInvoice | null>(null);
+  const [isPayingConfirm, setIsPayingConfirm] = useState(false);
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
+
   const loadData = () => {
     if (!user) return;
     const allInvoices = getMergedInvoices();
-    let userInvoices = allInvoices;
+    const allRequests = getMergedRequests();
 
+    // Enrich invoices with facilityName from linked request (presentation layer only)
+    const enriched: InvoiceWithFacility[] = allInvoices.map((inv) => {
+      const req = allRequests.find((r) => r.jobNumber === inv.jobNumber);
+      return { ...inv, facilityName: req?.facilityName || "—" };
+    });
+
+    let userInvoices = enriched;
     if (user.role === "Client") {
-      userInvoices = allInvoices.filter((i) => i.clientId === user.companyId);
+      userInvoices = enriched.filter((i) => i.clientId === user.companyId);
     }
     setInvoices(userInvoices);
   };
@@ -37,28 +52,39 @@ export function useInvoiceList() {
     loadData();
   }, [user]);
 
+  /** Opens the confirmation dialog — does NOT execute payment */
   const handlePayInvoice = (invoice: ClientInvoice) => {
-    if (!user) return;
+    setPaymentSuccess(false);
+    setPayingInvoice(invoice);
+  };
+
+  /** Closes the dialog and resets all dialog state */
+  const handleCancelPayment = () => {
+    setPayingInvoice(null);
+    setIsPayingConfirm(false);
+    setPaymentSuccess(false);
+  };
+
+  /** Executes the actual domain payment after user confirms in dialog */
+  const handleConfirmPayment = () => {
+    if (!user || !payingInvoice) return;
+    setIsPayingConfirm(true);
     try {
       const requests = getMergedRequests();
-      const request = requests.find((r) => r.jobNumber === invoice.jobNumber);
+      const request = requests.find((r) => r.jobNumber === payingInvoice.jobNumber);
 
       if (!request) {
         throw new Error("Associated safety request not found.");
       }
 
-      confirmMockPayment({ request, invoice, paidBy: user.name || user.role });
+      confirmMockPayment({ request, invoice: payingInvoice, paidBy: user.name || user.role });
 
-      setAlertMsg({
-        type: "success",
-        text: `${t("invoices_payment_success")} (${invoice.id})`,
-      });
-
+      setPaymentSuccess(true);
       loadData();
 
-      if (selectedInvoice && selectedInvoice.id === invoice.id) {
+      if (selectedInvoice && selectedInvoice.id === payingInvoice.id) {
         const updatedInvoices = getMergedInvoices();
-        const updated = updatedInvoices.find((i) => i.id === invoice.id) || null;
+        const updated = updatedInvoices.find((i) => i.id === payingInvoice.id) || null;
         setSelectedInvoice(updated);
       }
     } catch (err: any) {
@@ -66,6 +92,9 @@ export function useInvoiceList() {
         type: "error",
         text: `${t("invoices_payment_failed")}${err.message || "Unknown error"}`,
       });
+      setPayingInvoice(null);
+    } finally {
+      setIsPayingConfirm(false);
     }
   };
 
@@ -99,6 +128,13 @@ export function useInvoiceList() {
     hasLinkedProject,
     hasLinkedContract,
     hasLinkedQuotation,
+    // dialog
+    payingInvoice,
+    isPayingConfirm,
+    paymentSuccess,
+    handleCancelPayment,
+    handleConfirmPayment,
     t,
   };
 }
+

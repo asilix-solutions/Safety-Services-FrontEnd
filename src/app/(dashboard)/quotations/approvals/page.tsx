@@ -166,7 +166,7 @@ export default function QuotationApprovalsQueuePage() {
               data={approvals}
               columns={columns}
               searchKey="jobNumber"
-              searchPlaceholder={t("requests:search_requests_placeholder")}
+              searchPlaceholder={t("dashboard:search_requests_placeholder")}
             />
           )}
         </CardContent>

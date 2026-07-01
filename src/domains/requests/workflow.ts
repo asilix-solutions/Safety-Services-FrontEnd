@@ -204,6 +204,7 @@ export function getRequestStatusDisplayName(
     under_review: "common:status_In_Review",
     quotation_created: "common:status_In_Review",
     awaiting_approval: "common:status_Action_Required",
+    awaiting_payment: "common:status_Awaiting_Payment",
     approved: "common:status_Approved",
     in_execution: "common:status_In_Progress",
     completed: "common:status_Completed",

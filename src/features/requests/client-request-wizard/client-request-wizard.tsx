@@ -234,7 +234,7 @@ export function ClientRequestWizard() {
 
   const handleSaveDraft = () => {
     saveDraftState(step);
-    alert("Draft saved successfully! You can resume from this step later.");
+    alert(t("requests:wizard.success.draftSaved"));
   };
 
   // Compute auto-classification parameters

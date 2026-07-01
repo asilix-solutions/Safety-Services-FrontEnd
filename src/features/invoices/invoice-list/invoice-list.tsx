@@ -6,6 +6,7 @@ import { CheckCircle2, ShieldAlert } from "lucide-react";
 import { useInvoiceList } from "./hooks/use-invoice-list";
 import { InvoiceTable } from "./components/invoice-table";
 import { InvoiceActions } from "./components/invoice-actions";
+import { PaymentConfirmDialog } from "./components/payment-confirm-dialog";
 
 export function InvoiceList() {
   const {
@@ -24,6 +25,11 @@ export function InvoiceList() {
     hasLinkedProject,
     hasLinkedContract,
     hasLinkedQuotation,
+    payingInvoice,
+    isPayingConfirm,
+    paymentSuccess,
+    handleCancelPayment,
+    handleConfirmPayment,
     t,
   } = useInvoiceList();
 
@@ -80,6 +86,7 @@ export function InvoiceList() {
         onSearchQueryChange={setSearchQuery}
         onPayInvoice={handlePayInvoice}
         onViewDetails={(inv) => setSelectedInvoice(inv)}
+        onDownloadInvoice={handleDownloadInvoice}
       />
 
       <InvoiceActions
@@ -90,6 +97,16 @@ export function InvoiceList() {
         hasLinkedContract={hasLinkedContract}
         hasLinkedQuotation={hasLinkedQuotation}
       />
+
+      {payingInvoice && (
+        <PaymentConfirmDialog
+          invoice={payingInvoice}
+          isPaying={isPayingConfirm}
+          isSuccess={paymentSuccess}
+          onConfirm={handleConfirmPayment}
+          onCancel={handleCancelPayment}
+        />
+      )}
     </div>
   );
 }

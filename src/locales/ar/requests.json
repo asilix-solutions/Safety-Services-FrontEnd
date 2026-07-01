@@ -444,6 +444,10 @@
   "timeline.comments.quotationApprovedBy": "تمت الموافقة على عرض السعر داخلياً بواسطة {{user}}.",
   "timeline.comments.quotationRejected": "تم رفض عرض السعر. السبب: {{reason}}",
   "timeline.comments.quotationChangesRequested": "طلب تعديلات على عرض السعر. الملاحظات: {{comments}}",
+  "timeline.comments.invoiceIssued": "تم إصدار الفاتورة / بانتظار سداد العميل",
+  "timeline.comments.workspaceProvisioned": "تم إنشاء مساحة عمل المشروع. رقم المشروع: {{id}}",
+  "timeline.comments.inspectionApproved": "تم اعتماد الفحص النهائي. اكتمل المشروع. الملاحظات: {{notes}}",
+  "timeline.comments.inspectionReturned": "تمت إعادة الفحص النهائي للتنفيذ وإصلاح الملاحظات. الملاحظات: {{notes}}",
   "new_license": "رخصة سلامة جديدة",
   "maintenance_contract": "عقد صيانة",
   "engineering_blueprint": "مراجعة المخططات الهندسية",
@@ -497,6 +501,7 @@
   "wizard.serviceDetails.buildingFloorsPlaceholder": "مثال: 3",
   "wizard.serviceDetails.requiredSystemsPlaceholder": "مثال: إنذار، إطفاء، رش آلي، تهوية",
   "wizard.serviceDetails.engineeringNotesPlaceholder": "مثال: أضف أي استثناءات تصميمية أو ملاحظات هنا...",
+  "wizard.success.draftSaved": "تم حفظ المسودة بنجاح! يمكنك استكمال الخطوات لاحقاً.",
   "wizard.serviceDetails.caseDescriptionPlaceholder": "مثال: تقرير ملاءمة لمكتب داخل مبنى تجاري",
   "wizard.serviceDetails.buildingLicenseContextPlaceholder": "مثال: أدخل رقم رخصة البناء أو تفاصيل السياق..."
 }

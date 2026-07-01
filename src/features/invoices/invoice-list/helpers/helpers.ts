@@ -31,13 +31,17 @@ export function getStatusBadgeVariant(status: "unpaid" | "paid"): "success" | "d
   return "destructive";
 }
 
-export function filterBySearch(invoices: ClientInvoice[], query: string): ClientInvoice[] {
+export function filterBySearch(
+  invoices: (ClientInvoice & { facilityName?: string })[],
+  query: string
+): (ClientInvoice & { facilityName?: string })[] {
   if (!query) return invoices;
   const q = query.toLowerCase().trim();
   return invoices.filter(
     (inv) =>
       inv.id.toLowerCase().includes(q) ||
-      inv.jobNumber.toLowerCase().includes(q)
+      inv.jobNumber.toLowerCase().includes(q) ||
+      (inv.facilityName || "").toLowerCase().includes(q)
   );
 }
 

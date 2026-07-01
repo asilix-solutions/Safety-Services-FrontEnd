@@ -108,7 +108,7 @@ export function DataTable<T extends Record<string, any>>({
 
       {/* Primary Table View */}
       <div className="overflow-x-auto rounded-xl border border-border/80 bg-card">
-        <table className="w-full border-collapse text-left text-sm text-foreground">
+        <table className="w-full border-collapse text-start text-sm text-foreground">
           <thead>
             <tr className="border-b border-border bg-secondary/50 text-muted-foreground font-medium">
               {columns.map((col, idx) => (

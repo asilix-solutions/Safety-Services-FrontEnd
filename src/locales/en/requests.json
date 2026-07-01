@@ -444,6 +444,10 @@
   "timeline.comments.quotationApprovedBy": "Quotation approved internally by {{user}}.",
   "timeline.comments.quotationRejected": "Quotation rejected. Reason: {{reason}}",
   "timeline.comments.quotationChangesRequested": "Quotation changes requested. Comments: {{comments}}",
+  "timeline.comments.invoiceIssued": "Invoice issued / awaiting client payment",
+  "timeline.comments.workspaceProvisioned": "Project Workspace Provisioned. Project ID: {{id}}",
+  "timeline.comments.inspectionApproved": "Final inspection approved. Project completed. Notes: {{notes}}",
+  "timeline.comments.inspectionReturned": "Final inspection returned for execution fixes. Notes: {{notes}}",
   "new_license": "New Safety License",
   "maintenance_contract": "Maintenance Contract",
   "engineering_blueprint": "Blueprint Review",
@@ -497,6 +501,7 @@
   "wizard.serviceDetails.buildingFloorsPlaceholder": "Example: 3",
   "wizard.serviceDetails.requiredSystemsPlaceholder": "Example: Alarm, firefighting, sprinklers, ventilation",
   "wizard.serviceDetails.engineeringNotesPlaceholder": "Example: Add design exceptions or notes here...",
+  "wizard.success.draftSaved": "Draft saved successfully! You can resume from this step later.",
   "wizard.serviceDetails.caseDescriptionPlaceholder": "Example: Suitability report for an office inside a commercial building",
   "wizard.serviceDetails.buildingLicenseContextPlaceholder": "Example: Enter building license number or context..."
 }

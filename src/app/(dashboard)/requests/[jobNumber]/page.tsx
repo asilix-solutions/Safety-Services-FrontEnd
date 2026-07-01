@@ -146,6 +146,21 @@ export default function RequestDetailsPage() {
     if (lower === "project execution completed. awaiting final inspection.") {
       return t("requests:timeline.comments.executionCompleted");
     }
+    if (lower === "invoice issued / awaiting client payment") {
+      return t("requests:timeline.comments.invoiceIssued");
+    }
+    if (c.startsWith("Project Workspace Provisioned. Project ID: ")) {
+      const id = c.substring("Project Workspace Provisioned. Project ID: ".length);
+      return t("requests:timeline.comments.workspaceProvisioned").replace("{{id}}", id);
+    }
+    if (c.startsWith("Final inspection approved. Project completed. Notes: ")) {
+      const notes = c.substring("Final inspection approved. Project completed. Notes: ".length);
+      return t("requests:timeline.comments.inspectionApproved").replace("{{notes}}", notes);
+    }
+    if (c.startsWith("Final inspection returned for execution fixes. Notes: ")) {
+      const notes = c.substring("Final inspection returned for execution fixes. Notes: ".length);
+      return t("requests:timeline.comments.inspectionReturned").replace("{{notes}}", notes);
+    }
 
     if (c.startsWith("Quotation submitted for review by ")) {
       const parts = c.split(". Total: SAR ");
