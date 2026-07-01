@@ -7,6 +7,7 @@ export const WORKFLOW_STAGES = [
   "UNDER_REVIEW",
   "QUOTATION",
   "QUOTATION_APPROVAL",
+  "READY_FOR_PAYMENT",
   "PAYMENT_CONFIRMED",
   "PROJECT_CREATED",
   "FIELD_EXECUTION",
@@ -37,7 +38,8 @@ export function mapStatusToStage(status: RequestStatus): WorkflowStage {
     assigned: "UNDER_REVIEW",
     under_review: "UNDER_REVIEW",
     quotation_created: "QUOTATION",
-    awaiting_approval: "PAYMENT_CONFIRMED", // awaiting approval maps here in transition logic
+    awaiting_approval: "QUOTATION_APPROVAL",
+    awaiting_payment: "READY_FOR_PAYMENT",
     approved: "PROJECT_CREATED",
     in_execution: "FIELD_EXECUTION",
     completed: "COMPLETED",

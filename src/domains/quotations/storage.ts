@@ -42,3 +42,8 @@ export function getPendingQuotations(): Quotation[] {
   return quotations.filter((q) => q.quotationStatus === "DRAFT" || q.quotationStatus === "CHANGES_REQUESTED");
 }
 
+export function getQuotationByJobNumber(jobNumber: string): Quotation | null {
+  const list = getQuotations();
+  return list.find((q) => q.jobNumber === jobNumber) || null;
+}
+

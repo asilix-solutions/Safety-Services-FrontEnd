@@ -108,3 +108,8 @@ export function getEngineeringRequests(): LicensingRequest[] {
   );
 }
 
+export function getRequestByJobNumber(jobNumber: string): LicensingRequest | null {
+  const list = getMergedRequests();
+  return list.find((r) => r.jobNumber === jobNumber) || null;
+}
+

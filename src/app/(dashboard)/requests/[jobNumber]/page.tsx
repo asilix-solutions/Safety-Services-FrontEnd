@@ -11,6 +11,7 @@ import { MapPin, ShieldAlert, ArrowLeft, Clock, Eye, Download, RefreshCw, Send, 
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useTranslation, useNamespaceTranslations } from "@/providers/i18n-provider";
+import { ServiceDetailsCard } from "@/features/requests/components/service-details-card";
 import {
   WORKFLOW_STAGES,
   getQueueDisplayName,
@@ -22,16 +23,17 @@ import {
   getWorkflowStageDisplayName
 } from "@/domains/requests/workflow";
 
-// Import new storage domains
+// Import new storage domains and selectors
 import { ClientInvoice } from "@/domains/invoices/types";
-import { getInvoices, createOrUpdateInvoice } from "@/domains/invoices/storage";
+import { getInvoiceByJobNumber } from "@/domains/invoices/storage";
+import { createInvoiceFromApprovedQuotation } from "@/domains/invoices/workflow";
 import { ClientPayment } from "@/domains/payments/types";
-import { getMergedRequests, upsertRequest } from "@/domains/requests/storage";
+import { getRequestByJobNumber, upsertRequest } from "@/domains/requests/storage";
 import { Quotation } from "@/domains/quotations/types";
-import { getQuotations } from "@/domains/quotations/storage";
+import { getQuotationByJobNumber } from "@/domains/quotations/storage";
 import { confirmMockPayment } from "@/domains/payments/workflow";
 import { Project } from "@/types/project";
-import { getProjects } from "@/domains/projects/storage";
+import { getProjectByJobNumber } from "@/domains/projects/storage";
 import { USER_ROLES } from "@/constants/roles";
 import { getProjectExecutionPhaseLabel } from "@/domains/projects/workflow";
 
@@ -50,40 +52,23 @@ export default function RequestDetailsPage() {
 
   const loadData = () => {
     if (jobNumber) {
-      const merged = getMergedRequests();
-      
-      const found = merged.find((r) => r.jobNumber === jobNumber);
-      if (found) {
-        setRequest(found);
+      const foundRequest = getRequestByJobNumber(jobNumber);
+      if (foundRequest) {
+        setRequest(foundRequest);
       }
 
       // Load invoice if exists
-      const invoices = getInvoices();
-      const foundInvoice = invoices.find((i) => i.jobNumber === jobNumber);
-      if (foundInvoice) {
-        setInvoice(foundInvoice);
-      } else {
-        setInvoice(null);
-      }
+      const foundInvoice = getInvoiceByJobNumber(jobNumber);
+      setInvoice(foundInvoice);
 
       // Load linked project if exists
-      const projects = getProjects();
-      const foundProject = projects.find((p) => p.jobNumber === jobNumber);
-      if (foundProject) {
-        setLinkedProject(foundProject);
-      } else {
-        setLinkedProject(null);
-      }
+      const foundProject = getProjectByJobNumber(jobNumber);
+      setLinkedProject(foundProject);
 
       // Load quotation if exists
       try {
-        const quotes = getQuotations();
-        const foundQuote = quotes.find((q) => q.jobNumber === jobNumber);
-        if (foundQuote) {
-          setQuotation(foundQuote);
-        } else {
-          setQuotation(null);
-        }
+        const foundQuote = getQuotationByJobNumber(jobNumber);
+        setQuotation(foundQuote);
       } catch (e) {
         console.error("Failed to read quotations", e);
       }
@@ -95,28 +80,14 @@ export default function RequestDetailsPage() {
   }, [jobNumber]);
 
   const handleRegenerateInvoice = () => {
-    if (!quotation || quotation.quotationStatus !== "APPROVED") return;
+    if (!user || !quotation || quotation.quotationStatus !== "APPROVED" || !request) return;
 
     try {
-      const invoiceId = `INV-${Math.floor(1000 + Math.random() * 9000)}`;
-      const dueDate = new Date();
-      dueDate.setDate(dueDate.getDate() + 30);
-
-      const newInvoice: ClientInvoice = {
-        id: invoiceId,
-        tenantId: request?.tenantId || "default-tenant",
-        jobNumber: jobNumber,
-        quotationJobNumber: jobNumber,
-        subtotal: quotation.subtotal || 0,
-        vatAmount: quotation.vat || 0,
-        grandTotal: quotation.grandTotal || 0,
-        currency: "SAR",
-        status: "unpaid",
-        dueDate: dueDate.toISOString(),
-        issuedAt: new Date().toISOString(),
-      };
-
-      createOrUpdateInvoice(newInvoice);
+      createInvoiceFromApprovedQuotation({
+        quotation,
+        request,
+        approvedBy: user.name || user.role,
+      });
       alert(t("requests:details.alertInvoiceRegenerated"));
       loadData();
     } catch (err) {
@@ -176,6 +147,30 @@ export default function RequestDetailsPage() {
       return t("requests:timeline.comments.executionCompleted");
     }
 
+    if (c.startsWith("Quotation submitted for review by ")) {
+      const parts = c.split(". Total: SAR ");
+      const userStr = parts[0].substring("Quotation submitted for review by ".length);
+      const totalStr = parts[1] || "";
+      return t("requests:timeline.comments.quotationSubmittedBy")
+        .replace("{{user}}", userStr)
+        .replace("{{total}}", totalStr);
+    }
+    if (c.startsWith("Quotation approved internally by ")) {
+      let userStr = c.substring("Quotation approved internally by ".length);
+      if (userStr.endsWith(".")) {
+        userStr = userStr.slice(0, -1);
+      }
+      return t("requests:timeline.comments.quotationApprovedBy").replace("{{user}}", userStr);
+    }
+    if (c.startsWith("Quotation rejected. Reason: ")) {
+      const reasonStr = c.substring("Quotation rejected. Reason: ".length);
+      return t("requests:timeline.comments.quotationRejected").replace("{{reason}}", reasonStr);
+    }
+    if (c.startsWith("Quotation changes requested. Comments: ")) {
+      const commentsStr = c.substring("Quotation changes requested. Comments: ".length);
+      return t("requests:timeline.comments.quotationChangesRequested").replace("{{comments}}", commentsStr);
+    }
+
     return c;
   };
 
@@ -216,6 +211,8 @@ export default function RequestDetailsPage() {
         return t("requests:nextStep.QUOTATION");
       case "QUOTATION_APPROVAL":
         return t("requests:nextStep.QUOTATION_APPROVAL");
+      case "READY_FOR_PAYMENT":
+        return t("requests:nextStep.READY_FOR_PAYMENT");
       case "PAYMENT_CONFIRMED":
         return t("requests:nextStep.PAYMENT_CONFIRMED");
       case "PROJECT_CREATED":
@@ -502,6 +499,9 @@ export default function RequestDetailsPage() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Service-specific Dynamic Details */}
+          <ServiceDetailsCard values={request} />
 
           {/* Uploaded Documents checklist */}
           <Card className="border-border bg-card">

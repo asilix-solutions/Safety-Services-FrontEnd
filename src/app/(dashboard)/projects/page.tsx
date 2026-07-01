@@ -23,7 +23,7 @@ export default function ProjectsPage() {
   useEffect(() => {
     const list = getProjects();
     if (user?.role === "Client") {
-      const filtered = list.filter((p) => p.clientId === user.id || p.clientName === user.name);
+      const filtered = list.filter((p) => p.clientId === user.companyId);
       setProjects(filtered);
     } else {
       setProjects(list);

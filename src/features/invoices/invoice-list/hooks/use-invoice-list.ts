@@ -28,7 +28,7 @@ export function useInvoiceList() {
     let userInvoices = allInvoices;
 
     if (user.role === "Client") {
-      userInvoices = allInvoices.filter((i) => i.tenantId === user.companyId);
+      userInvoices = allInvoices.filter((i) => i.clientId === user.companyId);
     }
     setInvoices(userInvoices);
   };

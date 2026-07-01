@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/providers/AuthProvider";
 import { MOCK_REQUESTS } from "@/mock/requests";
+import { ServiceDetailsCard } from "@/features/requests/components/service-details-card";
 import { LicensingRequest, RequestType, WorkflowStage, RequestQueue } from "@/domains/requests/types";
 import { getMergedRequests, upsertRequest } from "@/domains/requests/storage";
 import { PageHeader } from "@/shared/components/page-header";
@@ -215,6 +216,9 @@ export default function EngineeringWorkspacePage() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Service Details */}
+          <ServiceDetailsCard values={request} titleClassName="text-sm font-bold text-foreground" />
 
           {/* Classification Details */}
           <Card className="border-border bg-card">

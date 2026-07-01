@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { SERVICE_REGISTRY } from "@/domains/requests/service-config";
 
 export const clientRequestSchema = z.object({
   // Step 1: Request Type
@@ -55,94 +56,26 @@ export const clientRequestSchema = z.object({
   riskCategory: z.enum(["low", "medium", "high"]).default("low"),
   notes: z.string().optional(),
 }).superRefine((data, ctx) => {
-  if (data.requestType === "new_license") {
-    if (!data.landPlotNumber || data.landPlotNumber.trim().length < 2) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Land plot number is required",
-        path: ["landPlotNumber"],
-      });
-    }
-    if (!data.buildingStatus || data.buildingStatus.trim().length < 2) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Building status is required",
-        path: ["buildingStatus"],
-      });
-    }
-    if (!data.licensePurpose || data.licensePurpose.trim().length < 2) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "License purpose is required",
-        path: ["licensePurpose"],
-      });
-    }
-  } else if (data.requestType === "maintenance_contract") {
-    if (!data.existingSafetySystems || data.existingSafetySystems.trim().length < 2) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Existing safety systems description is required",
-        path: ["existingSafetySystems"],
-      });
-    }
-    if (!data.preferredVisitDate || data.preferredVisitDate.trim().length < 2) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Preferred visit date is required",
-        path: ["preferredVisitDate"],
-      });
-    }
-    if (!data.onSiteCoordinatorName || data.onSiteCoordinatorName.trim().length < 2) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "On-site coordinator name is required",
-        path: ["onSiteCoordinatorName"],
-      });
-    }
-    if (!data.onSiteCoordinatorPhone || data.onSiteCoordinatorPhone.trim().length < 2) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "On-site coordinator phone is required",
-        path: ["onSiteCoordinatorPhone"],
-      });
-    }
-  } else if (data.requestType === "engineering_blueprint") {
-    if (!data.blueprintScope || data.blueprintScope.trim().length < 2) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Blueprint scope description is required",
-        path: ["blueprintScope"],
-      });
-    }
-    if (!data.buildingFloors || data.buildingFloors <= 0) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Building floors must be greater than 0",
-        path: ["buildingFloors"],
-      });
-    }
-    if (!data.constructionStatus || data.constructionStatus.trim().length < 2) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Construction status is required",
-        path: ["constructionStatus"],
-      });
-    }
-  } else if (data.requestType === "technical_report") {
-    if (!data.reportType) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Report type is required",
-        path: ["reportType"],
-      });
-    }
-    if (!data.caseDescription || data.caseDescription.trim().length < 2) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Case description is required",
-        path: ["caseDescription"],
-      });
-    }
+  const config = SERVICE_REGISTRY[data.requestType];
+  if (config) {
+    config.fields.forEach((field) => {
+      if (field.required) {
+        const val = data[field.key];
+        if (val === undefined || val === null || (typeof val === "string" && val.trim().length === 0)) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: `${field.key} is required`,
+            path: [field.key],
+          });
+        } else if (field.type === "number" && typeof val === "number" && val <= 0) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: `${field.key} must be greater than 0`,
+            path: [field.key],
+          });
+        }
+      }
+    });
   }
 });
 

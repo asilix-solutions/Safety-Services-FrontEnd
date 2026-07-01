@@ -87,7 +87,8 @@ export function createInvoiceForQuotation(
 
   return {
     id: invoiceId,
-    tenantId: request.tenantId || "default-tenant",
+    tenantId: request.tenantId || "tenant-1",
+    clientId: request.clientId,
     jobNumber: request.jobNumber,
     quotationJobNumber: request.jobNumber,
     subtotal: quotation.subtotal || 0,

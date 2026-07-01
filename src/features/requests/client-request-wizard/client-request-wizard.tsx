@@ -116,9 +116,47 @@ export function ClientRequestWizard() {
     try {
       const draft = getRequestDraft();
       if (draft) {
+        const type = draft.values.requestType as RequestType;
+        const registryDocs = DEFAULT_REQUIRED_DOCUMENTS[type] || [];
+        const draftDocs: RequiredDocument[] = Array.isArray(draft.documents)
+          ? draft.documents
+          : [];
+
+        // Check if the documents names in the draft match the registry templates for the draft's requestType
+        const isMatch = draftDocs.length === registryDocs.length &&
+          registryDocs.every((rd) => draftDocs.some((dd: RequiredDocument) => dd.name === rd.name));
+
         form.reset(draft.values);
-        setDocuments(draft.documents || []);
         setStep(draft.step || 1);
+
+        if (isMatch) {
+          // Normalize required flag in draft docs to registry setting
+          const normalized = draftDocs.map((doc: RequiredDocument) => {
+            const rd = registryDocs.find((item) => item.name === doc.name);
+            return {
+              ...doc,
+              required: rd ? rd.required : doc.required,
+            };
+          });
+          setDocuments(normalized);
+        } else {
+          // Discard and reset documents list to clean defaults for the draft's requestType
+          const cleanDocs = registryDocs.map((doc) => ({
+            ...doc,
+            uploaded: false,
+            required: doc.required,
+          }));
+          setDocuments(cleanDocs);
+          
+          // Save normalized draft state immediately to clear stale persisted data
+          const updatedState = {
+            step: draft.step || 1,
+            values: draft.values,
+            documents: cleanDocs,
+            updatedAt: new Date().toISOString(),
+          };
+          saveRequestDraft(updatedState);
+        }
       } else {
         // Init default docs
         initDefaultDocuments("new_license");
@@ -133,15 +171,21 @@ export function ClientRequestWizard() {
     setDocuments(defaultDocs.map((doc) => ({ ...doc, uploaded: false, required: doc.required })));
   };
 
-  // Re-init docs when requestType changes, only if not restored from draft
+  // Re-init docs when requestType changes, only if not restored from draft or if documents don't match the selected type
   useEffect(() => {
     if (selectedRequestType) {
+      const registryDocs = DEFAULT_REQUIRED_DOCUMENTS[selectedRequestType] || [];
+      const currentDocsMatch = documents.length === registryDocs.length &&
+        registryDocs.every((rd) => documents.some((dd: RequiredDocument) => dd.name === rd.name));
+
       const draft = getRequestDraft();
       if (draft) {
-        if (draft.values.requestType === selectedRequestType) {
-          // restored values match
+        if (draft.values.requestType === selectedRequestType && currentDocsMatch) {
+          // restored values match and documents already match this type
           return;
         }
+      } else if (currentDocsMatch) {
+        return;
       }
       initDefaultDocuments(selectedRequestType);
     }
@@ -254,7 +298,7 @@ export function ClientRequestWizard() {
       tenantId: "tenant-1",
       requestType: selectedRequestType,
       status: "submitted",
-      clientId: user?.id || "c-101",
+      clientId: user?.companyId || "c-102",
       clientName: user?.name || "Emaar Properties",
       facilityName: formValues.facilityName,
       crNumber: formValues.crNumber,

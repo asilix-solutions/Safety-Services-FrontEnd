@@ -1,3 +1,4 @@
+import { SERVICE_REGISTRY } from "./service-config";
 import { RequestType, RequiredDocument } from "./types";
 
 export const DEFAULT_REQUEST_CATEGORY = "General Safety";
@@ -25,26 +26,8 @@ export const HIGH_HAZARD_ISIC_CODES = [
 ];
 
 export const DEFAULT_REQUIRED_DOCUMENTS: Record<RequestType, Omit<RequiredDocument, "uploaded">[]> = {
-  new_license: [
-    { name: "Commercial Registration / 700 Document", type: "pdf,image", required: true },
-    { name: "Building Permit", type: "pdf", required: true },
-    { name: "Deed of Ownership / Rental Contract", type: "pdf", required: true },
-    { name: "Site Photos", type: "image,zip", required: true },
-  ],
-  maintenance_contract: [
-    { name: "Old Maintenance Contract (Optional)", type: "pdf", required: false },
-    { name: "Current Systems Photos", type: "image,zip", required: true },
-    { name: "Site Access/Contact Document (Optional)", type: "pdf,text", required: false },
-  ],
-  engineering_blueprint: [
-    { name: "Blueprint File (PDF/DWG/DXF)", type: "pdf,dwg,zip", required: true },
-    { name: "Building Permit", type: "pdf", required: true },
-    { name: "Architectural Plan (Optional)", type: "pdf", required: false },
-  ],
-  technical_report: [
-    { name: "Rental Contract", type: "pdf", required: true },
-    { name: "Building License", type: "pdf", required: true },
-    { name: "Site Photos", type: "image,zip", required: true },
-    { name: "Case Documents", type: "pdf,image", required: true },
-  ],
+  new_license: SERVICE_REGISTRY.new_license.documents,
+  maintenance_contract: SERVICE_REGISTRY.maintenance_contract.documents,
+  engineering_blueprint: SERVICE_REGISTRY.engineering_blueprint.documents,
+  technical_report: SERVICE_REGISTRY.technical_report.documents,
 };

@@ -18,6 +18,7 @@ import { Quotation } from "@/domains/quotations/types";
 import { useRouter, useParams } from "next/navigation";
 import { getQuotations, approveQuotation, rejectQuotation, requestChangesOnQuotation } from "@/domains/quotations/workflow";
 import { getMergedRequests } from "@/domains/requests/storage";
+import { getInvoiceByJobNumber } from "@/domains/invoices/storage";
 
 export default function QuotationApprovalDetailsPage() {
   const { user } = useAuth();
@@ -98,7 +99,11 @@ export default function QuotationApprovalDetailsPage() {
     );
   }
 
+  const linkedInvoice = getInvoiceByJobNumber(jobNumber);
+
   const handleDecisionSubmit = () => {
+    if (quotation.quotationStatus !== "SUBMITTED_FOR_APPROVAL") return;
+
     setErrorMsg("");
     if ((actionType === "REQUEST_CHANGES" || actionType === "REJECT") && !inputText.trim()) {
       setErrorMsg(t("common:requiredField") || "This field is required");
@@ -145,7 +150,15 @@ export default function QuotationApprovalDetailsPage() {
             {t("requests:quotations.details.back")}
           </Button>
         </Link>
-        <Badge variant="warning">{t("requests:quotations.status.submitted")}</Badge>
+        <Badge variant={quotation.quotationStatus === "APPROVED" ? "success" : quotation.quotationStatus === "REJECTED" ? "destructive" : "warning"}>
+          {quotation.quotationStatus === "APPROVED"
+            ? t("requests:quotations.status.approved")
+            : quotation.quotationStatus === "REJECTED"
+            ? t("requests:quotations.status.rejected")
+            : quotation.quotationStatus === "CHANGES_REQUESTED"
+            ? t("requests:quotations.status.changesRequested")
+            : t("requests:quotations.status.submitted")}
+        </Badge>
       </div>
 
       <PageHeader
@@ -307,7 +320,37 @@ export default function QuotationApprovalDetailsPage() {
               </div>
 
               {/* Action Buttons */}
-              {actionType === null ? (
+              {quotation.quotationStatus === "APPROVED" ? (
+                <div className="pt-4 border-t border-border/80 space-y-3">
+                  <div className="flex items-center gap-2 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400">
+                    <CheckCircle className="h-5 w-5 shrink-0" />
+                    <div className="text-xs">
+                      <p className="font-semibold">{t("requests:quotations.status.alreadyApproved")}</p>
+                      <p className="text-[10px] opacity-80">
+                        {t("requests:quotations.details.approvedBy")}: {quotation.approvedBy || "Admin"}
+                      </p>
+                    </div>
+                  </div>
+                  {linkedInvoice && (
+                    <div className="p-3 rounded-lg bg-secondary/20 border border-border space-y-2 text-xs">
+                      <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">{t("common:invoices_table_id") || "Invoice ID"}:</span>
+                        <span className="font-mono font-bold text-primary">{linkedInvoice.id}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">{t("common:invoices_table_status") || "Status"}:</span>
+                        <Badge variant={linkedInvoice.status === "paid" ? "success" : "warning"} className="uppercase text-[9px]">
+                          {linkedInvoice.status === "paid" ? (t("common:invoices_status_paid") || "Paid") : (t("common:invoices_status_unpaid") || "Unpaid")}
+                        </Badge>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">{t("common:invoices_table_due") || "Due Date"}:</span>
+                        <span className="font-medium text-foreground">{new Date(linkedInvoice.dueDate).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : actionType === null ? (
                 <div className="grid grid-cols-1 gap-2 pt-4 border-t border-border/80">
                   <Button
                     onClick={() => setActionType("APPROVE")}

@@ -42,11 +42,11 @@ export function prepareClientOverviewViewModel(
   const companyId = user.companyId;
 
   // Filter client-scoped data
-  const clientRequests = data.requests.filter((r) => r.clientId === user.id || r.clientId === user.companyId);
-  const clientProjects = data.projects.filter((p) => p.clientId === user.id || p.clientName === user.name);
-  const clientInvoices = data.invoices.filter((i) => i.tenantId === user.id || i.tenantId === user.companyId);
-  const clientContracts = data.contracts.filter((c) => c.clientId === user.id || c.clientId === user.companyId);
-  const clientCertificates = data.certificates.filter((c) => c.clientId === user.id || c.clientId === user.companyId);
+  const clientRequests = data.requests.filter((r) => r.clientId === user.companyId);
+  const clientProjects = data.projects.filter((p) => p.clientId === user.companyId);
+  const clientInvoices = data.invoices.filter((i) => i.clientId === user.companyId);
+  const clientContracts = data.contracts.filter((c) => c.clientId === user.companyId);
+  const clientCertificates = data.certificates.filter((c) => c.clientId === user.companyId);
 
   // Welcome Stats using centralized domain selectors
   const activeRequests = getActiveRequests(user.id, user.companyId);

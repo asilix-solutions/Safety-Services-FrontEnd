@@ -6,6 +6,8 @@ import { Badge } from "@/shared/ui/badge";
 import { FileText, Download, X, ArrowRight, Layers, FileCheck, Landmark, ClipboardList } from "lucide-react";
 import Link from "next/link";
 import { useTranslation } from "@/providers/i18n-provider";
+import { useAuth } from "@/providers/AuthProvider";
+import { USER_ROLES } from "@/constants/roles";
 import { formatCurrency, formatDate, getStatusBadgeVariant, getStatusLabel } from "../helpers/helpers";
 
 interface InvoiceActionsProps {
@@ -26,8 +28,25 @@ export function InvoiceActions({
   hasLinkedQuotation = false,
 }: InvoiceActionsProps) {
   const { t } = useTranslation();
+  const { user } = useAuth();
 
   if (!invoice) return null;
+
+  const isClient = user?.role === USER_ROLES.CLIENT;
+  const isConsultingEngineer = user?.role === USER_ROLES.CONSULTING_ENGINEER;
+  const isCompanyAdmin = user?.role === USER_ROLES.COMPANY_ADMIN;
+
+  const getQuotationHref = () => {
+    if (isConsultingEngineer) {
+      return `/quotations/${invoice.jobNumber}`;
+    }
+    if (isCompanyAdmin) {
+      return `/quotations/approvals/${invoice.jobNumber}`;
+    }
+    return "";
+  };
+
+  const quotationHref = getQuotationHref();
 
   const isPaid = invoice.status === "paid";
 
@@ -172,15 +191,27 @@ export function InvoiceActions({
               </Button>
 
               {hasLinkedQuotation && (
-                <Link href={`/quotations/${invoice.jobNumber}`} className="w-full">
-                  <Button variant="ghost" size="sm" className="w-full justify-between text-xs h-9 text-muted-foreground hover:text-foreground cursor-pointer">
+                isClient ? (
+                  <div className="flex items-center justify-between text-xs p-3 rounded-lg bg-secondary/10 border border-border text-muted-foreground">
                     <span className="flex items-center gap-2">
-                      <ClipboardList className="h-4 w-4 text-primary" />
+                      <ClipboardList className="h-4 w-4 text-muted-foreground/60" />
                       {t("invoices_link_quotation")}
                     </span>
-                    <ArrowRight className="h-3.5 w-3.5 opacity-60 rtl:rotate-180" />
-                  </Button>
-                </Link>
+                    <span className="text-[10px] text-end font-medium">
+                      {t("invoices_quotation_client_notice")}
+                    </span>
+                  </div>
+                ) : quotationHref ? (
+                  <Link href={quotationHref} className="w-full">
+                    <Button variant="ghost" size="sm" className="w-full justify-between text-xs h-9 text-muted-foreground hover:text-foreground cursor-pointer">
+                      <span className="flex items-center gap-2">
+                        <ClipboardList className="h-4 w-4 text-primary" />
+                        {t("invoices_link_quotation")}
+                      </span>
+                      <ArrowRight className="h-3.5 w-3.5 opacity-60 rtl:rotate-180" />
+                    </Button>
+                  </Link>
+                ) : null
               )}
 
               {hasLinkedProject && (

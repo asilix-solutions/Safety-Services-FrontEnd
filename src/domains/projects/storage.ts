@@ -295,5 +295,10 @@ export function getPendingReports(inspectorName?: string): Project[] {
   );
 }
 
+export function getProjectByJobNumber(jobNumber: string): Project | null {
+  const list = getProjects();
+  return list.find((p) => p.jobNumber === jobNumber) || null;
+}
+
 
 

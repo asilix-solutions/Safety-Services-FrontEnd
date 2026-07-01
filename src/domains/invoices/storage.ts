@@ -35,7 +35,8 @@ export function createOrUpdateInvoice(invoice: ClientInvoice): void {
 const MOCK_INVOICES: ClientInvoice[] = [
   {
     id: "INV-2026-001",
-    tenantId: "c-102", // client companyId
+    tenantId: "tenant-1",
+    clientId: "c-102", // client companyId
     jobNumber: "SSLM-2026-000001",
     quotationJobNumber: "SSLM-2026-000001",
     subtotal: 5000,
@@ -48,7 +49,8 @@ const MOCK_INVOICES: ClientInvoice[] = [
   },
   {
     id: "INV-2026-002",
-    tenantId: "c-103", // client companyId
+    tenantId: "tenant-1",
+    clientId: "c-103", // client companyId
     jobNumber: "SSLM-2026-000002",
     quotationJobNumber: "SSLM-2026-000002",
     subtotal: 12000,
@@ -64,7 +66,7 @@ const MOCK_INVOICES: ClientInvoice[] = [
 
 export function getMergedInvoices(): ClientInvoice[] {
   const localList = getInvoices();
-  const hasOldSchema = localList.length > 0 && localList.some(inv => !inv.tenantId);
+  const hasOldSchema = localList.length > 0 && localList.some(inv => !inv.clientId);
   
   if (localList.length === 0 || hasOldSchema) {
     // Seed initial mock invoices if local storage is clean or outdated
@@ -88,11 +90,16 @@ export function getUnpaidInvoices(userId?: string, companyId?: string): ClientIn
   const invoices = getMergedInvoices();
   const unpaid = invoices.filter((i) => i.status === "unpaid");
   if (companyId) {
-    return unpaid.filter((i) => i.tenantId === companyId);
+    return unpaid.filter((i) => i.clientId === companyId);
   }
   if (userId) {
-    return unpaid.filter((i) => i.tenantId === userId);
+    return unpaid.filter((i) => i.clientId === userId);
   }
   return unpaid;
+}
+
+export function getInvoiceByJobNumber(jobNumber: string): ClientInvoice | null {
+  const list = getMergedInvoices();
+  return list.find((i) => i.jobNumber === jobNumber) || null;
 }
 

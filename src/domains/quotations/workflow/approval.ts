@@ -81,23 +81,23 @@ export function approveQuotation({
     approvedAt: nowStr,
   };
 
-  // Keep in QUOTATION stage
+  // Transition to READY_FOR_PAYMENT stage
   const { updatedQuotation, updatedRequest: syncedRequest } = syncQuotationAndRequest(
     approvedQuote,
     request,
-    "QUOTATION" as WorkflowStage
+    "READY_FOR_PAYMENT" as WorkflowStage
   );
 
-  // Explicitly update request status to quotation_created
+  // Explicitly update request status to awaiting_payment
   const requestWithUpdatedStatus = {
     ...syncedRequest,
-    status: "quotation_created" as const,
+    status: "awaiting_payment" as const,
   };
 
   const updatedRequest = appendTimelineEvent(
     requestWithUpdatedStatus,
-    "quotation_created",
-    `Quotation approved internally by ${approvedBy}.`
+    "awaiting_payment",
+    "Invoice issued / awaiting client payment"
   );
 
   persistQuotation(updatedQuotation);

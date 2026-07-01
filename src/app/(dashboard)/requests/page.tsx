@@ -27,7 +27,7 @@ export default function RequestsPage() {
   useEffect(() => {
     const list = getMergedRequests();
     if (user?.role === "Client") {
-      const filtered = list.filter((r) => r.clientId === user.id || r.clientId === user.companyId);
+      const filtered = list.filter((r) => r.clientId === user.companyId);
       setRequests(filtered);
     } else {
       setRequests(list);
