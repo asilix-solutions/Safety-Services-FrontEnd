@@ -166,7 +166,7 @@ export function prepareOperationsOverviewViewModel(
 
   // Projects pending final inspection review
   data.projects
-    .filter((p) => p.executionPhase === "ready_for_final_inspection" && !p.workspace?.inspection?.completedAt)
+    .filter((p) => p.executionPhase === "READY_FOR_FINAL_INSPECTION" && !p.workspace?.inspection?.completedAt)
     .forEach((p) => {
       actionItems.push({
         id: `action-inspection-${p.id}`,
@@ -222,13 +222,13 @@ export function prepareOperationsOverviewViewModel(
     .slice(0, 5)
     .map((proj): OverviewEntityItem => {
       let progress = 30;
-      if (proj.executionPhase === "completed") {
+      if (proj.executionPhase === "COMPLETED") {
         progress = 100;
-      } else if (proj.executionPhase === "ready_for_final_inspection") {
+      } else if (proj.executionPhase === "READY_FOR_FINAL_INSPECTION") {
         progress = 85;
-      } else if (proj.executionPhase === "active_execution") {
+      } else if (proj.executionPhase === "ACTIVE_EXECUTION") {
         progress = 60;
-      } else if (proj.executionPhase === "kickoff_ready") {
+      } else if (proj.executionPhase === "KICKOFF_APPROVED") {
         progress = 20;
       }
       return {

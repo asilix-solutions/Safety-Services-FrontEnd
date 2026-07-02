@@ -31,7 +31,7 @@ export function canCompleteExecution(
     return { valid: false, reason: "Project does not exist." };
   }
 
-  if (project.executionPhase !== "active_execution") {
+  if (project.executionPhase !== "ACTIVE_EXECUTION") {
     return {
       valid: false,
       reason: `Project execution must be active (current phase: ${project.executionPhase || "none"}).`,

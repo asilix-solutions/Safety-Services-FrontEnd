@@ -31,7 +31,7 @@ export function useContractList() {
     setContracts(userContracts);
 
     const allProjects = getProjects();
-    const completed = allProjects.filter((p) => p.status === "completed" || p.executionPhase === "completed");
+    const completed = allProjects.filter((p) => p.status === "completed" || p.executionPhase === "COMPLETED");
     const withoutContracts = completed.filter((p) => !allContracts.some((c) => c.projectId === p.id));
     setCompletedProjectsWithoutContracts(withoutContracts);
   };

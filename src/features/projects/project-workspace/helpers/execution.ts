@@ -17,5 +17,5 @@ export function getCurrentPhaseIndex(
   executionPhase: ProjectExecutionPhase | undefined,
   internalPhases: { id: ProjectExecutionPhase; labelKey: string }[]
 ): number {
-  return internalPhases.findIndex((p) => p.id === (executionPhase || "created"));
+  return internalPhases.findIndex((p) => p.id === (executionPhase || "PROJECT_PROVISIONED"));
 }

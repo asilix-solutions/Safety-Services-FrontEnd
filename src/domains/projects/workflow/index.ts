@@ -5,3 +5,4 @@ export * from "./execution";
 export * from "./completion";
 export * from "./inspection";
 export * from "./provision";
+export * from "./state-machine";

@@ -11,9 +11,9 @@ export function synchronizeProjectAndRequest(
 
   // Map execution phase to project status
   let projectStatus = project.status;
-  if (executionPhase === "active_execution") {
+  if (executionPhase === "ACTIVE_EXECUTION") {
     projectStatus = "active";
-  } else if (executionPhase === "completed") {
+  } else if (executionPhase === "COMPLETED") {
     projectStatus = "completed";
   }
 

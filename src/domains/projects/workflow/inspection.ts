@@ -59,7 +59,7 @@ export function approveFinalInspection({
     const synced = synchronizeProjectAndRequest(
       updatedProject,
       request,
-      "completed",
+      "COMPLETED",
       "COMPLETED" as WorkflowStage
     );
     updatedProject = synced.updatedProject;
@@ -72,7 +72,7 @@ export function approveFinalInspection({
 
     persistRequest(updatedRequest);
   } else {
-    updatedProject.executionPhase = "completed";
+    updatedProject.executionPhase = "COMPLETED";
     updatedProject.status = "completed";
     updatedProject.updatedAt = nowStr;
   }
@@ -143,7 +143,7 @@ export function requestFinalInspectionFixes({
     const synced = synchronizeProjectAndRequest(
       updatedProject,
       request,
-      "active_execution",
+      "ACTIVE_EXECUTION",
       "FIELD_EXECUTION" as WorkflowStage
     );
     updatedProject = synced.updatedProject;
@@ -156,7 +156,7 @@ export function requestFinalInspectionFixes({
 
     persistRequest(updatedRequest);
   } else {
-    updatedProject.executionPhase = "active_execution";
+    updatedProject.executionPhase = "ACTIVE_EXECUTION";
     updatedProject.status = "active";
     updatedProject.updatedAt = nowStr;
   }

@@ -15,7 +15,7 @@ export function getProjectHealth(project: Project, silos: SiloExecutionData[]): 
     };
   }
 
-  if (project.executionPhase === "ready_for_final_inspection" || project.status === "completed") {
+  if (project.executionPhase === "READY_FOR_FINAL_INSPECTION" || project.status === "completed") {
     return {
       status: "healthy",
       labelKey: "projects:health.healthy",

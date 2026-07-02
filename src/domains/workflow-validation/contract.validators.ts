@@ -12,7 +12,7 @@ export function canGenerateContract(
     return { valid: false, reason: "Project does not exist." };
   }
 
-  const isCompleted = project.status === "completed" || project.executionPhase === "completed";
+  const isCompleted = project.status === "completed" || project.executionPhase === "COMPLETED";
   if (!isCompleted) {
     return {
       valid: false,

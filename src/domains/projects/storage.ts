@@ -258,7 +258,7 @@ export function provisionProjectFromRequest(request: LicensingRequest): Project 
     clientName: request.clientName || "Client",
     clientId: request.clientId || "client-id",
     status: "planning",
-    executionPhase: "created",
+    executionPhase: "PROJECT_PROVISIONED",
     workspace,
     workspaceTemplate: template,
     startDate: new Date().toISOString().split("T")[0],
@@ -275,7 +275,7 @@ export function provisionProjectFromRequest(request: LicensingRequest): Project 
 
 export function getActiveProjects(userId?: string, companyId?: string): Project[] {
   const projects = getProjects();
-  const active = projects.filter((p) => p.status === "active" || p.executionPhase === "active_execution");
+  const active = projects.filter((p) => p.status === "active" || p.executionPhase === "ACTIVE_EXECUTION");
   if (companyId) {
     return active.filter((p) => p.tenantId === companyId || p.clientId === companyId);
   }
@@ -289,7 +289,7 @@ export function getPendingReports(inspectorName?: string): Project[] {
   const projects = getProjects();
   return projects.filter(
     (p) =>
-      p.executionPhase === "ready_for_final_inspection" &&
+      p.executionPhase === "READY_FOR_FINAL_INSPECTION" &&
       (!p.workspace?.inspection?.completedAt || !p.workspace?.inspection?.approved) &&
       (!inspectorName || p.workspace?.kickoff.assignedInspector === inspectorName)
   );

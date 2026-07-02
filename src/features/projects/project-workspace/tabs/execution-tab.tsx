@@ -165,7 +165,7 @@ export function ExecutionTab({
                     </div>
 
                     <div className="p-2 bg-secondary/35 border-t border-border flex justify-between items-center text-[10px]">
-                      {user.role === USER_ROLES.OPERATIONS_OFFICER && project.executionPhase === "active_execution" ? (
+                      {user.role === USER_ROLES.OPERATIONS_OFFICER && project.executionPhase === "ACTIVE_EXECUTION" ? (
                         <div className="w-full flex gap-2 justify-end">
                           {!isEditing && (
                             <Button
@@ -256,7 +256,7 @@ export function ExecutionTab({
       )}
 
       {/* Execution Completion / Readiness - Operations Only */}
-      {project.executionPhase === "active_execution" && (
+      {project.executionPhase === "ACTIVE_EXECUTION" && (
         <Card className="border-indigo-500/35 bg-card">
           <CardHeader className="pb-3 border-b border-border">
             <CardTitle className="text-sm font-bold flex items-center gap-2">

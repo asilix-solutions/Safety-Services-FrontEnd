@@ -40,8 +40,8 @@ export function FinalInspectionPanel({
 
   const isConsultingEngineer = userRole === USER_ROLES.CONSULTING_ENGINEER || userRole === USER_ROLES.SUPER_ADMIN || userRole === "ConsultingEngineer";
 
-  // Check if project is in ready_for_final_inspection phase
-  if (project.executionPhase !== "ready_for_final_inspection") {
+  // Check if project is in READY_FOR_FINAL_INSPECTION phase
+  if (project.executionPhase !== "READY_FOR_FINAL_INSPECTION") {
     return null;
   }
 

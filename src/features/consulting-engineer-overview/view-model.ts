@@ -152,7 +152,7 @@ export function prepareConsultingEngineerOverviewViewModel(
       titleKey: "consultingEngineer.overview.prepareTechnicalReport",
       titleFallback: "Prepare Technical Report",
       descriptionFallback: `Prepare & approve final technical report for ${p.name}`,
-      href: `/projects/${p.id}`,
+      href: `/site-visits`,
       actionLabelKey: "open",
       actionLabelFallback: "Open",
       referenceId: p.jobNumber || p.id,
@@ -248,7 +248,7 @@ export function prepareConsultingEngineerOverviewViewModel(
     let titleKey = "consultingEngineer.overview.activity.finalInspectionReady";
     let titleFallback = "Final Inspection Ready";
 
-    if (proj.executionPhase === "ready_for_final_inspection") {
+    if (proj.executionPhase === "READY_FOR_FINAL_INSPECTION") {
       titleKey = "consultingEngineer.overview.activity.finalInspectionReady";
       titleFallback = "Final Inspection Ready";
     } else if (proj.workspace?.inspection?.completedAt) {
@@ -269,7 +269,7 @@ export function prepareConsultingEngineerOverviewViewModel(
       timestamp: proj.updatedAt || proj.createdAt || new Date().toISOString(),
       referenceId: proj.jobNumber || proj.id,
       descriptionFallback: proj.name,
-      href: `/projects/${proj.id}`,
+      href: `/site-visits`,
     });
   });
 

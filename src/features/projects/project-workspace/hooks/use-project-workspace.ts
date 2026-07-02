@@ -9,7 +9,6 @@ import { getMergedRequests } from "@/domains/requests/storage";
 import { getContracts } from "@/domains/contracts/storage";
 import { getCertificateByProjectId } from "@/domains/certificates/storage";
 import { 
-  approveKickoff,
   startExecution,
   updateProjectSiloStatus,
   transitionProjectPhase,
@@ -78,7 +77,7 @@ export function useProjectWorkspace() {
         }
         
         if (!foundProject.executionPhase) {
-          foundProject.executionPhase = foundProject.status === "active" ? "active_execution" : "created";
+          foundProject.executionPhase = foundProject.status === "active" ? "ACTIVE_EXECUTION" : "PROJECT_PROVISIONED";
         }
         setProject(foundProject);
 
@@ -117,27 +116,7 @@ export function useProjectWorkspace() {
     loadData();
   }, [projectId]);
 
-  const handleApproveKickoff = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!project) return;
-    setIsProcessing(true);
-    try {
-      const updated = approveKickoff({
-        project,
-        notes,
-        approvedBy: user?.name || user?.role || "Operations Officer",
-      });
-      setProject(updated);
-      alert(t("projects:kickoff.savedSuccess") || "Kickoff approved successfully!");
-      loadData();
-    } catch (err: unknown) {
-      console.error(err);
-      const message = err instanceof Error ? err.message : "Failed to approve kickoff.";
-      alert(message);
-    } finally {
-      setIsProcessing(false);
-    }
-  };
+
 
   const handleStartExecution = () => {
     if (!project || isProcessing) return;
@@ -300,7 +279,6 @@ export function useProjectWorkspace() {
     certificate,
     isProcessing,
     loadData,
-    handleApproveKickoff,
     handleStartExecution,
     handleStartSilo,
     handleCompleteSilo,

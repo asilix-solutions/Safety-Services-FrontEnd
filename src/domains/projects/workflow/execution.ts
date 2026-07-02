@@ -17,7 +17,7 @@ export function startProjectExecution({
   updatedRequest: LicensingRequest | null;
 } {
   // 1. If project is already active, return immediately (Idempotency)
-  if (project.status === "active" && project.executionPhase === "active_execution") {
+  if (project.status === "active" && project.executionPhase === "ACTIVE_EXECUTION") {
     return {
       updatedProject: project,
       updatedRequest: request,
@@ -39,7 +39,7 @@ export function startProjectExecution({
     const synced = synchronizeProjectAndRequest(
       updatedProject,
       request,
-      "active_execution",
+      "ACTIVE_EXECUTION",
       "FIELD_EXECUTION" as WorkflowStage
     );
     updatedProject = synced.updatedProject;
@@ -61,7 +61,7 @@ export function startProjectExecution({
     persistRequest(updatedRequest);
   } else {
     updatedProject.status = "active";
-    updatedProject.executionPhase = "active_execution";
+    updatedProject.executionPhase = "ACTIVE_EXECUTION";
     updatedProject.updatedAt = nowStr;
   }
 
@@ -142,8 +142,8 @@ export function startExecutionSilo({
   siloId: "alarm" | "suppression" | "ventilation";
   startedBy: string;
 }): Project {
-  if (project.status !== "active" || project.executionPhase !== "active_execution") {
-    throw new Error("Cannot start silo: Project status must be active and executionPhase must be active_execution.");
+  if (project.status !== "active" || project.executionPhase !== "ACTIVE_EXECUTION") {
+    throw new Error("Cannot start silo: Project status must be active and executionPhase must be ACTIVE_EXECUTION.");
   }
 
   const currentWorkspace = project.workspace || createDefaultWorkspace();
@@ -209,8 +209,8 @@ export function completeExecutionSilo({
   completedBy: string;
   notes: string;
 }): Project {
-  if (project.status !== "active" || project.executionPhase !== "active_execution") {
-    throw new Error("Cannot complete silo: Project status must be active and executionPhase must be active_execution.");
+  if (project.status !== "active" || project.executionPhase !== "ACTIVE_EXECUTION") {
+    throw new Error("Cannot complete silo: Project status must be active and executionPhase must be ACTIVE_EXECUTION.");
   }
 
   const currentWorkspace = project.workspace || createDefaultWorkspace();
@@ -258,7 +258,7 @@ export function completeExecutionSilo({
   const allCompleted = updatedSilos.every((s) => s.status === "completed");
   let nextPhase: ProjectExecutionPhase | undefined = project.executionPhase;
   if (allCompleted) {
-    nextPhase = "ready_for_final_inspection";
+    nextPhase = "READY_FOR_FINAL_INSPECTION";
   }
 
   const updatedProject: Project = {

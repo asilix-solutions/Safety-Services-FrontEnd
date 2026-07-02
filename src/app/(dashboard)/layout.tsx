@@ -49,21 +49,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       return pathname === path || pathname.startsWith(path + "/");
     });
 
-    // Special allowance for Consulting Engineer accessing ready/completed project workspaces
-    if (!isAllowed && user.role === "Consulting Engineer" && pathname.startsWith("/projects/")) {
-      const projectId = pathname.split("/")[2];
-      if (projectId) {
-        const projects = getProjects();
-        const project = projects.find((p) => p.id === projectId);
-        if (
-          project &&
-          (project.executionPhase === "ready_for_final_inspection" ||
-            project.executionPhase === "completed")
-        ) {
-          isAllowed = true;
-        }
-      }
-    }
+
 
     if (!isAllowed) {
       router.push(defaultRoute);

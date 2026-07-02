@@ -28,9 +28,9 @@ export function StatusBadge({ status, type, className }: StatusBadgeProps) {
 
   try {
     if (type === "project") {
-      if (status === "ready_for_final_inspection") {
+      if (status === "READY_FOR_FINAL_INSPECTION") {
         metadata = { label: "Awaiting Final Inspection", badgeVariant: "warning" };
-        translatedLabel = t("projects:phases.ready_for_final_inspection");
+        translatedLabel = t("projects:phases.READY_FOR_FINAL_INSPECTION");
       } else {
         metadata = PROJECT_STATUS_METADATA[status as ProjectStatus] || metadata;
         const txKey = PROJECT_STATUS_TX[status as ProjectStatus];

@@ -25,7 +25,6 @@ interface OverviewTabProps {
   isProcessing: boolean;
   notes: string;
   setNotes: (val: string) => void;
-  handleApproveKickoff: (e: React.FormEvent) => void;
   handleStartExecution: () => void;
   handlePhaseTransition: (phase: any) => void;
   loadData: () => void;
@@ -42,7 +41,6 @@ export function OverviewTab({
   isProcessing,
   notes,
   setNotes,
-  handleApproveKickoff,
   handleStartExecution,
   handlePhaseTransition,
   loadData,
@@ -100,9 +98,9 @@ export function OverviewTab({
         />
 
         {/* Final Inspection/Completion views if applicable */}
-        {project.executionPhase === "completed" ? (
+        {project.executionPhase === "COMPLETED" ? (
           <ProjectCompletedCard project={project} t={t} />
-        ) : project.executionPhase === "ready_for_final_inspection" ? (
+        ) : project.executionPhase === "READY_FOR_FINAL_INSPECTION" ? (
           <FinalInspectionPanel
             project={project}
             request={request}
@@ -118,26 +116,59 @@ export function OverviewTab({
           />
         ) : (
           <>
-            {/* Kickoff Section */}
-            {user.role === USER_ROLES.OPERATIONS_OFFICER && project.executionPhase === "created" && (
+            {/* Operations Officer Kickoff Visit Scheduling Form */}
+            {user.role === USER_ROLES.OPERATIONS_OFFICER && project.executionPhase === "PROJECT_PROVISIONED" && (
               <Card className="border-border bg-card">
                 <CardHeader className="pb-3 border-b border-border">
                   <CardTitle className="text-sm font-bold flex items-center gap-2">
                     <Settings className="h-4 w-4 text-indigo-500" />
-                    {t("projects:kickoff.title") || "Project Setup & Kickoff"}
+                    {t("projects:kickoff.title") || "Schedule Kickoff Site Visit"}
                   </CardTitle>
                   <CardDescription className="text-xs text-muted-foreground">
-                    {t("projects:kickoff.desc") || "Operational setup before active execution."}
+                    Assign a consulting engineer inspector and schedule kickoff.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="pt-4">
-                  <form onSubmit={handleApproveKickoff} className="space-y-4 text-xs">
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const form = e.currentTarget;
+                      const inspectorName = "Eng. Tariq Al-Mansoor"; // Default mock name
+                      const inspectorId = "USR-006"; // Mock ID
+                      const notesVal = (form.elements.namedItem("kickoffNotes") as HTMLTextAreaElement).value;
+                      
+                      const { initiateKickoffVisit } = require("@/domains/projects/workflow/kickoff");
+                      try {
+                        const updated = initiateKickoffVisit({
+                          project,
+                          inspectorId,
+                          inspectorName,
+                          notes: notesVal,
+                          scheduledDate: new Date().toISOString(),
+                        });
+                        setProject(updated);
+                        alert("Kickoff site visit scheduled successfully!");
+                        loadData();
+                      } catch (err: any) {
+                        alert(err.message);
+                      }
+                    }}
+                    className="space-y-4 text-xs"
+                  >
+                    <div className="space-y-1">
+                      <label className="font-semibold text-muted-foreground block">Assigned Inspector</label>
+                      <input
+                        type="text"
+                        readOnly
+                        value="Eng. Tariq Al-Mansoor (Consulting Engineer)"
+                        className="w-full bg-secondary/35 border border-border p-2 rounded"
+                      />
+                    </div>
                     <div className="space-y-1">
                       <label className="font-semibold text-muted-foreground block">{t("projects:kickoff.kickoffNotes") || "Kickoff Directions & Notes"}</label>
                       <Textarea
                         rows={3}
-                        value={notes}
-                        onChange={(e) => setNotes(e.target.value)}
+                        name="kickoffNotes"
                         placeholder={t("projects:kickoff.notesPlaceholder") || "Enter kickoff instructions..."}
                         className="bg-secondary/50 min-h-[80px]"
                       />
@@ -150,22 +181,118 @@ export function OverviewTab({
                         disabled={isProcessing}
                         className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold"
                       >
-                        {t("projects:kickoff.approveKickoff") || "Approve Kickoff"}
+                        Schedule Kickoff Visit
                       </Button>
                     </div>
                   </form>
                 </CardContent>
               </Card>
             )}
+
+            {/* Consulting Engineer Inspector Kickoff Audit Sign-Off Form */}
+            {user.role === USER_ROLES.CONSULTING_ENGINEER && project.executionPhase === "KICKOFF_PENDING" && (
+              <Card className="border-border bg-card">
+                <CardHeader className="pb-3 border-b border-border">
+                  <CardTitle className="text-sm font-bold flex items-center gap-2">
+                    <Settings className="h-4 w-4 text-indigo-500" />
+                    Perform Kickoff Site Visit Inspection
+                  </CardTitle>
+                  <CardDescription className="text-xs text-muted-foreground">
+                    Review kickoff directions and log inspection decision.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="pt-4 space-y-4">
+                  {(() => {
+                    const { getSiteVisitsByProjectId } = require("@/domains/site-visits/storage");
+                    const visits = getSiteVisitsByProjectId(project.id);
+                    const pendingVisit = visits.find((v: any) => v.type === "kickoff" && v.status === "scheduled");
+                    if (!pendingVisit) {
+                      return <p className="text-xs text-muted-foreground">No scheduled kickoff visits found.</p>;
+                    }
+                    return (
+                      <div className="space-y-4 text-xs">
+                        <div className="p-3 bg-secondary/35 border border-border rounded space-y-1">
+                          <span className="font-bold block">Operations Directions:</span>
+                          <p className="text-muted-foreground">{pendingVisit.notes}</p>
+                        </div>
+                        <div className="flex gap-2 justify-end">
+                          <Button
+                            size="sm"
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold"
+                            onClick={() => {
+                              const { handleKickoffDecision } = require("@/domains/projects/workflow/kickoff");
+                              try {
+                                const updated = handleKickoffDecision({
+                                  project,
+                                  visitId: pendingVisit.id,
+                                  approved: true,
+                                  decisionNotes: "Kickoff inspected and approved.",
+                                  inspectorName: user.name || "Eng. Tariq Al-Mansoor",
+                                });
+                                setProject(updated);
+                                alert("Kickoff approved successfully!");
+                                loadData();
+                              } catch (err: any) {
+                                alert(err.message);
+                              }
+                            }}
+                          >
+                            Approve Kickoff
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            className="font-bold"
+                            onClick={() => {
+                              const { handleKickoffDecision } = require("@/domains/projects/workflow/kickoff");
+                              try {
+                                const updated = handleKickoffDecision({
+                                  project,
+                                  visitId: pendingVisit.id,
+                                  approved: false,
+                                  decisionNotes: "Kickoff rejected due to checklist compliance gaps.",
+                                  inspectorName: user.name || "Eng. Tariq Al-Mansoor",
+                                });
+                                setProject(updated);
+                                alert("Kickoff inspection rejected. Returned to Operations.");
+                                loadData();
+                              } catch (err: any) {
+                                alert(err.message);
+                              }
+                            }}
+                          >
+                            Reject & Return
+                          </Button>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Awaiting Kickoff State Info Panel */}
+            {project.executionPhase === "KICKOFF_PENDING" && user.role !== USER_ROLES.CONSULTING_ENGINEER && (
+              <Card className="border-border bg-card">
+                <CardHeader>
+                  <CardTitle className="text-sm font-bold">Kickoff Audit Scheduled</CardTitle>
+                  <CardDescription className="text-xs">Awaiting consulting engineer inspection audit.</CardDescription>
+                </CardHeader>
+                <CardContent className="text-xs text-muted-foreground">
+                  <p>Inspector Eng. Tariq Al-Mansoor has been dispatched to perform the kickoff site audit.</p>
+                </CardContent>
+              </Card>
+            )}
+
             {/* If Kickoff is approved, but execution hasn't started yet, display general details */}
-            {project.executionPhase === "kickoff_ready" && (
+            {project.executionPhase === "KICKOFF_APPROVED" && (
               <Card className="border-border bg-card">
                 <CardHeader>
                   <CardTitle className="text-sm font-bold">{t("projects:kickoff.approved")}</CardTitle>
                   <CardDescription className="text-xs">{t("projects:details.opsDesc")}</CardDescription>
                 </CardHeader>
                 <CardContent className="text-xs space-y-2">
-                  <p>{t("projects:kickoff.notes")}: <span className="font-semibold">{project.workspace?.kickoff?.notes || "No notes"}</span></p>
+                  <p>Status: <span className="font-semibold text-emerald-600">Approved for site works</span></p>
                 </CardContent>
               </Card>
             )}
@@ -189,12 +316,12 @@ export function OverviewTab({
               </CardDescription>
             </CardHeader>
             <CardContent className="pt-2">
-              {project.executionPhase === "created" && (
+              {project.executionPhase === "PROJECT_PROVISIONED" && (
                 <div className="text-xs text-muted-foreground py-2 text-center font-semibold">
                   {t("projects:kickoff.awaitingApproval") || "Awaiting Kickoff Approval"}
                 </div>
               )}
-              {project.executionPhase === "kickoff_ready" && (
+              {project.executionPhase === "KICKOFF_APPROVED" && (
                 <Button
                   onClick={handleStartExecution}
                   disabled={isProcessing}
@@ -207,7 +334,7 @@ export function OverviewTab({
                   }
                 </Button>
               )}
-              {project.executionPhase === "active_execution" && (
+              {project.executionPhase === "ACTIVE_EXECUTION" && (
                 <div className="p-2 border border-emerald-500/20 bg-emerald-500/5 text-emerald-600 rounded font-semibold text-center text-xs flex items-center justify-center gap-2">
                   <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
                   {t("projects:kickoff.executionStarted") || "Execution Started"}

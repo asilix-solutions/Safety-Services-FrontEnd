@@ -46,7 +46,6 @@ export default function ProjectWorkspace() {
     setActiveTab,
     isProcessing,
     loadData,
-    handleApproveKickoff,
     handleStartExecution,
     handleStartSilo,
     handleCompleteSilo,
@@ -102,7 +101,6 @@ export default function ProjectWorkspace() {
             isProcessing={isProcessing}
             notes={notes}
             setNotes={setNotes}
-            handleApproveKickoff={handleApproveKickoff}
             handleStartExecution={handleStartExecution}
             handlePhaseTransition={handlePhaseTransition}
             loadData={loadData}
@@ -157,7 +155,6 @@ export default function ProjectWorkspace() {
                 isProcessing={isProcessing}
                 notes={notes}
                 setNotes={setNotes}
-                handleApproveKickoff={handleApproveKickoff}
                 handleStartExecution={handleStartExecution}
                 handlePhaseTransition={handlePhaseTransition}
                 loadData={loadData}

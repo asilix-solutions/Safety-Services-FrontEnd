@@ -630,11 +630,45 @@ export default function RequestDetailsPage() {
                 )}
 
                 <div className="pt-2 border-t border-border">
-                  <Link href={`/projects/${linkedProject.id}`}>
-                    <Button size="sm" className="w-full text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white gap-1.5 h-8">
-                      {isClient ? t("requests:details.viewProject") : t("requests:details.openWorkspace")}
-                    </Button>
-                  </Link>
+                  {(() => {
+                    if (user?.role === USER_ROLES.OPERATIONS_OFFICER) {
+                      return (
+                        <Link href={`/projects/${linkedProject.id}`}>
+                          <Button size="sm" className="w-full text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white gap-1.5 h-8">
+                            {t("requests:details.openWorkspace")}
+                          </Button>
+                        </Link>
+                      );
+                    } else if (user?.role === USER_ROLES.CONSULTING_ENGINEER) {
+                      const { getSiteVisitsByProjectId } = require("@/domains/site-visits/storage");
+                      const visits = getSiteVisitsByProjectId(linkedProject.id);
+                      const kickoffVisit = visits.find((v: any) => v.type === "kickoff");
+                      if (kickoffVisit) {
+                        return (
+                          <Link href={`/site-visits`}>
+                            <Button size="sm" className="w-full text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white gap-1.5 h-8">
+                              {t("projects:tabs.viewSiteVisits") || "View Site Visits"}
+                            </Button>
+                          </Link>
+                        );
+                      } else {
+                        return (
+                          <Button size="sm" disabled className="w-full text-xs font-bold bg-secondary text-muted-foreground gap-1.5 h-8">
+                            Awaiting Site Visit Assignment
+                          </Button>
+                        );
+                      }
+                    } else {
+                      // Client View / Read Only mode
+                      return (
+                        <Link href={`/projects/${linkedProject.id}`}>
+                          <Button size="sm" className="w-full text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white gap-1.5 h-8">
+                            {t("requests:details.viewProject") || "View Project Progress"}
+                          </Button>
+                        </Link>
+                      );
+                    }
+                  })()}
                 </div>
               </CardContent>
             </Card>

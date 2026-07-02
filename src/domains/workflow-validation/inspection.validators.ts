@@ -11,7 +11,7 @@ export function canApproveInspection(
     return { valid: false, reason: "Project does not exist." };
   }
 
-  if (project.executionPhase !== "ready_for_final_inspection") {
+  if (project.executionPhase !== "READY_FOR_FINAL_INSPECTION") {
     return {
       valid: false,
       reason: `Project must be ready for final inspection (current phase: ${project.executionPhase || "none"}).`,
@@ -39,7 +39,7 @@ export function canReturnInspection(
     return { valid: false, reason: "Project does not exist." };
   }
 
-  if (project.executionPhase !== "ready_for_final_inspection") {
+  if (project.executionPhase !== "READY_FOR_FINAL_INSPECTION") {
     return {
       valid: false,
       reason: `Project must be ready for final inspection (current phase: ${project.executionPhase || "none"}).`,

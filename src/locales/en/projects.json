@@ -155,6 +155,7 @@
   "tabs.execution": "Execution",
   "tabs.obstacles": "Obstacles",
   "tabs.documents": "Documents",
+  "tabs.viewSiteVisits": "View Site Visits",
   "empty.noObstacles": "No active obstacles or critical blockers found on this site.",
   "empty.noDocuments": "No compliance files, contracts, or certificates have been issued yet.",
   "documents.linkedRequestFiles": "Request Attachments & Blueprints",
@@ -172,6 +173,22 @@
   "execution.startModule": "Start",
   "execution.completionNotes": "Completion notes...",
   "execution.completeModule": "Complete",
-  "execution.completed": "Completed"
+  "execution.completed": "Completed",
+  "phases.PROJECT_PROVISIONED": "Project Workspace Provisioned",
+  "phases.KICKOFF_PENDING": "Kickoff Setup Pending",
+  "phases.KICKOFF_APPROVED": "Kickoff Approved",
+  "phases.ACTIVE_EXECUTION": "Active Field Execution",
+  "phases.EXECUTION_COMPLETED": "Execution Tasks Completed",
+  "phases.READY_FOR_FINAL_INSPECTION": "Ready for Final Inspection",
+  "phases.FINAL_INSPECTION_APPROVED": "Final Inspection Approved",
+  "phases.CERTIFICATE_ISSUED": "Safety Certificate Issued",
+  "phases.COMPLETED": "Project Closed Out",
+  "workflow_invalid_transition": "Invalid state transition requested.",
+  "workflow_error_missing_inspector": "An inspector must be assigned before initiating kickoff.",
+  "workflow_error_kickoff_unapproved": "Kickoff must be approved by the inspector.",
+  "workflow_error_silos_incomplete": "All safety system installation silos must be completed first.",
+  "workflow_error_project_blocked": "Project is currently blocked by active obstacles.",
+  "workflow_error_inspection_unapproved": "Certificate cannot be issued without approved final inspection.",
+  "workflow_error_missing_safety_score": "Safety compliance score must be registered before completion."
 }
 

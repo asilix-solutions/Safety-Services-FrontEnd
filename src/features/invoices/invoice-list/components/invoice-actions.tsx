@@ -219,6 +219,36 @@ export function InvoiceActions({
                 (() => {
                   const projectsList = getProjects();
                   const linkedProj = projectsList.find((p) => p.jobNumber === invoice.jobNumber);
+                  
+                  if (user?.role === USER_ROLES.CONSULTING_ENGINEER) {
+                    if (linkedProj) {
+                      const { getSiteVisitsByProjectId } = require("@/domains/site-visits/storage");
+                      const visits = getSiteVisitsByProjectId(linkedProj.id);
+                      const kickoffVisit = visits.find((v: any) => v.type === "kickoff");
+                      if (kickoffVisit) {
+                        return (
+                          <Link href={`/site-visits`} className="w-full">
+                            <Button variant="ghost" size="sm" className="w-full justify-between text-xs h-9 text-muted-foreground hover:text-foreground cursor-pointer">
+                              <span className="flex items-center gap-2">
+                                <Layers className="h-4 w-4 text-primary" />
+                                {t("projects:tabs.viewSiteVisits") || "View Site Visits"}
+                              </span>
+                              <ArrowRight className="h-3.5 w-3.5 opacity-60 rtl:rotate-180" />
+                            </Button>
+                          </Link>
+                        );
+                      }
+                    }
+                    return (
+                      <Button disabled variant="ghost" size="sm" className="w-full justify-between text-xs h-9 text-muted-foreground/50 cursor-not-allowed">
+                        <span className="flex items-center gap-2">
+                          <Layers className="h-4 w-4 text-muted-foreground/30" />
+                          Awaiting Site Visit Assignment
+                        </span>
+                      </Button>
+                    );
+                  }
+
                   const href = linkedProj ? `/projects/${linkedProj.id}` : `/projects/${invoice.jobNumber}`;
                   return (
                     <Link href={href} className="w-full">

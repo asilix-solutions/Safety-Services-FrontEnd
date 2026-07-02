@@ -54,7 +54,7 @@ export function completeProjectExecution({
     const synced = synchronizeProjectAndRequest(
       updatedProject,
       request,
-      "ready_for_final_inspection",
+      "READY_FOR_FINAL_INSPECTION",
       "FINAL_INSPECTION" as WorkflowStage
     );
     updatedProject = synced.updatedProject;
@@ -67,7 +67,7 @@ export function completeProjectExecution({
 
     persistRequest(updatedRequest);
   } else {
-    updatedProject.executionPhase = "ready_for_final_inspection";
+    updatedProject.executionPhase = "READY_FOR_FINAL_INSPECTION";
     updatedProject.updatedAt = nowStr;
   }
 

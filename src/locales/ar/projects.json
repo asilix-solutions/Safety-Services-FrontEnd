@@ -155,6 +155,7 @@
   "tabs.execution": "التنفيذ",
   "tabs.obstacles": "العوائق",
   "tabs.documents": "المستندات",
+  "tabs.viewSiteVisits": "عرض الزيارات الميدانية",
   "empty.noObstacles": "لا توجد أي عوائق نشطة أو مشاكل حرجة في الموقع حالياً.",
   "empty.noDocuments": "لم يتم إصدار أي عقود أو شهادات أو مستندات فنية للمشروع بعد.",
   "documents.linkedRequestFiles": "مرفقات الطلب والمخططات الهندسية",
@@ -172,6 +173,22 @@
   "execution.startModule": "بدء",
   "execution.completionNotes": "ملاحظات الإتمام...",
   "execution.completeModule": "إتمام",
-  "execution.completed": "مكتمل"
+  "execution.completed": "مكتمل",
+  "phases.PROJECT_PROVISIONED": "تم تأسيس مساحة عمل المشروع",
+  "phases.KICKOFF_PENDING": "إعداد انطلاق المشروع معلق",
+  "phases.KICKOFF_APPROVED": "تم اعتماد بدء العمل",
+  "phases.ACTIVE_EXECUTION": "التنفيذ الميداني نشط",
+  "phases.EXECUTION_COMPLETED": "اكتملت أعمال التنفيذ والصيانة",
+  "phases.READY_FOR_FINAL_INSPECTION": "جاهز للفحص النهائي",
+  "phases.FINAL_INSPECTION_APPROVED": "تم اعتماد الفحص الفني النهائي",
+  "phases.CERTIFICATE_ISSUED": "تم إصدار شهادة السلامة",
+  "phases.COMPLETED": "تم إغلاق وتصفية المشروع",
+  "workflow_invalid_transition": "التحول المطلوب في حالة المشروع غير صالح.",
+  "workflow_error_missing_inspector": "يجب تعيين مهندس فحص ميداني أولاً لبدء المشروع.",
+  "workflow_error_kickoff_unapproved": "يجب اعتماد بدء العمل أولاً من قبل المهندس المختص.",
+  "workflow_error_silos_incomplete": "يجب إكمال كافة الصوامع وأعمال التنفيذ الوقائية أولاً.",
+  "workflow_error_project_blocked": "المشروع متوقف حالياً لوجود عوائق نشطة.",
+  "workflow_error_inspection_unapproved": "لا يمكن إصدار شهادة السلامة بدون اعتماد الفحص النهائي.",
+  "workflow_error_missing_safety_score": "يجب تقييم درجة السلامة والامتثال قبل إغلاق المشروع."
 }
 

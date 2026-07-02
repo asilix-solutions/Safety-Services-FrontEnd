@@ -3,11 +3,15 @@ import { ProjectStatus } from "./project-status";
 export type ProjectType = "license" | "maintenance" | "engineering";
 
 export type ProjectExecutionPhase =
-  | "created"
-  | "kickoff_ready"
-  | "active_execution"
-  | "ready_for_final_inspection"
-  | "completed";
+  | "PROJECT_PROVISIONED"
+  | "KICKOFF_PENDING"
+  | "KICKOFF_APPROVED"
+  | "ACTIVE_EXECUTION"
+  | "EXECUTION_COMPLETED"
+  | "READY_FOR_FINAL_INSPECTION"
+  | "FINAL_INSPECTION_APPROVED"
+  | "CERTIFICATE_ISSUED"
+  | "COMPLETED";
 
 export type ProjectWorkspaceTemplate =
   | "installation_full"

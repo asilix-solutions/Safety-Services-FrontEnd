@@ -1,48 +1,61 @@
-import { Project, ProjectWorkspaceData } from "@/types/project";
-import { createDefaultWorkspace } from "@/domains/projects/storage";
+import { Project } from "@/types/project";
 import { persistProject } from "./helpers/persist";
+import { createOrUpdateSiteVisit } from "@/domains/site-visits/storage";
+import { SiteVisit } from "@/domains/site-visits/types";
 
-export function approveKickoff({
+/**
+ * Operations schedules / initiates a kickoff visit for the project workspace.
+ * Transitions Project state: PROJECT_PROVISIONED -> KICKOFF_PENDING
+ */
+export function initiateKickoffVisit({
   project,
+  inspectorId,
+  inspectorName,
   notes,
-  approvedBy,
+  scheduledDate,
 }: {
   project: Project;
+  inspectorId: string;
+  inspectorName: string;
   notes: string;
-  approvedBy: string;
+  scheduledDate: string;
 }): Project {
-  if (project.status !== "planning" || project.executionPhase !== "created") {
-    throw new Error("Cannot approve kickoff: Project status must be planning and executionPhase must be created.");
+  if (project.executionPhase !== "PROJECT_PROVISIONED") {
+    throw new Error("Cannot initiate kickoff: Project phase must be PROJECT_PROVISIONED.");
   }
 
   const nowStr = new Date().toISOString();
 
-  // Create workspace metadata with kickoff notes if supported, preserving existing data
-  const currentWorkspace = project.workspace || createDefaultWorkspace();
-  const updatedWorkspace: ProjectWorkspaceData = {
-    ...currentWorkspace,
-    kickoff: {
-      ...currentWorkspace.kickoff,
-      approved: true,
-      notes: notes || "",
-    },
+  // 1. Create a site visit record in pending/scheduled status
+  const kickoffVisit: SiteVisit = {
+    id: `SV-KICK-${Math.floor(1000 + Math.random() * 9000)}`,
+    projectId: project.id,
+    projectName: `Kickoff Audit: ${project.name}`,
+    location: "Project Site",
+    inspectorId,
+    inspectorName,
+    scheduledDate: scheduledDate || nowStr,
+    type: "kickoff",
+    status: "scheduled",
+    notes: notes || "Initial project site audit for kickoff authorization.",
   };
 
-  // Add timeline event
+  createOrUpdateSiteVisit(kickoffVisit);
+
+  // 2. Add operational tasks
   const updatedTasks = [...(project.tasks || [])];
   updatedTasks.push({
     id: `TSK-${Math.floor(1000 + Math.random() * 9000)}`,
-    title: "Kickoff Approved",
-    description: `Project kickoff approved by ${approvedBy}. Notes: ${notes}`,
+    title: "Kickoff Site Visit Scheduled",
+    description: `Kickoff site inspection scheduled with ${inspectorName}.`,
     completed: true,
-    dueDate: nowStr.split("T")[0],
+    dueDate: (scheduledDate || nowStr).split("T")[0],
     priority: "Medium",
   });
 
   const updatedProject: Project = {
     ...project,
-    executionPhase: "kickoff_ready",
-    workspace: updatedWorkspace,
+    executionPhase: "KICKOFF_PENDING",
     tasks: updatedTasks,
     updatedAt: nowStr,
   };
@@ -51,6 +64,71 @@ export function approveKickoff({
   return updatedProject;
 }
 
+/**
+ * Inspector reviews, and approves/rejects the kickoff visit.
+ * Transitions Project state: KICKOFF_PENDING -> KICKOFF_APPROVED (if approved)
+ */
+export function handleKickoffDecision({
+  project,
+  visitId,
+  approved,
+  decisionNotes,
+  inspectorName,
+}: {
+  project: Project;
+  visitId: string;
+  approved: boolean;
+  decisionNotes: string;
+  inspectorName: string;
+}): Project {
+  if (project.executionPhase !== "KICKOFF_PENDING") {
+    throw new Error("Cannot record kickoff decision: Project must be in KICKOFF_PENDING phase.");
+  }
+
+  const nowStr = new Date().toISOString();
+
+  // 1. Resolve and update the kickoff visit status
+  const kickoffVisit: SiteVisit = {
+    id: visitId,
+    projectId: project.id,
+    projectName: `Kickoff Audit: ${project.name}`,
+    location: "Project Site",
+    inspectorId: "USR-006", // Fixed mock inspector reference or dynamic
+    inspectorName,
+    scheduledDate: nowStr,
+    type: "kickoff",
+    status: approved ? "approved" : "rejected",
+    notes: decisionNotes,
+    approved,
+  };
+
+  createOrUpdateSiteVisit(kickoffVisit);
+
+  const updatedTasks = [...(project.tasks || [])];
+  updatedTasks.push({
+    id: `TSK-${Math.floor(1000 + Math.random() * 9000)}`,
+    title: approved ? "Kickoff Approved" : "Kickoff Rejected",
+    description: `Kickoff inspection ${approved ? "approved" : "rejected"} by ${inspectorName}. Notes: ${decisionNotes}`,
+    completed: true,
+    dueDate: nowStr.split("T")[0],
+    priority: "High",
+  });
+
+  const updatedProject: Project = {
+    ...project,
+    executionPhase: approved ? "KICKOFF_APPROVED" : "PROJECT_PROVISIONED", // rollback to provisioned on reject so ops can schedule again
+    tasks: updatedTasks,
+    updatedAt: nowStr,
+  };
+
+  persistProject(updatedProject);
+  return updatedProject;
+}
+
+/**
+ * Operations starts the active execution workspace
+ * Transitions Project state: KICKOFF_APPROVED -> ACTIVE_EXECUTION
+ */
 export function startExecution({
   project,
   startedBy,
@@ -58,8 +136,8 @@ export function startExecution({
   project: Project;
   startedBy: string;
 }): Project {
-  if (project.executionPhase !== "kickoff_ready") {
-    throw new Error("Cannot start execution: Project executionPhase must be kickoff_ready.");
+  if (project.executionPhase !== "KICKOFF_APPROVED") {
+    throw new Error("Cannot start execution: Project executionPhase must be KICKOFF_APPROVED.");
   }
 
   const nowStr = new Date().toISOString();
@@ -77,7 +155,7 @@ export function startExecution({
   const updatedProject: Project = {
     ...project,
     status: "active",
-    executionPhase: "active_execution",
+    executionPhase: "ACTIVE_EXECUTION",
     tasks: updatedTasks,
     updatedAt: nowStr,
   };

@@ -50,11 +50,15 @@ export function prepareProjectWorkspaceViewModel(
   const health = getProjectHealth(project, silos);
 
   const internalPhases: { id: ProjectExecutionPhase; labelKey: string }[] = [
-    { id: "created", labelKey: "projects:phases.created" },
-    { id: "kickoff_ready", labelKey: "projects:phases.kickoff_ready" },
-    { id: "active_execution", labelKey: "projects:phases.active_execution" },
-    { id: "ready_for_final_inspection", labelKey: "projects:phases.ready_for_final_inspection" },
-    { id: "completed", labelKey: "projects:phases.completed" }
+    { id: "PROJECT_PROVISIONED", labelKey: "projects:phases.PROJECT_PROVISIONED" },
+    { id: "KICKOFF_PENDING", labelKey: "projects:phases.KICKOFF_PENDING" },
+    { id: "KICKOFF_APPROVED", labelKey: "projects:phases.KICKOFF_APPROVED" },
+    { id: "ACTIVE_EXECUTION", labelKey: "projects:phases.ACTIVE_EXECUTION" },
+    { id: "EXECUTION_COMPLETED", labelKey: "projects:phases.EXECUTION_COMPLETED" },
+    { id: "READY_FOR_FINAL_INSPECTION", labelKey: "projects:phases.READY_FOR_FINAL_INSPECTION" },
+    { id: "FINAL_INSPECTION_APPROVED", labelKey: "projects:phases.FINAL_INSPECTION_APPROVED" },
+    { id: "CERTIFICATE_ISSUED", labelKey: "projects:phases.CERTIFICATE_ISSUED" },
+    { id: "COMPLETED", labelKey: "projects:phases.COMPLETED" }
   ];
 
   const currentPhaseIndex = getCurrentPhaseIndex(project.executionPhase, internalPhases);
