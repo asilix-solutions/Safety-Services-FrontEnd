@@ -7,11 +7,12 @@ import { DataTable, ColumnDef } from "@/shared/tables/data-table";
 import { Award, Eye, Download, XCircle } from "lucide-react";
 import { useTranslation } from "@/providers/i18n-provider";
 import { ActionMenu } from "@/shared/components/action-menu";
+import { Badge } from "@/shared/ui/badge";
 import {
   deriveCertificateDisplayStatus,
-  getCertificateStatusBadgeClass,
+  getCertificateStatusBadgeVariant,
   getRemainingValidityText,
-  getExpirationBadgeVariant,
+  canRevokeCertificate,
 } from "../helpers/formatters";
 
 interface CertificatesTableProps {
@@ -82,15 +83,11 @@ export function CertificatesTable({
       render: (row) => {
         const displayStatus = deriveCertificateDisplayStatus(row.status, row.expiresAt);
         const transKey = `certificates_tab_${displayStatus}`;
+        const variant = getCertificateStatusBadgeVariant(row.status, row.expiresAt);
         return (
-          <span
-            className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${getCertificateStatusBadgeClass(
-              row.status,
-              row.expiresAt
-            )}`}
-          >
+          <Badge variant={variant} className="uppercase text-[10px]">
             {t(`common:${transKey}`).toUpperCase()}
-          </span>
+          </Badge>
         );
       },
     },
@@ -98,11 +95,20 @@ export function CertificatesTable({
       header: t("common:certificateSummary.validityDays"),
       render: (row) => {
         const text = getRemainingValidityText(row.expiresAt, row.status, t);
-        const badgeClass = getExpirationBadgeVariant(row.expiresAt, row.status);
+        const displayStatus = deriveCertificateDisplayStatus(row.status, row.expiresAt);
+        let variant: "default" | "secondary" | "warning" | "destructive" | "success" | "outline" = "default";
+        if (displayStatus === "active") {
+          const validityDays = (new Date(row.expiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24);
+          if (validityDays < 30) variant = "destructive";
+          else if (validityDays < 90) variant = "warning";
+          else variant = "success";
+        } else {
+          variant = "destructive";
+        }
         return (
-          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${badgeClass}`}>
+          <Badge variant={variant} className="uppercase text-[10px]">
             {text}
-          </span>
+          </Badge>
         );
       },
     },
@@ -127,7 +133,7 @@ export function CertificatesTable({
     {
       header: t("common:actions") || "Actions",
       render: (row) => {
-        const canRevoke = isAdmin && row.status === "active";
+        const canRev = canRevokeCertificate(row, userRole);
         const menuItems = [
           {
             id: "view-details",
@@ -141,7 +147,7 @@ export function CertificatesTable({
             icon: Download,
             onClick: () => onDownloadCertificate(row),
           },
-          ...(canRevoke
+          ...(canRev
             ? [
                 {
                   id: "revoke",
@@ -174,7 +180,7 @@ export function CertificatesTable({
               variant={statusFilter === "all" ? "default" : "ghost"}
               onClick={() => onStatusFilterChange("all")}
               size="sm"
-              className="h-8 gap-1.5 text-xs"
+              className="h-8 gap-1.5 text-xs cursor-pointer"
             >
               {t("common:certificates_tab_all")}
               <span
@@ -191,7 +197,7 @@ export function CertificatesTable({
               variant={statusFilter === "active" ? "default" : "ghost"}
               onClick={() => onStatusFilterChange("active")}
               size="sm"
-              className="h-8 gap-1.5 text-xs"
+              className="h-8 gap-1.5 text-xs cursor-pointer"
             >
               {t("common:certificates_tab_active")}
               <span
@@ -208,7 +214,7 @@ export function CertificatesTable({
               variant={statusFilter === "expired" ? "default" : "ghost"}
               onClick={() => onStatusFilterChange("expired")}
               size="sm"
-              className="h-8 gap-1.5 text-xs"
+              className="h-8 gap-1.5 text-xs cursor-pointer"
             >
               {t("common:certificates_tab_expired")}
               <span
@@ -225,7 +231,7 @@ export function CertificatesTable({
               variant={statusFilter === "revoked" ? "default" : "ghost"}
               onClick={() => onStatusFilterChange("revoked")}
               size="sm"
-              className="h-8 gap-1.5 text-xs"
+              className="h-8 gap-1.5 text-xs cursor-pointer"
             >
               {t("common:certificates_tab_revoked")}
               <span
@@ -268,3 +274,4 @@ export function CertificatesTable({
     </Card>
   );
 }
+export default CertificatesTable;

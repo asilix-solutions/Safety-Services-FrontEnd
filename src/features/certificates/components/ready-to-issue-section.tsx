@@ -1,29 +1,29 @@
 import React from "react";
-import { ClientContract } from "@/domains/contracts/types";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
 import { DataTable, ColumnDef } from "@/shared/tables/data-table";
 import { ActionButton } from "@/shared/components/action-button";
 import { Plus, Award } from "lucide-react";
 import { useTranslation } from "@/providers/i18n-provider";
+import { CertificateEligibility } from "@/domains/workflow-validation/certificate.validators";
 
 interface ReadyToIssueSectionProps {
-  contracts: ClientContract[];
-  onIssueCertificate: (contract: ClientContract) => void;
+  eligibleItems: CertificateEligibility[];
+  onIssueCertificate: (item: CertificateEligibility) => void;
 }
 
 export function ReadyToIssueSection({
-  contracts,
+  eligibleItems,
   onIssueCertificate,
 }: ReadyToIssueSectionProps) {
   const { t } = useTranslation();
 
-  if (contracts.length === 0) return null;
+  if (eligibleItems.length === 0) return null;
 
-  const columns: ColumnDef<ClientContract>[] = [
+  const columns: ColumnDef<CertificateEligibility>[] = [
     {
-      header: t("common:certificates_contract_id"),
-      accessorKey: "id",
-      render: (row) => <span className="font-mono text-xs font-bold text-primary">{row.id}</span>,
+      header: t("common:certificates_project_id") || "Project ID",
+      accessorKey: "sourceId",
+      render: (row) => <span className="font-mono text-xs font-bold text-primary">{row.sourceId}</span>,
     },
     {
       header: t("common:title") || "Title",
@@ -31,15 +31,15 @@ export function ReadyToIssueSection({
       render: (row) => <span className="font-semibold text-foreground">{row.title}</span>,
     },
     {
-      header: t("common:certificates_job_number"),
+      header: t("common:certificates_job_number") || "Job Number",
       accessorKey: "jobNumber",
-      render: (row) => <span className="font-mono text-xs">{row.jobNumber}</span>,
+      render: (row) => <span className="font-mono text-xs">{row.jobNumber || "—"}</span>,
     },
     {
       header: t("common:status") || "Status",
       render: () => (
         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-500/10 text-blue-600 dark:text-blue-400">
-          {t("common:certificates_milestone_contract_archived").toUpperCase()}
+          {(t("common:certificates_eligible") || "Eligible").toUpperCase()}
         </span>
       ),
     },
@@ -50,7 +50,7 @@ export function ReadyToIssueSection({
           label={t("common:certificates_issue_btn")}
           icon={Plus}
           onClick={() => onIssueCertificate(row)}
-          className="h-8 text-xs bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm border-none"
+          className="h-8 text-xs bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm border-none cursor-pointer"
         />
       ),
     },
@@ -61,15 +61,15 @@ export function ReadyToIssueSection({
       <CardHeader>
         <CardTitle className="text-base font-semibold flex items-center gap-2">
           <Award className="h-4.5 w-4.5 text-emerald-500" />
-          {t("common:certificates_ready_to_issue")}
+          {t("common:certificates_eligible_section_title") || "Eligible Compliance Certificates"}
         </CardTitle>
         <CardDescription>
-          {t("common:certificates_ready_to_issue_desc")}
+          {t("common:certificates_eligible_section_desc") || "The following projects have completed physical inspections and safety validations. You can now register compliance certificates."}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <DataTable
-          data={contracts}
+          data={eligibleItems}
           columns={columns}
           searchKey="title"
         />
@@ -77,3 +77,4 @@ export function ReadyToIssueSection({
     </Card>
   );
 }
+export default ReadyToIssueSection;

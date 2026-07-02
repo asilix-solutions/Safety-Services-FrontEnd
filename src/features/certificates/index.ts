@@ -1,1 +1,1 @@
-export { CertificateList } from "./certificate-list/certificate-list";
+export { CertificateList } from "./components/certificate-list";

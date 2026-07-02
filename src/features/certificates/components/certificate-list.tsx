@@ -3,16 +3,16 @@
 import React from "react";
 import { PageHeader } from "@/shared/components/page-header";
 import { CheckCircle2 } from "lucide-react";
-import { useCertificateList } from "./hooks/use-certificate-list";
-import { ReadyToIssueSection } from "./components/ready-to-issue-section";
-import { CertificatesTable } from "./components/certificates-table";
-import { CertificateActions } from "./components/certificate-actions";
+import { useCertificateList } from "../hooks/use-certificate-list";
+import { ReadyToIssueSection } from "./ready-to-issue-section";
+import { CertificatesTable } from "./certificates-table";
+import { CertificateActions } from "./certificate-actions";
 
 export function CertificateList() {
   const {
     user,
     certificates,
-    archivedContractsWithoutCertificates,
+    eligibleItems,
     alertMsg,
     setAlertMsg,
     statusFilter,
@@ -68,7 +68,7 @@ export function CertificateList() {
 
       {isAdmin && (
         <ReadyToIssueSection
-          contracts={archivedContractsWithoutCertificates}
+          eligibleItems={eligibleItems}
           onIssueCertificate={handleIssueCertificate}
         />
       )}

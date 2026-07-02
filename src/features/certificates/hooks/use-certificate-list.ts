@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/providers/AuthProvider";
 import { useTranslation, useNamespaceTranslations } from "@/providers/i18n-provider";
-import { ClientContract } from "@/domains/contracts/types";
-import { getContracts } from "@/domains/contracts/storage";
 import { ClientCertificate } from "@/domains/certificates/types";
 import { getCertificates } from "@/domains/certificates/storage";
-import { issueCertificate, revokeCertificate } from "@/domains/certificates/workflow";
+import { issueCertificateFromProject, revokeCertificate } from "@/domains/certificates/workflow";
+import { getProjects } from "@/domains/projects/storage";
+import { checkProjectCertificateEligibility, CertificateEligibility } from "@/domains/workflow-validation/certificate.validators";
 
 export function useCertificateList() {
   const { user } = useAuth();
@@ -13,7 +13,7 @@ export function useCertificateList() {
   useNamespaceTranslations(["common", "dashboard"]);
 
   const [certificates, setCertificates] = useState<ClientCertificate[]>([]);
-  const [archivedContractsWithoutCertificates, setArchivedContractsWithoutCertificates] = useState<ClientContract[]>([]);
+  const [eligibleItems, setEligibleItems] = useState<CertificateEligibility[]>([]);
   const [alertMsg, setAlertMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "expired" | "revoked">("all");
   const [selectedCertificate, setSelectedCertificate] = useState<ClientCertificate | null>(null);
@@ -31,12 +31,11 @@ export function useCertificateList() {
 
     const isAdmin = user.role === "Company Admin" || user.role === "Super Admin";
     if (isAdmin) {
-      const allContracts = getContracts();
-      const archived = allContracts.filter((c) => c.status === "archived");
-      const withoutCertificates = archived.filter(
-        (contract) => !allCertificates.some((cert) => cert.contractId === contract.id)
-      );
-      setArchivedContractsWithoutCertificates(withoutCertificates);
+      const allProjects = getProjects();
+      const eligible = allProjects
+        .map((proj) => checkProjectCertificateEligibility(proj, allCertificates))
+        .filter((item) => item.eligible);
+      setEligibleItems(eligible);
     }
   };
 
@@ -44,13 +43,19 @@ export function useCertificateList() {
     loadData();
   }, [user]);
 
-  const handleIssueCertificate = (contract: ClientContract) => {
+  const handleIssueCertificate = (item: CertificateEligibility) => {
     if (!user) return;
     try {
-      issueCertificate(contract, user.name);
+      const allProjects = getProjects();
+      const targetProject = allProjects.find((p) => p.id === item.sourceId);
+      if (!targetProject) {
+        throw new Error("Target project not found.");
+      }
+
+      issueCertificateFromProject(targetProject, user.name);
       setAlertMsg({
         type: "success",
-        text: `${t("certificates_issue_success")} "${contract.title}"`,
+        text: `${t("certificates_issue_success")} "${item.title}"`,
       });
       loadData();
     } catch (err: any) {
@@ -81,7 +86,7 @@ export function useCertificateList() {
   return {
     user,
     certificates,
-    archivedContractsWithoutCertificates,
+    eligibleItems,
     alertMsg,
     setAlertMsg,
     statusFilter,
