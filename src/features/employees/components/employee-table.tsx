@@ -55,7 +55,6 @@ export function EmployeeTable({ employees, canManage, onViewDetails, onToggleSta
           : t("common:employees.table.activate"),
         onClick: () => onToggleStatus(emp.id),
         icon: emp.status === "Active" ? UserMinus : UserCheck,
-        destructive: emp.status === "Active",
       });
     }
 
@@ -80,7 +79,6 @@ export function EmployeeTable({ employees, canManage, onViewDetails, onToggleSta
           : t("common:employees.table.activate"),
         onClick: () => onToggleStatus(emp.id),
         icon: emp.status === "Active" ? UserMinus : UserCheck,
-        destructive: emp.status === "Active",
       });
     }
 

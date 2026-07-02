@@ -42,12 +42,14 @@ export const ROLE_PERMISSIONS: Record<UserRole, RolePermissionKey[]> = {
     "licenses.view",
     "licenses.approve",
     "requests.view",
+    "customers.view",
   ],
   "Operations Officer": [
     "projects.view",
     "projects.create",
     "projects.edit",
     "reports.view",
+    "customers.view",
   ],
   "Sales Agent": [
     "customers.view",
