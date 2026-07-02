@@ -189,6 +189,7 @@
   "workflow_error_silos_incomplete": "يجب إكمال كافة الصوامع وأعمال التنفيذ الوقائية أولاً.",
   "workflow_error_project_blocked": "المشروع متوقف حالياً لوجود عوائق نشطة.",
   "workflow_error_inspection_unapproved": "لا يمكن إصدار شهادة السلامة بدون اعتماد الفحص النهائي.",
-  "workflow_error_missing_safety_score": "يجب تقييم درجة السلامة والامتثال قبل إغلاق المشروع."
+  "workflow_error_missing_safety_score": "يجب تقييم درجة السلامة والامتثال قبل إغلاق المشروع.",
+  "details.workspaceActive": "مساحة عمل المشروع نشطة"
 }
 

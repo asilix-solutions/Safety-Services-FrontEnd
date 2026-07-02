@@ -64,7 +64,7 @@ export function CustomerList() {
           title={t("common:customers.title")}
           description={t("common:customers.desc")}
         />
-        {permissions.canManage && (
+        {permissions.canManageCustomerProfile && (
           <AddCustomerDialog onAdd={handleAddCustomer} />
         )}
       </div>

@@ -317,6 +317,7 @@ export default function RequestDetailsPage() {
 
   const isConsultingEngineer = user?.role === USER_ROLES.CONSULTING_ENGINEER;
   const isClient = user?.role === USER_ROLES.CLIENT;
+  const isSalesAgent = user?.role === USER_ROLES.SALES_AGENT;
   const queueNorm = (request.assignedQueue || "").toUpperCase();
   const classNorm = (request.classification || "").toUpperCase().replace(/_/, "");
   const isFastOrMaintenance = queueNorm === "FAST_TRACK" || queueNorm === "MAINTENANCE" || classNorm.includes("FAST") || classNorm.includes("MAINTENANCE");
@@ -570,7 +571,7 @@ export default function RequestDetailsPage() {
                         variant="outline"
                         size="icon"
                         className="h-8 w-8"
-                        disabled={isReplaceAllowed(request.currentStage) === "READ_ONLY"}
+                        disabled={user.role !== USER_ROLES.CLIENT || isReplaceAllowed(request.currentStage) === "READ_ONLY"}
                         onClick={() => handleReplaceFile(idx)}
                         title="Replace"
                       >
@@ -588,95 +589,130 @@ export default function RequestDetailsPage() {
         <div className="space-y-4">
           {/* Linked Project Execution Snapshot */}
           {linkedProject && (
-            <Card className="border-indigo-500/25 bg-indigo-500/5 shadow-sm">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wide flex items-center gap-1.5">
-                  <Activity className="h-4 w-4" />
-                  {t("projects:details.linkedProject") || "Linked Project Execution"}
-                </CardTitle>
-                <CardDescription className="text-[10px] text-muted-foreground">
-                  {t("projects:details.opsDesc") || "Active field operations tracker"}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="text-xs space-y-3 pt-1">
-                <div className="space-y-1">
-                  <span className="text-[9px] text-muted-foreground block uppercase">{t("projects:details.id") || "Project ID"}</span>
-                  <span className="font-mono font-bold text-foreground">{linkedProject.id}</span>
-                </div>
-                
-                {isClient ? (
+            isSalesAgent ? (
+              <Card className="border-border bg-card shadow-sm">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-xs font-bold text-foreground uppercase tracking-wide flex items-center gap-1.5">
+                    <Activity className="h-4 w-4 text-indigo-600" />
+                    {t("dashboard:sales_project_title")}
+                  </CardTitle>
+                  <CardDescription className="text-[10px] text-muted-foreground">
+                    {t("dashboard:sales_project_desc")}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="text-xs space-y-3 pt-1">
+                  <div className="space-y-1">
+                    <span className="text-[9px] text-muted-foreground block uppercase">{t("projects:details.id") || "Project ID"}</span>
+                    <span className="font-mono font-bold text-foreground">{linkedProject.id}</span>
+                  </div>
                   <div className="space-y-1">
                     <span className="text-[9px] text-muted-foreground block uppercase">{t("projects:status") || "Status"}</span>
-                    <span className="font-semibold text-foreground capitalize">{t(`projects:status.${linkedProject.status}`) || linkedProject.status}</span>
+                    <span className="font-semibold text-foreground capitalize">
+                      {t(`projects:status.${linkedProject.status}`) || linkedProject.status}
+                    </span>
                   </div>
-                ) : (
-                  <>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="border-indigo-500/25 bg-indigo-500/5 shadow-sm">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wide flex items-center gap-1.5">
+                    <Activity className="h-4 w-4" />
+                    {t("projects:details.linkedProject") || "Linked Project Execution"}
+                  </CardTitle>
+                  <CardDescription className="text-[10px] text-muted-foreground">
+                    {t("projects:details.opsDesc") || "Active field operations tracker"}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="text-xs space-y-3 pt-1">
+                  <div className="space-y-1">
+                    <span className="text-[9px] text-muted-foreground block uppercase">{t("projects:details.id") || "Project ID"}</span>
+                    <span className="font-mono font-bold text-foreground">{linkedProject.id}</span>
+                  </div>
+                  
+                  {isClient ? (
                     <div className="space-y-1">
-                      <span className="text-[9px] text-muted-foreground block uppercase">{t("projects:phases.title") || "Execution Phase"}</span>
-                      <span className="font-bold text-indigo-600 dark:text-indigo-400 capitalize">
-                        {getProjectExecutionPhaseLabel(linkedProject.executionPhase, t) || t("projects:phases.created")}
-                      </span>
+                      <span className="text-[9px] text-muted-foreground block uppercase">{t("projects:status") || "Status"}</span>
+                      <span className="font-semibold text-foreground capitalize">{t(`projects:status.${linkedProject.status}`) || linkedProject.status}</span>
                     </div>
-                    <div className="space-y-1">
-                      <span className="text-[9px] text-muted-foreground block uppercase">{t("projects:details.type") || "Workspace Profile"}</span>
-                      <span className="font-semibold text-foreground capitalize">
-                        {(() => {
-                          const { getProjectTemplateMetadata } = require("@/domains/projects/storage");
-                          return getProjectTemplateMetadata(linkedProject.workspaceTemplate || "installation_full", t).projectProgramLabel;
-                        })()}
-                      </span>
-                    </div>
-                  </>
-                )}
+                  ) : (
+                    <>
+                      <div className="space-y-1">
+                        <span className="text-[9px] text-muted-foreground block uppercase">{t("projects:phases.title") || "Execution Phase"}</span>
+                        <span className="font-bold text-indigo-600 dark:text-indigo-400 capitalize">
+                          {getProjectExecutionPhaseLabel(linkedProject.executionPhase, t) || t("projects:phases.created")}
+                        </span>
+                      </div>
+                      <div className="space-y-1">
+                        <span className="text-[9px] text-muted-foreground block uppercase">{t("projects:details.type") || "Workspace Profile"}</span>
+                        <span className="font-semibold text-foreground capitalize">
+                          {(() => {
+                            const { getProjectTemplateMetadata } = require("@/domains/projects/storage");
+                            return getProjectTemplateMetadata(linkedProject.workspaceTemplate || "installation_full", t).projectProgramLabel;
+                          })()}
+                        </span>
+                      </div>
+                    </>
+                  )}
 
-                <div className="pt-2 border-t border-border">
-                  {(() => {
-                    if (user?.role === USER_ROLES.OPERATIONS_OFFICER) {
-                      return (
-                        <Link href={`/projects/${linkedProject.id}`}>
-                          <Button size="sm" className="w-full text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white gap-1.5 h-8">
-                            {t("requests:details.openWorkspace")}
-                          </Button>
-                        </Link>
-                      );
-                    } else if (user?.role === USER_ROLES.CONSULTING_ENGINEER) {
-                      const { getSiteVisitsByProjectId } = require("@/domains/site-visits/storage");
-                      const visits = getSiteVisitsByProjectId(linkedProject.id);
-                      const kickoffVisit = visits.find((v: any) => v.type === "kickoff");
-                      if (kickoffVisit) {
+                  <div className="pt-2 border-t border-border">
+                    {(() => {
+                      if (user?.role === USER_ROLES.OPERATIONS_OFFICER) {
                         return (
-                          <Link href={`/site-visits`}>
+                          <Link href={`/projects/${linkedProject.id}`}>
                             <Button size="sm" className="w-full text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white gap-1.5 h-8">
-                              {t("projects:tabs.viewSiteVisits") || "View Site Visits"}
+                              {t("requests:details.openWorkspace")}
+                            </Button>
+                          </Link>
+                        );
+                      } else if (user?.role === USER_ROLES.CONSULTING_ENGINEER) {
+                        const { getSiteVisitsByProjectId } = require("@/domains/site-visits/storage");
+                        const visits = getSiteVisitsByProjectId(linkedProject.id);
+                        const kickoffVisit = visits.find((v: any) => v.type === "kickoff");
+                        if (kickoffVisit) {
+                          return (
+                            <Link href={`/site-visits`}>
+                              <Button size="sm" className="w-full text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white gap-1.5 h-8">
+                                {t("projects:tabs.viewSiteVisits") || "View Site Visits"}
+                              </Button>
+                            </Link>
+                          );
+                        } else {
+                          return (
+                            <Button size="sm" disabled className="w-full text-xs font-bold bg-secondary text-muted-foreground gap-1.5 h-8">
+                              Awaiting Site Visit Assignment
+                            </Button>
+                          );
+                        }
+                      } else if (user?.role === USER_ROLES.CLIENT) {
+                        return (
+                          <Link href={`/projects/${linkedProject.id}`}>
+                            <Button size="sm" className="w-full text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white gap-1.5 h-8">
+                              {t("requests:details.viewProject") || "View Project Progress"}
                             </Button>
                           </Link>
                         );
                       } else {
+                        // Sales Agent, Super Admin, etc. (Read only / No direct link)
                         return (
                           <Button size="sm" disabled className="w-full text-xs font-bold bg-secondary text-muted-foreground gap-1.5 h-8">
-                            Awaiting Site Visit Assignment
+                            {t("projects:details.workspaceActive") || "Project Workspace Active"}
                           </Button>
                         );
                       }
-                    } else {
-                      // Client View / Read Only mode
-                      return (
-                        <Link href={`/projects/${linkedProject.id}`}>
-                          <Button size="sm" className="w-full text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white gap-1.5 h-8">
-                            {t("requests:details.viewProject") || "View Project Progress"}
-                          </Button>
-                        </Link>
-                      );
-                    }
-                  })()}
-                </div>
-              </CardContent>
-            </Card>
+                    })()}
+                  </div>
+                </CardContent>
+              </Card>
+            )
           )}
+
           {/* Workflow Stepper Timeline */}
           <Card className="border-border bg-card">
             <CardHeader>
-              <CardTitle className="text-base font-bold text-foreground">{t("requests:details.stageTimelineTitle")}</CardTitle>
+              <CardTitle className="text-base font-bold text-foreground">
+                {isSalesAgent ? t("dashboard:sales_timeline_title") : t("requests:details.stageTimelineTitle")}
+              </CardTitle>
               <CardDescription className="text-muted-foreground">{t("requests:details.stageTimelineDesc")}</CardDescription>
             </CardHeader>
             <CardContent>

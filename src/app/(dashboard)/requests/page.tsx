@@ -227,17 +227,23 @@ export default function RequestsPage() {
     },
   ];
 
+  const isSalesAgent = user.role === "Sales Agent";
+
   return (
     <div className="space-y-6">
       <PageHeader
-        title={t("dashboard:licensing_requests_queue")}
-        description={t("dashboard:verify_submitted_desc")}
+        title={isSalesAgent ? t("dashboard:sales_requests_title") : t("dashboard:licensing_requests_queue")}
+        description={isSalesAgent ? t("dashboard:sales_requests_subtitle") : t("dashboard:verify_submitted_desc")}
       />
 
       <Card className="border-border bg-card">
         <CardHeader>
-          <CardTitle className="text-base font-semibold">{t("dashboard:incoming_safety_certificates")}</CardTitle>
-          <CardDescription className="text-muted-foreground">{t("dashboard:saas_compliance_desc")}</CardDescription>
+          <CardTitle className="text-base font-semibold">
+            {isSalesAgent ? t("dashboard:sales_section_title") : t("dashboard:incoming_safety_certificates")}
+          </CardTitle>
+          <CardDescription className="text-muted-foreground">
+            {isSalesAgent ? t("dashboard:sales_section_desc") : t("dashboard:saas_compliance_desc")}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <DataTable

@@ -189,6 +189,7 @@
   "workflow_error_silos_incomplete": "All safety system installation silos must be completed first.",
   "workflow_error_project_blocked": "Project is currently blocked by active obstacles.",
   "workflow_error_inspection_unapproved": "Certificate cannot be issued without approved final inspection.",
-  "workflow_error_missing_safety_score": "Safety compliance score must be registered before completion."
+  "workflow_error_missing_safety_score": "Safety compliance score must be registered before completion.",
+  "details.workspaceActive": "Project Workspace Active"
 }
 

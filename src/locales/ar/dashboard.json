@@ -110,5 +110,12 @@
   "inspection_calendar": "تقويم الفحص",
   "june_schedule_desc": "جدول أعمال السلامة لشهر يونيو 2026",
   "assigned_inspector": "المفتش المخصص",
-  "notes_label": "ملاحظات"
+  "notes_label": "ملاحظات",
+  "sales_requests_title": "طلبات العملاء",
+  "sales_requests_subtitle": "عرض طلبات العملاء المقدمة وسجل المبيعات.",
+  "sales_section_title": "طلبات العملاء",
+  "sales_section_desc": "تصفح طلبات العملاء ومراقبة تقدمها الحالي.",
+  "sales_project_title": "معلومات المشروع",
+  "sales_project_desc": "تم ربط هذا الطلب بمشروع نشط.",
+  "sales_timeline_title": "تقدم الطلب"
 }

@@ -110,5 +110,12 @@
   "inspection_calendar": "Inspection Calendar",
   "june_schedule_desc": "June 2026 safety schedule",
   "assigned_inspector": "Assigned Inspector",
-  "notes_label": "Notes"
+  "notes_label": "Notes",
+  "sales_requests_title": "Customer Requests",
+  "sales_requests_subtitle": "View submitted customer requests and sales intake history.",
+  "sales_section_title": "Customer Requests",
+  "sales_section_desc": "Browse customer requests and monitor their current progress.",
+  "sales_project_title": "Project Information",
+  "sales_project_desc": "This request has been linked to an active project.",
+  "sales_timeline_title": "Request Progress"
 }
