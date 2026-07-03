@@ -117,5 +117,7 @@
   "sales_section_desc": "Browse customer requests and monitor their current progress.",
   "sales_project_title": "Project Information",
   "sales_project_desc": "This request has been linked to an active project.",
-  "sales_timeline_title": "Request Progress"
+  "sales_timeline_title": "Request Progress",
+  "nav_home": "Home",
+  "nav_my_requests": "My Requests"
 }

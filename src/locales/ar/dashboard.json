@@ -117,5 +117,7 @@
   "sales_section_desc": "تصفح طلبات العملاء ومراقبة تقدمها الحالي.",
   "sales_project_title": "معلومات المشروع",
   "sales_project_desc": "تم ربط هذا الطلب بمشروع نشط.",
-  "sales_timeline_title": "تقدم الطلب"
+  "sales_timeline_title": "تقدم الطلب",
+  "nav_home": "الرئيسية",
+  "nav_my_requests": "طلباتي"
 }

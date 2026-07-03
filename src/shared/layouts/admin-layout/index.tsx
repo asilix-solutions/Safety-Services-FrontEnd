@@ -42,6 +42,11 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
       "Contracts": "dashboard:nav_contracts",
       "Certificates": "dashboard:nav_certificates",
       "Invoices": "dashboard:nav_invoices",
+      "Blueprint Review": "dashboard:nav_blueprint_review",
+      "Quotations": "dashboard:nav_quotations",
+      "Site Visits": "dashboard:nav_site_visits",
+      "Home": "dashboard:nav_home",
+      "My Requests": "dashboard:nav_my_requests",
     };
     return map[label] || label;
   };
