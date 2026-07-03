@@ -71,7 +71,7 @@ export function BlueprintWorkspace({ jobNumber }: BlueprintWorkspaceProps) {
     : null;
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto px-1 sm:px-4 pb-12">
+    <div className="space-y-6 max-w-7xl mx-auto px-1 sm:px-4 pb-12">
       {/* ==========================================
           HEADER & CONTEXT AREA
           ========================================== */}
@@ -160,19 +160,12 @@ export function BlueprintWorkspace({ jobNumber }: BlueprintWorkspaceProps) {
       {/* ==========================================
           STEP 1: REQUEST CONTEXT
           ========================================== */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <RequestSummaryCard request={viewModel} />
-        </div>
-        <div>
-          <ServiceDetailsCard values={viewModel} titleClassName="text-sm font-bold text-foreground" />
-        </div>
-      </div>
+      <RequestSummaryCard request={viewModel} />
 
       {/* ==========================================
           STEP 2: TECHNICAL DOCUMENTS (INSPECT)
           ========================================== */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 border-t border-border pt-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           <BlueprintViewer request={viewModel} />
         </div>
@@ -184,7 +177,7 @@ export function BlueprintWorkspace({ jobNumber }: BlueprintWorkspaceProps) {
       {/* ==========================================
           STEP 3: ENGINEERING EVALUATION (EVALUATE & DOCUMENT)
           ========================================== */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 border-t border-border pt-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           <ClassificationMatrixCard request={viewModel} />
         </div>
@@ -200,7 +193,7 @@ export function BlueprintWorkspace({ jobNumber }: BlueprintWorkspaceProps) {
       {/* ==========================================
           STEP 4: ENGINEERING DECISION (DECIDE)
           ========================================== */}
-      <div className="flex justify-end border-t border-border pt-6">
+      <div className="flex justify-end">
         <ReviewDecisionActions
           onApprove={handleApprove}
           onReturn={() => setShowReturnDialog(true)}
@@ -231,7 +224,7 @@ export function BlueprintWorkspace({ jobNumber }: BlueprintWorkspaceProps) {
         </div>
 
         {/* Location reference details */}
-        <div>
+        <div className="space-y-6">
           <Card className="border-border bg-card h-full flex flex-col justify-between shadow-xs">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-bold text-foreground">
@@ -282,6 +275,11 @@ export function BlueprintWorkspace({ jobNumber }: BlueprintWorkspaceProps) {
             </CardContent>
           </Card>
         </div>
+      </div>
+
+      {/* Row 7: Collapsible details */}
+      <div className="border-t border-border pt-6">
+        <ServiceDetailsCard values={viewModel} titleClassName="text-sm font-bold text-foreground" />
       </div>
     </div>
   );
