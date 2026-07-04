@@ -202,7 +202,7 @@ export function getRequestStatusDisplayName(
     submitted: "common:status_Pending_Review",
     assigned: "common:status_In_Review",
     under_review: "common:status_In_Review",
-    quotation_created: "common:status_In_Review",
+    quotation_created: "requests:status_quotation_created",
     awaiting_approval: "common:status_Action_Required",
     awaiting_payment: "common:status_Awaiting_Payment",
     approved: "common:status_Approved",
@@ -219,5 +219,27 @@ export function getWorkflowStageDisplayName(
   t: (key: string) => string
 ): string {
   return t(`requests:stages.${stage}`) || stage.replace(/_/g, " ");
+}
+
+export function approveRequestForQuotation(
+  request: LicensingRequest,
+  actorName?: string
+): LicensingRequest {
+  const actor = actorName || "Consulting Engineer";
+  const now = new Date().toISOString();
+  
+  const newTimelineEvent = {
+    status: "quotation_created" as RequestStatus,
+    comment: "Approved for Quotation.",
+    date: now,
+  };
+
+  return {
+    ...request,
+    currentStage: "QUOTATION",
+    status: "quotation_created",
+    updatedAt: now,
+    timeline: [...(request.timeline || []), newTimelineEvent],
+  };
 }
 

@@ -20,7 +20,8 @@ import {
   getCanonicalRequestTypeDisplayName,
   getReviewPathDisplayName,
   getRequestStatusDisplayName,
-  getWorkflowStageDisplayName
+  getWorkflowStageDisplayName,
+  approveRequestForQuotation
 } from "@/domains/requests/workflow";
 
 // Import new storage domains and selectors
@@ -278,11 +279,9 @@ export default function RequestDetailsPage() {
   };
 
   const handleApproveForQuotation = () => {
-    const updatedRequest: LicensingRequest = { 
-      ...request, 
-      currentStage: "QUOTATION" as WorkflowStage,
-      updatedAt: new Date().toISOString()
-    };
+    if (!request) return;
+    const actor = user.name || user.role;
+    const updatedRequest = approveRequestForQuotation(request, actor);
     setRequest(updatedRequest);
     
     try {
@@ -497,7 +496,9 @@ export default function RequestDetailsPage() {
               <div className="py-2.5 grid grid-cols-3 gap-2">
                 <span className="text-muted-foreground">{t("requests:details.assignedDepartment") || "Assigned Department"}</span>
                 <span className="col-span-2 font-semibold text-foreground">
-                  {getQueueDisplayName(request.assignedQueue, t)}
+                  {request.currentStage === "QUOTATION" || request.currentStage === "QUOTATION_APPROVAL" || request.status === "quotation_created"
+                    ? (t("requests:queue.quotation") || "Quotation Queue")
+                    : getQueueDisplayName(request.assignedQueue, t)}
                 </span>
               </div>
               <div className="py-2.5 grid grid-cols-3 gap-2">

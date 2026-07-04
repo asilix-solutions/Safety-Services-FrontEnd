@@ -36,11 +36,19 @@ export function getMergedRequests(): LicensingRequest[] {
     mergedMap.set(r.jobNumber, r);
   });
 
-  const mergedList = Array.from(mergedMap.values()).map((r) => ({
-    ...r,
-    currentStage: r.currentStage || mapStatusToStage(r.status),
-    assignedQueue: r.assignedQueue || (r.classification === "high_hazard_review" ? "HIGH_HAZARD" : r.classification === "engineering_project" ? "ENGINEERING" : r.classification === "maintenance_strategy" ? "MAINTENANCE" : "FAST_TRACK")
-  }));
+  const mergedList = Array.from(mergedMap.values()).map((r) => {
+    const currentStage = r.currentStage || mapStatusToStage(r.status);
+    let status = r.status;
+    if ((currentStage === "QUOTATION" || currentStage === "QUOTATION_APPROVAL") && status === "submitted") {
+      status = "quotation_created";
+    }
+    return {
+      ...r,
+      status,
+      currentStage,
+      assignedQueue: r.assignedQueue || (r.classification === "high_hazard_review" ? "HIGH_HAZARD" : r.classification === "engineering_project" ? "ENGINEERING" : r.classification === "maintenance_strategy" ? "MAINTENANCE" : "FAST_TRACK")
+    };
+  });
 
   return mergedList.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 }
