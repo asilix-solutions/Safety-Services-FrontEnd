@@ -157,8 +157,10 @@ export default function QuotationsQueuePage() {
       header: t("requests:quotations.columns.assignedQueue"),
       accessorKey: "assignedQueue",
       render: (row) => (
-        <Badge variant={row.assignedQueue === "HIGH_HAZARD" ? "destructive" : "secondary"}>
-          {getQueueDisplayName(row.assignedQueue, t)}
+        <Badge variant={row.currentStage === "QUOTATION" || row.currentStage === "QUOTATION_APPROVAL" ? "default" : (row.assignedQueue === "HIGH_HAZARD" ? "destructive" : "secondary")}>
+          {row.currentStage === "QUOTATION" || row.currentStage === "QUOTATION_APPROVAL"
+            ? (t("requests:queue.quotation") || "Quotation Queue")
+            : getQueueDisplayName(row.assignedQueue, t)}
         </Badge>
       ),
     },

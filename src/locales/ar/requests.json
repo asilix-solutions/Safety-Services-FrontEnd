@@ -289,7 +289,7 @@
   "quotations.columns.quotationStatus": "حالة عرض السعر",
   "quotations.status.notStarted": "لم يبدأ",
   "quotations.status.draft": "مسودة",
-  "quotations.status.submitted": "مرسل للمراجعة والاعتماد",
+  "quotations.status.submitted": "بانتظار الموافقة",
   "quotations.actions.continueDraft": "متابعة المسودة",
   "quotations.actions.viewSubmission": "عرض الإرسال",
   "list.fields.area": "المساحة:",
