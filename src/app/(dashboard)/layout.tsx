@@ -42,7 +42,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const allowedPaths = navItems.map((item: any) => item.path);
     const defaultRoute = ROLE_DEFAULT_ROUTE[user.role] || "/";
 
-    let isAllowed = allowedPaths.some((path: string) => {
+    const isAllowed = allowedPaths.some((path: string) => {
       if (path === "/") {
         return pathname === "/" || pathname === "/overview";
       }

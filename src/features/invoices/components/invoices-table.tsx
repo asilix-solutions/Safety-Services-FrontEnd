@@ -147,7 +147,7 @@ export function InvoicesTable({
           {(["all", "paid", "unpaid"] as const).map((tab) => {
             const isActive = statusFilter === tab;
             const count = counts[tab];
-            let label = t(`invoices_status_${tab}`);
+            const label = t(`invoices_status_${tab}`);
             return (
               <button
                 key={tab}

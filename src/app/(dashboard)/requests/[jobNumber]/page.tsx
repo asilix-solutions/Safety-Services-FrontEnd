@@ -34,7 +34,8 @@ import { Quotation } from "@/domains/quotations/types";
 import { getQuotationByJobNumber } from "@/domains/quotations/storage";
 import { confirmMockPayment } from "@/domains/payments/workflow";
 import { Project } from "@/types/project";
-import { getProjectByJobNumber } from "@/domains/projects/storage";
+import { getProjectByJobNumber, getProjectTemplateMetadata } from "@/domains/projects/storage";
+import { getSiteVisitsByProjectId } from "@/domains/site-visits/storage";
 import { USER_ROLES } from "@/constants/roles";
 import { getProjectExecutionPhaseLabel } from "@/domains/projects/workflow";
 
@@ -648,7 +649,6 @@ export default function RequestDetailsPage() {
                         <span className="text-[9px] text-muted-foreground block uppercase">{t("projects:details.type") || "Workspace Profile"}</span>
                         <span className="font-semibold text-foreground capitalize">
                           {(() => {
-                            const { getProjectTemplateMetadata } = require("@/domains/projects/storage");
                             return getProjectTemplateMetadata(linkedProject.workspaceTemplate || "installation_full", t).projectProgramLabel;
                           })()}
                         </span>
@@ -667,7 +667,6 @@ export default function RequestDetailsPage() {
                           </Link>
                         );
                       } else if (user?.role === USER_ROLES.CONSULTING_ENGINEER) {
-                        const { getSiteVisitsByProjectId } = require("@/domains/site-visits/storage");
                         const visits = getSiteVisitsByProjectId(linkedProject.id);
                         const kickoffVisit = visits.find((v: any) => v.type === "kickoff");
                         if (kickoffVisit) {

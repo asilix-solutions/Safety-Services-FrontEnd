@@ -2,10 +2,17 @@
 
 import React from "react";
 import { ClientInvoice } from "@/domains/invoices/types";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/shared/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogBody,
+  DialogTitle,
+  DialogDescription,
+} from "@/shared/ui/dialog";
 import { Button } from "@/shared/ui/button";
 import { Badge } from "@/shared/ui/badge";
-import { CheckCircle2, X, AlertTriangle, CreditCard, Layers } from "lucide-react";
+import { CheckCircle2, AlertTriangle, CreditCard, Layers } from "lucide-react";
 import Link from "next/link";
 import { useTranslation } from "@/providers/i18n-provider";
 import { formatCurrency as localFormatCurrency } from "@/lib/formatters";
@@ -31,29 +38,19 @@ export function PaymentConfirmDialog({
   const { t, locale } = useTranslation();
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm">
-      <Card className="max-w-md w-full border-border bg-card shadow-2xl overflow-hidden relative">
-        <button
-          onClick={onCancel}
-          className="absolute right-4 top-4 text-muted-foreground hover:text-foreground cursor-pointer z-10"
-          disabled={isPaying}
-        >
-          <X className="h-4 w-4" />
-        </button>
-
+    <Dialog open onOpenChange={(open) => !open && !isPaying && onCancel()}>
+      <DialogContent hideClose={isPaying} onEscapeKeyDown={(e) => isPaying && e.preventDefault()}>
         {!isSuccess ? (
           <>
-            <CardHeader className="border-b border-border pb-4 pr-10">
-              <CardTitle className="text-sm font-bold flex items-center gap-2">
+            <DialogHeader>
+              <DialogTitle>
                 <CreditCard className="h-4 w-4 text-primary" />
                 {t("common:invoices_pay_confirm_title")}
-              </CardTitle>
-              <CardDescription className="text-xs">
-                {t("common:invoices_pay_confirm_desc")}
-              </CardDescription>
-            </CardHeader>
+              </DialogTitle>
+              <DialogDescription>{t("common:invoices_pay_confirm_desc")}</DialogDescription>
+            </DialogHeader>
 
-            <CardContent className="space-y-4 pt-4 text-xs">
+            <DialogBody>
               {/* Invoice Details */}
               <div className="space-y-2.5 bg-secondary/20 p-3 rounded-lg border border-border">
                 <div className="flex justify-between items-center">
@@ -128,43 +125,42 @@ export function PaymentConfirmDialog({
                   )}
                 </Button>
               </div>
-            </CardContent>
+            </DialogBody>
           </>
         ) : (
           <>
-            <CardHeader className="border-b border-border pb-4 pr-10">
-              <CardTitle className="text-sm font-bold flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
+            <DialogHeader>
+              <DialogTitle className="text-emerald-600 dark:text-emerald-400">
                 <CheckCircle2 className="h-4 w-4" />
                 {t("common:invoices_pay_success_title")}
-              </CardTitle>
-            </CardHeader>
+              </DialogTitle>
+            </DialogHeader>
 
-            <CardContent className="space-y-4 pt-4 text-xs">
+            <DialogBody>
               <p className="text-sm text-muted-foreground leading-relaxed">
                 {t("common:invoices_pay_success_desc")}
               </p>
 
               <div className="flex flex-col gap-2 pt-2">
-                <Link href={createdProjectId ? `/projects/${createdProjectId}` : "/projects"} className="w-full" onClick={onCancel}>
+                <Link
+                  href={createdProjectId ? `/projects/${createdProjectId}` : "/projects"}
+                  className="w-full"
+                  onClick={onCancel}
+                >
                   <Button size="sm" className="w-full h-9 text-xs gap-2">
                     <Layers className="h-3.5 w-3.5" />
                     {t("common:invoices_pay_success_go_projects")}
                   </Button>
                 </Link>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full h-9 text-xs"
-                  onClick={onCancel}
-                >
+                <Button variant="outline" size="sm" className="w-full h-9 text-xs" onClick={onCancel}>
                   {t("common:invoices_pay_success_go_invoices")}
                 </Button>
               </div>
-            </CardContent>
+            </DialogBody>
           </>
         )}
-      </Card>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 

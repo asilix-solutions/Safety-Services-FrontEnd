@@ -3,6 +3,7 @@
 import React from "react";
 import { PageHeader } from "@/shared/components/page-header";
 import { CheckCircle2, ShieldAlert } from "lucide-react";
+import { hasPermission } from "@/constants/permissions";
 import { useInvoiceList } from "./hooks/use-invoice-list";
 import { InvoiceTable } from "./components/invoice-table";
 import { InvoiceActions } from "./components/invoice-actions";
@@ -36,7 +37,7 @@ export function InvoiceList() {
 
   if (!user) return null;
 
-  const hasAccess = ["Super Admin", "Company Admin", "Client"].includes(user.role);
+  const hasAccess = hasPermission(user.role, "invoices.view");
   if (!hasAccess) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-4">

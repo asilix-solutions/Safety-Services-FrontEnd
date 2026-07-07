@@ -12,7 +12,7 @@ import { StatusBadge } from "@/shared/components/status-badge";
 import { USER_ROLES } from "@/constants/roles";
 import { ExecutionSummaryCard } from "../components/execution-summary-card";
 
-interface ExecutionTabProps {
+interface SystemsTabProps {
   project: Project;
   viewModel: ExecutionViewModel;
   user: { role: string };
@@ -39,7 +39,7 @@ interface ExecutionTabProps {
   t: any;
 }
 
-export function ExecutionTab({
+export function SystemsTab({
   project,
   viewModel,
   user,
@@ -64,7 +64,7 @@ export function ExecutionTab({
   handleCompleteSilo,
   handleCompleteExecution,
   t
-}: ExecutionTabProps) {
+}: SystemsTabProps) {
   return (
     <div className="space-y-6">
       {/* Template Render Logic for Silos/Maintenance/Checklist */}

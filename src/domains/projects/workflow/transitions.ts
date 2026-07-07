@@ -1,33 +1,3 @@
-import { Project, ProjectExecutionPhase } from "@/types/project";
-import { persistProject } from "./helpers/persist";
-
-export function transitionProjectPhase({
-  project,
-  phase,
-}: {
-  project: Project;
-  phase: ProjectExecutionPhase;
-}): Project {
-  const nowStr = new Date().toISOString();
-  
-  let newStatus = project.status;
-  if (phase === "ACTIVE_EXECUTION") {
-    newStatus = "active";
-  } else if (phase === "COMPLETED") {
-    newStatus = "completed";
-  }
-
-  const updatedProject: Project = {
-    ...project,
-    status: newStatus,
-    executionPhase: phase,
-    updatedAt: nowStr,
-  };
-
-  persistProject(updatedProject);
-  return updatedProject;
-}
-
 export function getProjectExecutionPhaseLabel(
   phase: string | undefined,
   t: (key: string) => string

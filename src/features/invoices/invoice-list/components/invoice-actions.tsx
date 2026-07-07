@@ -9,6 +9,7 @@ import { useTranslation } from "@/providers/i18n-provider";
 import { useAuth } from "@/providers/AuthProvider";
 import { USER_ROLES } from "@/constants/roles";
 import { getProjects } from "@/domains/projects/storage";
+import { getSiteVisitsByProjectId } from "@/domains/site-visits/storage";
 import { formatCurrency, formatDate, getStatusBadgeVariant, getStatusLabel } from "../helpers/helpers";
 
 interface InvoiceActionsProps {
@@ -222,7 +223,6 @@ export function InvoiceActions({
                   
                   if (user?.role === USER_ROLES.CONSULTING_ENGINEER) {
                     if (linkedProj) {
-                      const { getSiteVisitsByProjectId } = require("@/domains/site-visits/storage");
                       const visits = getSiteVisitsByProjectId(linkedProj.id);
                       const kickoffVisit = visits.find((v: any) => v.type === "kickoff");
                       if (kickoffVisit) {

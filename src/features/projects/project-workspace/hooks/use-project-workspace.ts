@@ -2,24 +2,24 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "@/providers/AuthProvider";
 import { useParams } from "next/navigation";
 import { useTranslation } from "@/providers/i18n-provider";
-import { Project, ProjectExecutionPhase, SiloExecutionData } from "@/types/project";
+import { Project, SiloExecutionData } from "@/types/project";
 import { getProjects } from "@/domains/projects/storage";
 import { LicensingRequest } from "@/domains/requests/types";
 import { getMergedRequests } from "@/domains/requests/storage";
 import { getContracts } from "@/domains/contracts/storage";
 import { getCertificateByProjectId } from "@/domains/certificates/storage";
-import { 
+import {
   startExecution,
   updateProjectSiloStatus,
-  transitionProjectPhase,
   completeProjectExecution,
   startExecutionSilo,
   completeExecutionSilo
 } from "@/domains/projects/workflow";
 import { createDefaultWorkspace } from "@/domains/projects/storage";
-import { prepareProjectWorkspaceViewModel, ProjectWorkspaceViewModel } from "../view-models/project-workspace.viewmodel";
+import { prepareProjectWorkspaceViewModel } from "../view-models/project-workspace.viewmodel";
 import { ClientContract } from "@/domains/contracts/types";
 import { ClientCertificate } from "@/domains/certificates/types";
+import { ProjectWorkspaceTab } from "@/constants/permissions";
 
 export function useProjectWorkspace() {
   const { user } = useAuth();
@@ -46,7 +46,7 @@ export function useProjectWorkspace() {
   const [readyForFinalInspection, setReadyForFinalInspection] = useState(false);
 
   // Tab and Document states
-  const [activeTab, setActiveTab] = useState<"overview" | "execution" | "obstacles" | "documents">("overview");
+  const [activeTab, setActiveTab] = useState<ProjectWorkspaceTab>("overview");
   const [contract, setContract] = useState<ClientContract | null>(null);
   const [certificate, setCertificate] = useState<ClientCertificate | null>(null);
 
@@ -205,17 +205,6 @@ export function useProjectWorkspace() {
     }
   };
 
-  const handlePhaseTransition = (phase: ProjectExecutionPhase) => {
-    if (!project) return;
-    try {
-      const updated = transitionProjectPhase({ project, phase });
-      setProject(updated);
-      loadData();
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
   const startEditingSilo = (silo: SiloExecutionData) => {
     setEditingSilo(silo.id);
     setSiloStatus(silo.status);
@@ -243,8 +232,8 @@ export function useProjectWorkspace() {
     }
   };
 
-  const viewModel = project 
-    ? prepareProjectWorkspaceViewModel(project, request, contract, certificate, user?.role || "")
+  const viewModel = project
+    ? prepareProjectWorkspaceViewModel(project, request, contract, certificate, user?.role)
     : null;
 
   return {
@@ -283,7 +272,6 @@ export function useProjectWorkspace() {
     handleStartSilo,
     handleCompleteSilo,
     handleCompleteExecution,
-    handlePhaseTransition,
     startEditingSilo,
     handleSaveSilo,
     viewModel,

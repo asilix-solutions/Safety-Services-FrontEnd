@@ -2,6 +2,8 @@ import { Project, ProjectExecutionPhase, SiloExecutionData, ProjectTask } from "
 import { LicensingRequest } from "@/domains/requests/types";
 import { ClientContract } from "@/domains/contracts/types";
 import { ClientCertificate } from "@/domains/certificates/types";
+import { UserRole } from "@/types/role";
+import { ProjectWorkspaceTab, getVisibleProjectWorkspaceTabs, canEditProjectWorkspace } from "@/constants/permissions";
 import { getProjectHealth } from "../helpers/health";
 import { calculateExecutionTotals, getCurrentPhaseIndex } from "../helpers/execution";
 import { buildProjectTimeline, TimelineItem } from "../helpers/timeline";
@@ -32,7 +34,7 @@ export interface ProjectWorkspaceViewModel {
   execution: ExecutionViewModel;
   documents: ResolvedDocuments;
   obstacles: ObstaclesViewModel;
-  roles: { isClient: boolean; isOperationalRole: boolean };
+  access: { visibleTabs: ProjectWorkspaceTab[]; canEdit: boolean };
 }
 
 export function prepareProjectWorkspaceViewModel(
@@ -40,11 +42,11 @@ export function prepareProjectWorkspaceViewModel(
   request: LicensingRequest | null,
   contract: ClientContract | null,
   certificate: ClientCertificate | null,
-  userRole: string
+  userRole: UserRole | undefined
 ): ProjectWorkspaceViewModel {
-  const isClient = userRole === "Client" || userRole === "Client Admin";
-  const isOperationalRole = !isClient && (userRole === "Operations Officer" || userRole === "Consulting Engineer" || userRole === "Super Admin");
-  
+  const visibleTabs = getVisibleProjectWorkspaceTabs(userRole);
+  const canEdit = canEditProjectWorkspace(userRole);
+
   const silos = project.workspace?.execution?.silos || [];
   const totals = calculateExecutionTotals(silos);
   const health = getProjectHealth(project, silos);
@@ -84,9 +86,9 @@ export function prepareProjectWorkspaceViewModel(
       standard,
       blockedSilos
     },
-    roles: {
-      isClient,
-      isOperationalRole
+    access: {
+      visibleTabs,
+      canEdit
     }
   };
 }

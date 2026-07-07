@@ -14,7 +14,7 @@ import { Checkbox } from "@/shared/ui/checkbox";
 import { Label } from "@/shared/ui/label";
 import { Quotation, QuotationItem, QuotationStatus } from "@/domains/quotations/types";
 import { getMergedRequests } from "@/domains/requests/storage";
-import { getQuotations, persistQuotation, updateQuotationItems, createQuotationDraft, submitQuotationForApproval } from "@/domains/quotations/workflow";
+import { getQuotations, persistQuotation, updateQuotationItems, createQuotationDraft, submitQuotationForApproval, getQuotationSuggestedItems } from "@/domains/quotations/workflow";
 import { Plus, Trash2, ArrowLeft, Save, Send, X } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -112,14 +112,11 @@ export default function QuotationBuilderPage() {
   };
 
   // Resolve context-aware suggestions
-  const suggestedItems = typeof window !== "undefined" ? (() => {
-    const { getQuotationSuggestedItems } = require("@/domains/quotations/workflow");
-    return getQuotationSuggestedItems({
-      requestType: request.requestType,
-      classification: request.classification,
-      assignedQueue: request.assignedQueue || undefined,
-    }, t);
-  })() : [];
+  const suggestedItems = typeof window !== "undefined" ? getQuotationSuggestedItems({
+    requestType: request.requestType,
+    classification: request.classification,
+    assignedQueue: request.assignedQueue || undefined,
+  }, t) : [];
 
 
   // Validation

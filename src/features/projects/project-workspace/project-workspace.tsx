@@ -6,6 +6,8 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { getProjectTemplateMetadata } from "@/domains/projects/storage";
 import { useProjectWorkspace } from "./hooks/use-project-workspace";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/shared/ui/tabs";
+import { ProjectWorkspaceTab } from "@/constants/permissions";
 
 // Layout Imports
 import { WorkspaceLayout } from "./layouts/workspace-layout";
@@ -14,9 +16,17 @@ import { WorkspaceContent } from "./layouts/workspace-content";
 
 // Tab Imports
 import { OverviewTab } from "./tabs/overview-tab";
-import { ExecutionTab } from "./tabs/execution-tab";
-import { DocumentsTab } from "./tabs/documents-tab";
+import { TimelineTab } from "./tabs/timeline-tab";
+import { SystemsTab } from "./tabs/systems-tab";
+import { ProcurementTab } from "./tabs/procurement-tab";
+import { LaborTab } from "./tabs/labor-tab";
+import { SiteVisitsTab } from "./tabs/site-visits-tab";
 import { ObstaclesTab } from "./tabs/obstacles-tab";
+import { AttachmentsTab } from "./tabs/attachments-tab";
+import { PhotosTab } from "./tabs/photos-tab";
+import { InspectionTab } from "./tabs/inspection-tab";
+import { CompletionTab } from "./tabs/completion-tab";
+import { PROJECT_TABS } from "./constants/project-tabs";
 
 export default function ProjectWorkspace() {
   const {
@@ -26,8 +36,6 @@ export default function ProjectWorkspace() {
     setProject,
     request,
     setRequest,
-    notes,
-    setNotes,
     editingSilo,
     setEditingSilo,
     siloStatus,
@@ -50,7 +58,6 @@ export default function ProjectWorkspace() {
     handleStartSilo,
     handleCompleteSilo,
     handleCompleteExecution,
-    handlePhaseTransition,
     startEditingSilo,
     handleSaveSilo,
     viewModel,
@@ -65,7 +72,7 @@ export default function ProjectWorkspace() {
         <p>Project with reference {projectId} not found.</p>
         <Link href="/projects">
           <Button variant="outline" size="sm">
-            <ArrowLeft className="h-4 w-4 mr-2 rtl:ml-2 rtl:mr-0" />
+            <ArrowLeft className="h-4 w-4 me-2" />
             {t("projects:details.back")}
           </Button>
         </Link>
@@ -73,8 +80,9 @@ export default function ProjectWorkspace() {
     );
   }
 
-  const { isClient, isOperationalRole } = viewModel.roles;
+  const workspaceUser = { role: user.role, name: user.name || "" };
   const projectProgramLabel = getProjectTemplateMetadata(project.workspaceTemplate || "installation_full", t).projectProgramLabel;
+  const visibleTabs = PROJECT_TABS.filter((tab) => viewModel.access.visibleTabs.includes(tab.id));
 
   return (
     <WorkspaceLayout>
@@ -89,126 +97,110 @@ export default function ProjectWorkspace() {
       />
 
       <WorkspaceContent>
-        {/* CLIENT VIEW SPLIT */}
-        {isClient && (
-          <OverviewTab
-            project={project}
-            setProject={setProject}
-            request={request}
-            setRequest={setRequest}
-            viewModel={viewModel.overview}
-            user={{ role: user.role, name: user.name || "" }}
-            isProcessing={isProcessing}
-            notes={notes}
-            setNotes={setNotes}
-            handleStartExecution={handleStartExecution}
-            handlePhaseTransition={handlePhaseTransition}
-            loadData={loadData}
-            t={t}
-          />
-        )}
+        <Tabs
+          value={activeTab}
+          onValueChange={(value) => setActiveTab(value as ProjectWorkspaceTab)}
+        >
+          <TabsList>
+            {visibleTabs.map((tab) => (
+              <TabsTrigger key={tab.id} value={tab.id}>
+                {t(tab.labelKey)}
+              </TabsTrigger>
+            ))}
+          </TabsList>
 
-        {/* OPERATIONS WORKSPACE SPLIT */}
-        {isOperationalRole && (
-          <div className="space-y-6">
-            {/* Tab Selector Buttons */}
-            <div className="flex flex-wrap gap-2 border-b border-border pb-2">
-              <Button
-                variant={activeTab === "overview" ? "default" : "outline"}
-                onClick={() => setActiveTab("overview")}
-                className="text-xs h-8 font-bold"
-              >
-                {t("projects:tabs.overview")}
-              </Button>
-              <Button
-                variant={activeTab === "execution" ? "default" : "outline"}
-                onClick={() => setActiveTab("execution")}
-                className="text-xs h-8 font-bold"
-              >
-                {t("projects:tabs.execution")}
-              </Button>
-              <Button
-                variant={activeTab === "documents" ? "default" : "outline"}
-                onClick={() => setActiveTab("documents")}
-                className="text-xs h-8 font-bold"
-              >
-                {t("projects:tabs.documents")}
-              </Button>
-              <Button
-                variant={activeTab === "obstacles" ? "default" : "outline"}
-                onClick={() => setActiveTab("obstacles")}
-                className="text-xs h-8 font-bold"
-              >
-                {t("projects:tabs.obstacles")}
-              </Button>
-            </div>
+          <TabsContent value="overview">
+            <OverviewTab
+              project={project}
+              request={request}
+              viewModel={viewModel.overview}
+              user={workspaceUser}
+              isProcessing={isProcessing}
+              handleStartExecution={handleStartExecution}
+              t={t}
+            />
+          </TabsContent>
 
-            {/* TAB 1: OVERVIEW */}
-            {activeTab === "overview" && (
-              <OverviewTab
-                project={project}
-                setProject={setProject}
-                request={request}
-                setRequest={setRequest}
-                viewModel={viewModel.overview}
-                user={{ role: user.role, name: user.name || "" }}
-                isProcessing={isProcessing}
-                notes={notes}
-                setNotes={setNotes}
-                handleStartExecution={handleStartExecution}
-                handlePhaseTransition={handlePhaseTransition}
-                loadData={loadData}
-                t={t}
-              />
-            )}
+          <TabsContent value="timeline">
+            <TimelineTab timeline={viewModel.overview.timeline} t={t} />
+          </TabsContent>
 
-            {/* TAB 2: EXECUTION */}
-            {activeTab === "execution" && (
-              <ExecutionTab
-                project={project}
-                viewModel={viewModel.execution}
-                user={{ role: user.role }}
-                isProcessing={isProcessing}
-                editingSilo={editingSilo}
-                setEditingSilo={setEditingSilo}
-                siloStatus={siloStatus}
-                setSiloStatus={setSiloStatus}
-                siloLabor={siloLabor}
-                setSiloLabor={setSiloLabor}
-                siloMaterials={siloMaterials}
-                setSiloMaterials={setSiloMaterials}
-                siloCost={siloCost}
-                setSiloCost={setSiloCost}
-                completionNotes={completionNotes}
-                setCompletionNotes={setCompletionNotes}
-                readyForFinalInspection={readyForFinalInspection}
-                setReadyForFinalInspection={setReadyForFinalInspection}
-                startEditingSilo={startEditingSilo}
-                handleSaveSilo={handleSaveSilo}
-                handleStartSilo={handleStartSilo}
-                handleCompleteSilo={handleCompleteSilo}
-                handleCompleteExecution={handleCompleteExecution}
-                t={t}
-              />
-            )}
+          <TabsContent value="systems">
+            <SystemsTab
+              project={project}
+              viewModel={viewModel.execution}
+              user={workspaceUser}
+              isProcessing={isProcessing}
+              editingSilo={editingSilo}
+              setEditingSilo={setEditingSilo}
+              siloStatus={siloStatus}
+              setSiloStatus={setSiloStatus}
+              siloLabor={siloLabor}
+              setSiloLabor={setSiloLabor}
+              siloMaterials={siloMaterials}
+              setSiloMaterials={setSiloMaterials}
+              siloCost={siloCost}
+              setSiloCost={setSiloCost}
+              completionNotes={completionNotes}
+              setCompletionNotes={setCompletionNotes}
+              readyForFinalInspection={readyForFinalInspection}
+              setReadyForFinalInspection={setReadyForFinalInspection}
+              startEditingSilo={startEditingSilo}
+              handleSaveSilo={handleSaveSilo}
+              handleStartSilo={handleStartSilo}
+              handleCompleteSilo={handleCompleteSilo}
+              handleCompleteExecution={handleCompleteExecution}
+              t={t}
+            />
+          </TabsContent>
 
-            {/* TAB 3: DOCUMENTS */}
-            {activeTab === "documents" && (
-              <DocumentsTab
-                viewModel={viewModel.documents}
-                t={t}
-              />
-            )}
+          <TabsContent value="procurement">
+            <ProcurementTab t={t} />
+          </TabsContent>
 
-            {/* TAB 4: OBSTACLES */}
-            {activeTab === "obstacles" && (
-              <ObstaclesTab
-                viewModel={viewModel.obstacles}
-                t={t}
-              />
-            )}
-          </div>
-        )}
+          <TabsContent value="labor">
+            <LaborTab t={t} />
+          </TabsContent>
+
+          <TabsContent value="siteVisits">
+            <SiteVisitsTab
+              project={project}
+              setProject={setProject}
+              user={workspaceUser}
+              isProcessing={isProcessing}
+              loadData={loadData}
+              t={t}
+            />
+          </TabsContent>
+
+          <TabsContent value="obstacles">
+            <ObstaclesTab viewModel={viewModel.obstacles} t={t} />
+          </TabsContent>
+
+          <TabsContent value="attachments">
+            <AttachmentsTab viewModel={viewModel.documents} t={t} />
+          </TabsContent>
+
+          <TabsContent value="photos">
+            <PhotosTab t={t} />
+          </TabsContent>
+
+          <TabsContent value="inspection">
+            <InspectionTab
+              project={project}
+              request={request}
+              setProject={setProject}
+              setRequest={setRequest}
+              user={workspaceUser}
+              loadData={loadData}
+              t={t}
+            />
+          </TabsContent>
+
+          <TabsContent value="completion">
+            <CompletionTab project={project} t={t} />
+          </TabsContent>
+        </Tabs>
       </WorkspaceContent>
     </WorkspaceLayout>
   );

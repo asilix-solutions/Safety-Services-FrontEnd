@@ -8,12 +8,12 @@ import { RequestDocumentsCard } from "../components/request-documents-card";
 import { ContractsCard } from "../components/contracts-card";
 import { CertificatesCard } from "../components/certificates-card";
 
-interface DocumentsTabProps {
+interface AttachmentsTabProps {
   viewModel: ResolvedDocuments;
   t: any;
 }
 
-export function DocumentsTab({ viewModel, t }: DocumentsTabProps) {
+export function AttachmentsTab({ viewModel, t }: AttachmentsTabProps) {
   const hasDocs = viewModel.requestDocuments.length > 0 || viewModel.contract || viewModel.certificate;
 
   return (

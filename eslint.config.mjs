@@ -20,6 +20,13 @@ const eslintConfig = [
       "next-env.d.ts",
     ],
   },
+  {
+    // RECONCILIATION.md D4, step 2: warn (not error) so new `any` usage is visible
+    // in review without failing the build while the existing backlog is triaged.
+    rules: {
+      "@typescript-eslint/no-explicit-any": "warn",
+    },
+  },
 ];
 
 export default eslintConfig;
