@@ -1,17 +1,10 @@
 import React from "react";
-import { ShoppingCart } from "lucide-react";
-import { EmptyState } from "@/shared/components/empty-state";
+import { ProcurementPanel } from "../procurement";
 
 interface ProcurementTabProps {
-  t: (key: string) => string;
+  projectId: string;
 }
 
-export function ProcurementTab({ t }: ProcurementTabProps) {
-  return (
-    <EmptyState
-      icon={<ShoppingCart />}
-      title={t("projects:procurement.title")}
-      description={t("projects:procurement.empty")}
-    />
-  );
+export function ProcurementTab({ projectId }: ProcurementTabProps) {
+  return <ProcurementPanel projectId={projectId} />;
 }

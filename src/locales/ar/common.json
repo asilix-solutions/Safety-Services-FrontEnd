@@ -549,7 +549,14 @@
   "customers.filter.industry": "كل القطاعات",
   "customers.filter.city": "كل المدن",
   "customers.status.Active": "نشط",
-  "customers.status.Inactive": "غير نشط"
+  "customers.status.Inactive": "غير نشط",
+  "camera.openCamera": "فتح الكاميرا",
+  "camera.chooseFile": "اختيار ملف",
+  "camera.capture": "التقاط الصورة",
+  "camera.cancel": "إلغاء",
+  "camera.retake": "إعادة الالتقاط",
+  "camera.cameraUnavailable": "تعذر الوصول إلى الكاميرا. يرجى استخدام اختيار ملف بدلاً من ذلك.",
+  "camera.previewAlt": "الصورة الملتقطة"
 }
 
 

@@ -547,6 +547,13 @@
   "customers.filter.industry": "All Industries",
   "customers.filter.city": "All Cities",
   "customers.status.Active": "Active",
-  "customers.status.Inactive": "Inactive"
+  "customers.status.Inactive": "Inactive",
+  "camera.openCamera": "Open Camera",
+  "camera.chooseFile": "Choose File",
+  "camera.capture": "Capture Photo",
+  "camera.cancel": "Cancel",
+  "camera.retake": "Retake Photo",
+  "camera.cameraUnavailable": "Camera access is unavailable. Please use Choose File instead.",
+  "camera.previewAlt": "Captured photo"
 }
 

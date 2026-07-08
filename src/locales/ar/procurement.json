@@ -1,0 +1,49 @@
+{
+  "title": "سجل المشتريات وضريبة القيمة المضافة",
+  "empty": "لا توجد سجلات مشتريات بعد. أضف عملية شراء للبدء.",
+
+  "form.title": "تسجيل مشتريات / فاتورة ميدانية",
+  "form.supplierName": "اسم المورد",
+  "form.supplierNamePlaceholder": "مثال: شركة السلامة لمعدات الإطفاء",
+  "form.silo": "النظام الفرعي",
+  "form.invoiceType": "نوع الفاتورة",
+  "form.preTaxValue": "القيمة قبل الضريبة (ريال)",
+  "form.preTaxRequired": "أدخل قيمة فاتورة صحيحة أكبر من صفر.",
+  "form.vatAmount": "ضريبة القيمة المضافة (15%، معزولة)",
+  "form.vatIsolatedTag": "استرداد زاتكا",
+  "form.totalValue": "القيمة الإجمالية",
+  "form.receiptPhoto": "صورة فاتورة الشراء الأصلية",
+  "form.receiptRequired": "يجب التقاط صورة حية لإيصال الفاتورة الورقية قبل الحفظ.",
+  "form.save": "حفظ سجل المشتريات",
+  "form.saveFailed": "فشل حفظ سجل المشتريات. يرجى المحاولة مرة أخرى.",
+
+  "silo.alarm": "الإنذار",
+  "silo.suppression": "الإطفاء",
+  "silo.ventilation": "التهوية",
+
+  "invoiceType.taxable": "خاضع للضريبة",
+  "invoiceType.non_taxable": "غير خاضع للضريبة",
+
+  "receipt.openCamera": "فتح الكاميرا",
+  "receipt.chooseFile": "اختيار ملف",
+  "receipt.capture": "التقاط الصورة",
+  "receipt.cancel": "إلغاء",
+  "receipt.retake": "إعادة الالتقاط",
+  "receipt.cameraUnavailable": "تعذر الوصول إلى الكاميرا. يرجى استخدام اختيار ملف بدلاً من ذلك.",
+  "receipt.previewAlt": "صورة الإيصال الملتقطة",
+
+  "list.title": "سجلات المشتريات",
+  "list.supplier": "المورد",
+  "list.silo": "النظام الفرعي",
+  "list.invoiceType": "النوع",
+  "list.preTax": "قبل الضريبة",
+  "list.vat": "ضريبة القيمة المضافة",
+  "list.total": "الإجمالي",
+  "list.date": "التاريخ",
+  "list.receipt": "الإيصال",
+
+  "summary.count": "السجلات",
+  "summary.totalTaxable": "القيمة الخاضعة للضريبة",
+  "summary.totalVat": "إجمالي ضريبة القيمة المضافة",
+  "summary.totalSpend": "إجمالي الإنفاق"
+}

@@ -1,0 +1,49 @@
+{
+  "title": "Procurement & VAT Ledger",
+  "empty": "No procurement records logged yet. Add a purchase to get started.",
+
+  "form.title": "Record Procurement / Field Invoice",
+  "form.supplierName": "Supplier Name",
+  "form.supplierNamePlaceholder": "e.g. Al-Salamah Fire Equipment Co.",
+  "form.silo": "Subsystem",
+  "form.invoiceType": "Invoice Type",
+  "form.preTaxValue": "Pre-Tax Value (SAR)",
+  "form.preTaxRequired": "Enter a valid invoice value greater than zero.",
+  "form.vatAmount": "VAT (15%, isolated)",
+  "form.vatIsolatedTag": "ZATCA Refund",
+  "form.totalValue": "Total Value",
+  "form.receiptPhoto": "Original Invoice Receipt Photo",
+  "form.receiptRequired": "A live photo of the paper receipt is required before saving.",
+  "form.save": "Save Procurement Record",
+  "form.saveFailed": "Failed to save the procurement record. Please try again.",
+
+  "silo.alarm": "Alarm",
+  "silo.suppression": "Suppression",
+  "silo.ventilation": "Ventilation",
+
+  "invoiceType.taxable": "Taxable",
+  "invoiceType.non_taxable": "Non-Taxable",
+
+  "receipt.openCamera": "Open Camera",
+  "receipt.chooseFile": "Choose File",
+  "receipt.capture": "Capture Photo",
+  "receipt.cancel": "Cancel",
+  "receipt.retake": "Retake Photo",
+  "receipt.cameraUnavailable": "Camera access is unavailable. Please use Choose File instead.",
+  "receipt.previewAlt": "Captured receipt photo",
+
+  "list.title": "Procurement Records",
+  "list.supplier": "Supplier",
+  "list.silo": "Subsystem",
+  "list.invoiceType": "Type",
+  "list.preTax": "Pre-Tax",
+  "list.vat": "VAT",
+  "list.total": "Total",
+  "list.date": "Date",
+  "list.receipt": "Receipt",
+
+  "summary.count": "Records",
+  "summary.totalTaxable": "Taxable Value",
+  "summary.totalVat": "Total VAT",
+  "summary.totalSpend": "Total Spend"
+}

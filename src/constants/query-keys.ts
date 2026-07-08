@@ -12,6 +12,12 @@ export const QUERY_KEYS = {
     DETAIL: (id: string) => ["projects", id] as const,
     TASKS: (id: string) => ["projects", id, "tasks"] as const,
   },
+  PROCUREMENT: {
+    LIST: (projectId: string) => ["procurement", projectId] as const,
+  },
+  PHOTOS: {
+    LIST: (projectId: string) => ["photos", projectId] as const,
+  },
   CUSTOMERS: {
     LIST: ["customers"] as const,
     DETAIL: (id: string) => ["customers", id] as const,
