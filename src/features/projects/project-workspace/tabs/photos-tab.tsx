@@ -1,17 +1,10 @@
 import React from "react";
-import { Camera } from "lucide-react";
-import { EmptyState } from "@/shared/components/empty-state";
+import { PhotosPanel } from "../photos";
 
 interface PhotosTabProps {
-  t: (key: string) => string;
+  projectId: string;
 }
 
-export function PhotosTab({ t }: PhotosTabProps) {
-  return (
-    <EmptyState
-      icon={<Camera />}
-      title={t("projects:photos.title")}
-      description={t("projects:photos.empty")}
-    />
-  );
+export function PhotosTab({ projectId }: PhotosTabProps) {
+  return <PhotosPanel projectId={projectId} />;
 }

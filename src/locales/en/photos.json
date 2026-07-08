@@ -1,0 +1,21 @@
+{
+  "title": "Installation Photos",
+  "empty": "No installation photos captured yet. Capture a photo to get started.",
+
+  "form.title": "Capture Installation Photo",
+  "form.silo": "Subsystem",
+  "form.caption": "Caption (optional)",
+  "form.captionPlaceholder": "e.g. Alarm panel mounted in main corridor",
+  "form.photo": "Installation Photo",
+  "form.imageRequired": "A live photo of the installation is required before saving.",
+  "form.save": "Save Photo",
+  "form.saveFailed": "Failed to save the installation photo. Please try again.",
+
+  "silo.alarm": "Alarm",
+  "silo.suppression": "Suppression",
+  "silo.ventilation": "Ventilation",
+
+  "grid.title": "Installation Photo Gallery",
+
+  "summary.total": "Total Photos"
+}
