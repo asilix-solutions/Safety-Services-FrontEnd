@@ -8,6 +8,10 @@ import { LicensingRequest } from "@/domains/requests/types";
 import { getMergedRequests } from "@/domains/requests/storage";
 import { getContracts } from "@/domains/contracts/storage";
 import { getCertificateByProjectId } from "@/domains/certificates/storage";
+import { getQuotationByJobNumber } from "@/domains/quotations/storage";
+import { getInvoiceByJobNumber } from "@/domains/invoices/storage";
+import { Quotation } from "@/domains/quotations/types";
+import { ClientInvoice } from "@/domains/invoices/types";
 import {
   startExecution,
   updateProjectSiloStatus,
@@ -24,7 +28,7 @@ import { ProjectWorkspaceTab } from "@/constants/permissions";
 export function useProjectWorkspace() {
   const { user } = useAuth();
   const params = useParams();
-  const { t } = useTranslation();
+  const { t, dir } = useTranslation();
 
   const [project, setProject] = useState<Project | null>(null);
   const [request, setRequest] = useState<LicensingRequest | null>(null);
@@ -49,6 +53,8 @@ export function useProjectWorkspace() {
   const [activeTab, setActiveTab] = useState<ProjectWorkspaceTab>("overview");
   const [contract, setContract] = useState<ClientContract | null>(null);
   const [certificate, setCertificate] = useState<ClientCertificate | null>(null);
+  const [quotation, setQuotation] = useState<Quotation | null>(null);
+  const [invoice, setInvoice] = useState<ClientInvoice | null>(null);
 
 
   const [isProcessing, setIsProcessing] = useState(false);
@@ -107,6 +113,20 @@ export function useProjectWorkspace() {
           setCertificate(linkedCert || null);
         } catch (e) {
           console.error("Failed to load certificate:", e);
+        }
+
+        if (foundProject.jobNumber) {
+          try {
+            setQuotation(getQuotationByJobNumber(foundProject.jobNumber));
+          } catch (e) {
+            console.error("Failed to load quotation:", e);
+          }
+
+          try {
+            setInvoice(getInvoiceByJobNumber(foundProject.jobNumber));
+          } catch (e) {
+            console.error("Failed to load invoice:", e);
+          }
         }
       }
     }
@@ -233,7 +253,7 @@ export function useProjectWorkspace() {
   };
 
   const viewModel = project
-    ? prepareProjectWorkspaceViewModel(project, request, contract, certificate, user?.role)
+    ? prepareProjectWorkspaceViewModel(project, request, contract, certificate, user?.role, quotation, invoice)
     : null;
 
   return {
@@ -275,6 +295,7 @@ export function useProjectWorkspace() {
     startEditingSilo,
     handleSaveSilo,
     viewModel,
-    t
+    t,
+    dir
   };
 }

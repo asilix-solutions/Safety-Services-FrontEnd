@@ -30,7 +30,7 @@ export function SiteVisitsTab({ project, setProject, user, isProcessing, loadDat
                 {t("projects:kickoff.title") || "Schedule Kickoff Site Visit"}
               </CardTitle>
               <CardDescription className="text-xs text-muted-foreground">
-                Assign a consulting engineer inspector and schedule kickoff.
+                {t("projects:kickoff.assignDesc")}
               </CardDescription>
             </CardHeader>
             <CardContent className="pt-4">
@@ -51,7 +51,7 @@ export function SiteVisitsTab({ project, setProject, user, isProcessing, loadDat
                       scheduledDate: new Date().toISOString(),
                     });
                     setProject(updated);
-                    alert("Kickoff site visit scheduled successfully!");
+                    alert(t("projects:kickoff.scheduledSuccessAlert"));
                     loadData();
                   } catch (err: any) {
                     alert(err.message);
@@ -60,7 +60,7 @@ export function SiteVisitsTab({ project, setProject, user, isProcessing, loadDat
                 className="space-y-4 text-xs"
               >
                 <div className="space-y-1">
-                  <label className="font-semibold text-muted-foreground block">Assigned Inspector</label>
+                  <label className="font-semibold text-muted-foreground block">{t("projects:kickoff.inspector")}</label>
                   <input
                     type="text"
                     readOnly
@@ -85,7 +85,7 @@ export function SiteVisitsTab({ project, setProject, user, isProcessing, loadDat
                     disabled={isProcessing}
                     className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold"
                   >
-                    Schedule Kickoff Visit
+                    {t("projects:kickoff.scheduleBtn")}
                   </Button>
                 </div>
               </form>
@@ -99,10 +99,10 @@ export function SiteVisitsTab({ project, setProject, user, isProcessing, loadDat
             <CardHeader className="pb-3 border-b border-border">
               <CardTitle className="text-sm font-bold flex items-center gap-2">
                 <Settings className="h-4 w-4 text-indigo-500" />
-                Perform Kickoff Site Visit Inspection
+                {t("projects:kickoff.performInspectionTitle")}
               </CardTitle>
               <CardDescription className="text-xs text-muted-foreground">
-                Review kickoff directions and log inspection decision.
+                {t("projects:kickoff.reviewInspectionDesc")}
               </CardDescription>
             </CardHeader>
             <CardContent className="pt-4 space-y-4">
@@ -110,12 +110,12 @@ export function SiteVisitsTab({ project, setProject, user, isProcessing, loadDat
                 const visits = getSiteVisitsByProjectId(project.id);
                 const pendingVisit = visits.find((v: any) => v.type === "kickoff" && v.status === "scheduled");
                 if (!pendingVisit) {
-                  return <p className="text-xs text-muted-foreground">No scheduled kickoff visits found.</p>;
+                  return <p className="text-xs text-muted-foreground">{t("projects:kickoff.noScheduledVisits")}</p>;
                 }
                 return (
                   <div className="space-y-4 text-xs">
                     <div className="p-3 bg-secondary/35 border border-border rounded space-y-1">
-                      <span className="font-bold block">Operations Directions:</span>
+                      <span className="font-bold block">{t("projects:kickoff.operationsDirectionsLabel")}</span>
                       <p className="text-muted-foreground">{pendingVisit.notes}</p>
                     </div>
                     <div className="flex gap-2 justify-end">
@@ -132,14 +132,14 @@ export function SiteVisitsTab({ project, setProject, user, isProcessing, loadDat
                               inspectorName: user.name || "Eng. Tariq Al-Mansoor",
                             });
                             setProject(updated);
-                            alert("Kickoff approved successfully!");
+                            alert(t("projects:kickoff.savedSuccess"));
                             loadData();
                           } catch (err: any) {
                             alert(err.message);
                           }
                         }}
                       >
-                        Approve Kickoff
+                        {t("projects:kickoff.approveAction")}
                       </Button>
                       <Button
                         size="sm"
@@ -155,14 +155,14 @@ export function SiteVisitsTab({ project, setProject, user, isProcessing, loadDat
                               inspectorName: user.name || "Eng. Tariq Al-Mansoor",
                             });
                             setProject(updated);
-                            alert("Kickoff inspection rejected. Returned to Operations.");
+                            alert(t("projects:kickoff.rejectedAlert"));
                             loadData();
                           } catch (err: any) {
                             alert(err.message);
                           }
                         }}
                       >
-                        Reject & Return
+                        {t("projects:kickoff.rejectAction")}
                       </Button>
                     </div>
                   </div>
@@ -176,11 +176,11 @@ export function SiteVisitsTab({ project, setProject, user, isProcessing, loadDat
         {project.executionPhase === "KICKOFF_PENDING" && user.role !== USER_ROLES.CONSULTING_ENGINEER && (
           <Card className="border-border bg-card">
             <CardHeader>
-              <CardTitle className="text-sm font-bold">Kickoff Audit Scheduled</CardTitle>
-              <CardDescription className="text-xs">Awaiting consulting engineer inspection audit.</CardDescription>
+              <CardTitle className="text-sm font-bold">{t("projects:kickoff.auditScheduledTitle")}</CardTitle>
+              <CardDescription className="text-xs">{t("projects:kickoff.awaitingAuditDesc")}</CardDescription>
             </CardHeader>
             <CardContent className="text-xs text-muted-foreground">
-              <p>Inspector Eng. Tariq Al-Mansoor has been dispatched to perform the kickoff site audit.</p>
+              <p>{t("projects:kickoff.dispatchedNotice")}</p>
             </CardContent>
           </Card>
         )}
@@ -193,7 +193,7 @@ export function SiteVisitsTab({ project, setProject, user, isProcessing, loadDat
               <CardDescription className="text-xs">{t("projects:details.opsDesc")}</CardDescription>
             </CardHeader>
             <CardContent className="text-xs space-y-2">
-              <p>Status: <span className="font-semibold text-emerald-600">Approved for site works</span></p>
+              <p>{t("projects:kickoff.statusLabel")} <span className="font-semibold text-emerald-600">{t("projects:kickoff.approvedForSiteWorks")}</span></p>
             </CardContent>
           </Card>
         )}
@@ -201,7 +201,7 @@ export function SiteVisitsTab({ project, setProject, user, isProcessing, loadDat
         {!["PROJECT_PROVISIONED", "KICKOFF_PENDING", "KICKOFF_APPROVED"].includes(project.executionPhase || "") && (
           <Card className="border-border bg-card">
             <CardContent className="py-8 text-center text-muted-foreground text-xs">
-              Kickoff site visit already resolved for this project phase.
+              {t("projects:kickoff.alreadyResolved")}
             </CardContent>
           </Card>
         )}

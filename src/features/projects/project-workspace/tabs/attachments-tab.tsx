@@ -27,7 +27,7 @@ export function AttachmentsTab({ viewModel, t }: AttachmentsTabProps) {
             <CardHeader className="pb-2 border-b border-border">
               <CardTitle className="text-sm font-bold flex items-center gap-2">
                 <LinkIcon className="h-4 w-4 text-indigo-500" />
-                Contracts & Certificates
+                {t("projects:documents.contractsAndCertificates")}
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-4 space-y-3 text-xs">

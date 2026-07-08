@@ -30,13 +30,13 @@ export function ObstacleList({ viewModel, t }: ObstacleListProps) {
             <div className="flex items-center gap-2 text-destructive">
               <AlertTriangle className="h-4 w-4 animate-bounce" />
               <CardTitle className="text-xs font-bold uppercase tracking-wider">
-                {t(`projects:silos.${silo.id}.name`)} - BLOCKED
+                {t(`projects:silos.${silo.id}.name`)} - {t("projects:obstacles.blockedSuffix")}
               </CardTitle>
             </div>
           </CardHeader>
           <CardContent className="text-xs">
             <p className="text-muted-foreground">
-              This system installation is currently marked as BLOCKED. Please review technician crew allocations and materials estimates in the Execution tab.
+              {t("projects:obstacles.blockedDesc")}
             </p>
           </CardContent>
         </Card>
@@ -51,7 +51,7 @@ export function ObstacleList({ viewModel, t }: ObstacleListProps) {
             {viewModel.critical.length > 0 && (
               <div className="space-y-2">
                 <h4 className="text-[10px] font-bold text-red-600 dark:text-red-400 uppercase tracking-wide">
-                  Critical & High Risk Blockers
+                  {t("projects:obstacles.criticalHeading")}
                 </h4>
                 <div className="space-y-2">
                   {viewModel.critical.map(task => (
@@ -72,7 +72,7 @@ export function ObstacleList({ viewModel, t }: ObstacleListProps) {
             {viewModel.standard.length > 0 && (
               <div className="space-y-2 pt-3 border-t border-border/60">
                 <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">
-                  Standard Checklist Tasks & Audits
+                  {t("projects:obstacles.standardHeading")}
                 </h4>
                 <div className="space-y-2">
                   {viewModel.standard.map(task => (

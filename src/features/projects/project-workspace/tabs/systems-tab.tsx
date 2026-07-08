@@ -102,21 +102,21 @@ export function SystemsTab({
                         <div className="space-y-2 pt-2 border-t border-border text-[10px]">
                           <div className="grid grid-cols-2 gap-1.5">
                             <div>
-                              <label className="block text-[9px] text-muted-foreground font-semibold">Status</label>
-                              <Select 
-                                value={siloStatus} 
+                              <label className="block text-[9px] text-muted-foreground font-semibold">{t("projects:silos.formStatusLabel")}</label>
+                              <Select
+                                value={siloStatus}
                                 onChange={(e) => setSiloStatus(e.target.value)}
                                 className="h-8 bg-background font-bold text-xs"
                               >
-                                <option value="pending">Pending</option>
-                                <option value="ready">Ready</option>
-                                <option value="in_progress">In Progress</option>
-                                <option value="completed">Completed</option>
-                                <option value="blocked">Blocked</option>
+                                <option value="pending">{t("projects:silos.statusOptions.pending")}</option>
+                                <option value="ready">{t("projects:silos.statusOptions.ready")}</option>
+                                <option value="in_progress">{t("projects:silos.statusOptions.inProgress")}</option>
+                                <option value="completed">{t("projects:silos.statusOptions.completed")}</option>
+                                <option value="blocked">{t("projects:silos.statusOptions.blocked")}</option>
                               </Select>
                             </div>
                             <div>
-                              <label className="block text-[9px] text-muted-foreground font-semibold">Labor Count</label>
+                              <label className="block text-[9px] text-muted-foreground font-semibold">{t("projects:silos.laborCountLabel")}</label>
                               <Input 
                                 type="number" 
                                 value={siloLabor} 
@@ -127,7 +127,7 @@ export function SystemsTab({
                           </div>
                           <div className="grid grid-cols-2 gap-1.5">
                             <div>
-                              <label className="block text-[9px] text-muted-foreground font-semibold">Materials</label>
+                              <label className="block text-[9px] text-muted-foreground font-semibold">{t("projects:silos.materialsFieldLabel")}</label>
                               <Input 
                                 type="number" 
                                 value={siloMaterials} 
@@ -136,7 +136,7 @@ export function SystemsTab({
                               />
                             </div>
                             <div>
-                              <label className="block text-[9px] text-muted-foreground font-semibold">Cost (SAR)</label>
+                              <label className="block text-[9px] text-muted-foreground font-semibold">{t("projects:silos.costFieldLabel")}</label>
                               <Input 
                                 type="number" 
                                 value={siloCost} 
@@ -150,7 +150,7 @@ export function SystemsTab({
                         <div className="grid grid-cols-3 gap-2 pt-2 border-t border-border text-[9px] text-muted-foreground">
                           <div className="flex flex-col bg-secondary/15 p-1.5 rounded border border-border/40 text-center">
                             <span className="text-[8px] uppercase tracking-wide font-semibold">{t("projects:silos.labor") || "Labor"}</span>
-                            <span className="font-bold text-foreground mt-0.5">{silo.laborCount} Crew</span>
+                            <span className="font-bold text-foreground mt-0.5">{silo.laborCount} {t("projects:silos.crewSuffix")}</span>
                           </div>
                           <div className="flex flex-col bg-secondary/15 p-1.5 rounded border border-border/40 text-center">
                             <span className="text-[8px] uppercase tracking-wide font-semibold">{t("projects:silos.materials") || "Materials"}</span>
@@ -174,7 +174,7 @@ export function SystemsTab({
                               className="h-7 text-[10px] px-2 font-bold"
                               onClick={() => startEditingSilo(silo)}
                             >
-                              Edit
+                              {t("projects:silos.editBtn")}
                             </Button>
                           )}
                           {isEditing ? (
@@ -185,14 +185,14 @@ export function SystemsTab({
                                 className="h-7 text-[10px] px-2 font-bold"
                                 onClick={() => setEditingSilo(null)}
                               >
-                                Cancel
+                                {t("projects:silos.cancelBtn")}
                               </Button>
                               <Button
                                 size="sm"
                                 className="h-7 text-[10px] px-2 bg-indigo-600 text-white font-bold"
                                 onClick={() => handleSaveSilo(silo.id)}
                               >
-                                Save
+                                {t("projects:silos.saveBtn")}
                               </Button>
                             </div>
                           ) : (

@@ -17,7 +17,7 @@ export function ProjectTimelineCard({ timeline, t }: ProjectTimelineCardProps) {
       </CardHeader>
       <CardContent className="text-xs pt-0">
         {timeline.length > 0 ? (
-          <div className="relative border-s border-border pl-4 ml-2 space-y-4 pt-1">
+          <div className="relative border-s border-border ps-4 ms-2 space-y-4 pt-1">
             {timeline.map((item, idx) => (
               <div key={idx} className="relative">
                 <div className="absolute -start-[21px] mt-1 h-2.5 w-2.5 rounded-full bg-indigo-500 ring-4 ring-background" />
@@ -31,7 +31,7 @@ export function ProjectTimelineCard({ timeline, t }: ProjectTimelineCardProps) {
           </div>
         ) : (
           <div className="py-6 text-center text-muted-foreground text-xs">
-            No workflow history items recorded.
+            {t("projects:timeline.empty")}
           </div>
         )}
       </CardContent>

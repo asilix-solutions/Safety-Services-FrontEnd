@@ -16,15 +16,15 @@ export function ContractsCard({ contract, t }: ContractsCardProps) {
       {contract ? (
         <div className="p-3 border border-border rounded-lg bg-secondary/15 flex items-center justify-between hover:border-primary/20 transition-all">
           <div>
-            <span className="font-semibold text-foreground block">{contract.title || "Execution Contract Agreement"}</span>
+            <span className="font-semibold text-foreground block">{contract.title || t("projects:documents.contractDefaultTitle")}</span>
             <span className="text-[10px] text-muted-foreground font-mono">{contract.id} ({contract.status})</span>
           </div>
-          <Button variant="outline" size="sm" className="h-8 text-xs font-bold" onClick={() => alert(`Simulated download of contract: ${contract.id}`)}>
-            Download
+          <Button variant="outline" size="sm" className="h-8 text-xs font-bold" onClick={() => alert(`${t("projects:documents.simulatedDownloadContract")} ${contract.id}`)}>
+            {t("projects:documents.downloadBtn")}
           </Button>
         </div>
       ) : (
-        <p className="text-muted-foreground text-[10px] italic">No contract generated yet.</p>
+        <p className="text-muted-foreground text-[10px] italic">{t("projects:documents.noContract")}</p>
       )}
     </div>
   );

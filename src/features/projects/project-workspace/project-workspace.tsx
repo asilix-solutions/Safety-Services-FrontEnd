@@ -61,7 +61,8 @@ export default function ProjectWorkspace() {
     startEditingSilo,
     handleSaveSilo,
     viewModel,
-    t
+    t,
+    dir
   } = useProjectWorkspace();
 
   if (!user) return null;
@@ -98,6 +99,7 @@ export default function ProjectWorkspace() {
 
       <WorkspaceContent>
         <Tabs
+          dir={dir}
           value={activeTab}
           onValueChange={(value) => setActiveTab(value as ProjectWorkspaceTab)}
         >
@@ -113,8 +115,8 @@ export default function ProjectWorkspace() {
             <OverviewTab
               project={project}
               request={request}
+              documents={viewModel.documents}
               viewModel={viewModel.overview}
-              user={workspaceUser}
               isProcessing={isProcessing}
               handleStartExecution={handleStartExecution}
               t={t}
@@ -155,7 +157,7 @@ export default function ProjectWorkspace() {
           </TabsContent>
 
           <TabsContent value="procurement">
-            <ProcurementTab t={t} />
+            <ProcurementTab projectId={project.id} />
           </TabsContent>
 
           <TabsContent value="labor">
@@ -182,7 +184,7 @@ export default function ProjectWorkspace() {
           </TabsContent>
 
           <TabsContent value="photos">
-            <PhotosTab t={t} />
+            <PhotosTab projectId={project.id} />
           </TabsContent>
 
           <TabsContent value="inspection">

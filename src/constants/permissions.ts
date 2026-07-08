@@ -168,3 +168,80 @@ export function hasPermission(role: UserRole, permission: RolePermissionKey): bo
   const permissions = ROLE_PERMISSIONS[role];
   return permissions ? permissions.includes(permission) : false;
 }
+
+/**
+ * Project Workspace — Overview tab role-awareness (P2, HIGH priority scope only).
+ * Widgets/KPIs/actions rendered by `OverviewTab` must be read from
+ * `PROJECT_WORKSPACE_ROLE_CONFIG` — never gated by a hardcoded role check
+ * inside a component.
+ */
+export type ProjectOverviewWidgetId =
+  | "phaseStepper"
+  | "projectHealth"
+  | "nextAction"
+  | "linkedRequest"
+  | "documents"
+  | "inspectionStatus"
+  | "siteVisits"
+  | "quotationSummary"
+  | "invoiceSummary"
+  | "customerInfo"
+  | "assignedEngineer"
+  | "assignedResources"
+  | "procurementStatus"
+  | "team";
+
+export type ProjectOverviewKpiId =
+  | "progressPercent"
+  | "currentStage"
+  | "openObstaclesCount"
+  | "invoiceStatus";
+
+export type ProjectOverviewActionId =
+  | "startExecution"
+  | "logInspectionNotes"
+  | "viewContracts"
+  | "viewInvoices"
+  | "viewReports";
+
+export interface ProjectOverviewRoleConfig {
+  widgets: ProjectOverviewWidgetId[];
+  kpis: ProjectOverviewKpiId[];
+  actions: ProjectOverviewActionId[];
+}
+
+const EMPTY_OVERVIEW_CONFIG: ProjectOverviewRoleConfig = { widgets: [], kpis: [], actions: [] };
+
+export const PROJECT_WORKSPACE_ROLE_CONFIG: Record<UserRole, ProjectOverviewRoleConfig> = {
+  "Operations Officer": {
+    kpis: ["progressPercent", "currentStage", "openObstaclesCount"],
+    widgets: ["phaseStepper", "projectHealth", "nextAction", "assignedResources", "procurementStatus"],
+    actions: ["startExecution"],
+  },
+  "Consulting Engineer": {
+    kpis: ["currentStage"],
+    widgets: ["inspectionStatus", "documents", "siteVisits"],
+    actions: ["logInspectionNotes"],
+  },
+  "Company Admin": {
+    kpis: ["progressPercent", "invoiceStatus"],
+    widgets: ["quotationSummary", "invoiceSummary", "projectHealth", "team"],
+    actions: ["viewContracts", "viewInvoices", "viewReports"],
+  },
+  Client: {
+    kpis: ["progressPercent"],
+    widgets: ["linkedRequest", "documents", "assignedEngineer", "invoiceSummary"],
+    actions: [],
+  },
+  "Sales Agent": {
+    kpis: ["progressPercent", "invoiceStatus"],
+    widgets: ["customerInfo", "quotationSummary", "invoiceSummary"],
+    actions: [],
+  },
+  "Super Admin": EMPTY_OVERVIEW_CONFIG,
+};
+
+export function getProjectOverviewRoleConfig(role: UserRole | undefined): ProjectOverviewRoleConfig {
+  if (!role) return EMPTY_OVERVIEW_CONFIG;
+  return PROJECT_WORKSPACE_ROLE_CONFIG[role] ?? EMPTY_OVERVIEW_CONFIG;
+}

@@ -24,9 +24,9 @@ export function RequestDocumentsCard({ documents, t }: RequestDocumentsCardProps
           <div key={idx} className="flex justify-between items-center p-2.5 border border-border rounded bg-secondary/15 hover:bg-secondary/25 transition-all">
             <span className="font-semibold text-foreground">{doc.name}</span>
             {doc.uploaded ? (
-              <span className="text-[10px] text-success font-semibold font-mono">{doc.fileName || "Uploaded"}</span>
+              <span className="text-[10px] text-success font-semibold font-mono">{doc.fileName || t("projects:documents.uploadedLabel")}</span>
             ) : (
-              <span className="text-[10px] text-muted-foreground">Not Uploaded</span>
+              <span className="text-[10px] text-muted-foreground">{t("projects:documents.notUploaded")}</span>
             )}
           </div>
         ))}

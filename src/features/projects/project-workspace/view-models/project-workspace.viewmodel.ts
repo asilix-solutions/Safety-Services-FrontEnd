@@ -2,19 +2,34 @@ import { Project, ProjectExecutionPhase, SiloExecutionData, ProjectTask } from "
 import { LicensingRequest } from "@/domains/requests/types";
 import { ClientContract } from "@/domains/contracts/types";
 import { ClientCertificate } from "@/domains/certificates/types";
+import { Quotation } from "@/domains/quotations/types";
+import { ClientInvoice } from "@/domains/invoices/types";
 import { UserRole } from "@/types/role";
-import { ProjectWorkspaceTab, getVisibleProjectWorkspaceTabs, canEditProjectWorkspace } from "@/constants/permissions";
+import {
+  ProjectWorkspaceTab,
+  getVisibleProjectWorkspaceTabs,
+  canEditProjectWorkspace,
+  getProjectOverviewRoleConfig,
+  ProjectOverviewRoleConfig
+} from "@/constants/permissions";
 import { getProjectHealth } from "../helpers/health";
 import { calculateExecutionTotals, getCurrentPhaseIndex } from "../helpers/execution";
 import { buildProjectTimeline, TimelineItem } from "../helpers/timeline";
 import { resolveProjectDocuments, ResolvedDocuments } from "../helpers/documents";
 import { groupProjectObstacles } from "../helpers/obstacles";
+import { getProgressPercent, getOpenObstaclesCount, getNextActionLabelKey } from "../helpers/overview";
 
 export interface OverviewViewModel {
   internalPhases: { id: ProjectExecutionPhase; labelKey: string }[];
   currentPhaseIndex: number;
   health: { status: string; color: string; labelKey: string };
   timeline: TimelineItem[];
+  progressPercent: number;
+  nextActionLabelKey: string;
+  openObstaclesCount: number;
+  quotation: Quotation | null;
+  invoice: ClientInvoice | null;
+  roleConfig: ProjectOverviewRoleConfig;
 }
 
 export interface ExecutionViewModel {
@@ -42,10 +57,13 @@ export function prepareProjectWorkspaceViewModel(
   request: LicensingRequest | null,
   contract: ClientContract | null,
   certificate: ClientCertificate | null,
-  userRole: UserRole | undefined
+  userRole: UserRole | undefined,
+  quotation: Quotation | null = null,
+  invoice: ClientInvoice | null = null
 ): ProjectWorkspaceViewModel {
   const visibleTabs = getVisibleProjectWorkspaceTabs(userRole);
   const canEdit = canEditProjectWorkspace(userRole);
+  const roleConfig = getProjectOverviewRoleConfig(userRole);
 
   const silos = project.workspace?.execution?.silos || [];
   const totals = calculateExecutionTotals(silos);
@@ -74,7 +92,13 @@ export function prepareProjectWorkspaceViewModel(
       internalPhases,
       currentPhaseIndex,
       health,
-      timeline
+      timeline,
+      progressPercent: getProgressPercent(currentPhaseIndex, internalPhases.length),
+      nextActionLabelKey: getNextActionLabelKey(project.executionPhase),
+      openObstaclesCount: getOpenObstaclesCount(project.tasks),
+      quotation,
+      invoice,
+      roleConfig
     },
     execution: {
       silos,
