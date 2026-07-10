@@ -1,0 +1,42 @@
+{
+  "title": "Field Labor",
+  "empty": "No labor records logged yet. Add a worker to get started.",
+
+  "form.title": "Record Field Labor",
+  "form.workerName": "Worker Name",
+  "form.workerNamePlaceholder": "e.g. Ahmed Al-Otaibi",
+  "form.fieldRole": "Field Role",
+  "form.fieldRolePlaceholder": "e.g. Alarm Technician",
+  "form.legalCategory": "Legal Category",
+  "form.agreedWage": "Agreed Wage (SAR)",
+  "form.agreedWageRequired": "Enter a valid agreed wage greater than zero for outsource labor.",
+  "form.costPreview": "Cost",
+  "form.save": "Save Labor Record",
+  "form.saveFailed": "Failed to save the labor record. Please try again.",
+
+  "legalCategory.internal": "Internal",
+  "legalCategory.outsource": "Outsource",
+
+  "list.title": "Labor Records",
+  "list.worker": "Worker",
+  "list.role": "Field Role",
+  "list.category": "Category",
+  "list.cost": "Cost",
+  "list.status": "Status",
+  "list.settledBadge": "Settled",
+  "list.noSettlement": "No settlement required",
+
+  "settlement.confirmButton": "Confirm Final Outsource Labor Settlement",
+  "settlement.dialogTitle": "Confirm Final Outsource Labor Settlement",
+  "settlement.warning": "This action is final and irreversible. Once confirmed, this labor record cannot be edited, deleted, or settled again.",
+  "settlement.geoHint": "Your device's location may be captured to log this settlement. If you deny access, the settlement will still proceed without a location tag.",
+  "settlement.cancel": "Cancel",
+  "settlement.confirm": "Confirm Settlement",
+  "settlement.settleFailed": "Failed to confirm the settlement. Please try again.",
+
+  "summary.headcount": "Headcount",
+  "summary.internalCount": "Internal",
+  "summary.outsourceCount": "Outsource",
+  "summary.totalOutsourceCost": "Total Outsource Cost",
+  "summary.unsettledOutsourceCount": "Unsettled Outsource"
+}

@@ -1,17 +1,10 @@
 import React from "react";
-import { HardHat } from "lucide-react";
-import { EmptyState } from "@/shared/components/empty-state";
+import { LaborPanel } from "../labor";
 
 interface LaborTabProps {
-  t: (key: string) => string;
+  projectId: string;
 }
 
-export function LaborTab({ t }: LaborTabProps) {
-  return (
-    <EmptyState
-      icon={<HardHat />}
-      title={t("projects:labor.title")}
-      description={t("projects:labor.empty")}
-    />
-  );
+export function LaborTab({ projectId }: LaborTabProps) {
+  return <LaborPanel projectId={projectId} />;
 }

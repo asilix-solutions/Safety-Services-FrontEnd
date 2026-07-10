@@ -161,7 +161,7 @@ export default function ProjectWorkspace() {
           </TabsContent>
 
           <TabsContent value="labor">
-            <LaborTab t={t} />
+            <LaborTab projectId={project.id} />
           </TabsContent>
 
           <TabsContent value="siteVisits">

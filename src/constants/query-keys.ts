@@ -18,6 +18,9 @@ export const QUERY_KEYS = {
   PHOTOS: {
     LIST: (projectId: string) => ["photos", projectId] as const,
   },
+  LABOR: {
+    LIST: (projectId: string) => ["labor", projectId] as const,
+  },
   CUSTOMERS: {
     LIST: ["customers"] as const,
     DETAIL: (id: string) => ["customers", id] as const,

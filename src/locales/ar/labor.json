@@ -1,0 +1,42 @@
+{
+  "title": "العمالة الميدانية",
+  "empty": "لا توجد سجلات عمالة حتى الآن. أضف عاملاً للبدء.",
+
+  "form.title": "تسجيل عمالة ميدانية",
+  "form.workerName": "اسم العامل",
+  "form.workerNamePlaceholder": "مثال: أحمد العتيبي",
+  "form.fieldRole": "الدور الميداني",
+  "form.fieldRolePlaceholder": "مثال: فني إنذار",
+  "form.legalCategory": "الفئة القانونية",
+  "form.agreedWage": "الأجر المتفق عليه (ريال)",
+  "form.agreedWageRequired": "أدخل أجراً متفقاً عليه صحيحاً أكبر من صفر للعمالة الخارجية.",
+  "form.costPreview": "التكلفة",
+  "form.save": "حفظ سجل العمالة",
+  "form.saveFailed": "فشل حفظ سجل العمالة. يرجى المحاولة مرة أخرى.",
+
+  "legalCategory.internal": "داخلي",
+  "legalCategory.outsource": "عمالة خارجية",
+
+  "list.title": "سجلات العمالة",
+  "list.worker": "العامل",
+  "list.role": "الدور الميداني",
+  "list.category": "الفئة",
+  "list.cost": "التكلفة",
+  "list.status": "الحالة",
+  "list.settledBadge": "تمت التسوية",
+  "list.noSettlement": "لا تتطلب تسوية",
+
+  "settlement.confirmButton": "تأكيد التسوية النهائية للعمالة الخارجية",
+  "settlement.dialogTitle": "تأكيد التسوية النهائية للعمالة الخارجية",
+  "settlement.warning": "هذا الإجراء نهائي ولا يمكن التراجع عنه. بعد التأكيد، لا يمكن تعديل هذا السجل أو حذفه أو تسويته مرة أخرى.",
+  "settlement.geoHint": "قد يتم تسجيل موقع جهازك لتوثيق هذه التسوية. في حال رفض الإذن، ستستمر عملية التسوية دون وسم الموقع.",
+  "settlement.cancel": "إلغاء",
+  "settlement.confirm": "تأكيد التسوية",
+  "settlement.settleFailed": "فشل تأكيد التسوية. يرجى المحاولة مرة أخرى.",
+
+  "summary.headcount": "عدد العمال",
+  "summary.internalCount": "داخلي",
+  "summary.outsourceCount": "خارجي",
+  "summary.totalOutsourceCost": "إجمالي تكلفة العمالة الخارجية",
+  "summary.unsettledOutsourceCount": "غير مسوّاة (خارجية)"
+}
