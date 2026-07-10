@@ -1,0 +1,24 @@
+{
+  "title": "Project Closure",
+  "empty": "The project has not been closed yet. Closure details will appear here once the Operations Officer records the signed and stamped inspection report.",
+
+  "form.title": "Record Project Closure",
+  "form.signedBy": "Signed By (optional)",
+  "form.signedByPlaceholder": "e.g. Client representative name",
+  "form.methodDraw": "Draw Signature",
+  "form.methodUpload": "Upload Signed Report",
+  "form.clearSignature": "Clear Signature",
+  "form.signatureRequired": "A signature or a photo of the signed report is required before closing the project.",
+  "form.mandatoryHint": "Complete Ticket / Close Project stays disabled until a signature is captured or a photo of the signed and stamped inspection report is uploaded.",
+  "form.irreversibleWarning": "This action is final and irreversible. Once the project is closed, the closure record cannot be edited, deleted, or recorded again.",
+  "form.close": "Complete Ticket / Close Project",
+  "form.saveFailed": "Failed to close the project. Please check your connection and try again — your captured signature has been kept.",
+
+  "method.canvas": "Drawn Signature",
+  "method.upload": "Uploaded Signed Report",
+
+  "summary.closedBadge": "Closed — Unalterable",
+  "summary.closedAt": "Closed At",
+  "summary.closedBy": "Closed By",
+  "summary.method": "Closure Method"
+}

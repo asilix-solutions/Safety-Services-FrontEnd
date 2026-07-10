@@ -556,7 +556,8 @@
   "camera.cancel": "إلغاء",
   "camera.retake": "إعادة الالتقاط",
   "camera.cameraUnavailable": "تعذر الوصول إلى الكاميرا. يرجى استخدام اختيار ملف بدلاً من ذلك.",
-  "camera.previewAlt": "الصورة الملتقطة"
+  "camera.previewAlt": "الصورة الملتقطة",
+  "signaturePad.clear": "مسح التوقيع"
 }
 
 

@@ -31,6 +31,8 @@ import arPhotos from "@/locales/ar/photos.json";
 import enPhotos from "@/locales/en/photos.json";
 import arLabor from "@/locales/ar/labor.json";
 import enLabor from "@/locales/en/labor.json";
+import arClosure from "@/locales/ar/closure.json";
+import enClosure from "@/locales/en/closure.json";
 
 // Mapping dictionary registry
 export const DICTIONARIES: Record<Locale, Record<Namespace, Record<string, string>>> = {
@@ -48,6 +50,7 @@ export const DICTIONARIES: Record<Locale, Record<Namespace, Record<string, strin
     procurement: arProcurement,
     photos: arPhotos,
     labor: arLabor,
+    closure: arClosure,
   },
   en: {
     common: enCommon,
@@ -63,6 +66,7 @@ export const DICTIONARIES: Record<Locale, Record<Namespace, Record<string, strin
     procurement: enProcurement,
     photos: enPhotos,
     labor: enLabor,
+    closure: enClosure,
   },
 };
 

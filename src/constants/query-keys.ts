@@ -21,6 +21,9 @@ export const QUERY_KEYS = {
   LABOR: {
     LIST: (projectId: string) => ["labor", projectId] as const,
   },
+  CLOSURE: {
+    DETAIL: (projectId: string) => ["closure", projectId] as const,
+  },
   CUSTOMERS: {
     LIST: ["customers"] as const,
     DETAIL: (id: string) => ["customers", id] as const,

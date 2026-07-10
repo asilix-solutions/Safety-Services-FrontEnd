@@ -554,6 +554,7 @@
   "camera.cancel": "Cancel",
   "camera.retake": "Retake Photo",
   "camera.cameraUnavailable": "Camera access is unavailable. Please use Choose File instead.",
-  "camera.previewAlt": "Captured photo"
+  "camera.previewAlt": "Captured photo",
+  "signaturePad.clear": "Clear Signature"
 }
 

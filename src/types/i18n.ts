@@ -13,7 +13,8 @@ export type Namespace =
   | "requests"
   | "procurement"
   | "photos"
-  | "labor";
+  | "labor"
+  | "closure";
 
 export interface Translations {
   common: typeof import("@/locales/en/common.json");
@@ -29,6 +30,7 @@ export interface Translations {
   procurement: typeof import("@/locales/en/procurement.json");
   photos: typeof import("@/locales/en/photos.json");
   labor: typeof import("@/locales/en/labor.json");
+  closure: typeof import("@/locales/en/closure.json");
 }
 
 export type TxKey =
@@ -44,4 +46,5 @@ export type TxKey =
   | `requests:${keyof Translations["requests"]}`
   | `procurement:${keyof Translations["procurement"]}`
   | `photos:${keyof Translations["photos"]}`
-  | `labor:${keyof Translations["labor"]}`;
+  | `labor:${keyof Translations["labor"]}`
+  | `closure:${keyof Translations["closure"]}`;
