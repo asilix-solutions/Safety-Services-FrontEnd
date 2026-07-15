@@ -1,6 +1,7 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Activity } from "lucide-react";
+import { StatusBadge } from "@/shared/components/status-badge";
 
 interface ProjectHealthCardProps {
   health: {
@@ -25,7 +26,7 @@ export function ProjectHealthCard({ health, projectStatus, t }: ProjectHealthCar
             <Activity className="h-4 w-4" />
             <span>{t(health.labelKey)}</span>
           </div>
-          <span className="text-[10px] opacity-85 uppercase font-mono tracking-wider">{projectStatus}</span>
+          <StatusBadge status={projectStatus} type="project" className="text-[10px]" />
         </div>
         <p className="text-[10px] text-muted-foreground leading-normal">
           {t("projects:health.description")}

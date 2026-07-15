@@ -28,7 +28,7 @@ export function SiteVisitsCard({ projectId, t }: SiteVisitsCardProps) {
           visits.map((visit) => (
             <div key={visit.id} className="flex items-center justify-between p-2 border border-border rounded bg-secondary/15">
               <span className="font-semibold">{visit.type}</span>
-              <Badge variant="outline">{visit.status}</Badge>
+              <Badge variant="outline">{t(`projects:overview.siteVisits.status.${visit.status}`)}</Badge>
             </div>
           ))
         )}

@@ -8,9 +8,25 @@ import { Select } from "@/shared/ui/select";
 import { Briefcase, CheckCircle } from "lucide-react";
 import { Project, SiloExecutionData } from "@/types/project";
 import { ExecutionViewModel } from "../view-models/project-workspace.viewmodel";
-import { StatusBadge } from "@/shared/components/status-badge";
+import { Badge } from "@/shared/ui/badge";
 import { USER_ROLES } from "@/constants/roles";
 import { ExecutionSummaryCard } from "../components/execution-summary-card";
+
+const SILO_STATUS_KEY: Record<string, string> = {
+  pending: "pending",
+  ready: "ready",
+  in_progress: "inProgress",
+  completed: "completed",
+  blocked: "blocked",
+};
+
+const SILO_STATUS_VARIANT: Record<string, "secondary" | "warning" | "success" | "destructive"> = {
+  pending: "secondary",
+  ready: "secondary",
+  in_progress: "warning",
+  completed: "success",
+  blocked: "destructive",
+};
 
 interface SystemsTabProps {
   project: Project;
@@ -93,7 +109,14 @@ export function SystemsTab({
                       <div className="flex justify-between items-start gap-2">
                         <span className="font-bold text-xs text-foreground block">{name}</span>
                         <span className="shrink-0">
-                          <StatusBadge status={isEditing ? siloStatus : silo.status} type="project" />
+                          {(() => {
+                            const displayStatus = isEditing ? siloStatus : silo.status;
+                            return (
+                              <Badge variant={SILO_STATUS_VARIANT[displayStatus] ?? "secondary"}>
+                                {t(`projects:silos.statusOptions.${SILO_STATUS_KEY[displayStatus] ?? displayStatus}`)}
+                              </Badge>
+                            );
+                          })()}
                         </span>
                       </div>
                       <p className="text-[10px] text-muted-foreground leading-relaxed min-h-[40px]">{desc}</p>
@@ -154,7 +177,7 @@ export function SystemsTab({
                           </div>
                           <div className="flex flex-col bg-secondary/15 p-1.5 rounded border border-border/40 text-center">
                             <span className="text-[8px] uppercase tracking-wide font-semibold">{t("projects:silos.materials") || "Materials"}</span>
-                            <span className="font-bold text-foreground mt-0.5">{silo.materialsCount} Items</span>
+                            <span className="font-bold text-foreground mt-0.5">{silo.materialsCount} {t("projects:silos.itemsSuffix")}</span>
                           </div>
                           <div className="flex flex-col bg-secondary/15 p-1.5 rounded border border-border/40 text-center">
                             <span className="text-[8px] uppercase tracking-wide font-semibold">{t("projects:silos.cost") || "Cost"}</span>
@@ -242,7 +265,7 @@ export function SystemsTab({
                             {t("projects:silos.status") || "Status"}:
                           </span>
                           <span className="font-semibold text-foreground uppercase">
-                            {silo.status}
+                            {t(`projects:silos.statusOptions.${SILO_STATUS_KEY[silo.status] ?? silo.status}`)}
                           </span>
                         </div>
                       )}
