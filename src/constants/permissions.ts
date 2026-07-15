@@ -245,3 +245,35 @@ export function getProjectOverviewRoleConfig(role: UserRole | undefined): Projec
   if (!role) return EMPTY_OVERVIEW_CONFIG;
   return PROJECT_WORKSPACE_ROLE_CONFIG[role] ?? EMPTY_OVERVIEW_CONFIG;
 }
+
+/**
+ * Super Admin Companies (tenant management, SRS FR-TEN-06) — per-role view/manage
+ * access. Components must read the resolved booleans from
+ * `canViewCompanies`/`canManageCompanies`, never compare `role === "Super Admin"`
+ * directly, matching the `PROJECT_WORKSPACE_TAB_ACCESS` pattern above.
+ */
+interface CompaniesAccess {
+  canView: boolean;
+  canManage: boolean;
+}
+
+const NO_COMPANIES_ACCESS: CompaniesAccess = { canView: false, canManage: false };
+
+export const COMPANIES_ACCESS: Record<UserRole, CompaniesAccess> = {
+  "Super Admin": { canView: true, canManage: true },
+  "Company Admin": NO_COMPANIES_ACCESS,
+  "Consulting Engineer": NO_COMPANIES_ACCESS,
+  "Operations Officer": NO_COMPANIES_ACCESS,
+  "Sales Agent": NO_COMPANIES_ACCESS,
+  Client: NO_COMPANIES_ACCESS,
+};
+
+export function canViewCompanies(role: UserRole | undefined): boolean {
+  if (!role) return false;
+  return COMPANIES_ACCESS[role]?.canView ?? false;
+}
+
+export function canManageCompanies(role: UserRole | undefined): boolean {
+  if (!role) return false;
+  return COMPANIES_ACCESS[role]?.canManage ?? false;
+}

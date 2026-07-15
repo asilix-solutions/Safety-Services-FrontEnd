@@ -8,8 +8,8 @@ import {
   SuperAdminOverview,
   prepareSuperAdminOverviewViewModel,
   SuperAdminOverviewViewModel,
-  MOCK_COMPANIES,
 } from "@/features/super-admin-overview";
+import { getCompanies } from "@/domains/organization/storage";
 
 export function SuperAdminDashboard() {
   const { user } = useAuth();
@@ -20,8 +20,7 @@ export function SuperAdminDashboard() {
   const loadData = () => {
     if (!user) return;
 
-    // Use isolated mock company domain mapping
-    const companies = MOCK_COMPANIES;
+    const companies = getCompanies();
 
     const vm = prepareSuperAdminOverviewViewModel(
       {

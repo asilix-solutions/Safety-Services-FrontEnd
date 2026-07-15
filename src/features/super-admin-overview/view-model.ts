@@ -5,6 +5,8 @@ import {
   OverviewActivityItem,
   OverviewQuickAccessItem,
 } from "@/features/dashboard-overview";
+import { Company } from "@/domains/organization/types";
+import { MOCK_COMPANIES } from "@/domains/organization/storage";
 
 export interface SuperAdminOverviewViewModel {
   welcomeCardProps: {
@@ -21,65 +23,10 @@ export interface SuperAdminOverviewViewModel {
   quickAccessLinks: OverviewQuickAccessItem[];
 }
 
-// Mock company domain definitions ready to move to future domain files
-export interface MockCompany {
-  id: string;
-  name: string;
-  owner: string;
-  plan: string;
-  status: "active" | "suspended" | "pending_verification";
-  expiresAt: string;
-  userCount: number;
-  registeredAt: string;
-}
-
-export const MOCK_COMPANIES: MockCompany[] = [
-  {
-    id: "COMP-001",
-    name: "Apex Safety Ltd",
-    owner: "Fahad Qasim",
-    plan: "Enterprise Premium",
-    status: "active",
-    expiresAt: "2026-12-31T00:00:00Z",
-    userCount: 45,
-    registeredAt: "2026-05-10T10:00:00Z",
-  },
-  {
-    id: "COMP-002",
-    name: "Safety Shield Co.",
-    owner: "Salim Obaid",
-    plan: "Basic Business",
-    status: "active",
-    expiresAt: "2026-07-15T00:00:00Z", // Expiring soon (within 30 days of June 28)
-    userCount: 12,
-    registeredAt: "2026-05-28T14:30:00Z",
-  },
-  {
-    id: "COMP-003",
-    name: "Gulf Fire Engineering",
-    owner: "Khalid Issa",
-    plan: "Standard Growth",
-    status: "suspended",
-    expiresAt: "2026-06-01T00:00:00Z", // Expired/Suspended
-    userCount: 22,
-    registeredAt: "2026-06-01T09:00:00Z",
-  },
-  {
-    id: "COMP-004",
-    name: "Red Sea Compliance",
-    owner: "Ahmed Jamil",
-    plan: "Standard Growth",
-    status: "pending_verification",
-    expiresAt: "2026-08-20T00:00:00Z",
-    userCount: 5,
-    registeredAt: "2026-06-25T11:00:00Z",
-  },
-];
-
 export function prepareSuperAdminOverviewViewModel(
   user: { name: string; role: string },
   data: {
-    companies?: MockCompany[];
+    companies?: Company[];
   }
 ): SuperAdminOverviewViewModel {
   const todayStr = "2026-06-28";
@@ -98,7 +45,7 @@ export function prepareSuperAdminOverviewViewModel(
     return c.status === "active" && diffDays >= 0 && diffDays <= 30;
   }).length;
 
-  const totalUsers = companiesList.reduce((sum, c) => sum + c.userCount, 0);
+  const totalUsers = companiesList.reduce((sum, c) => sum + c.personnelCount, 0);
 
   // Reordered by natural SaaS hierarchy: Total Companies -> Active Subscriptions -> Expiring Subscriptions -> Total Users
   const summaryCards: OverviewStatCard[] = [
