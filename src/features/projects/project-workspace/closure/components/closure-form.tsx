@@ -16,6 +16,7 @@ interface ClosureFormProps {
   onSubmit: (values: ClosureFormValues) => Promise<unknown>;
   isSaving: boolean;
   saveError: Error | null;
+  hasPhotos: boolean;
 }
 
 const DEFAULT_VALUES: ClosureFormValues = {
@@ -24,7 +25,7 @@ const DEFAULT_VALUES: ClosureFormValues = {
   signedBy: "",
 };
 
-export function ClosureForm({ onSubmit, isSaving, saveError }: ClosureFormProps) {
+export function ClosureForm({ onSubmit, isSaving, saveError, hasPhotos }: ClosureFormProps) {
   const { t } = useTranslation();
 
   const form = useForm<ClosureFormValues, unknown, ClosureFormValues>({
@@ -85,7 +86,7 @@ export function ClosureForm({ onSubmit, isSaving, saveError }: ClosureFormProps)
             <p className="text-xs font-semibold text-destructive">{t("closure:form.saveFailed")}</p>
           )}
 
-          <Button type="submit" disabled={isSaving || !signatureImage} isLoading={isSaving}>
+          <Button type="submit" disabled={isSaving || !signatureImage || !hasPhotos} isLoading={isSaving}>
             {t("closure:form.close")}
           </Button>
         </form>

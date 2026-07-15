@@ -9,7 +9,7 @@
   "form.methodUpload": "Upload Signed Report",
   "form.clearSignature": "Clear Signature",
   "form.signatureRequired": "A signature or a photo of the signed report is required before closing the project.",
-  "form.mandatoryHint": "Complete Ticket / Close Project stays disabled until a signature is captured or a photo of the signed and stamped inspection report is uploaded.",
+  "form.mandatoryHint": "Complete Ticket / Close Project stays disabled until a signature is captured or a photo of the signed and stamped inspection report is uploaded, and at least one installation photo has been added to the project.",
   "form.irreversibleWarning": "This action is final and irreversible. Once the project is closed, the closure record cannot be edited, deleted, or recorded again.",
   "form.close": "Complete Ticket / Close Project",
   "form.saveFailed": "Failed to close the project. Please check your connection and try again — your captured signature has been kept.",

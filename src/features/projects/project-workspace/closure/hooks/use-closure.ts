@@ -6,6 +6,7 @@ import { useAuth } from "@/providers/AuthProvider";
 import { useNamespaceTranslations, useTranslation } from "@/providers/i18n-provider";
 import { getClosureByProject, createClosureRecord } from "@/domains/closure";
 import { ClosureDraft } from "@/domains/closure/types";
+import { getPhotoSummary } from "@/domains/photos";
 import { canEditProjectWorkspace } from "@/constants/permissions";
 import { QUERY_KEYS } from "@/constants/query-keys";
 import { ClosureFormValues } from "@/schemas/closure.schema";
@@ -24,6 +25,13 @@ export function useClosure(projectId: string) {
     queryFn: () => getClosureByProject(projectId),
     enabled: !!projectId,
   });
+
+  const { data: photoSummary } = useQuery({
+    queryKey: QUERY_KEYS.PHOTOS.LIST(projectId),
+    queryFn: () => getPhotoSummary(projectId),
+    enabled: !!projectId,
+  });
+  const hasPhotos = (photoSummary?.total ?? 0) > 0;
 
   const closeMutation = useMutation({
     mutationFn: async (values: ClosureFormValues) => {
@@ -47,6 +55,7 @@ export function useClosure(projectId: string) {
     canEdit,
     isLoading,
     viewModel,
+    hasPhotos,
     closeProject: closeMutation.mutateAsync,
     isClosing: closeMutation.isPending,
     closeError: closeMutation.error as Error | null,

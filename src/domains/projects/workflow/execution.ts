@@ -185,6 +185,10 @@ export function startExecutionSilo({
     completed: true,
     dueDate: nowStr.split("T")[0],
     priority: "Medium",
+    titleKey: "projects:obstacles.events.siloStarted.title",
+    titleParams: { silo: siloId },
+    descriptionKey: "projects:obstacles.events.siloStarted.desc",
+    descriptionParams: { silo: siloId, actor: startedBy },
   });
 
   const updatedProject: Project = {
@@ -252,6 +256,10 @@ export function completeExecutionSilo({
     completed: true,
     dueDate: nowStr.split("T")[0],
     priority: "Medium",
+    titleKey: "projects:obstacles.events.siloCompleted.title",
+    titleParams: { silo: siloId },
+    descriptionKey: "projects:obstacles.events.siloCompleted.desc",
+    descriptionParams: { silo: siloId, actor: completedBy, notes },
   });
 
   // Check if all silos are now completed

@@ -12,7 +12,7 @@ interface ClosurePanelProps {
 }
 
 export function ClosurePanel({ projectId }: ClosurePanelProps) {
-  const { canEdit, viewModel, isLoading, closeProject, isClosing, closeError, t } = useClosure(projectId);
+  const { canEdit, viewModel, isLoading, hasPhotos, closeProject, isClosing, closeError, t } = useClosure(projectId);
 
   if (isLoading) return null;
 
@@ -30,7 +30,7 @@ export function ClosurePanel({ projectId }: ClosurePanelProps) {
     );
   }
 
-  return <ClosureForm onSubmit={closeProject} isSaving={isClosing} saveError={closeError} />;
+  return <ClosureForm onSubmit={closeProject} isSaving={isClosing} saveError={closeError} hasPhotos={hasPhotos} />;
 }
 
 export default ClosurePanel;

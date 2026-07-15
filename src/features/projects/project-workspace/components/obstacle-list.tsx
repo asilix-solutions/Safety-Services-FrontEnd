@@ -2,10 +2,28 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
 import { AlertTriangle } from "lucide-react";
 import { ObstaclesViewModel } from "../view-models/project-workspace.viewmodel";
+import { ProjectTask } from "@/types/project";
+
+type TranslateFn = (key: string, params?: Record<string, string>) => string;
 
 interface ObstacleListProps {
   viewModel: ObstaclesViewModel;
-  t: any;
+  t: TranslateFn;
+}
+
+/** Prefers the translated key over the legacy free-text field; resolves the silo param to its localized name. */
+function resolveText(t: TranslateFn, key: string | undefined, params: Record<string, string> | undefined, fallback: string): string {
+  if (!key) return fallback;
+  const resolvedParams = params?.silo ? { ...params, silo: t(`projects:silos.${params.silo}.name`) } : params;
+  return t(key, resolvedParams);
+}
+
+function taskTitle(t: TranslateFn, task: ProjectTask): string {
+  return resolveText(t, task.titleKey, task.titleParams, task.title);
+}
+
+function taskDescription(t: TranslateFn, task: ProjectTask): string {
+  return resolveText(t, task.descriptionKey, task.descriptionParams, task.description);
 }
 
 export function ObstacleList({ viewModel, t }: ObstacleListProps) {
@@ -57,11 +75,11 @@ export function ObstacleList({ viewModel, t }: ObstacleListProps) {
                   {viewModel.critical.map(task => (
                     <div key={task.id} className="p-3 border border-red-500/20 rounded-lg flex items-center justify-between gap-4 text-xs bg-red-500/[0.02]">
                       <div>
-                        <span className="font-semibold text-foreground block">{task.title}</span>
-                        <span className="text-[10px] text-muted-foreground">{task.description}</span>
+                        <span className="font-semibold text-foreground block">{taskTitle(t, task)}</span>
+                        <span className="text-[10px] text-muted-foreground">{taskDescription(t, task)}</span>
                       </div>
                       <span className="px-2 py-0.5 rounded text-[9px] font-bold bg-destructive/10 text-destructive">
-                        {task.priority}
+                        {t(`projects:obstacles.priority.${task.priority.toLowerCase()}`)}
                       </span>
                     </div>
                   ))}
@@ -78,11 +96,11 @@ export function ObstacleList({ viewModel, t }: ObstacleListProps) {
                   {viewModel.standard.map(task => (
                     <div key={task.id} className="p-3 border border-border rounded-lg flex items-center justify-between gap-4 text-xs bg-secondary/10">
                       <div>
-                        <span className="font-semibold text-foreground block">{task.title}</span>
-                        <span className="text-[10px] text-muted-foreground">{task.description}</span>
+                        <span className="font-semibold text-foreground block">{taskTitle(t, task)}</span>
+                        <span className="text-[10px] text-muted-foreground">{taskDescription(t, task)}</span>
                       </div>
                       <span className="px-2 py-0.5 rounded text-[9px] font-bold bg-secondary text-muted-foreground">
-                        {task.priority}
+                        {t(`projects:obstacles.priority.${task.priority.toLowerCase()}`)}
                       </span>
                     </div>
                   ))}

@@ -1,10 +1,18 @@
 import { ClosureDraft, ClosureRecord, ClosureStatus } from "./types";
 import { getClosureByProject, upsertClosure } from "./storage";
+import { getPhotoSummary } from "@/domains/photos";
 
 /** AF-3: blocks creating a closure record without a bound signature/upload artifact. */
 export function assertSignaturePresent(draft: Pick<ClosureDraft, "signatureImage">): void {
   if (!draft.signatureImage || draft.signatureImage.trim().length === 0) {
     throw new Error("A signature or a photo of the signed report is required to close the project.");
+  }
+}
+
+/** SRS step 9 / AF-3: blocks closure until field readiness is documented with at least one installation photo. */
+export function assertHasInstallationPhoto(projectId: string): void {
+  if (getPhotoSummary(projectId).total === 0) {
+    throw new Error("At least one installation photo is required to close the project.");
   }
 }
 
@@ -21,6 +29,7 @@ export function createClosureRecord(
   createdBy: { id: string; name: string }
 ): ClosureRecord {
   assertSignaturePresent(draft);
+  assertHasInstallationPhoto(draft.projectId);
   assertNotClosed(draft.projectId);
 
   if (!draft.projectId) {

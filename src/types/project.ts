@@ -69,6 +69,12 @@ export interface ProjectTask {
   dueDate: string;
   completed: boolean;
   priority: "Low" | "Medium" | "High" | "Critical";
+  /** i18n key for the translated title, e.g. "projects:obstacles.events.siloStarted.title". Falls back to `title` when absent (legacy records). */
+  titleKey?: string;
+  titleParams?: Record<string, string>;
+  /** i18n key for the translated description. Falls back to `description` when absent (legacy records). */
+  descriptionKey?: string;
+  descriptionParams?: Record<string, string>;
 }
 
 export interface Project {

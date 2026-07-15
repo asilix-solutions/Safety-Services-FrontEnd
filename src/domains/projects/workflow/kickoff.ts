@@ -51,6 +51,9 @@ export function initiateKickoffVisit({
     completed: true,
     dueDate: (scheduledDate || nowStr).split("T")[0],
     priority: "Medium",
+    titleKey: "projects:obstacles.events.kickoffScheduled.title",
+    descriptionKey: "projects:obstacles.events.kickoffScheduled.desc",
+    descriptionParams: { actor: inspectorName },
   });
 
   const updatedProject: Project = {
@@ -112,6 +115,9 @@ export function handleKickoffDecision({
     completed: true,
     dueDate: nowStr.split("T")[0],
     priority: "High",
+    titleKey: approved ? "projects:obstacles.events.kickoffApproved.title" : "projects:obstacles.events.kickoffRejected.title",
+    descriptionKey: approved ? "projects:obstacles.events.kickoffApproved.desc" : "projects:obstacles.events.kickoffRejected.desc",
+    descriptionParams: { actor: inspectorName, notes: decisionNotes },
   });
 
   const updatedProject: Project = {
@@ -150,6 +156,9 @@ export function startExecution({
     completed: true,
     dueDate: nowStr.split("T")[0],
     priority: "Medium",
+    titleKey: "projects:obstacles.events.executionStarted.title",
+    descriptionKey: "projects:obstacles.events.executionStarted.desc",
+    descriptionParams: { actor: startedBy },
   });
 
   const updatedProject: Project = {

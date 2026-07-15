@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 interface I18nContextType {
   locale: Locale;
   dir: "rtl" | "ltr";
-  t: (key: string) => string;
+  t: (key: string, params?: Record<string, string>) => string;
   changeLanguage: (newLocale: Locale) => void;
   isPending: boolean;
   addTranslations: (newTranslations: Record<string, Record<string, string>>) => void;
@@ -79,7 +79,7 @@ export function I18nProvider({
   };
 
   // Type-safe translation resolution
-  const t = (key: string): string => {
+  const t = (key: string, params?: Record<string, string>): string => {
     const delimiterIndex = key.indexOf(":");
     let ns = "common";
     let subKey = key;
@@ -95,7 +95,9 @@ export function I18nProvider({
       }
     }
 
-    return translations[ns]?.[subKey] || DICTIONARIES[locale]?.[ns as Namespace]?.[subKey] || subKey || key;
+    const raw = translations[ns]?.[subKey] || DICTIONARIES[locale]?.[ns as Namespace]?.[subKey] || subKey || key;
+    if (!params) return raw;
+    return Object.keys(params).reduce((acc, paramKey) => acc.split(`{${paramKey}}`).join(params[paramKey]), raw);
   };
 
   return (
