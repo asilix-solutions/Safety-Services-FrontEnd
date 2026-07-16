@@ -28,20 +28,21 @@ export function ChangeTierDialog({ company, onConfirm, onClose }: ChangeTierDial
   const { t } = useTranslation();
   const [selectedTier, setSelectedTier] = useState<SubscriptionTier>("Trial");
   const [error, setError] = useState<string | null>(null);
+  const [displayCompany, setDisplayCompany] = useState<Company | null>(null);
 
   useEffect(() => {
     if (company) {
       setSelectedTier(company.tier);
       setError(null);
+      setDisplayCompany(company);
     }
   }, [company]);
-
-  if (!company) return null;
 
   const limits = TIER_LIMITS[selectedTier];
 
   const handleConfirm = () => {
-    const result = onConfirm(company.id, selectedTier);
+    if (!displayCompany) return;
+    const result = onConfirm(displayCompany.id, selectedTier);
     if (result.success) {
       onClose();
     } else {
@@ -50,14 +51,16 @@ export function ChangeTierDialog({ company, onConfirm, onClose }: ChangeTierDial
   };
 
   return (
-    <Dialog open onOpenChange={(open) => !open && onClose()}>
+    <Dialog open={!!company} onOpenChange={(open) => !open && onClose()}>
       <DialogContent>
+        {displayCompany && (
+        <>
         <DialogHeader>
           <DialogTitle>
             <Layers className="h-4 w-4 text-primary" />
             {t("common:companies.dialog.change_tier_title")}
           </DialogTitle>
-          <DialogDescription>{company.name}</DialogDescription>
+          <DialogDescription>{displayCompany.name}</DialogDescription>
         </DialogHeader>
 
         <DialogBody>
@@ -108,6 +111,8 @@ export function ChangeTierDialog({ company, onConfirm, onClose }: ChangeTierDial
             </Button>
           </div>
         </DialogBody>
+        </>
+        )}
       </DialogContent>
     </Dialog>
   );

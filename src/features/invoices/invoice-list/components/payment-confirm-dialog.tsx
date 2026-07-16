@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { ClientInvoice } from "@/domains/invoices/types";
 import {
   Dialog,
@@ -17,9 +17,10 @@ import Link from "next/link";
 import { useTranslation } from "@/providers/i18n-provider";
 import { formatCurrency as localFormatCurrency } from "@/lib/formatters";
 import { getStatusLabel, getStatusBadgeVariant } from "../helpers/helpers";
+import { StripePaymentElement } from "./stripe-payment-element";
 
 interface PaymentConfirmDialogProps {
-  invoice: ClientInvoice;
+  invoice: ClientInvoice | null;
   isPaying: boolean;
   isSuccess: boolean;
   createdProjectId?: string | null;
@@ -36,13 +37,22 @@ export function PaymentConfirmDialog({
   onCancel,
 }: PaymentConfirmDialogProps) {
   const { t, locale } = useTranslation();
+  const [displayInvoice, setDisplayInvoice] = useState<ClientInvoice | null>(null);
+
+  useEffect(() => {
+    if (invoice) setDisplayInvoice(invoice);
+  }, [invoice]);
 
   return (
-    <Dialog open onOpenChange={(open) => !open && !isPaying && onCancel()}>
-      <DialogContent hideClose={isPaying} onEscapeKeyDown={(e) => isPaying && e.preventDefault()}>
-        {!isSuccess ? (
+    <Dialog open={!!invoice} onOpenChange={(open) => !open && !isPaying && onCancel()}>
+      <DialogContent
+        hideClose={isPaying}
+        onEscapeKeyDown={(e) => isPaying && e.preventDefault()}
+        className="max-w-lg max-h-[85vh] flex flex-col"
+      >
+        {!displayInvoice ? null : !isSuccess ? (
           <>
-            <DialogHeader>
+            <DialogHeader className="shrink-0">
               <DialogTitle>
                 <CreditCard className="h-4 w-4 text-primary" />
                 {t("common:invoices_pay_confirm_title")}
@@ -50,21 +60,21 @@ export function PaymentConfirmDialog({
               <DialogDescription>{t("common:invoices_pay_confirm_desc")}</DialogDescription>
             </DialogHeader>
 
-            <DialogBody>
+            <DialogBody className="overflow-y-auto">
               {/* Invoice Details */}
               <div className="space-y-2.5 bg-secondary/20 p-3 rounded-lg border border-border">
                 <div className="flex justify-between items-center">
                   <span className="text-muted-foreground">
                     {t("common:invoices_pay_confirm_invoice_id")}
                   </span>
-                  <span className="font-mono font-bold text-primary">{invoice.id}</span>
+                  <span className="font-mono font-bold text-primary">{displayInvoice.id}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-muted-foreground">
                     {t("common:invoices_pay_confirm_job_number")}
                   </span>
                   <span className="font-mono font-semibold text-foreground">
-                    {invoice.jobNumber}
+                    {displayInvoice.jobNumber}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
@@ -72,10 +82,10 @@ export function PaymentConfirmDialog({
                     {t("common:invoices_pay_confirm_status")}
                   </span>
                   <Badge
-                    variant={getStatusBadgeVariant(invoice.status)}
+                    variant={getStatusBadgeVariant(displayInvoice.status)}
                     className="uppercase text-[9px]"
                   >
-                    {getStatusLabel(invoice.status, t)}
+                    {getStatusLabel(displayInvoice.status, t)}
                   </Badge>
                 </div>
               </div>
@@ -86,7 +96,7 @@ export function PaymentConfirmDialog({
                   {t("common:invoices_pay_confirm_amount")}
                 </span>
                 <span className="text-base font-bold text-primary">
-                  {localFormatCurrency(invoice.grandTotal, locale, invoice.currency)}
+                  {localFormatCurrency(displayInvoice.grandTotal, locale, displayInvoice.currency)}
                 </span>
               </div>
 
@@ -98,33 +108,14 @@ export function PaymentConfirmDialog({
                 </p>
               </div>
 
-              {/* Actions */}
-              <div className="flex gap-2 pt-1">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex-1 h-9 text-xs"
-                  onClick={onCancel}
-                  disabled={isPaying}
-                >
-                  {t("common:invoices_pay_cancel_btn")}
-                </Button>
-                <Button
-                  size="sm"
-                  className="flex-1 h-9 text-xs bg-primary hover:bg-primary/90"
-                  onClick={onConfirm}
-                  disabled={isPaying}
-                >
-                  {isPaying ? (
-                    <span className="flex items-center gap-1.5">
-                      <span className="h-3 w-3 rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground animate-spin" />
-                      {t("common:loading")}
-                    </span>
-                  ) : (
-                    t("common:invoices_pay_confirm_btn")
-                  )}
-                </Button>
-              </div>
+              {/* Stripe Payment Element (test mode, simulated confirmation) */}
+              <StripePaymentElement
+                amount={displayInvoice.grandTotal}
+                currency={displayInvoice.currency}
+                isPaying={isPaying}
+                onPaySuccess={onConfirm}
+                onCancel={onCancel}
+              />
             </DialogBody>
           </>
         ) : (

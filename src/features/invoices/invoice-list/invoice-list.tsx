@@ -100,16 +100,14 @@ export function InvoiceList() {
         hasLinkedQuotation={hasLinkedQuotation}
       />
 
-      {payingInvoice && (
-        <PaymentConfirmDialog
-          invoice={payingInvoice}
-          isPaying={isPayingConfirm}
-          isSuccess={paymentSuccess}
-          createdProjectId={createdProjectId}
-          onConfirm={handleConfirmPayment}
-          onCancel={handleCancelPayment}
-        />
-      )}
+      <PaymentConfirmDialog
+        invoice={payingInvoice}
+        isPaying={isPayingConfirm}
+        isSuccess={paymentSuccess}
+        createdProjectId={createdProjectId}
+        onConfirm={handleConfirmPayment}
+        onCancel={handleCancelPayment}
+      />
     </div>
   );
 }
