@@ -13,7 +13,7 @@ import {
 import { Button } from "@/shared/ui/button";
 import { Badge } from "@/shared/ui/badge";
 import { CheckCircle2, AlertTriangle, CreditCard, Layers } from "lucide-react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useTranslation } from "@/providers/i18n-provider";
 import { formatCurrency as localFormatCurrency } from "@/lib/formatters";
 import { getStatusLabel, getStatusBadgeVariant } from "../helpers/helpers";
@@ -37,11 +37,21 @@ export function PaymentConfirmDialog({
   onCancel,
 }: PaymentConfirmDialogProps) {
   const { t, locale } = useTranslation();
+  const router = useRouter();
   const [displayInvoice, setDisplayInvoice] = useState<ClientInvoice | null>(null);
 
   useEffect(() => {
     if (invoice) setDisplayInvoice(invoice);
   }, [invoice]);
+
+  /** Close the dialog first so Radix's close/cleanup effects (body pointer-events/scroll
+   * lock) commit, THEN navigate on the next tick — navigating in the same event as the
+   * unmount races Radix's cleanup and leaves the destination page unclickable. */
+  const handleGoToProjects = () => {
+    const destination = createdProjectId ? `/projects/${createdProjectId}` : "/projects";
+    onCancel();
+    setTimeout(() => router.push(destination), 0);
+  };
 
   return (
     <Dialog open={!!invoice} onOpenChange={(open) => !open && !isPaying && onCancel()}>
@@ -133,16 +143,14 @@ export function PaymentConfirmDialog({
               </p>
 
               <div className="flex flex-col gap-2 pt-2">
-                <Link
-                  href={createdProjectId ? `/projects/${createdProjectId}` : "/projects"}
-                  className="w-full"
-                  onClick={onCancel}
+                <Button
+                  size="sm"
+                  className="w-full h-9 text-xs gap-2"
+                  onClick={handleGoToProjects}
                 >
-                  <Button size="sm" className="w-full h-9 text-xs gap-2">
-                    <Layers className="h-3.5 w-3.5" />
-                    {t("common:invoices_pay_success_go_projects")}
-                  </Button>
-                </Link>
+                  <Layers className="h-3.5 w-3.5" />
+                  {t("common:invoices_pay_success_go_projects")}
+                </Button>
                 <Button variant="outline" size="sm" className="w-full h-9 text-xs" onClick={onCancel}>
                   {t("common:invoices_pay_success_go_invoices")}
                 </Button>
