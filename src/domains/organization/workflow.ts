@@ -1,6 +1,8 @@
 import { Company, CompaniesSummary, TierLimitCheck, SubscriptionTier, TIER_LIMITS } from "./types";
 import { getCompanies, saveCompanies } from "./storage";
 
+const ALL_TIERS: SubscriptionTier[] = ["Trial", "Basic", "Professional"];
+
 function findCompanyOrThrow(companies: Company[], id: string): Company {
   const company = companies.find((c) => c.id === id);
   if (!company) throw new Error(`Company not found: ${id}`);
@@ -59,4 +61,29 @@ export function getCompaniesSummary(): CompaniesSummary {
     active: companies.filter((c) => c.status === "active").length,
     suspended: companies.filter((c) => c.status === "suspended").length,
   };
+}
+
+export interface TierDistribution {
+  tier: SubscriptionTier;
+  count: number;
+}
+
+export function getTierDistribution(): TierDistribution[] {
+  const companies = getCompanies();
+  return ALL_TIERS.map((tier) => ({
+    tier,
+    count: companies.filter((c) => c.tier === tier).length,
+  }));
+}
+
+export interface SubscriptionMatrixRow {
+  company: Company;
+  limitCheck: TierLimitCheck;
+}
+
+export function getSubscriptionMatrix(): SubscriptionMatrixRow[] {
+  return getCompanies().map((company) => ({
+    company,
+    limitCheck: checkTierLimit(company),
+  }));
 }

@@ -1,0 +1,22 @@
+{
+  "title": "مصفوفة الاشتراكات",
+  "desc": "مراقبة فئات المستأجرين وحالة الاشتراك والاستخدام مقابل حدود الخطة عبر المنصة.",
+  "unauthorized_desc": "لا يملك دورك صلاحية الوصول إلى مصفوفة الاشتراكات.",
+  "distribution.title": "توزيع الفئات",
+  "distribution.tier.Trial": "تجريبية",
+  "distribution.tier.Basic": "أساسية",
+  "distribution.tier.Professional": "احترافية",
+  "matrix.title": "مصفوفة الاشتراكات",
+  "matrix.empty_title": "لا توجد شركات",
+  "matrix.empty_desc": "لا توجد شركات مستأجرة لعرضها حتى الآن.",
+  "matrix.table.tenant": "المستأجر",
+  "matrix.table.tier": "الفئة",
+  "matrix.table.status": "حالة الاشتراك",
+  "matrix.table.users": "المستخدمون",
+  "matrix.table.projects": "المشاريع",
+  "status.active": "نشط",
+  "status.suspended": "معلق",
+  "status.pending_verification": "بانتظار التحقق",
+  "limit_unlimited": "غير محدود",
+  "limit.at_limit": "بلغ الحد"
+}

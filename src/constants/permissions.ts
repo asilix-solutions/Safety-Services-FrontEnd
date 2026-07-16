@@ -277,3 +277,61 @@ export function canManageCompanies(role: UserRole | undefined): boolean {
   if (!role) return false;
   return COMPANIES_ACCESS[role]?.canManage ?? false;
 }
+
+/**
+ * Super Admin Subscriptions Matrix (tenant monitoring, SRS FR-TEN-05) — read-only
+ * dashboard, distinct from the FR-TEN-06 Companies control surface above. Components
+ * must read the resolved boolean from `canViewSubscriptions`, never compare
+ * `role === "Super Admin"` directly.
+ */
+interface SubscriptionsAccess {
+  canView: boolean;
+}
+
+const NO_SUBSCRIPTIONS_ACCESS: SubscriptionsAccess = { canView: false };
+
+export const SUBSCRIPTIONS_ACCESS: Record<UserRole, SubscriptionsAccess> = {
+  "Super Admin": { canView: true },
+  "Company Admin": NO_SUBSCRIPTIONS_ACCESS,
+  "Consulting Engineer": NO_SUBSCRIPTIONS_ACCESS,
+  "Operations Officer": NO_SUBSCRIPTIONS_ACCESS,
+  "Sales Agent": NO_SUBSCRIPTIONS_ACCESS,
+  Client: NO_SUBSCRIPTIONS_ACCESS,
+};
+
+export function canViewSubscriptions(role: UserRole | undefined): boolean {
+  if (!role) return false;
+  return SUBSCRIPTIONS_ACCESS[role]?.canView ?? false;
+}
+
+/**
+ * Super Admin Users (platform account roster, SRS "user counts" + per-tier
+ * personnel limits). Components must read the resolved booleans from
+ * `canViewUsers`/`canManageUsers`, never compare `role === "Super Admin"`
+ * directly, matching the `COMPANIES_ACCESS`/`SUBSCRIPTIONS_ACCESS` pattern above.
+ */
+interface UsersAccess {
+  canView: boolean;
+  canManage: boolean;
+}
+
+const NO_USERS_ACCESS: UsersAccess = { canView: false, canManage: false };
+
+export const USERS_ACCESS: Record<UserRole, UsersAccess> = {
+  "Super Admin": { canView: true, canManage: true },
+  "Company Admin": NO_USERS_ACCESS,
+  "Consulting Engineer": NO_USERS_ACCESS,
+  "Operations Officer": NO_USERS_ACCESS,
+  "Sales Agent": NO_USERS_ACCESS,
+  Client: NO_USERS_ACCESS,
+};
+
+export function canViewUsers(role: UserRole | undefined): boolean {
+  if (!role) return false;
+  return USERS_ACCESS[role]?.canView ?? false;
+}
+
+export function canManageUsers(role: UserRole | undefined): boolean {
+  if (!role) return false;
+  return USERS_ACCESS[role]?.canManage ?? false;
+}

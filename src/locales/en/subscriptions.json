@@ -1,0 +1,22 @@
+{
+  "title": "Subscriptions Matrix",
+  "desc": "Monitor tenant tiers, subscription status, and usage against plan limits across the platform.",
+  "unauthorized_desc": "You do not have access to the subscriptions matrix.",
+  "distribution.title": "Tier Distribution",
+  "distribution.tier.Trial": "Trial",
+  "distribution.tier.Basic": "Basic",
+  "distribution.tier.Professional": "Professional",
+  "matrix.title": "Subscription Matrix",
+  "matrix.empty_title": "No Companies Found",
+  "matrix.empty_desc": "There are no tenant companies to display yet.",
+  "matrix.table.tenant": "Tenant",
+  "matrix.table.tier": "Tier",
+  "matrix.table.status": "Subscription Status",
+  "matrix.table.users": "Users",
+  "matrix.table.projects": "Projects",
+  "status.active": "Active",
+  "status.suspended": "Suspended",
+  "status.pending_verification": "Pending Verification",
+  "limit_unlimited": "Unlimited",
+  "limit.at_limit": "At Limit"
+}

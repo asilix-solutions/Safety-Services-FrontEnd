@@ -6,6 +6,8 @@ export const QUERY_KEYS = {
   USERS: {
     LIST: ["users"] as const,
     DETAIL: (id: string) => ["users", id] as const,
+    SUMMARY: ["users", "summary"] as const,
+    PERSONNEL_USAGE: ["users", "personnel-usage"] as const,
   },
   PROJECTS: {
     LIST: ["projects"] as const,
@@ -48,6 +50,10 @@ export const QUERY_KEYS = {
   },
   NOTIFICATIONS: {
     LIST: ["notifications"] as const,
+  },
+  SUBSCRIPTIONS: {
+    DISTRIBUTION: ["subscriptions", "distribution"] as const,
+    MATRIX: ["subscriptions", "matrix"] as const,
   },
 } as const;
 export type QueryKeysType = typeof QUERY_KEYS;
