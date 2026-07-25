@@ -1,4 +1,13 @@
 import { Quotation, QuotationItem } from "../types";
+import { VAT_RATE } from "@/constants/tax";
+
+export function computeQuotationTotals(items: QuotationItem[]): { subtotal: number; vat: number; grandTotal: number } {
+  const subtotal = items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
+  const taxableSum = items.filter(item => item.taxable).reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
+  const vat = taxableSum * VAT_RATE;
+  const grandTotal = subtotal + vat;
+  return { subtotal, vat, grandTotal };
+}
 
 export function createQuotationDraft(jobNumber: string): Quotation {
   const nowStr = new Date().toISOString();
@@ -18,10 +27,7 @@ export function updateQuotationItems(
   quotation: Quotation,
   items: QuotationItem[]
 ): Quotation {
-  const subtotal = items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
-  const taxableSum = items.filter(item => item.taxable).reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
-  const vat = taxableSum * 0.15; // 15% VAT on taxable items only
-  const grandTotal = subtotal + vat;
+  const { subtotal, vat, grandTotal } = computeQuotationTotals(items);
 
   return {
     ...quotation,

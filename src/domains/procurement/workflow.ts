@@ -1,8 +1,8 @@
 import { InvoiceType, ProcurementDraft, ProcurementRecord, ProcurementSummary, VatBreakdown } from "./types";
 import { getProcurementByProject, upsertProcurement } from "./storage";
+import { VAT_RATE } from "@/constants/tax";
 
-/** ZATCA-compliant rate — the ONLY place the 15% figure is applied (CLAUDE.md business rule). */
-const VAT_RATE = 0.15;
+/** ZATCA-compliant rate — single source of truth defined in constants/tax.ts. */
 
 function roundCurrency(value: number): number {
   return Math.round(value * 100) / 100;

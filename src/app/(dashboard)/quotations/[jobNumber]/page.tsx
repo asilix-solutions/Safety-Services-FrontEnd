@@ -14,7 +14,7 @@ import { Checkbox } from "@/shared/ui/checkbox";
 import { Label } from "@/shared/ui/label";
 import { Quotation, QuotationItem, QuotationStatus } from "@/domains/quotations/types";
 import { getMergedRequests } from "@/domains/requests/storage";
-import { getQuotations, persistQuotation, updateQuotationItems, createQuotationDraft, submitQuotationForApproval, getQuotationSuggestedItems } from "@/domains/quotations/workflow";
+import { getQuotations, persistQuotation, updateQuotationItems, createQuotationDraft, submitQuotationForApproval, getQuotationSuggestedItems, computeQuotationTotals } from "@/domains/quotations/workflow";
 import { Plus, Trash2, ArrowLeft, Save, Send, X } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -79,10 +79,7 @@ export default function QuotationBuilderPage() {
   };
 
   // Financial Calculations
-  const subtotal = items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
-  const taxableSum = items.filter(item => item.taxable).reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
-  const vat = taxableSum * 0.15;
-  const grandTotal = subtotal + vat;
+  const { subtotal, vat, grandTotal } = computeQuotationTotals(items);
 
   // Add custom quotation item
   const handleAddItem = (descriptionText = "") => {
