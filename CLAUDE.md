@@ -57,12 +57,21 @@ providers, types, config, lib, mock, assets.
 
 # Official Lifecycle
 
-Never mutate state outside a domain workflow helper:
-DRAFT → SUBMITTED → UNDER_REVIEW → QUOTATION → PAYMENT_CONFIRMED →
-PROJECT_CREATED → FIELD_EXECUTION → FINAL_INSPECTION → COMPLETED
+`LicensingRequest` carries TWO status fields by design, not a single enum:
+- `currentStage: WorkflowStage` — the AUTHORITATIVE state-machine field.
+  Governs all gating (visibility, transitions, progress indicators). Real 11-state
+  sequence (`domains/requests/types.ts`, `WORKFLOW_STAGES` in `domains/requests/workflow.ts`):
+  DRAFT → SUBMITTED → UNDER_REVIEW → QUOTATION → QUOTATION_APPROVAL →
+  READY_FOR_PAYMENT → PAYMENT_CONFIRMED → PROJECT_CREATED → FIELD_EXECUTION →
+  FINAL_INSPECTION → COMPLETED
+- `status: RequestStatus` — a secondary, internal display/classification layer
+  (lowercase snake_case), used for Badges and the active/completed filter.
+  Kept as a plausible shape for a future external/government API contract.
+  Synced one-way from `currentStage` via `mapStatusToStage()`
+  (`domains/requests/workflow.ts:34-49`) on every `getMergedRequests()` pass.
 
 - No page or component may change status directly. Route every transition
-  through `domains/*/workflow.ts`.
+  through `domains/*/workflow.ts`, writing `currentStage` (the authoritative field).
 - Never confuse: Request (pre-payment) ≠ Project (post-payment);
   Quotation (price offer) ≠ Invoice (post-approval) ≠ Payment (confirmation).
 

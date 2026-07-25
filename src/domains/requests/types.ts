@@ -31,6 +31,17 @@ export interface RequiredDocument {
   fileName?: string;
 }
 
+/**
+ * Two status fields, by design, not a duplication:
+ * - status (RequestStatus): internal display/classification layer. Kept
+ *   deliberately — its lowercase snake_case shape is a reasonable fit for a
+ *   future external/government API contract per the SRS Civil-Defense
+ *   integration goals. Currently internal-display only (Badges, filtering).
+ * - currentStage (WorkflowStage): the AUTHORITATIVE state-machine field.
+ *   Governs all gating (visibility, transitions, progress indicators).
+ * The two are kept in sync one-way via mapStatusToStage()
+ * (domains/requests/workflow.ts:34-49), called on every getMergedRequests() pass.
+ */
 export interface LicensingRequest {
   id: string;
   jobNumber: string;
