@@ -16,6 +16,7 @@ import { getClassificationDisplayName, getRequestStatusDisplayName, getCanonical
 import { getMergedRequests } from "@/domains/requests/storage";
 import { getProjects } from "@/domains/projects/storage";
 import { Project } from "@/types/project";
+import { isRole } from "@/constants/permissions";
  
 export default function RequestsPage() {
   const { user } = useAuth();
@@ -26,8 +27,8 @@ export default function RequestsPage() {
   // Load from localStorage and merge with mock requests
   useEffect(() => {
     const list = getMergedRequests();
-    if (user?.role === "Client") {
-      const filtered = list.filter((r) => r.clientId === user.companyId);
+    if (isRole(user?.role, ["Client"])) {
+      const filtered = list.filter((r) => r.clientId === user!.companyId);
       setRequests(filtered);
     } else {
       setRequests(list);
@@ -90,7 +91,7 @@ export default function RequestsPage() {
   };
 
   // Render client-portal layout with friendly visual cards
-  if (user.role === "Client") {
+  if (isRole(user.role, ["Client"])) {
     return (
       <div className="space-y-6">
         <PageHeader
@@ -193,7 +194,7 @@ export default function RequestsPage() {
       render: (row) => {
         const queue = row.assignedQueue || (row.classification === "high_hazard_review" ? "HIGH_HAZARD" : row.classification === "engineering_project" ? "ENGINEERING" : row.classification === "maintenance_strategy" ? "MAINTENANCE" : "FAST_TRACK");
         const isEngQueue = queue === "ENGINEERING" || queue === "HIGH_HAZARD";
-        const isConsultingEngineer = user.role === "Consulting Engineer";
+        const isConsultingEngineer = isRole(user.role, ["Consulting Engineer"]);
         const linkedProject = projectsByJobNumber.get(row.jobNumber);
 
         if (isConsultingEngineer && isEngQueue) {
@@ -227,7 +228,7 @@ export default function RequestsPage() {
     },
   ];
 
-  const isSalesAgent = user.role === "Sales Agent";
+  const isSalesAgent = isRole(user.role, ["Sales Agent"]);
 
   return (
     <div className="space-y-6">

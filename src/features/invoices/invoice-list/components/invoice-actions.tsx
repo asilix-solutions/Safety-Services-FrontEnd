@@ -8,6 +8,7 @@ import Link from "next/link";
 import { useTranslation } from "@/providers/i18n-provider";
 import { useAuth } from "@/providers/AuthProvider";
 import { USER_ROLES } from "@/constants/roles";
+import { isRole } from "@/constants/permissions";
 import { getProjects } from "@/domains/projects/storage";
 import { getSiteVisitsByProjectId } from "@/domains/site-visits/storage";
 import { formatCurrency, formatDate, getStatusBadgeVariant, getStatusLabel } from "../helpers/helpers";
@@ -34,9 +35,9 @@ export function InvoiceActions({
 
   if (!invoice) return null;
 
-  const isClient = user?.role === USER_ROLES.CLIENT;
-  const isConsultingEngineer = user?.role === USER_ROLES.CONSULTING_ENGINEER;
-  const isCompanyAdmin = user?.role === USER_ROLES.COMPANY_ADMIN;
+  const isClient = isRole(user?.role, [USER_ROLES.CLIENT]);
+  const isConsultingEngineer = isRole(user?.role, [USER_ROLES.CONSULTING_ENGINEER]);
+  const isCompanyAdmin = isRole(user?.role, [USER_ROLES.COMPANY_ADMIN]);
 
   const getQuotationHref = () => {
     if (isConsultingEngineer) {
@@ -221,7 +222,7 @@ export function InvoiceActions({
                   const projectsList = getProjects();
                   const linkedProj = projectsList.find((p) => p.jobNumber === invoice.jobNumber);
                   
-                  if (user?.role === USER_ROLES.CONSULTING_ENGINEER) {
+                  if (isRole(user?.role, [USER_ROLES.CONSULTING_ENGINEER])) {
                     if (linkedProj) {
                       const visits = getSiteVisitsByProjectId(linkedProj.id);
                       const kickoffVisit = visits.find((v: any) => v.type === "kickoff");

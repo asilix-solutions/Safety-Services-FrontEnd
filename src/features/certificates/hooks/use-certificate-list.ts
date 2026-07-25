@@ -6,6 +6,7 @@ import { getCertificates } from "@/domains/certificates/storage";
 import { issueCertificateFromProject, revokeCertificate } from "@/domains/certificates/workflow";
 import { getProjects } from "@/domains/projects/storage";
 import { checkProjectCertificateEligibility, CertificateEligibility } from "@/domains/workflow-validation/certificate.validators";
+import { isRole, hasPermission } from "@/constants/permissions";
 
 export function useCertificateList() {
   const { user } = useAuth();
@@ -24,12 +25,12 @@ export function useCertificateList() {
     const allCertificates = getCertificates();
     let userCertificates = allCertificates;
 
-    if (user.role === "Client") {
+    if (isRole(user.role, ["Client"])) {
       userCertificates = allCertificates.filter((c) => c.clientId === user.companyId);
     }
     setCertificates(userCertificates);
 
-    const isAdmin = user.role === "Company Admin" || user.role === "Super Admin";
+    const isAdmin = hasPermission(user.role, "certificates.manage");
     if (isAdmin) {
       const allProjects = getProjects();
       const eligible = allProjects
@@ -81,7 +82,7 @@ export function useCertificateList() {
     alert(`Downloading compliance certificate PDF for "${certificate.title}" (Simulated)`);
   };
 
-  const isAdmin = user ? user.role === "Company Admin" || user.role === "Super Admin" : false;
+  const isAdmin = user ? hasPermission(user.role, "certificates.manage") : false;
 
   return {
     user,

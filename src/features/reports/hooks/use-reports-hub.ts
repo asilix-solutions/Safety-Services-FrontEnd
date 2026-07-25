@@ -13,6 +13,7 @@ import {
   downloadReport,
   submitReport
 } from "@/domains/reports";
+import { isRole } from "@/constants/permissions";
 import { getProjects } from "@/domains/projects/storage";
 import { getSiteVisits } from "@/domains/site-visits/storage";
 import { getRequests } from "@/domains/requests/storage";
@@ -58,9 +59,9 @@ export function useReportsHub() {
 
   // Roles helpers
   const isAdmin = user ? ["Super Admin", "Company Admin"].includes(user.role) : false;
-  const isEngineer = user ? user.role === "Consulting Engineer" : false;
-  const isOperations = user ? user.role === "Operations Officer" : false;
-  const isClient = user ? user.role === "Client" : false;
+  const isEngineer = isRole(user?.role, ["Consulting Engineer"]);
+  const isOperations = isRole(user?.role, ["Operations Officer"]);
+  const isClient = isRole(user?.role, ["Client"]);
 
   // 1. Compute Ready to Generate items based on other domains
   const readyToGenerateItems = useMemo<ReadyToGenerateItem[]>(() => {

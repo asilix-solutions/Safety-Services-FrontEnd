@@ -8,6 +8,7 @@ import { getProjects } from "@/domains/projects/storage";
 import { getContracts } from "@/domains/contracts/storage";
 import { getQuotations } from "@/domains/quotations/storage";
 import { confirmMockPayment } from "@/domains/payments/workflow";
+import { isRole } from "@/constants/permissions";
 
 /** Presentation-layer only extension — adds facilityName for display */
 export type InvoiceWithFacility = ClientInvoice & { facilityName: string };
@@ -43,7 +44,7 @@ export function useInvoiceList() {
     });
 
     let userInvoices = enriched;
-    if (user.role === "Client") {
+    if (isRole(user.role, ["Client"])) {
       userInvoices = enriched.filter((i) => i.clientId === user.companyId);
     }
     setInvoices(userInvoices);

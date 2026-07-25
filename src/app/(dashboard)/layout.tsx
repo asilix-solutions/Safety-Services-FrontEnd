@@ -8,6 +8,7 @@ import { AdminLayout } from "@/shared/layouts/admin-layout";
 import { OperationsLayout } from "@/shared/layouts/operations-layout";
 import { ClientLayout } from "@/shared/layouts/client-layout";
 import { ROLE_NAVIGATION } from "@/constants/navigation";
+import { NAV_LAYOUT_GROUPS } from "@/constants/permissions";
 import { getProjects } from "@/domains/projects/storage";
 
 
@@ -71,15 +72,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   if (!user) return null;
 
   // Resolve layouts explicitly based on user role categories
-  if (user.role === "Super Admin" || user.role === "Company Admin" || user.role === "Sales Agent") {
+  const layoutGroup = NAV_LAYOUT_GROUPS[user.role];
+
+  if (layoutGroup === "admin") {
     return <AdminLayout>{children}</AdminLayout>;
   }
 
-  if (user.role === "Consulting Engineer" || user.role === "Operations Officer") {
+  if (layoutGroup === "operations") {
     return <OperationsLayout>{children}</OperationsLayout>;
   }
 
-  if (user.role === "Client") {
+  if (layoutGroup === "client") {
     return <ClientLayout>{children}</ClientLayout>;
   }
 

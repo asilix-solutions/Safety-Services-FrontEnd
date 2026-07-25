@@ -37,6 +37,7 @@ import { Project } from "@/types/project";
 import { getProjectByJobNumber, getProjectTemplateMetadata } from "@/domains/projects/storage";
 import { getSiteVisitsByProjectId } from "@/domains/site-visits/storage";
 import { USER_ROLES } from "@/constants/roles";
+import { isRole } from "@/constants/permissions";
 import { getProjectExecutionPhaseLabel } from "@/domains/projects/workflow";
 
 export default function RequestDetailsPage() {
@@ -315,9 +316,9 @@ export default function RequestDetailsPage() {
 
   const currentStageIndex = WORKFLOW_STAGES.indexOf(request.currentStage);
 
-  const isConsultingEngineer = user?.role === USER_ROLES.CONSULTING_ENGINEER;
-  const isClient = user?.role === USER_ROLES.CLIENT;
-  const isSalesAgent = user?.role === USER_ROLES.SALES_AGENT;
+  const isConsultingEngineer = isRole(user?.role, [USER_ROLES.CONSULTING_ENGINEER]);
+  const isClient = isRole(user?.role, [USER_ROLES.CLIENT]);
+  const isSalesAgent = isRole(user?.role, [USER_ROLES.SALES_AGENT]);
   const queueNorm = (request.assignedQueue || "").toUpperCase();
   const classNorm = (request.classification || "").toUpperCase().replace(/_/, "");
   const isFastOrMaintenance = queueNorm === "FAST_TRACK" || queueNorm === "MAINTENANCE" || classNorm.includes("FAST") || classNorm.includes("MAINTENANCE");
@@ -658,7 +659,7 @@ export default function RequestDetailsPage() {
 
                   <div className="pt-2 border-t border-border">
                     {(() => {
-                      if (user?.role === USER_ROLES.OPERATIONS_OFFICER) {
+                      if (isRole(user?.role, [USER_ROLES.OPERATIONS_OFFICER])) {
                         return (
                           <Link href={`/projects/${linkedProject.id}`}>
                             <Button size="sm" className="w-full text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white gap-1.5 h-8">
@@ -666,7 +667,7 @@ export default function RequestDetailsPage() {
                             </Button>
                           </Link>
                         );
-                      } else if (user?.role === USER_ROLES.CONSULTING_ENGINEER) {
+                      } else if (isRole(user?.role, [USER_ROLES.CONSULTING_ENGINEER])) {
                         const visits = getSiteVisitsByProjectId(linkedProject.id);
                         const kickoffVisit = visits.find((v: any) => v.type === "kickoff");
                         if (kickoffVisit) {
@@ -684,7 +685,7 @@ export default function RequestDetailsPage() {
                             </Button>
                           );
                         }
-                      } else if (user?.role === USER_ROLES.CLIENT) {
+                      } else if (isRole(user?.role, [USER_ROLES.CLIENT])) {
                         return (
                           <Link href={`/projects/${linkedProject.id}`}>
                             <Button size="sm" className="w-full text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white gap-1.5 h-8">

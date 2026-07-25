@@ -13,6 +13,7 @@ import { useTranslation, useNamespaceTranslations } from "@/providers/i18n-provi
 import { Project } from "@/types/project";
 import { getProjects } from "@/domains/projects/storage";
 import { StatusBadge } from "@/shared/components/status-badge";
+import { isRole } from "@/constants/permissions";
 
 export default function ProjectsPage() {
   const { user } = useAuth();
@@ -22,8 +23,8 @@ export default function ProjectsPage() {
 
   useEffect(() => {
     const list = getProjects();
-    if (user?.role === "Client") {
-      const filtered = list.filter((p) => p.clientId === user.companyId);
+    if (isRole(user?.role, ["Client"])) {
+      const filtered = list.filter((p) => p.clientId === user!.companyId);
       setProjects(filtered);
     } else {
       setProjects(list);

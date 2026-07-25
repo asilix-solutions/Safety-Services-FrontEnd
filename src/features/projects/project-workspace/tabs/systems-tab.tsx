@@ -10,6 +10,8 @@ import { Project, SiloExecutionData } from "@/types/project";
 import { ExecutionViewModel } from "../view-models/project-workspace.viewmodel";
 import { Badge } from "@/shared/ui/badge";
 import { USER_ROLES } from "@/constants/roles";
+import { isRole } from "@/constants/permissions";
+import type { UserRole } from "@/types/role";
 import { ExecutionSummaryCard } from "../components/execution-summary-card";
 
 const SILO_STATUS_KEY: Record<string, string> = {
@@ -188,7 +190,7 @@ export function SystemsTab({
                     </div>
 
                     <div className="p-2 bg-secondary/35 border-t border-border flex justify-between items-center text-[10px]">
-                      {user.role === USER_ROLES.OPERATIONS_OFFICER && project.executionPhase === "ACTIVE_EXECUTION" ? (
+                      {isRole(user.role as UserRole, [USER_ROLES.OPERATIONS_OFFICER]) && project.executionPhase === "ACTIVE_EXECUTION" ? (
                         <div className="w-full flex gap-2 justify-end">
                           {!isEditing && (
                             <Button

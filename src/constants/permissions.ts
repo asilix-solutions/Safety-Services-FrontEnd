@@ -93,6 +93,30 @@ export function canAccessProjectWorkspace(role: UserRole | undefined): boolean {
   if (!role) return false;
   return PROJECT_WORKSPACE_TAB_ACCESS[role]?.enterable ?? false;
 }
+/**
+ * Generic role-membership check. Components must call this (or a matrix
+ * accessor above/below) instead of comparing `role === "X"` directly.
+ */
+export function isRole(role: UserRole | undefined, roles: UserRole[]): boolean {
+  return !!role && roles.includes(role);
+}
+
+/**
+ * Which dashboard layout shell each role renders into (nav gate,
+ * `app/(dashboard)/layout.tsx`). Matches the historical Admin/Operations/Client
+ * split exactly — a distinct concept from `ROLE_PERMISSIONS` below.
+ */
+export type NavLayoutGroup = "admin" | "operations" | "client";
+
+export const NAV_LAYOUT_GROUPS: Record<UserRole, NavLayoutGroup> = {
+  "Super Admin": "admin",
+  "Company Admin": "admin",
+  "Sales Agent": "admin",
+  "Consulting Engineer": "operations",
+  "Operations Officer": "operations",
+  Client: "client",
+};
+
 export const ROLE_PERMISSIONS: Record<UserRole, RolePermissionKey[]> = {
   "Super Admin": [
     "users.manage",

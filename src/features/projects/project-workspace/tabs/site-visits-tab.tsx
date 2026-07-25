@@ -5,6 +5,8 @@ import { Textarea } from "@/shared/ui/textarea";
 import { Settings } from "lucide-react";
 import { Project } from "@/types/project";
 import { USER_ROLES } from "@/constants/roles";
+import { isRole } from "@/constants/permissions";
+import type { UserRole } from "@/types/role";
 import { initiateKickoffVisit, handleKickoffDecision } from "@/domains/projects/workflow/kickoff";
 import { getSiteVisitsByProjectId } from "@/domains/site-visits/storage";
 
@@ -22,7 +24,7 @@ export function SiteVisitsTab({ project, setProject, user, isProcessing, loadDat
     <div className="grid gap-6 lg:grid-cols-3">
       <div className="lg:col-span-3 space-y-6">
         {/* Operations Officer Kickoff Visit Scheduling Form */}
-        {user.role === USER_ROLES.OPERATIONS_OFFICER && project.executionPhase === "PROJECT_PROVISIONED" && (
+        {isRole(user.role as UserRole, [USER_ROLES.OPERATIONS_OFFICER]) && project.executionPhase === "PROJECT_PROVISIONED" && (
           <Card className="border-border bg-card">
             <CardHeader className="pb-3 border-b border-border">
               <CardTitle className="text-sm font-bold flex items-center gap-2">
@@ -94,7 +96,7 @@ export function SiteVisitsTab({ project, setProject, user, isProcessing, loadDat
         )}
 
         {/* Consulting Engineer Inspector Kickoff Audit Sign-Off Form */}
-        {user.role === USER_ROLES.CONSULTING_ENGINEER && project.executionPhase === "KICKOFF_PENDING" && (
+        {isRole(user.role as UserRole, [USER_ROLES.CONSULTING_ENGINEER]) && project.executionPhase === "KICKOFF_PENDING" && (
           <Card className="border-border bg-card">
             <CardHeader className="pb-3 border-b border-border">
               <CardTitle className="text-sm font-bold flex items-center gap-2">

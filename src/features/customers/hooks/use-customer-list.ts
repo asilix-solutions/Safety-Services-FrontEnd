@@ -6,6 +6,7 @@ import { validateCustomer } from "@/domains/customers/validation";
 import { CustomerFilters } from "../types";
 import { getActiveProjects } from "@/domains/projects/storage";
 import { getUnpaidInvoices } from "@/domains/invoices/storage";
+import { hasPermission } from "@/constants/permissions";
 
 export function useCustomerList() {
   const { user } = useAuth();
@@ -39,7 +40,7 @@ export function useCustomerList() {
     }
     const role = user.role;
     return {
-      canManageCustomerProfile: role === "Company Admin" || role === "Sales Agent",
+      canManageCustomerProfile: hasPermission(role, "customers.manage"),
       canToggleCustomerStatus: role === "Company Admin",
       canMutateLinkedRecords: false,
       canView: ["Super Admin", "Company Admin", "Operations Officer", "Consulting Engineer", "Sales Agent"].includes(role),
