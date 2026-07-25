@@ -17,6 +17,9 @@ export function createQuotationDraft(jobNumber: string): Quotation {
     items: [],
     subtotal: 0,
     vat: 0,
+
+
+    
     grandTotal: 0,
     createdAt: nowStr,
     updatedAt: nowStr,
