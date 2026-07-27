@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { toast } from "sonner";
 import { useAuth } from "@/providers/AuthProvider";
 import { useParams } from "next/navigation";
 import { useTranslation } from "@/providers/i18n-provider";
@@ -147,12 +148,12 @@ export function useProjectWorkspace() {
         startedBy: user?.name || user?.role || "Operations Officer",
       });
       setProject(updated);
-      alert(t("projects:details.alertExecutionStarted") || "Execution started successfully!");
+      toast.success(t("projects:details.alertExecutionStarted"));
       loadData();
     } catch (err: unknown) {
       console.error(err);
-      const message = err instanceof Error ? err.message : "Failed to start execution.";
-      alert(message);
+      const message = err instanceof Error ? err.message : t("projects:details.errors.startExecution");
+      toast.error(message);
     } finally {
       setIsProcessing(false);
     }
@@ -168,12 +169,12 @@ export function useProjectWorkspace() {
         startedBy: user?.name || user?.role || "Operations Officer",
       });
       setProject(updated);
-      alert(t("projects:execution.moduleStarted") || "Silo execution started!");
+      toast.success(t("projects:execution.moduleStarted"));
       loadData();
     } catch (err: unknown) {
       console.error(err);
-      const message = err instanceof Error ? err.message : "Failed to start silo execution.";
-      alert(message);
+      const message = err instanceof Error ? err.message : t("projects:execution.errors.startSilo");
+      toast.error(message);
     } finally {
       setIsProcessing(false);
     }
@@ -190,12 +191,12 @@ export function useProjectWorkspace() {
         notes,
       });
       setProject(updated);
-      alert(t("projects:execution.moduleCompleted") || "Silo execution completed!");
+      toast.success(t("projects:execution.moduleCompleted"));
       loadData();
     } catch (err: unknown) {
       console.error(err);
-      const message = err instanceof Error ? err.message : "Failed to complete silo execution.";
-      alert(message);
+      const message = err instanceof Error ? err.message : t("projects:execution.errors.completeSilo");
+      toast.error(message);
     } finally {
       setIsProcessing(false);
     }
@@ -216,7 +217,7 @@ export function useProjectWorkspace() {
       if (updatedRequest) {
         setRequest(updatedRequest);
       }
-      alert(t("projects:details.alertExecutionCompleted"));
+      toast.success(t("projects:details.alertExecutionCompleted"));
       loadData();
     } catch (err) {
       console.error(err);

@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/providers/theme-provider";
 import { I18nProvider } from "@/providers/i18n-provider";
 import { getNamespaceDictionaries } from "@/lib/i18n";
 import { Locale } from "@/types/i18n";
+import { Toaster } from "@/shared/ui/sonner";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -57,6 +58,7 @@ export default async function RootLayout({
               <AuthProvider>
                 {children}
               </AuthProvider>
+              <Toaster />
             </ThemeProvider>
           </I18nProvider>
         </QueryProvider>
