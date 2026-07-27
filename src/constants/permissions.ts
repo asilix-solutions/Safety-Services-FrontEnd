@@ -359,3 +359,35 @@ export function canManageUsers(role: UserRole | undefined): boolean {
   if (!role) return false;
   return USERS_ACCESS[role]?.canManage ?? false;
 }
+
+/**
+ * Employee Roster (per-tenant staff management) — per-role view/manage access.
+ * Components must read the resolved booleans from
+ * `canViewEmployees`/`canManageEmployees`, never compare `role === "X"`
+ * directly, matching the `COMPANIES_ACCESS`/`USERS_ACCESS` pattern above.
+ */
+interface EmployeesAccess {
+  canView: boolean;
+  canManage: boolean;
+}
+
+const NO_EMPLOYEES_ACCESS: EmployeesAccess = { canView: false, canManage: false };
+
+export const EMPLOYEES_ACCESS: Record<UserRole, EmployeesAccess> = {
+  "Super Admin": { canView: true, canManage: false },
+  "Company Admin": { canView: true, canManage: true },
+  "Consulting Engineer": { canView: true, canManage: false },
+  "Operations Officer": { canView: true, canManage: false },
+  "Sales Agent": NO_EMPLOYEES_ACCESS,
+  Client: NO_EMPLOYEES_ACCESS,
+};
+
+export function canViewEmployees(role: UserRole | undefined): boolean {
+  if (!role) return false;
+  return EMPLOYEES_ACCESS[role]?.canView ?? false;
+}
+
+export function canManageEmployees(role: UserRole | undefined): boolean {
+  if (!role) return false;
+  return EMPLOYEES_ACCESS[role]?.canManage ?? false;
+}

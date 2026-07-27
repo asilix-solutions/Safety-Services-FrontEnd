@@ -3,6 +3,7 @@ import { useAuth } from "@/providers/AuthProvider";
 import { Employee, EmployeeDepartment, EmployeeStatus, EmployeeAvailability } from "@/domains/employees/types";
 import { getEmployees, createOrUpdateEmployee } from "@/domains/employees/storage";
 import { validateEmployee } from "@/domains/employees/validation";
+import { canViewEmployees, canManageEmployees } from "@/constants/permissions";
 import { EmployeeFilters } from "../types";
 
 export function useEmployeeList() {
@@ -34,11 +35,10 @@ export function useEmployeeList() {
   // Permission Checks (Centralized)
   const permissions = useMemo(() => {
     if (!user) return { canManage: false, canView: false };
-    
-    const role = user.role;
+
     return {
-      canManage: role === "Company Admin",
-      canView: ["Super Admin", "Company Admin", "Operations Officer", "Consulting Engineer"].includes(role),
+      canManage: canManageEmployees(user.role),
+      canView: canViewEmployees(user.role),
     };
   }, [user]);
 
