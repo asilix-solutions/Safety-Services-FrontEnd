@@ -1,4 +1,5 @@
 import React from "react";
+import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Button } from "@/shared/ui/button";
 import { Textarea } from "@/shared/ui/textarea";
@@ -53,10 +54,11 @@ export function SiteVisitsTab({ project, setProject, user, isProcessing, loadDat
                       scheduledDate: new Date().toISOString(),
                     });
                     setProject(updated);
-                    alert(t("projects:kickoff.scheduledSuccessAlert"));
+                    toast.success(t("projects:kickoff.scheduledSuccessAlert"));
                     loadData();
                   } catch (err: any) {
-                    alert(err.message);
+                    console.error("initiateKickoffVisit failed:", err);
+                    toast.error(t("common:error_generic_action_failed"));
                   }
                 }}
                 className="space-y-4 text-xs"
@@ -134,10 +136,11 @@ export function SiteVisitsTab({ project, setProject, user, isProcessing, loadDat
                               inspectorName: user.name || "Eng. Tariq Al-Mansoor",
                             });
                             setProject(updated);
-                            alert(t("projects:kickoff.savedSuccess"));
+                            toast.success(t("projects:kickoff.savedSuccess"));
                             loadData();
                           } catch (err: any) {
-                            alert(err.message);
+                            console.error("handleKickoffDecision (approve) failed:", err);
+                            toast.error(t("common:error_generic_action_failed"));
                           }
                         }}
                       >
@@ -157,10 +160,11 @@ export function SiteVisitsTab({ project, setProject, user, isProcessing, loadDat
                               inspectorName: user.name || "Eng. Tariq Al-Mansoor",
                             });
                             setProject(updated);
-                            alert(t("projects:kickoff.rejectedAlert"));
+                            toast.success(t("projects:kickoff.rejectedAlert"));
                             loadData();
                           } catch (err: any) {
-                            alert(err.message);
+                            console.error("handleKickoffDecision (reject) failed:", err);
+                            toast.error(t("common:error_generic_action_failed"));
                           }
                         }}
                       >

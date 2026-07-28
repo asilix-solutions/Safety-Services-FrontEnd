@@ -1,4 +1,5 @@
 {
+  "error_generic_action_failed": "Something went wrong. Please try again.",
   "search": "Search...",
   "loading": "Loading...",
   "switch_workspace": "Switch Workspace:",

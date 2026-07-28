@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { toast } from "sonner";
 import { useAuth } from "@/providers/AuthProvider";
 import { LicensingRequest, RequestType, WorkflowStage } from "@/domains/requests/types";
 import { PageHeader } from "@/shared/components/page-header";
@@ -91,7 +92,7 @@ export default function RequestDetailsPage() {
         request,
         approvedBy: user.name || user.role,
       });
-      alert(t("requests:details.alertInvoiceRegenerated"));
+      toast.success(t("requests:details.alertInvoiceRegenerated"));
       loadData();
     } catch (err) {
       console.error("Failed to regenerate invoice", err);
@@ -255,7 +256,7 @@ export default function RequestDetailsPage() {
   const handleReplaceFile = (docIndex: number) => {
     const rule = isReplaceAllowed(request.currentStage);
     if (rule === "READ_ONLY") {
-      alert(t("requests:details.alertFileLocked"));
+      toast.error(t("requests:details.alertFileLocked"));
       return;
     }
     if (rule === "CONFIRM_REQUIRED") {
@@ -276,7 +277,7 @@ export default function RequestDetailsPage() {
       } catch(e) {
         console.error("Failed to sync file replacement to localStorage", e);
       }
-      alert(t("requests:details.alertFileReplaced"));
+      toast.success(t("requests:details.alertFileReplaced"));
     }
   };
 
@@ -288,7 +289,7 @@ export default function RequestDetailsPage() {
     
     try {
       upsertRequest(updatedRequest);
-      alert(t("requests:details.alertTransitionQuotation"));
+      toast.success(t("requests:details.alertTransitionQuotation"));
     } catch (e) {
       console.error("Failed to transition request to Quotation", e);
     }
@@ -305,7 +306,7 @@ export default function RequestDetailsPage() {
       setInvoice(updatedInvoice);
       setRequest(updatedRequest);
 
-      alert(t("requests:details.alertPaymentConfirmed"));
+      toast.success(t("requests:details.alertPaymentConfirmed"));
       loadData();
     } catch (err) {
       console.error("Failed to complete mock payment", err);
@@ -554,7 +555,7 @@ export default function RequestDetailsPage() {
                             variant="outline"
                             size="icon"
                             className="h-8 w-8"
-                            onClick={() => alert(t("requests:details.simulatedView").replace("{{fileName}}", doc.fileName || ""))}
+                            onClick={() => toast.info(t("requests:details.simulatedView").replace("{{fileName}}", doc.fileName || ""))}
                             title="View"
                           >
                             <Eye className="h-3.5 w-3.5 text-muted-foreground" />
@@ -563,7 +564,7 @@ export default function RequestDetailsPage() {
                             variant="outline"
                             size="icon"
                             className="h-8 w-8"
-                            onClick={() => alert(t("requests:details.simulatedDownload").replace("{{fileName}}", doc.fileName || ""))}
+                            onClick={() => toast.info(t("requests:details.simulatedDownload").replace("{{fileName}}", doc.fileName || ""))}
                             title="Download"
                           >
                             <Download className="h-3.5 w-3.5 text-muted-foreground" />
