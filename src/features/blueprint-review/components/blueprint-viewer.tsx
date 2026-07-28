@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { toast } from "sonner";
 import { useTranslation } from "@/providers/i18n-provider";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/shared/ui/card";
 import { Button } from "@/shared/ui/button";
@@ -130,7 +131,7 @@ export function BlueprintViewer({ request }: BlueprintViewerProps) {
                   variant="ghost"
                   size="icon"
                   className="h-6 w-6"
-                  onClick={() => alert("Simulating expansion to full screen vector mode")}
+                  onClick={() => toast.info(t("common:blueprint_fullscreen_notice"))}
                 >
                   <Maximize2 className="h-3.5 w-3.5 text-muted-foreground" />
                 </Button>
@@ -208,7 +209,7 @@ export function BlueprintViewer({ request }: BlueprintViewerProps) {
                 variant="outline"
                 size="sm"
                 className="text-xs gap-1 h-8 px-3.5 border-border bg-background text-foreground"
-                onClick={() => alert(`${t("requests:details.simulatedView").replace("{{fileName}}", primaryDoc.fileName || "")}`)}
+                onClick={() => toast.info(`${t("requests:details.simulatedView").replace("{{fileName}}", primaryDoc.fileName || "")}`)}
               >
                 <ExternalLink className="h-3.5 w-3.5" />
                 {t("common:view")}
@@ -217,7 +218,7 @@ export function BlueprintViewer({ request }: BlueprintViewerProps) {
                 variant="outline"
                 size="sm"
                 className="text-xs gap-1 h-8 px-3.5 border-border bg-background text-foreground"
-                onClick={() => alert(`${t("requests:details.simulatedDownload").replace("{{fileName}}", primaryDoc.fileName || "")}`)}
+                onClick={() => toast.info(`${t("requests:details.simulatedDownload").replace("{{fileName}}", primaryDoc.fileName || "")}`)}
               >
                 <Download className="h-3.5 w-3.5" />
                 {t("requests:engineeringWorkspace.download")}

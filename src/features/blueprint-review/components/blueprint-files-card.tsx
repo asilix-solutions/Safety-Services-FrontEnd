@@ -1,4 +1,5 @@
 import React from "react";
+import { toast } from "sonner";
 import { useTranslation } from "@/providers/i18n-provider";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/shared/ui/card";
 import { Button } from "@/shared/ui/button";
@@ -128,7 +129,7 @@ export function BlueprintFilesCard({ request }: BlueprintFilesCardProps) {
                       variant="outline"
                       size="sm"
                       className="h-7 text-[10px] px-2.5 text-muted-foreground flex items-center gap-1 border-border bg-card"
-                      onClick={() => alert(`${t("requests:details.simulatedView").replace("{{fileName}}", doc.fileName || "")}`)}
+                      onClick={() => toast.info(`${t("requests:details.simulatedView").replace("{{fileName}}", doc.fileName || "")}`)}
                     >
                       <ExternalLink className="h-3 w-3" />
                       {t("common:view")}
@@ -137,7 +138,7 @@ export function BlueprintFilesCard({ request }: BlueprintFilesCardProps) {
                       variant="outline"
                       size="sm"
                       className="h-7 text-[10px] px-2.5 text-muted-foreground flex items-center gap-1 border-border bg-card"
-                      onClick={() => alert(`${t("requests:details.simulatedDownload").replace("{{fileName}}", doc.fileName || "")}`)}
+                      onClick={() => toast.info(`${t("requests:details.simulatedDownload").replace("{{fileName}}", doc.fileName || "")}`)}
                     >
                       <Download className="h-3 w-3" />
                       {t("requests:engineeringWorkspace.download")}
