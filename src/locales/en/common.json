@@ -444,6 +444,8 @@
   "projects.inspection.completed": "Completed",
   "projects.inspection.cannotPassInspection": "Cannot Pass Inspection",
   "projects.inspection.cannotFailInspection": "Cannot Fail Inspection",
+  "projects.inspection.inspectionNotes": "Inspection Notes",
+  "projects.inspection.readyForFinalInspection": "Ready for Final Inspection",
   "employees.title": "Employee Management",
   "employees.desc": "Configure user profiles, departments, permissions, and operational availability status.",
   "employees.add_btn": "Add Employee",
