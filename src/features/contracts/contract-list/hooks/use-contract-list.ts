@@ -8,6 +8,8 @@ import { getRequests } from "@/domains/requests/storage";
 import { ClientContract } from "@/domains/contracts/types";
 import { getContracts } from "@/domains/contracts/storage";
 import { generateContractFromCompletedProject, signContract, archiveContract } from "@/domains/contracts/workflow";
+import { isRole } from "@/constants/permissions";
+import { USER_ROLES } from "@/constants/roles";
 
 export function useContractList() {
   const { user } = useAuth();
@@ -26,7 +28,7 @@ export function useContractList() {
     const allContracts = getContracts();
     let userContracts = allContracts;
 
-    if (user.role === "Client") {
+    if (isRole(user.role, [USER_ROLES.CLIENT])) {
       userContracts = allContracts.filter((c) => c.clientId === user.companyId);
     }
     setContracts(userContracts);
@@ -80,7 +82,7 @@ export function useContractList() {
     toast.info(t("common:contracts_download_simulated", { title: contract.title }));
   };
 
-  const isAdmin = user ? user.role === "Company Admin" || user.role === "Super Admin" : false;
+  const isAdmin = user ? isRole(user.role, [USER_ROLES.COMPANY_ADMIN, USER_ROLES.SUPER_ADMIN]) : false;
 
   return {
     user,

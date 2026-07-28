@@ -42,6 +42,7 @@ export function deactivateUser(id: string): User {
 
 export function getUsersSummary(): UsersSummary {
   const users = getUsers();
+  // role infrastructure, not a permission check — counting users per role for a summary
   const byRole = ALL_ROLES.reduce((acc, role) => {
     acc[role] = users.filter((u) => u.role === role).length;
     return acc;

@@ -146,6 +146,7 @@ export function getOrganizationInformation(user: { name: string; role: string; c
     tenantId: user?.companyId || "TNT-VERTEX-101",
     subscriptionPlan: "SSLM SaaS Business Plan",
     workspaceCreatedAt: "2026-01-01T12:00:00Z",
+    // role infrastructure, not a permission check — mock display-name selection, not access control
     activeCompanyAdmin: user?.role === "Company Admin" ? user.name : "Sarah Jenkins"
   };
 }

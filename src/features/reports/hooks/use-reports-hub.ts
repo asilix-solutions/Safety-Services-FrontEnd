@@ -58,7 +58,7 @@ export function useReportsHub() {
   };
 
   // Roles helpers
-  const isAdmin = user ? ["Super Admin", "Company Admin"].includes(user.role) : false;
+  const isAdmin = user ? isRole(user.role, ["Super Admin", "Company Admin"]) : false;
   const isEngineer = isRole(user?.role, ["Consulting Engineer"]);
   const isOperations = isRole(user?.role, ["Operations Officer"]);
   const isClient = isRole(user?.role, ["Client"]);
@@ -150,7 +150,7 @@ export function useReportsHub() {
     let list = reports;
 
     // Tenant enforcement (except Super Admin)
-    if (user.role !== "Super Admin" && user.companyId) {
+    if (!isRole(user.role, ["Super Admin"]) && user.companyId) {
       list = list.filter((r) => r.tenantId === user.companyId);
     }
 
@@ -186,7 +186,7 @@ export function useReportsHub() {
 
   const kpis = useMemo(() => {
     const userCompanyId = user?.companyId;
-    const tenantReports = user && user.role !== "Super Admin" && userCompanyId
+    const tenantReports = user && !isRole(user.role, ["Super Admin"]) && userCompanyId
       ? reports.filter((r) => r.tenantId === userCompanyId)
       : reports;
 

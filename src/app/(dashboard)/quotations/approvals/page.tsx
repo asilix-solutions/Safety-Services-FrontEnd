@@ -17,6 +17,8 @@ import { useTranslation, useNamespaceTranslations } from "@/providers/i18n-provi
 import { Quotation } from "@/domains/quotations/types";
 import { getQuotations } from "@/domains/quotations/workflow";
 import { getMergedRequests } from "@/domains/requests/storage";
+import { isRole } from "@/constants/permissions";
+import { USER_ROLES } from "@/constants/roles";
 
 export default function QuotationApprovalsQueuePage() {
   const { user } = useAuth();
@@ -47,7 +49,7 @@ export default function QuotationApprovalsQueuePage() {
     setApprovals(filteredApprovals);
   }, [t]);
 
-  if (!user || user.role !== "Company Admin") {
+  if (!user || !isRole(user.role, [USER_ROLES.COMPANY_ADMIN])) {
     return (
       <div className="flex h-[50vh] items-center justify-center">
         <p className="text-muted-foreground">{t("common:unauthorized") || "Access Denied"}</p>

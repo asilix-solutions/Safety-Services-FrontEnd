@@ -19,6 +19,8 @@ import { useRouter, useParams } from "next/navigation";
 import { getQuotations, approveQuotation, rejectQuotation, requestChangesOnQuotation } from "@/domains/quotations/workflow";
 import { getMergedRequests } from "@/domains/requests/storage";
 import { getInvoiceByJobNumber } from "@/domains/invoices/storage";
+import { isRole } from "@/constants/permissions";
+import { USER_ROLES } from "@/constants/roles";
 
 export default function QuotationApprovalDetailsPage() {
   const { user } = useAuth();
@@ -75,7 +77,7 @@ export default function QuotationApprovalDetailsPage() {
     }
   }, [jobNumber]);
 
-  if (!user || user.role !== "Company Admin") {
+  if (!user || !isRole(user.role, [USER_ROLES.COMPANY_ADMIN])) {
     return (
       <div className="flex h-[50vh] items-center justify-center">
         <p className="text-muted-foreground">{t("common:unauthorized") || "Access Denied"}</p>

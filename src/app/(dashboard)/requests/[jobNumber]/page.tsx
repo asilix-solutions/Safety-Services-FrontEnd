@@ -594,7 +594,7 @@ export default function RequestDetailsPage() {
                         variant="outline"
                         size="icon"
                         className="h-8 w-8"
-                        disabled={user.role !== USER_ROLES.CLIENT || isReplaceAllowed(request.currentStage) === "READ_ONLY"}
+                        disabled={!isClient || isReplaceAllowed(request.currentStage) === "READ_ONLY"}
                         onClick={() => handleReplaceFile(idx)}
                         title="Replace"
                       >

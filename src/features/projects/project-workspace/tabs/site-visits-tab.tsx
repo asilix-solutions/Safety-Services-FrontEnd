@@ -179,7 +179,7 @@ export function SiteVisitsTab({ project, setProject, user, isProcessing, loadDat
         )}
 
         {/* Awaiting Kickoff State Info Panel */}
-        {project.executionPhase === "KICKOFF_PENDING" && user.role !== USER_ROLES.CONSULTING_ENGINEER && (
+        {project.executionPhase === "KICKOFF_PENDING" && !isRole(user.role as UserRole, [USER_ROLES.CONSULTING_ENGINEER]) && (
           <Card className="border-border bg-card">
             <CardHeader>
               <CardTitle className="text-sm font-bold">{t("projects:kickoff.auditScheduledTitle")}</CardTitle>

@@ -27,6 +27,7 @@ export function RoleSwitcher() {
   };
 
   const getSelectValue = () => {
+    // role infrastructure, not a permission check — dev role-switcher enumerating roles
     if (user.role === USER_ROLES.CLIENT) {
       return `Client:${user.companyId || "c-102"}`;
     }

@@ -3,7 +3,8 @@ import { useAuth } from "@/providers/AuthProvider";
 import { Employee, EmployeeDepartment, EmployeeStatus, EmployeeAvailability } from "@/domains/employees/types";
 import { getEmployees, createOrUpdateEmployee } from "@/domains/employees/storage";
 import { validateEmployee } from "@/domains/employees/validation";
-import { canViewEmployees, canManageEmployees } from "@/constants/permissions";
+import { canViewEmployees, canManageEmployees, isRole } from "@/constants/permissions";
+import { USER_ROLES } from "@/constants/roles";
 import { EmployeeFilters } from "../types";
 
 export function useEmployeeList() {
@@ -23,7 +24,7 @@ export function useEmployeeList() {
   const loadEmployees = () => {
     if (!user) return;
     // Super Admin sees everything; Company Admin and others see only their company's employees
-    const tenantId = user.role === "Super Admin" ? undefined : user.companyId;
+    const tenantId = isRole(user.role, [USER_ROLES.SUPER_ADMIN]) ? undefined : user.companyId;
     const list = getEmployees(tenantId);
     setEmployees(list);
   };
@@ -72,7 +73,8 @@ export function useEmployeeList() {
         return false;
       }
 
-      // Role filter
+      // Role filter — filters the employee roster by the employee's own job role field
+      // (a UI list filter), not a permission check on the acting user.
       if (filters.role !== "All" && emp.role !== filters.role) {
         return false;
       }

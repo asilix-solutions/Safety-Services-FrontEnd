@@ -113,6 +113,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       permissions: ROLE_PERMISSIONS[role],
     };
     
+    // role infrastructure, not a permission check — dev role-switcher assigning a mock profile
     if (role === "Client" && companyId) {
       if (companyId === "c-103") {
         profile = {
