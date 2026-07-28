@@ -19,6 +19,9 @@ export function useCertificateList() {
   const [alertMsg, setAlertMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "expired" | "revoked">("all");
   const [selectedCertificate, setSelectedCertificate] = useState<ClientCertificate | null>(null);
+  const [revokeDialogOpen, setRevokeDialogOpen] = useState(false);
+  const [pendingRevokeCertificateId, setPendingRevokeCertificateId] = useState<string | null>(null);
+  const [revokeReason, setRevokeReason] = useState("");
 
   const loadData = () => {
     if (!user) return;
@@ -68,16 +71,29 @@ export function useCertificateList() {
 
   const handleRevokeCertificate = (certificateId: string) => {
     if (!user) return;
-    const reason = prompt(t("certificates_revoke_reason_prompt"), "Administrative Revocation");
-    if (reason === null) return;
+    setPendingRevokeCertificateId(certificateId);
+    setRevokeReason(t("certificates_revoke_reason_default"));
+    setRevokeDialogOpen(true);
+  };
+
+  const cancelRevoke = () => {
+    setRevokeDialogOpen(false);
+    setPendingRevokeCertificateId(null);
+  };
+
+  const confirmRevoke = () => {
+    if (!user || !pendingRevokeCertificateId || !revokeReason.trim()) return;
 
     try {
-      revokeCertificate(certificateId, user.name, reason);
+      revokeCertificate(pendingRevokeCertificateId, user.name, revokeReason.trim());
       setAlertMsg({ type: "success", text: t("certificates_revoke_success") });
       loadData();
     } catch (err: any) {
       console.error("revokeCertificate failed:", err);
       setAlertMsg({ type: "error", text: t("common:error_generic_action_failed") });
+    } finally {
+      setRevokeDialogOpen(false);
+      setPendingRevokeCertificateId(null);
     }
   };
 
@@ -102,6 +118,11 @@ export function useCertificateList() {
     handleDownloadCertificate,
     isAdmin,
     t,
+    revokeDialogOpen,
+    revokeReason,
+    setRevokeReason,
+    cancelRevoke,
+    confirmRevoke,
   };
 }
 export default useCertificateList;

@@ -8,6 +8,18 @@ import { PageHeader } from "@/shared/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Button } from "@/shared/ui/button";
 import { Badge } from "@/shared/ui/badge";
+import { Input } from "@/shared/ui/input";
+import { Label } from "@/shared/ui/label";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "@/shared/ui/alert-dialog";
 import { MapPin, ShieldAlert, ArrowLeft, Clock, Eye, Download, RefreshCw, Send, CreditCard, Activity } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -51,6 +63,10 @@ export default function RequestDetailsPage() {
   const [quotation, setQuotation] = useState<Quotation | null>(null);
   const [linkedProject, setLinkedProject] = useState<Project | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [replaceDialogOpen, setReplaceDialogOpen] = useState(false);
+  const [replaceDocIndex, setReplaceDocIndex] = useState<number | null>(null);
+  const [replaceFileName, setReplaceFileName] = useState("");
+  const [replaceShowWarning, setReplaceShowWarning] = useState(false);
 
   const jobNumber = params?.jobNumber as string;
 
@@ -259,26 +275,29 @@ export default function RequestDetailsPage() {
       toast.error(t("requests:details.alertFileLocked"));
       return;
     }
-    if (rule === "CONFIRM_REQUIRED") {
-      const ok = window.confirm(t("requests:details.confirmFileReplace"));
-      if (!ok) return;
+    setReplaceDocIndex(docIndex);
+    setReplaceFileName(request.documents[docIndex].fileName || "document.pdf");
+    setReplaceShowWarning(rule === "CONFIRM_REQUIRED");
+    setReplaceDialogOpen(true);
+  };
+
+  const handleConfirmReplaceFile = () => {
+    if (replaceDocIndex === null || !replaceFileName.trim()) return;
+
+    const updatedDocs = [...request.documents];
+    updatedDocs[replaceDocIndex] = { ...updatedDocs[replaceDocIndex], uploaded: true, fileName: replaceFileName.trim() };
+    const updatedRequest = { ...request, documents: updatedDocs };
+    setRequest(updatedRequest);
+
+    // Update using centralized upsert
+    try {
+      upsertRequest(updatedRequest);
+    } catch(e) {
+      console.error("Failed to sync file replacement to localStorage", e);
     }
-    
-    const newFileName = prompt(t("requests:details.promptReplaceFileName"), request.documents[docIndex].fileName || "document.pdf");
-    if (newFileName) {
-      const updatedDocs = [...request.documents];
-      updatedDocs[docIndex] = { ...updatedDocs[docIndex], uploaded: true, fileName: newFileName };
-      const updatedRequest = { ...request, documents: updatedDocs };
-      setRequest(updatedRequest);
-      
-      // Update using centralized upsert
-      try {
-        upsertRequest(updatedRequest);
-      } catch(e) {
-        console.error("Failed to sync file replacement to localStorage", e);
-      }
-      toast.success(t("requests:details.alertFileReplaced"));
-    }
+    toast.success(t("requests:details.alertFileReplaced"));
+    setReplaceDialogOpen(false);
+    setReplaceDocIndex(null);
   };
 
   const handleApproveForQuotation = () => {
@@ -788,6 +807,44 @@ export default function RequestDetailsPage() {
           </div>
         </div>
       </div>
+
+      <AlertDialog
+        open={replaceDialogOpen}
+        onOpenChange={(open) => {
+          setReplaceDialogOpen(open);
+          if (!open) {
+            setReplaceDocIndex(null);
+            setReplaceFileName("");
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("requests:details.replaceFileDialogTitle")}</AlertDialogTitle>
+            {replaceShowWarning && (
+              <AlertDialogDescription>{t("requests:details.confirmFileReplace")}</AlertDialogDescription>
+            )}
+          </AlertDialogHeader>
+          <div className="space-y-1.5">
+            <Label htmlFor="replace-file-name">{t("requests:details.promptReplaceFileName")}</Label>
+            <Input
+              id="replace-file-name"
+              value={replaceFileName}
+              onChange={(e) => setReplaceFileName(e.target.value)}
+            />
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("common:cancel")}</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={!replaceFileName.trim()}
+              onClick={handleConfirmReplaceFile}
+            >
+              {t("requests:details.replaceFileConfirmBtn")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

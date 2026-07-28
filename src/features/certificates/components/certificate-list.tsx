@@ -7,6 +7,17 @@ import { useCertificateList } from "../hooks/use-certificate-list";
 import { ReadyToIssueSection } from "./ready-to-issue-section";
 import { CertificatesTable } from "./certificates-table";
 import { CertificateActions } from "./certificate-actions";
+import { Textarea } from "@/shared/ui/textarea";
+import { Label } from "@/shared/ui/label";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "@/shared/ui/alert-dialog";
 
 export function CertificateList() {
   const {
@@ -24,6 +35,11 @@ export function CertificateList() {
     handleDownloadCertificate,
     isAdmin,
     t,
+    revokeDialogOpen,
+    revokeReason,
+    setRevokeReason,
+    cancelRevoke,
+    confirmRevoke,
   } = useCertificateList();
 
   if (!user) return null;
@@ -89,6 +105,33 @@ export function CertificateList() {
         onClose={() => setSelectedCertificate(null)}
         onDownloadCertificate={handleDownloadCertificate}
       />
+
+      <AlertDialog open={revokeDialogOpen} onOpenChange={(open) => !open && cancelRevoke()}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("certificates_revoke_dialog_title")}</AlertDialogTitle>
+          </AlertDialogHeader>
+          <div className="space-y-1.5">
+            <Label htmlFor="revoke-reason">{t("certificates_revoke_reason_prompt")}</Label>
+            <Textarea
+              id="revoke-reason"
+              value={revokeReason}
+              onChange={(e) => setRevokeReason(e.target.value)}
+              rows={3}
+            />
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={cancelRevoke}>{t("cancel")}</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={!revokeReason.trim()}
+              onClick={confirmRevoke}
+            >
+              {t("certificates_revoke_action")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

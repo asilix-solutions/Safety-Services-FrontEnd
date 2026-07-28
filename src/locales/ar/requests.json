@@ -411,6 +411,8 @@
   "details.alertFileLocked": "هذا الطلب قيد المراجعة حاليًا. الملفات المرفوعة مقفلة ومحمية ضد التعديل للحفاظ على سجلات الامتثال.",
   "details.confirmFileReplace": "تنبيه: تم تقديم هذا الطلب بالفعل للمراجعة. قد يؤدي استبدال المستندات إلى إعادة ترتيب طلبك في صف المراجعة. هل ترغب في الاستمرار؟",
   "details.alertFileReplaced": "تم استبدال الملف بنجاح!",
+  "details.replaceFileDialogTitle": "استبدال المستند",
+  "details.replaceFileConfirmBtn": "استبدال",
   "details.alertTransitionQuotation": "تمت الموافقة على الطلب بنجاح ونقله إلى مرحلة إعداد عرض السعر.",
   "details.alertPaymentConfirmed": "تم تأكيد الدفع الوهمي بنجاح، وتم إنشاء وتجهيز مشروع تنفيذ السلامة المرتبط!",
   "details.openWorkspace": "فتح مساحة عمل التنفيذ",

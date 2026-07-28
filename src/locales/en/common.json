@@ -107,6 +107,8 @@
   "certificates_milestone_not_reached": "Not Reached",
   "certificates_revoke_action": "Revoke",
   "certificates_revoke_reason_prompt": "Enter a reason for revoking this certificate:",
+  "certificates_revoke_dialog_title": "Revoke Certificate",
+  "certificates_revoke_reason_default": "Administrative Revocation",
   "certificates_issue_success": "Certificate successfully issued for",
   "certificates_revoke_success": "Certificate revoked successfully.",
   "certificates_eligible": "Eligible",

@@ -411,6 +411,8 @@
   "details.alertFileLocked": "This request is currently under review. Uploaded files are locked and read-only to preserve compliance records.",
   "details.confirmFileReplace": "Warning: This request has already been submitted for evaluation. Replacing documents may reset your review position. Do you want to proceed?",
   "details.alertFileReplaced": "File replaced successfully!",
+  "details.replaceFileDialogTitle": "Replace Document",
+  "details.replaceFileConfirmBtn": "Replace",
   "details.alertTransitionQuotation": "Request successfully approved and transitioned to Quotation phase.",
   "details.alertPaymentConfirmed": "Mock payment confirmed successfully. Project has been initialized!",
   "details.openWorkspace": "Open Execution Workspace",
