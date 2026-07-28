@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { toast } from "sonner";
 import { UseFormReturn } from "react-hook-form";
 import { ClientRequestFormValues } from "@/schemas/client-request.schema";
 import { Button } from "@/shared/ui/button";
@@ -89,11 +90,11 @@ export function ReviewSubmitStep({
   const pathSummary = getReviewPathSummary(classificationText);
 
   const handleMockView = (docName: string, fileName?: string) => {
-    alert(`${t("requests:wizard.review.documents.view")}: ${fileName || docName}`);
+    toast.info(`${t("requests:wizard.review.documents.view")}: ${fileName || docName}`);
   };
 
   const handleMockDownload = (docName: string, fileName?: string) => {
-    alert(`${t("requests:wizard.review.documents.download")}: ${fileName || docName}`);
+    toast.info(`${t("requests:wizard.review.documents.download")}: ${fileName || docName}`);
   };
 
   return (
@@ -305,7 +306,7 @@ export function ReviewSubmitStep({
               className="text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50/20 dark:hover:bg-indigo-950/20"
               onClick={() => {
                 onSaveDraft();
-                alert(t("requests:wizard.review.saveDraftSuccess"));
+                toast.success(t("requests:wizard.review.saveDraftSuccess"));
               }}
             >
               {t("requests:wizard.buttons.saveDraft")}

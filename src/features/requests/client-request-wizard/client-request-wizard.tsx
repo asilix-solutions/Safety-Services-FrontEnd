@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { toast } from "sonner";
 import { useForm, Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
@@ -217,7 +218,7 @@ export function ClientRequestWizard() {
     if (step === 4) {
       const missingRequired = documents.some((doc) => doc.required && !doc.uploaded);
       if (missingRequired) {
-        alert(t("requests:wizard.validation.missingDocuments") || "Please upload all required documents before proceeding.");
+        toast.error(t("requests:wizard.validation.missingDocuments") || "Please upload all required documents before proceeding.");
         return;
       }
     }
@@ -234,7 +235,7 @@ export function ClientRequestWizard() {
 
   const handleSaveDraft = () => {
     saveDraftState(step);
-    alert(t("requests:wizard.success.draftSaved"));
+    toast.success(t("requests:wizard.success.draftSaved"));
   };
 
   // Compute auto-classification parameters
