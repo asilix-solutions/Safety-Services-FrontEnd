@@ -10,6 +10,7 @@
   "form.imageRequired": "A live photo of the installation is required before saving.",
   "form.save": "Save Photo",
   "form.saveFailed": "Failed to save the installation photo. Please try again.",
+  "form.saveSuccess": "Installation photo saved successfully.",
 
   "silo.alarm": "Alarm",
   "silo.suppression": "Suppression",

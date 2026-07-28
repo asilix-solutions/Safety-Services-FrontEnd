@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { toast } from "sonner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/providers/AuthProvider";
 import { useNamespaceTranslations, useTranslation } from "@/providers/i18n-provider";
@@ -38,6 +39,7 @@ export function usePhotos(projectId: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PHOTOS.LIST(projectId) });
+      toast.success(t("photos:form.saveSuccess"));
     },
   });
 

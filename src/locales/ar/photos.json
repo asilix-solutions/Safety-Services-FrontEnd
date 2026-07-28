@@ -10,6 +10,7 @@
   "form.imageRequired": "يجب التقاط صورة حية للتركيب قبل الحفظ.",
   "form.save": "حفظ الصورة",
   "form.saveFailed": "فشل حفظ صورة التركيب. يرجى المحاولة مرة أخرى.",
+  "form.saveSuccess": "تم حفظ صورة التركيب بنجاح.",
 
   "silo.alarm": "الإنذار",
   "silo.suppression": "الإطفاء",
