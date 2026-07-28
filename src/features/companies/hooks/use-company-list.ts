@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/providers/AuthProvider";
+import { useTranslation } from "@/providers/i18n-provider";
 import { Company, SubscriptionTier } from "@/domains/organization/types";
 import { getCompanies } from "@/domains/organization/storage";
 import {
@@ -13,6 +14,7 @@ import { canViewCompanies, canManageCompanies } from "@/constants/permissions";
 
 export function useCompanyList() {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [error, setError] = useState<string | null>(null);
 
@@ -49,7 +51,8 @@ export function useCompanyList() {
       suspendCompany(id);
       loadCompanies();
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      console.error("suspendCompany failed:", e);
+      setError(t("common:error_generic_action_failed"));
     }
   };
 
@@ -60,7 +63,8 @@ export function useCompanyList() {
       activateCompany(id);
       loadCompanies();
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      console.error("activateCompany failed:", e);
+      setError(t("common:error_generic_action_failed"));
     }
   };
 
@@ -71,8 +75,8 @@ export function useCompanyList() {
       loadCompanies();
       return { success: true };
     } catch (e) {
-      const message = e instanceof Error ? e.message : String(e);
-      return { success: false, error: message };
+      console.error("changeTier failed:", e);
+      return { success: false };
     }
   };
 

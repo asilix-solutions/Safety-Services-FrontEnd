@@ -58,7 +58,7 @@ export function InspectionDecision({
         {error && (
           <div className="p-3 border border-destructive/20 bg-destructive/5 text-destructive rounded-lg flex items-start gap-2">
             <ShieldAlert className="h-4 w-4 shrink-0 mt-0.5" />
-            <span>{error}</span>
+            <span>{t(error) || error}</span>
           </div>
         )}
 

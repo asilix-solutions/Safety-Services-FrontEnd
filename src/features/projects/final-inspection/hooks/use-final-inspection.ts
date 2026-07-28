@@ -44,7 +44,8 @@ export function useFinalInspection({
         onSuccess(updatedProject, updatedRequest);
       }
     } catch (err: any) {
-      setError(err?.message || "An unexpected error occurred during approval.");
+      console.error("approveFinalInspection failed:", err);
+      setError("common:error_generic_action_failed");
     } finally {
       setIsSubmitting(false);
     }
@@ -70,7 +71,8 @@ export function useFinalInspection({
         onSuccess(updatedProject, updatedRequest);
       }
     } catch (err: any) {
-      setError(err?.message || "An unexpected error occurred during rejection.");
+      console.error("requestFinalInspectionFixes failed:", err);
+      setError("common:error_generic_action_failed");
     } finally {
       setIsSubmitting(false);
     }

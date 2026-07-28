@@ -243,7 +243,8 @@ export function useReportsHub() {
       setAlertMsg({ text: `Report successfully registered and added as DRAFT.`, type: "success" });
       refreshReports();
     } catch (e: any) {
-      setAlertMsg({ text: e.message || "Failed to generate report.", type: "error" });
+      console.error("createReport failed:", e);
+      setAlertMsg({ text: t("common:error_generic_action_failed"), type: "error" });
     }
   };
 
@@ -253,7 +254,8 @@ export function useReportsHub() {
       setAlertMsg({ text: `Report ${report.reportNumber} submitted for admin review.`, type: "success" });
       refreshReports();
     } catch (e: any) {
-      setAlertMsg({ text: e.message || "Failed to submit report.", type: "error" });
+      console.error("submitReport failed:", e);
+      setAlertMsg({ text: t("common:error_generic_action_failed"), type: "error" });
     }
   };
 
@@ -263,7 +265,8 @@ export function useReportsHub() {
       setAlertMsg({ text: `Report ${report.reportNumber} approved successfully.`, type: "success" });
       refreshReports();
     } catch (e: any) {
-      setAlertMsg({ text: e.message || "Failed to approve report.", type: "error" });
+      console.error("approveReport failed:", e);
+      setAlertMsg({ text: t("common:error_generic_action_failed"), type: "error" });
     }
   };
 
@@ -273,7 +276,8 @@ export function useReportsHub() {
       setAlertMsg({ text: `Report ${report.reportNumber} rejected.`, type: "success" });
       refreshReports();
     } catch (e: any) {
-      setAlertMsg({ text: e.message || "Failed to reject report.", type: "error" });
+      console.error("rejectReport failed:", e);
+      setAlertMsg({ text: t("common:error_generic_action_failed"), type: "error" });
     }
   };
 
@@ -283,7 +287,8 @@ export function useReportsHub() {
       setAlertMsg({ text: `Report ${report.reportNumber} archived.`, type: "success" });
       refreshReports();
     } catch (e: any) {
-      setAlertMsg({ text: e.message || "Failed to archive report.", type: "error" });
+      console.error("archiveReport failed:", e);
+      setAlertMsg({ text: t("common:error_generic_action_failed"), type: "error" });
     }
   };
 
@@ -293,7 +298,8 @@ export function useReportsHub() {
       setAlertMsg({ text: `Downloading ${report.reportNumber} (Mock Export PDF)...`, type: "success" });
       refreshReports();
     } catch (e: any) {
-      setAlertMsg({ text: e.message || "Failed to download report.", type: "error" });
+      console.error("downloadReport failed:", e);
+      setAlertMsg({ text: t("common:error_generic_action_failed"), type: "error" });
     }
   };
 

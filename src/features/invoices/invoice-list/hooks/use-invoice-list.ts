@@ -100,9 +100,10 @@ export function useInvoiceList() {
         setSelectedInvoice(updated);
       }
     } catch (err: any) {
+      console.error("confirmMockPayment failed:", err);
       setAlertMsg({
         type: "error",
-        text: `${t("invoices_payment_failed")}${err.message || "Unknown error"}`,
+        text: t("invoices_payment_failed"),
       });
       setPayingInvoice(null);
     } finally {

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
 import { useAuth } from "@/providers/AuthProvider";
 import { useTranslation, useNamespaceTranslations } from "@/providers/i18n-provider";
 import { ClientCertificate } from "@/domains/certificates/types";
@@ -60,7 +61,8 @@ export function useCertificateList() {
       });
       loadData();
     } catch (err: any) {
-      setAlertMsg({ type: "error", text: err.message || "Failed to issue certificate" });
+      console.error("issueCertificateFromProject failed:", err);
+      setAlertMsg({ type: "error", text: t("common:error_generic_action_failed") });
     }
   };
 
@@ -74,12 +76,13 @@ export function useCertificateList() {
       setAlertMsg({ type: "success", text: t("certificates_revoke_success") });
       loadData();
     } catch (err: any) {
-      setAlertMsg({ type: "error", text: err.message || "Failed to revoke certificate" });
+      console.error("revokeCertificate failed:", err);
+      setAlertMsg({ type: "error", text: t("common:error_generic_action_failed") });
     }
   };
 
   const handleDownloadCertificate = (certificate: ClientCertificate) => {
-    alert(`Downloading compliance certificate PDF for "${certificate.title}" (Simulated)`);
+    toast.info(t("common:certificates_download_simulated", { title: certificate.title }));
   };
 
   const isAdmin = user ? hasPermission(user.role, "certificates.manage") : false;
