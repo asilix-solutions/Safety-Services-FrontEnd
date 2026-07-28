@@ -181,6 +181,7 @@
   "invoices_download_simulated": "بدأ تحميل الفاتورة بصيغة PDF (محاكاة).",
   "invoices_payment_success": "تم دفع الفاتورة بنجاح وتأسيس مشروع امتثال السلامة.",
   "invoices_payment_failed": "فشلت عملية الدفع: ",
+  "contracts_download_simulated": "جارٍ تحميل ملف اتفاقية الإنجاز بصيغة PDF لـ \"{title}\" (محاكاة)",
   "invoices_pay_confirm_title": "تأكيد دفع الفاتورة",
   "invoices_pay_confirm_desc": "يرجى مراجعة التفاصيل أدناه قبل تأكيد الدفع.",
   "invoices_pay_confirm_invoice_id": "رقم الفاتورة",

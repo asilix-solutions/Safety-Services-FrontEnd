@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
 import { useAuth } from "@/providers/AuthProvider";
 import { useTranslation, useNamespaceTranslations } from "@/providers/i18n-provider";
 import { Project } from "@/types/project";
@@ -76,7 +77,7 @@ export function useContractList() {
   };
 
   const handleDownloadContract = (contract: ClientContract) => {
-    alert(`Downloading completion agreement PDF for "${contract.title}" (Simulated)`);
+    toast.info(t("common:contracts_download_simulated", { title: contract.title }));
   };
 
   const isAdmin = user ? user.role === "Company Admin" || user.role === "Super Admin" : false;

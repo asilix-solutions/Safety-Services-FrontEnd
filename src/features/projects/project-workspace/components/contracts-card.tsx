@@ -1,4 +1,5 @@
 import React from "react";
+import { toast } from "sonner";
 import { Button } from "@/shared/ui/button";
 import { ClientContract } from "@/domains/contracts/types";
 
@@ -19,7 +20,7 @@ export function ContractsCard({ contract, t }: ContractsCardProps) {
             <span className="font-semibold text-foreground block">{contract.title || t("projects:documents.contractDefaultTitle")}</span>
             <span className="text-[10px] text-muted-foreground font-mono">{contract.id} ({contract.status})</span>
           </div>
-          <Button variant="outline" size="sm" className="h-8 text-xs font-bold" onClick={() => alert(`${t("projects:documents.simulatedDownloadContract")} ${contract.id}`)}>
+          <Button variant="outline" size="sm" className="h-8 text-xs font-bold" onClick={() => toast.info(`${t("projects:documents.simulatedDownloadContract")} ${contract.id}`)}>
             {t("projects:documents.downloadBtn")}
           </Button>
         </div>

@@ -137,8 +137,6 @@ export function useProjectWorkspace() {
     loadData();
   }, [projectId]);
 
-
-
   const handleStartExecution = () => {
     if (!project || isProcessing) return;
     setIsProcessing(true);

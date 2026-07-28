@@ -1,4 +1,5 @@
 import React from "react";
+import { toast } from "sonner";
 import { Button } from "@/shared/ui/button";
 import { ClientCertificate } from "@/domains/certificates/types";
 
@@ -19,7 +20,7 @@ export function CertificatesCard({ certificate, t }: CertificatesCardProps) {
             <span className="font-semibold text-foreground block">{t("projects:documents.certificateName")}</span>
             <span className="text-[10px] text-muted-foreground font-mono">{certificate.id}</span>
           </div>
-          <Button variant="outline" size="sm" className="h-8 text-xs font-bold" onClick={() => alert(`${t("projects:documents.simulatedDownloadCertificate")} ${certificate.id}`)}>
+          <Button variant="outline" size="sm" className="h-8 text-xs font-bold" onClick={() => toast.info(`${t("projects:documents.simulatedDownloadCertificate")} ${certificate.id}`)}>
             {t("projects:documents.downloadBtn")}
           </Button>
         </div>

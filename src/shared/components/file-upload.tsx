@@ -3,6 +3,7 @@
 import React, { useState, useRef } from "react";
 import { UploadCloud, File, X, CheckCircle } from "lucide-react";
 import { Button } from "@/shared/ui/button";
+import { toast } from "sonner";
 
 import { useTranslation } from "@/providers/i18n-provider";
 
@@ -33,7 +34,7 @@ export function FileUpload({ onFileSelect, accept = ".pdf,.dwg,.zip", maxSizeMB 
   const processFile = (selectedFile: File) => {
     // Check file size
     if (selectedFile.size > maxSizeMB * 1024 * 1024) {
-      alert(t("requests:wizard.validation.fileTooLarge") || `File size exceeds limit of ${maxSizeMB}MB`);
+      toast.error(t("requests:wizard.validation.fileTooLarge") || `File size exceeds limit of ${maxSizeMB}MB`);
       return;
     }
 
@@ -41,7 +42,7 @@ export function FileUpload({ onFileSelect, accept = ".pdf,.dwg,.zip", maxSizeMB 
     const fileExt = "." + selectedFile.name.split(".").pop()?.toLowerCase();
     const acceptedExtensions = accept.split(",").map(ext => ext.trim().toLowerCase());
     if (!acceptedExtensions.includes(fileExt)) {
-      alert(t("requests:wizard.validation.invalidFileType") || "Invalid file type.");
+      toast.error(t("requests:wizard.validation.invalidFileType") || "Invalid file type.");
       return;
     }
 

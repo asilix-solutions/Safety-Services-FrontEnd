@@ -181,6 +181,7 @@
   "invoices_download_simulated": "Invoice PDF download started (Simulated).",
   "invoices_payment_success": "Invoice paid successfully and safety compliance project initialized.",
   "invoices_payment_failed": "Payment failed: ",
+  "contracts_download_simulated": "Downloading completion agreement PDF for \"{title}\" (Simulated)",
   "invoices_pay_confirm_title": "Confirm Invoice Payment",
   "invoices_pay_confirm_desc": "Please review the details below before confirming your payment.",
   "invoices_pay_confirm_invoice_id": "Invoice Number",

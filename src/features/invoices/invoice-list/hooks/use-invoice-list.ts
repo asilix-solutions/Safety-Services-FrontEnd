@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
 import { useAuth } from "@/providers/AuthProvider";
 import { useTranslation, useNamespaceTranslations } from "@/providers/i18n-provider";
 import { ClientInvoice } from "@/domains/invoices/types";
@@ -110,7 +111,7 @@ export function useInvoiceList() {
   };
 
   const handleDownloadInvoice = (invoice: ClientInvoice) => {
-    alert(`${t("invoices_download_simulated")} (${invoice.id})`);
+    toast.info(`${t("invoices_download_simulated")} (${invoice.id})`);
   };
 
   const hasLinkedProject = selectedInvoice
