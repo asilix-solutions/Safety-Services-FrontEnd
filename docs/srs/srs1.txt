@@ -1,0 +1,841 @@
+1. Introduction
+
+1.1 Purpose
+
+This Software Requirements Specification (SRS) describes the functional and
+non-functional requirements for the Safety Services & Licensing
+Management System -- a centralized cloud (SaaS) platform that manages
+the operations of technical safety and licensing companies. It governs
+licensing-request processing, automated activity/area-based routing,
+centralized field execution and procurement, document and signature
+authentication, and per-tenant isolation.
+
+1.2 Product Scope
+
+The platform provides an isolated workspace per subscribed safety company
+(tenant), an automated rule engine that classifies licensing requests by
+activity type and facility area, a centralized operations and procurement
+portal where the operations officer records all field activity (material
+invoices, field labor governance, technical inspection reports), and an
+interactive client portal for service selection, facility data entry, file uploads,
+and live tracking by Job Number -- protecting the company's financial and
+legal records. In the current MVP, all field operations are performed through
+the responsive web browser portal rather than a native mobile application.
+
+                                                                                                                1
+2. Overall Description
+
+2.1 Product Perspective
+
+The system is an integrated operational and administrative
+environment connecting client-facing portals with internal control
+panels for sales agents, consulting engineers, and the central
+operations & projects officer. All interfaces synchronize in real time to
+exchange data and update request, procurement, and obstacle-log
+states simultaneously.
+
+2.2 Product Functions
+
+At a high level, the system will:
+
+    Provision and isolate a dedicated tenant environment, custom
+       subdomain, and branding per subscribed company.
+
+    Authenticate users with TOTP multi-factor authentication and
+       role-based access control.
+
+    Capture client intake (CR/700 number, built-up area, GPS, documents,
+       blueprints).
+
+    Automatically route requests by area thresholds and ISIC activity
+       hazard bands.
+
+    Manage consulting workspace, blueprint review, and three specialized
+       technical reports.
+
+                                                                                                                2
+    Run centralized web-based field execution: project silos,
+       procurement/VAT, labor governance, obstacle logs, signature capture,
+       recurring maintenance scheduling.
+
+    Provide tracking, internal chat, profitability analytics, BI dashboards,
+       and SLA scorecards.
+
+    Enforce non-functional security, performance, and integration
+       requirements.
+
+2.3 User Classes and Characteristics
+
+    Super Admin: Holds top-level authority to manage subscribed safety
+       companies, review packages, and monitor overall platform
+       performance.
+
+    Company Admin: Controls their own safety company's options,
+       manages staff accounts, and views profitability analytics and
+       operational/financial reports.
+
+    Consulting Engineer: Receives new licensing/contract requests,
+       reviews uploaded data, studies blueprints, manages and generates
+       quotes, assigns inspection agents, and prepares/approves the three
+       specialized technical reports.
+
+    Operations & Projects Officer: The pivotal field party; receives work
+       orders on approval, manages item procurement, records tax invoices,
+       schedules and enters field labor data and wages, documents
+
+                                                                                                                3
+       inspection/obstacle reports, and closes tickets with client
+       signature/stamp photos.
+    Sales Agent: Adds target clients in the field and tracks the sales
+       pipeline from request to approval, with commission isolation.
+    Client: Uses services by filling forms, reviewing quotes, and tracking
+       the project and completion photos live via their Job Number.
+
+2.4 Operating Environment
+
+The system runs in modern web browsers on desktop and
+mobile-responsive views; field execution is performed through the
+responsive web portal. It uses a backend server, relational database, object
+storage, and Redis cache; all communication via HTTPS/TLS 1.3.
+
+2.5 Design and Implementation Constraints
+
+    Multi-tenant data isolation enforced at the query level.
+    ZATCA-compliant 15% VAT partitioning for taxable items.
+    Architecture must be integration-ready for future Civil Defense /
+
+       government portals (RESTful/GraphQL + OpenAPI).
+    Field workflows delivered via responsive web (no native mobile app in
+
+       the current MVP).
+
+3. External Interface Requirements
+
+3.1 User Interfaces
+
+                                                                                                                4
+Responsive web UI for desktop and mobile-responsive browser views;
+tenant-branded portals with dynamic colors and logos injected on
+authentication. Field forms use HTML5 browser capabilities (camera
+capture, canvas signature pad).
+
+3.2 Software Interfaces
+
+Integration with a transactional Email provider, Google Maps for facility
+geolocation, object storage (AWS S3 / GCP Storage), and Redis Pub/Sub for
+real-time events.
+
+3.3 Communications Interfaces
+
+All traffic over HTTPS/TLS 1.3; WebSocket channels for low-latency chat;
+real-time webhooks for obstacle/status broadcasting.
+
+4. System Features
+
+4.1 Tenant & SaaS Management
+
+   ID  Name         Description                     Actor Priority
+
+FR-T Multi-tenant Set up the shared corporate       System High
+
+EN-0 Database database, add a tenant_id foreign
+
+1            key to all dynamic tables, and create
+
+             migrations that auto-generate
+
+                                                                           5
+                tables when a new company
+                registers.
+
+FR-T Request    Capture tenant_id automatically System High
+
+EN-0 Isolation  from requests, inject a global query
+
+2 Middleware scope (WHERE tenant_id =
+
+                current_tenant), and unit-test that
+
+                cross-tenant access is blocked.
+
+FR-T Custom     Parse the URL to identify the         System High
+
+EN-0 Subdomain corporate subdomain, map it to the
+
+3 Router        tenant record, and block special
+
+                characters or reserved keywords
+
+                (admin, api, main).
+
+FR-T Wildcard   Configure the web server for          DevOps High
+EN-0 Domain     wildcard domains
+4 Config        (*.yourdomain.com) and expose a
+                real-time subdomain-availability
+                endpoint during sign-up.
+
+FR-T Super Admin Design and build a high-density      Super High
+
+EN-0 Matrix     monitoring dashboard mapping          Admin
+
+5 Dashboard tenants to resource tiers, showing
+
+                                                             6
+               subscription status, user counts,
+               and storage usage.
+
+FR-T Super Admin Provide a one-click                  Super High
+
+EN-0 Control   Suspend/Activate toggle for            Admin
+
+6 Endpoints non-payment, manage tiers (Trial,
+
+               Basic, Professional), and enforce
+
+               per-tier limits on concurrent
+
+               projects and personnel.
+
+FR-T Tenant    Upload logos/favicons with             Compan High
+EN-0 Branding
+7              extension (.png, .svg) and size        y Admin
+
+               validation, pick Primary/Secondary
+
+               colors with live preview, and persist
+
+               hex codes to the tenant config.
+
+FR-T Dynamic   Inject tenant colors into CSS          System Mediu
+EN-0 Branding
+8 Pipeline     variables / Tailwind on                         m
+
+               authentication so branding renders
+
+               across buttons, sidebars, and
+
+               portals.
+
+FR-T Watermarke Embed tenant logo and brand colors System Mediu
+
+EN-0 d PDF     into exported PDF headers/footers               m
+
+9 Reports
+
+                                                                  7
+                     and run end-to-end rendering tests
+                     for unified presentation.
+
+4.2 Client Portal & Intake Lifecycles
+
+ID  Name             Description                          Actor Priority
+
+FR-IN Intake Form Design and build a wizard capturing Client High
+
+T-01 Wizard          CR/national-ID 700 numbers,
+
+                     integer built-up area (rejecting
+
+                     non-numeric), and an interactive
+
+                     Google Maps pin extracting
+
+                     latitude/longitude.
+
+FR-IN Facility       Validate exact 10-digit CR/700       System High
+T-02 Ingestion
+                     numbers, reject negative or textual
+          Endpoints
+                     area values, and store extracted
+
+                     coordinates in the facility row.
+
+FR-IN Legacy         Capture legacy contract start/end Client High
+T-03 Contract        dates and mandatory
+                     site-coordinator name and direct
+          Dates      cellular phone number.
+
+                                                                       8
+FR-IN Legacy     Store contract timelines with cron System High
+
+T-04 Contract    alerts 30 days before expiry and
+
+Email Alerts email the site coordinator an
+
+                 activation link securing approval for
+
+                 field access.
+
+FR-IN Blueprint  Build a multi-file drag-and-drop Client / High
+T-05 Dropzone    dropzone with progress and instant System
+                 error states; server-side filter
+                 formats (.dwg, .dxf, .pdf, .png),
+                 enforce a 50MB cap, and stream
+                 uploads to isolated buckets.
+
+FR-IN Legal      Force upload of Deed of Ownership Client High
+
+T-06 Documentati or Electronic Rental Contracts,
+
+on Upload classify structure lifecycle (Active,
+
+                 Under Construction, Renovation),
+
+                 and capture Municipality Building
+
+                 Permits.
+
+                                                                 9
+FR-IN Safety        Process ownership/rental               System Medium
+T-07 Evaluation     metadata and bind classification
+                    state to append descriptive
+          Metadata  metadata to the consulting
+                    engineer's review layout.
+
+
+
+4.3 Rule & Routing Engine
+
+ID  Name                   Description                     Actor Priority
+
+FR-RU Small-Sc If area < 150 m², tag as Fast-Track /       System High
+
+L-01 ale            Basic Safety Hardware, route to the
+
+    Routing customer-service queue for a quote,
+
+                    and permit instant report generation
+
+                    upon payment.
+
+FR-RU Medium- If area is  150 and  1000 m²,                System High
+
+L-02 Scale          categorize under Maintenance Strategy
+
+    Routing & Mandatory On-Site Evaluation and
+
+                                                           10
+                   push to the sales CRM pipeline for a
+                   site audit.
+
+FR-RU Large-Sca If area > 1000 m², categorize under         System High
+
+L-03 le            Complex Blueprint Integration &
+
+Routing Comprehensive Structural Consultation
+
+                   and open an advanced consulting
+
+                   ticket.
+
+FR-RU ISIC         Map ISIC activity codes to safety risk System High
+L-04 Activity      bands; seed Commercial Kitchens,
+                   Chemical Warehousing, Compressed
+           Matrix  Gas Outlets, and Heavy Workshops as
+                   High-Hazard by default.
+
+FR-RU High-Haz If activity maps to High-Hazard, sever System High
+
+L-05 ard           fast-track paths regardless of area and
+
+Enforcer force-route to Comprehensive
+
+                   Engineering Review with mandatory
+
+                   legal alerts.
+
+FR-RU Low-Risk Capture simple safe structures (retail System Medium
+L-06 Bypass boutiques, offices) not in the hazard
+
+                          matrix and unlock automated technical
+                          safety certificate workflows.
+
+                                                            11
+    4.4 Consultant Portal & Reports
+
+    ID  Name                Description               Actor Priority
+
+FR-CON- Engineering Design and build a high-density   Consulting High
+                                                      Engineer
+01      Workspace dashboard combining blueprint
+
+                   canvas, geospatial position, and
+
+                   intake data on one screen, with
+
+                   an in-browser viewer and
+
+                   Approve/Return actions.
+
+FR-CON- Disposition Handle layout disposition         System High
+
+02      Endpoints updates (Approved / Modification
+
+                   Required) and block a
+
+                   modification return unless
+
+                   structural correction reasons are
+
+                   filled.
+
+FR-CON- Rich Text  Provide a WYSIWYG editor           Consulting High
+
+03      Report     (Tiptap/CKEditor) with formatting Engineer
+
+        Editor     helpers and shortcut buttons for
+
+                   standard engineering
+
+                   terminology, stripping raw HTML.
+
+                                                               12
+FR-CON- Snippet  Let senior consultants save         Consulting Medium
+                 reusable text arrays to an          Engineer
+04      Library  enterprise snippet table.
+
+FR-CON- Fast-Track Bind facility name, dimensions, System High
+
+05      Certificate and activity into an immutable
+
+                 PDF template and stamp the
+
+                 tenant's verification seal as a
+
+                 watermark, instantly
+
+                 downloadable in the client portal.
+
+FR-CON- Fire     Provide structured fields for       Consulting Medium
+                                                     Engineer
+06      Compartme safety calculations proving
+
+        nt Form  passive fire-containment
+
+                 integrity.
+
+FR-CON- Secure   Output restricted PDFs that lock System High
+
+07      Signature text selection/modification and
+
+        PDF Fusion merge digital signatures and
+
+                 corporate stamps tamper-proof
+
+                 into metadata.
+
+    4.5 Operations & Field Execution
+
+    ID  Name                 Description             Actor Priority
+
+                                                     13
+FR-OPS- Scheduling  Build a responsive web calendar Operation High
+
+01  Calendar        of site visits, availability, and    s Officer
+
+                    allocations with drag-and-drop
+
+                    assignment onto field-engineer
+
+                    calendars.
+
+FR-OPS- Field Dispatch Inject the Google Maps            System High
+
+02  (Email)         coordinate link into the field
+
+                    engineer's responsive web view
+
+                    and fire in-platform push
+
+                    notifications and transactional
+
+                    Email payloads on ticket
+
+                    assignment.
+
+FR-OPS- Project     On Paid/Financially-Confirmed System High
+
+03  Provisioning status, auto-create a project for
+
+                    the operations officer split into 3
+
+                    silos (Alarm, Suppression,
+
+                    Ventilation) and display them.
+
+FR-OPS- Expense &   Capture vendor invoices in a web Operation High
+                    layout mapped to a subsystem s Officer /
+04  VAT Logic       category (rejecting unclassified), System
+                    split 15% VAT into a ZATCA
+
+                                                                    14
+                      refund ledger, with a
+                      taxable/exempt toggle.
+
+FR-OPS- Web Camera Use HTML5 wrappers (input Field                    High
+
+05  Capture & capture="environment") to Technician
+
+    EXIF              prioritize live camera capture     / System
+
+                      over gallery picking, compress
+
+                      client-side, and verify EXIF
+
+                      confirms live capture, not
+
+                      stale-library uploads.
+
+FR-OPS- Workforce & Tag members as W2 Internal or Operation High
+
+06  Labor Cost Outsource; zero out internal              s Officer
+
+                      labor cost, require day-rates for
+
+                      outsource, and capture wages
+
+                      per project.
+
+FR-OPS- Irreversible  Provide a Confirm Final            Operation High
+
+07  Payout &          Outsource Labor Settlement         s Officer /
+
+    Audit             action with a strong confirmation System
+
+                      modal; log timestamp, IP, and
+
+                      geo-tag to a WORM store.
+
+                                                                      15
+FR-OPS- Responsive  Let field staff log execution        Field       High
+
+08  Obstacle        blockers via a web view with         Technician
+
+    Logging         mandatory live browser-camera / System
+
+                    photos; webhooks broadcast
+
+                    updates and structure logs into
+
+                    legal exhibits.
+
+FR-OPS- Recurring   Divide annual maintenance            System High
+
+09  Maintenance contracts into 4 quarters,
+
+                    auto-generate 4 scheduled site
+
+                    visits, and email team leads 7
+
+                    days prior; inject tickets into the
+
+                    planning calendar.
+
+FR-OPS- Web         Disable Complete-Ticket until the Field          High
+
+10  Signature &     ink-signed, stamped report is Technician
+
+    Closure         uploaded via a responsive web / System
+
+                    interface combined with an
+
+                    HTML5 canvas signature pad;
+
+                    bind the snapshot as an
+
+                    unalterable attachment.
+
+                                                                     16
+FR-OPS- Commissioni Force technicians to verify          Field       High
+
+11          ng Metrics subsystem metrics (alarm          Technician
+
+                   decibels, hydraulic pressure,         / System
+
+                   voltage, psi) with proof photos
+
+                   via browser, then route the
+
+                   payload to the consulting
+
+                   engineer.
+
+    ID      Name              Description                Actor Priority
+
+    4.6 Communication & Analytics Engine
+
+        ID  Name              Description                Actor Priority
+
+    FR-C Tracking  Generate unique tracking IDs on       System High
+    OM- Code       project creation (e.g.,
+    01 Engine      F1-2026-SRV-0432).
+
+    FR-C Milestone Display a linear milestone component System High
+
+    OM- Tracking in the client view, bound to real-time
+
+    02 View        backend status logs.
+
+                                                                     17
+FR-C WebSocket Spin up an isolated, archived chat  System High
+
+OM- Chat  channel per Work Order (client, agent,
+
+03        manager), writing messages to
+
+          durable legal storage; restrict file
+
+          transfers to internal chat.
+
+FR-C Net  Compute Project Net Margin = Gross System High
+
+OM- Profitabilit Revenue - (Material Expenses +
+
+04 y Engine Outsource Labor + Agent
+
+          Commissions), pulling ledger entries
+
+          on audit clearance, and display net %
+
+          with deviations.
+
+FR-C Executive Build interactive charts            Compan High
+                                                   y Admin
+OM- BI    (Chart.js/Recharts) of
+
+05 Dashboard month-over-month revenue and
+
+    s     expense weights across
+
+          Alarm/Suppression/Ventilation
+
+          divisions.
+
+FR-C Performan Filter top-performing project types System Mediu
+
+OM- ce Filters & and maintenance windows; compute  m
+
+06 SLA    task durations vs. SLA windows and
+
+                                                      18
+            maintain a per-technician efficiency
+            scorecard.
+
+4.7 Non-Functional & Security Requirements
+
+ID Name     Description                               Actor Priorit
+                                                                   y
+
+NFR- Data   Apply server-side AES-256 encryption to Syste High
+
+SEC- Encryptio blueprints, receipts, and wage         m
+
+01 n        documents before object-store writes.
+
+NFR- Presigned Disable public bucket reads and serve  Syste High
+                                                      m
+SEC- Links  expiring presigned URLs that lapse 120
+
+02          seconds after creation.
+
+NFR- Transport Enforce HTTPS/TLS 1.3 across all       DevOp High
+SEC- Security application networks.                   s
+03
+
+NFR- RBAC   Enforce fixed roles (Super Admin,         Syste High
+SEC-        Company Admin, Engineer, Field            m
+04          Technician, Accountant, Client), verify
+            tokens on all routes, and drop
+            profitability/billing payloads from
+
+                                                         19
+               field-worker responses; hide
+               management paths on the frontend.
+
+NFR- Multi-Fact Provide QR enrollment with backup          Syste High
+
+SEC- or Auth seeds and a 6-digit challenge; integrate m
+
+05 (TOTP) TOTP (Google/Microsoft Authenticator)
+
+               and mandate it for admin, operations,
+
+               and cash accounts.
+
+NFR- Storage   Index high-utilization columns              Back High
+PER- Indexing  (tenant_id, job_number, status,             End
+01             created_at) and eliminate N+1 query
+               anomalies with eager loading.
+
+NFR- Redis     Cache user state and short-lived OTP        DevOp High
+PER- Cache     tokens; use Redis Pub/Sub for               s
+02             under-2-second event updates.
+
+NFR- Load      Run headless load tests                     DevOp High
+PER- Testing
+03             (k6/JMeter/Locust) simulating 3,000         s
+
+               concurrent connections, link to APM, and
+
+               resolve bottlenecks to preserve stability.
+
+                                                              20
+NFR- API   Refactor endpoints to strict             Back Mediu
+                                                    End m
+INT- Integratio REST/GraphQL, standardize property
+
+01 n       naming for government entities, and
+
+           build a translation adapter for
+
+           government-portal compatibility.
+
+NFR- OpenAPI Auto-compile interactive               DevOp Mediu
+
+INT- Docs  OpenAPI/Swagger documentation for        s  m
+
+02         municipal technical integrations.
+
+   5. Use Cases
+
+    UC-01 -- New Licensing Request (Automated Routing)
+
+Actors: Primary -- Client; Secondary -- Rule Engine, Consulting Engineer Pre-conditions:
+Client has accessed the tenant portal via the custom subdomain; the system is online.
+
+Main Flow:
+
+    1. Client opens the company portal via the custom subdomain.
+    2. Client fills the intake wizard: activity name and type, ISIC code, CR/700 number
+
+         (10 digits), actual built-up area (m²), land plot number and location description,
+         GPS coordinates, current safety tools, and uploads (building permit or deed).
+    3. Client clicks "Submit Request."
+    4. System reads the Area field and Activity field and routes automatically:
+
+              Area < 150 m²  Fast-Track / Basic Safety Hardware  customer-service
+                  queue for an instant quote and immediate technical report on payment.
+                                                                                                              21
+              150­1000 m²  Mandatory periodic maintenance contract  schedule a
+                  field inspection and push to the sales pipeline.
+
+              1000 m²  Full engineering blueprint execution  open a consulting
+                  ticket.
+                  
+
+    5. If the activity is High-Hazard (buffet/kitchen, gas extensions,
+         flammable-materials workshop), the system severs fast-track regardless of area
+         and forces a non-instant report under Comprehensive Engineering Review.
+
+    6. System creates the ticket and generates a Job Number with a live tracking
+         timeline.
+
+Post-Conditions: Request is classified, routed to the correct track, and visible to the
+client via Job Number.
+
+Alternate Flows:
+
+     AF-1 Invalid CR/700: Number isn't exactly 10 digits  show validation error 
+         client corrects and resubmits.
+
+     AF-2 Invalid Area: Negative or textual value  reject with field error.
+
+Exceptions:
+
+     EX-1 Blueprint Upload Rejected: Wrong format or > 50MB  reject server-side
+         with descriptive error; no partial storage.
+
+    UC-02 -- Login & Multi-Factor Authentication
+
+Actors: Super Admin, Company Admin, Consulting Engineer, Operations Officer, Sales
+Agent, Client Pre-conditions: User account exists; user is on the login page.
+
+                                                                                                              22
+Main Flow:
+
+    1. User enters email/phone and password.
+    2. System verifies the password via secure hash comparison.
+    3. System checks account status (active, not suspended).
+    4. If the account is flagged for mandatory MFA (admin, operations, cash), system
+
+         presents the 6-digit TOTP challenge.
+    5. System validates the TOTP and creates a session/JWT.
+    6. System applies RBAC and redirects to the appropriate workspace.
+
+Post-Conditions: User is authenticated within their role scope; field-worker responses
+exclude profitability/billing payloads.
+
+Alternate Flows:
+
+     AF-1 Invalid Credentials: Show "Invalid email/phone or password"; allow retry or
+         password reset.
+
+     AF-2 Suspended Account: Deny access with a support message.
+     AF-3 MFA Failure: Reject the token; allow re-entry or backup-seed recovery.
+
+    UC-03 -- Field Execution & Project Closure
+
+Actors: Primary -- Operations & Projects Officer, Field Technician; Secondary --
+Consulting Engineer Pre-conditions: Quote is approved and first payment confirmed; a
+project was auto-provisioned into 3 silos.
+
+Main Flow:
+
+    1. The project appears in the operations officer's web workspace, split into Alarm,
+         Suppression, and Ventilation silos.
+
+                                                                                                              23
+2. Officer records procurement: enters supplier name, purchase item
+    (Alarm/Suppression/Ventilation), and invoice value.
+
+3. Officer sets invoice type:
+          Taxable  system forces entry of pre-tax value and the 15% tax amount in
+             an isolated ZATCA-refund field.
+          Non-taxable  tax field is zeroed and disabled.
+
+4. System blocks saving any field invoice without a live browser-camera photo of the
+    original paper invoice (EXIF-verified).
+
+5. Officer enters field labor: name, field role, and legal category -- Internal (cost
+    zeroed) or Outsource (mandatory agreed wage entry).
+
+6. On cash payment to outsource labor, officer clicks "Confirm Final Outsource Labor
+    Settlement"; system logs timestamp, IP, and geo-tag to a WORM store.
+
+7. Officer uploads live installation photos that appear instantly in the client portal
+    and admin panel.
+
+8. On obstacles, officer logs a description with live photos via the web view and
+    clicks "Broadcast"; webhooks alert management and update the client tracker and
+    chat room.
+
+9. After installation, officer runs a full operational test, documents commissioning
+    metrics with proof photos, and sets status to "Ready for Final Inspection."
+
+10.To close: the client signs and stamps the inspection report by hand; the officer
+    uploads it via the responsive web interface (with an HTML5 canvas signature pad
+    option) as the mandatory closure lock; the snapshot binds as an unalterable
+    attachment.
+
+11.System notifies the consulting engineer to approve the official technical reports
+    toward certificate issuance.
+
+                                                                                                          24
+Post-Conditions: Project is closed with legal proof of execution; net margin is
+recomputed from validated expenses.
+Alternate Flows:
+
+     AF-1 Missing Subsystem Classification: Expense submission rejected to protect
+         gross-margin calculations.
+
+     AF-2 Stale Receipt Photo: EXIF check fails (library upload, not live)  reject.
+     AF-3 Closure Without Signed Upload: Complete-Ticket stays disabled until the
+
+         signed/stamped document is uploaded.
+Exceptions:
+
+     EX-1 Upload Service Error: Network/storage failure during photo upload  show
+         retry message, preserve form data, do not mark step complete.
+
+                                                                                                              25
+
