@@ -3,7 +3,7 @@ import { useTranslation } from "@/providers/i18n-provider";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/shared/ui/card";
 import { Badge } from "@/shared/ui/badge";
 import { BlueprintReviewViewModel } from "../helpers/blueprint-review-view-model";
-import { getQueueDisplayName, getClassificationDisplayName, getClassificationReason } from "@/domains/requests/workflow";
+import { getQueueDisplayName, getClassificationReason, classifyRequest } from "@/domains/requests/workflow";
 
 interface ClassificationMatrixCardProps {
   request: BlueprintReviewViewModel;
@@ -12,12 +12,15 @@ interface ClassificationMatrixCardProps {
 export function ClassificationMatrixCard({ request }: ClassificationMatrixCardProps) {
   const { t } = useTranslation();
 
+  // Area band and hazard evaluation both come from the canonical FR-RU engine.
+  // The stored queue/classification still win when present — they are what the
+  // request was actually routed as at submission time.
+  const rules = classifyRequest(request);
+
   const isHighHazard =
     request.assignedQueue === "HIGH_HAZARD" ||
     request.classification === "high_hazard_review" ||
-    request.gasExtensions ||
-    request.hazardousMaterials ||
-    request.riskCategory === "high";
+    rules.classification === "high_hazard_review";
 
   return (
     <Card className="border-border bg-card">
@@ -43,7 +46,7 @@ export function ClassificationMatrixCard({ request }: ClassificationMatrixCardPr
               <tr className="hover:bg-secondary/5">
                 <td className="p-2.5 font-medium text-foreground">Area Constraint</td>
                 <td className="p-2.5 text-foreground font-semibold">
-                  {request.area} m² ({request.area > 1000 ? "Requires Full Engineering" : "Under Threshold"})
+                  {request.area} m² ({t(`requests:classification.areaBand.${rules.areaBand}`)})
                 </td>
               </tr>
               <tr className="hover:bg-secondary/5">

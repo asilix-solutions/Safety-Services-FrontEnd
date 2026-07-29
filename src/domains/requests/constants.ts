@@ -3,27 +3,9 @@ import { RequestType, RequiredDocument } from "./types";
 
 export const DEFAULT_REQUEST_CATEGORY = "General Safety";
 
-export const HIGH_HAZARD_KEYWORDS = [
-  "kitchen",
-  "buffet",
-  "gas",
-  "workshop",
-  "oil",
-  "chemical",
-  "compressed",
-  "heavy",
-  "storage",
-  "factory",
-  "manufacturing",
-  "welding",
-];
-
-export const HIGH_HAZARD_ISIC_CODES = [
-  "5610", // Restaurants and mobile food service activities (often have kitchens)
-  "2011", // Manufacture of basic chemicals
-  "4520", // Maintenance and repair of motor vehicles (workshops)
-  "4730", // Retail sale of automotive fuel in specialized stores
-];
+// The FR-RUL-04 hazard matrix (keywords + ISIC codes) now lives in
+// `constants/classification.ts` and is read only by
+// `domains/requests/workflow.ts#classifyRequest`.
 
 export const DEFAULT_REQUIRED_DOCUMENTS: Record<RequestType, Omit<RequiredDocument, "uploaded">[]> = {
   new_license: SERVICE_REGISTRY.new_license.documents,

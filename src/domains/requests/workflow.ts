@@ -1,5 +1,11 @@
-import { WorkflowStage, RequestQueue, LicensingRequest } from "./types";
+import { WorkflowStage, RequestQueue, RequestClassification, LicensingRequest } from "./types";
 import { RequestStatus } from "@/types/request-status";
+import {
+  AREA_THRESHOLDS,
+  HIGH_HAZARD_CATEGORIES,
+  AreaBand,
+  HighHazardCategoryId,
+} from "@/constants/classification";
 
 export const WORKFLOW_STAGES = [
   "DRAFT",
@@ -137,6 +143,137 @@ export function getClassificationDisplayName(classification: string, t: (key: st
   return map[classification] || classification.replace("_", " ");
 }
 
+/** Everything the FR-RU rule engine needs. Satisfied by both a wizard form value object and a stored `LicensingRequest`. */
+export interface ClassificationInput {
+  area?: number | null;
+  activityName?: string | null;
+  isicCode?: string | null;
+  gasExtensions?: boolean;
+  hazardousMaterials?: boolean;
+  riskCategory?: "low" | "medium" | "high";
+}
+
+export interface ClassificationResult {
+  classification: RequestClassification;
+  assignedQueue: RequestQueue;
+  /** The area-driven band on its own, before the FR-RUL-05 hazard override. */
+  areaBand: AreaBand;
+  /** Which FR-RUL-04 category matched, or null when the hazard came from a risk flag or nothing matched. */
+  hazardCategoryId: HighHazardCategoryId | null;
+  siteVisitRequired: boolean;
+  engineeringReviewRequired: boolean;
+  /**
+   * FR-RUL-01/05. Kept as its own explicit field: callers must read it directly
+   * and never re-derive it from `classification`, because the downstream FR-C
+   * gate (client-chosen `reportType` vs. what the rules permit) depends on it.
+   */
+  instantReportAllowed: boolean;
+  /** i18n key. This module stays pure — the UI does the translating. */
+  reasonKey: string;
+}
+
+const QUEUE_BY_CLASSIFICATION: Record<RequestClassification, RequestQueue> = {
+  fast_track: "FAST_TRACK",
+  maintenance_strategy: "MAINTENANCE",
+  engineering_project: "ENGINEERING",
+  high_hazard_review: "HIGH_HAZARD",
+};
+
+const REASON_KEY_BY_QUEUE: Record<RequestQueue, string> = {
+  FAST_TRACK: "requests:classificationReason.FAST_TRACK",
+  MAINTENANCE: "requests:classificationReason.MAINTENANCE",
+  ENGINEERING: "requests:classificationReason.ENGINEERING",
+  HIGH_HAZARD: "requests:classificationReason.HIGH_HAZARD",
+};
+
+/** FR-RUL-04: the hazard category this activity falls into, by ISIC code or activity-name keyword. */
+function matchHighHazardCategory(input: ClassificationInput): HighHazardCategoryId | null {
+  const activityName = (input.activityName || "").toLowerCase();
+  const isicCode = input.isicCode || "";
+
+  for (const category of HIGH_HAZARD_CATEGORIES) {
+    if (isicCode && category.isicCodes.includes(isicCode)) return category.id;
+    if (activityName && category.keywords.some((keyword) => activityName.includes(keyword))) {
+      return category.id;
+    }
+  }
+  return null;
+}
+
+/**
+ * The single source of truth for the FR-RU area/hazard rule engine
+ * (SRS FR-RUL-01..06 / UC-01). Pure: no React, no storage, no `t()` — it
+ * returns enums and i18n keys and lets the UI translate them (ADR-003).
+ *
+ * No page, feature, hook, or component may re-derive any part of this decision.
+ */
+export function classifyRequest(input: ClassificationInput): ClassificationResult {
+  const hazardCategoryId = matchHighHazardCategory(input);
+  const hasHazardFlag =
+    input.gasExtensions === true ||
+    input.hazardousMaterials === true ||
+    input.riskCategory === "high";
+  const isHighHazard = hasHazardFlag || hazardCategoryId !== null;
+
+  const area = Number(input.area) || 0;
+  const areaIsUsable = Number.isFinite(area) && area > 0;
+
+  const areaBand: AreaBand =
+    area < AREA_THRESHOLDS.FAST_TRACK_BELOW
+      ? "FAST_TRACK"
+      : area <= AREA_THRESHOLDS.MAINTENANCE_MAX_INCLUSIVE
+        ? "MAINTENANCE"
+        : "ENGINEERING";
+
+  let classification: RequestClassification;
+  let siteVisitRequired: boolean;
+  let engineeringReviewRequired: boolean;
+  let instantReportAllowed: boolean;
+
+  // FR-RUL-05: a high-hazard activity severs fast-track regardless of area.
+  if (isHighHazard) {
+    classification = "high_hazard_review";
+    siteVisitRequired = true;
+    engineeringReviewRequired = true;
+    instantReportAllowed = false;
+  } else if (areaBand === "FAST_TRACK") {
+    classification = "fast_track";
+    siteVisitRequired = false;
+    engineeringReviewRequired = false;
+    instantReportAllowed = true;
+  } else if (areaBand === "MAINTENANCE") {
+    classification = "maintenance_strategy";
+    siteVisitRequired = true;
+    engineeringReviewRequired = false;
+    instantReportAllowed = false;
+  } else {
+    classification = "engineering_project";
+    siteVisitRequired = true;
+    engineeringReviewRequired = true;
+    instantReportAllowed = false;
+  }
+
+  // An unusable area (zero, negative, or non-numeric) must never grant an
+  // instant report. The form layer rejects it first (client-request.schema.ts);
+  // this is the rule engine's own guard so the permissive default can't leak.
+  if (!areaIsUsable) {
+    instantReportAllowed = false;
+  }
+
+  const assignedQueue = QUEUE_BY_CLASSIFICATION[classification];
+
+  return {
+    classification,
+    assignedQueue,
+    areaBand,
+    hazardCategoryId,
+    siteVisitRequired,
+    engineeringReviewRequired,
+    instantReportAllowed,
+    reasonKey: REASON_KEY_BY_QUEUE[assignedQueue],
+  };
+}
+
 export function getClassificationReason(request: Partial<LicensingRequest>, t: (key: string) => string): string {
   // Normalize based on existing queue or classification path
   const queueNorm = (request.assignedQueue || "").toUpperCase();
@@ -155,42 +292,9 @@ export function getClassificationReason(request: Partial<LicensingRequest>, t: (
     return t("requests:classificationReason.ENGINEERING");
   }
 
-  // Rules-based calculation for new requests (fallback)
-  if (request.gasExtensions || request.hazardousMaterials || request.riskCategory === "high") {
-    return t("requests:classificationReason.HIGH_HAZARD");
-  }
-
-  const actName = (request.activityName || "").toLowerCase();
-  const isKeywordMatched = [
-    "kitchen",
-    "buffet",
-    "gas",
-    "workshop",
-    "oil",
-    "chemical",
-    "compressed",
-    "heavy",
-    "storage",
-    "factory",
-    "manufacturing",
-    "welding",
-  ].some((kw) => actName.includes(kw));
-
-  const code = request.isicCode || "";
-  const highHazardIsic = ["5610", "2011", "4520", "4730"];
-
-  if (isKeywordMatched || highHazardIsic.includes(code)) {
-    return t("requests:classificationReason.HIGH_HAZARD");
-  }
-
-  const area = request.area || 0;
-  if (area < 150) {
-    return t("requests:classificationReason.FAST_TRACK");
-  } else if (area >= 150 && area <= 1000) {
-    return t("requests:classificationReason.MAINTENANCE");
-  } else {
-    return t("requests:classificationReason.ENGINEERING");
-  }
+  // Rules-based calculation for new requests (fallback). Delegates to the
+  // canonical engine so thresholds and the hazard matrix exist in one place only.
+  return t(classifyRequest(request).reasonKey);
 }
 
 export function getRequestStatusDisplayName(

@@ -7,9 +7,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { clientRequestSchema, ClientRequestFormValues } from "@/schemas/client-request.schema";
 import { useAuth } from "@/providers/AuthProvider";
-import { RequiredDocument, RequestType, RequestClassification, RequestQueue, LicensingRequest } from "@/domains/requests/types";
-import { DEFAULT_REQUIRED_DOCUMENTS, HIGH_HAZARD_KEYWORDS, HIGH_HAZARD_ISIC_CODES } from "@/domains/requests/constants";
-import { getClassificationReason, getQueueDisplayName } from "@/domains/requests/workflow";
+import { RequiredDocument, RequestType, LicensingRequest } from "@/domains/requests/types";
+import { DEFAULT_REQUIRED_DOCUMENTS } from "@/domains/requests/constants";
+import { classifyRequest } from "@/domains/requests/workflow";
 import { getRequests, saveRequests, getRequestDraft, saveRequestDraft, deleteRequestDraft, getMergedRequests } from "@/domains/requests/storage";
 
 // Steps Components
@@ -28,22 +28,6 @@ import { Badge } from "@/shared/ui/badge";
 import { CheckCircle2, ChevronRight, ListTodo } from "lucide-react";
 import Link from "next/link";
 import { useTranslation } from "@/providers/i18n-provider";
-
-// Helper to determine if high hazard is triggered
-function isHighHazardActivity(values: Partial<ClientRequestFormValues>): boolean {
-  if (values.gasExtensions || values.hazardousMaterials || values.riskCategory === "high") {
-    return true;
-  }
-
-  const actName = (values.activityName || "").toLowerCase();
-  const isKeywordMatched = HIGH_HAZARD_KEYWORDS.some((kw) => actName.includes(kw));
-  if (isKeywordMatched) return true;
-
-  const code = values.isicCode || "";
-  if (HIGH_HAZARD_ISIC_CODES.includes(code)) return true;
-
-  return false;
-}
 
 export function ClientRequestWizard() {
   const { user } = useAuth();
@@ -238,38 +222,10 @@ export function ClientRequestWizard() {
     toast.success(t("requests:wizard.success.draftSaved"));
   };
 
-  // Compute auto-classification parameters
-  const isHighHazard = isHighHazardActivity(formValues);
+  // Auto-classification is owned entirely by the domain rule engine (ADR-003).
+  const { classification, siteVisitRequired, engineeringReviewRequired, instantReportAllowed, assignedQueue } =
+    classifyRequest(formValues);
   const area = formValues.area || 0;
-
-  let classification: RequestClassification = "fast_track";
-  let siteVisitRequired = false;
-  let engineeringReviewRequired = false;
-  let instantReportAllowed = true;
-
-  if (isHighHazard) {
-    classification = "high_hazard_review";
-    siteVisitRequired = true;
-    engineeringReviewRequired = true;
-    instantReportAllowed = false;
-  } else {
-    if (area < 150) {
-      classification = "fast_track";
-      siteVisitRequired = false;
-      engineeringReviewRequired = false;
-      instantReportAllowed = true;
-    } else if (area >= 150 && area <= 1000) {
-      classification = "maintenance_strategy";
-      siteVisitRequired = true;
-      engineeringReviewRequired = false;
-      instantReportAllowed = false;
-    } else {
-      classification = "engineering_project";
-      siteVisitRequired = true;
-      engineeringReviewRequired = true;
-      instantReportAllowed = false;
-    }
-  }
 
   const handleSubmit = async () => {
     setSubmitting(true);
@@ -284,14 +240,6 @@ export function ClientRequestWizard() {
     const count = allRequests.length + 1;
     const year = new Date().getFullYear();
     const jobNumber = `SSLM-${year}-${String(count).padStart(6, "0")}`;
-    let assignedQueue: RequestQueue = "FAST_TRACK";
-    if (classification === "high_hazard_review") {
-      assignedQueue = "HIGH_HAZARD";
-    } else if (classification === "engineering_project") {
-      assignedQueue = "ENGINEERING";
-    } else if (classification === "maintenance_strategy") {
-      assignedQueue = "MAINTENANCE";
-    }
 
     const newRequest: LicensingRequest = {
       id: `REQ-${Math.floor(1000 + Math.random() * 9000)}`,
