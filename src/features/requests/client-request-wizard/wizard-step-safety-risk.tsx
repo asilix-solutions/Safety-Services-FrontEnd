@@ -1,7 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { UseFormReturn } from "react-hook-form";
+import { toast } from "sonner";
 import { ClientRequestFormValues } from "@/schemas/client-request.schema";
 import { Button } from "@/shared/ui/button";
 import { useTranslation } from "@/providers/i18n-provider";
@@ -9,21 +10,52 @@ import { Label } from "@/shared/ui/label";
 import { Input } from "@/shared/ui/input";
 import { Textarea } from "@/shared/ui/textarea";
 import { Select } from "@/shared/ui/select";
-import { SERVICE_REGISTRY } from "@/domains/requests/service-config";
+import { AlertTriangle } from "lucide-react";
+import { SERVICE_REGISTRY, FieldConfig, FieldOption } from "@/domains/requests/service-config";
 import { RequestType } from "@/domains/requests/types";
 
 interface SafetyRiskStepProps {
   form: UseFormReturn<ClientRequestFormValues>;
+  /**
+   * Rule gates from `workflow.ts#classifyRequest`. This step only reads them —
+   * it never decides what opens or closes a gate (ADR-003).
+   */
+  instantReportAllowed: boolean;
   onNext: () => void;
   onPrev: () => void;
 }
 
-export function SafetyRiskStep({ form, onNext, onPrev }: SafetyRiskStepProps) {
+export function SafetyRiskStep({ form, instantReportAllowed, onNext, onPrev }: SafetyRiskStepProps) {
   const { t } = useTranslation();
-  const { register, watch, trigger, formState: { errors } } = form;
+  const { register, watch, trigger, setValue, formState: { errors } } = form;
 
   const requestType = watch("requestType") as RequestType;
   const config = SERVICE_REGISTRY[requestType];
+
+  const isGateOpen = (option: FieldOption): boolean =>
+    option.gate === "instantReportAllowed" ? instantReportAllowed : true;
+
+  /** The blocked option currently selected for this field, if any. */
+  const findBlockedSelection = (field: FieldConfig): FieldOption | undefined => {
+    const selected = watch(field.key);
+    return field.options?.find((option) => option.value === selected && !isGateOpen(option));
+  };
+
+  // A gate can close after the fact: the client picks "instant" here, steps back
+  // to the facility step, and changes the activity or area to something the rules
+  // classify as hazardous or oversized. Clear the now-forbidden choice and say why
+  // — the field is required, so validation stops them until they pick again.
+  useEffect(() => {
+    if (instantReportAllowed || !config) return;
+
+    for (const field of config.fields) {
+      const blocked = findBlockedSelection(field);
+      if (blocked) {
+        setValue(field.key, undefined, { shouldValidate: false });
+        toast.warning(t("requests:wizard.serviceDetails.reportTypeInstantCleared"));
+      }
+    }
+  }, [instantReportAllowed, requestType]);
 
   const handleNextStep = async () => {
     const fieldsToValidate = config ? config.fields.map((field) => field.key) : [];
@@ -67,6 +99,7 @@ export function SafetyRiskStep({ form, onNext, onPrev }: SafetyRiskStepProps) {
           }
 
           const hasError = errors[field.key];
+          const blockedOptions = (field.options ?? []).filter((opt) => !isGateOpen(opt));
 
           return (
             <div key={field.key} className={`space-y-1.5 flex flex-col justify-end ${colClass}`}>
@@ -78,13 +111,27 @@ export function SafetyRiskStep({ form, onNext, onPrev }: SafetyRiskStepProps) {
               {field.type === "select" && (
                 <Select {...register(field.key)}>
                   <option value="">{field.placeholderKey ? t(field.placeholderKey) : ""}</option>
-                  {field.options?.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {t(opt.labelKey)}
-                    </option>
-                  ))}
+                  {field.options?.map((opt) => {
+                    const blocked = !isGateOpen(opt);
+                    return (
+                      <option key={opt.value} value={opt.value} disabled={blocked}>
+                        {t(opt.labelKey)}
+                        {blocked && ` — ${t("requests:wizard.serviceDetails.reportTypeInstantUnavailableSuffix")}`}
+                      </option>
+                    );
+                  })}
                 </Select>
               )}
+
+              {blockedOptions.map((opt) => (
+                <p
+                  key={opt.value}
+                  className="flex items-start gap-1.5 text-[10px] text-amber-700 dark:text-amber-400 leading-relaxed mt-1"
+                >
+                  <AlertTriangle className="h-3 w-3 shrink-0 mt-0.5" />
+                  <span>{opt.gateBlockedReasonKey ? t(opt.gateBlockedReasonKey) : ""}</span>
+                </p>
+              ))}
 
               {field.type === "textarea" && (
                 <Textarea

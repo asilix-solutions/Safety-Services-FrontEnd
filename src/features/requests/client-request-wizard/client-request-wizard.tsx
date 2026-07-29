@@ -230,6 +230,11 @@ export function ClientRequestWizard() {
   const handleSubmit = async () => {
     setSubmitting(true);
 
+    // Defence in depth behind the step-3 gate: never persist a report type the
+    // rules forbid, whatever the form state ended up holding (FR-RUL-05).
+    const permittedReportType =
+      formValues.reportType === "instant" && !instantReportAllowed ? undefined : formValues.reportType;
+
     // Simulate submission delay
     await new Promise((resolve) => setTimeout(resolve, 1500));
     // Get current requests list from storage
@@ -283,7 +288,7 @@ export function ClientRequestWizard() {
       constructionStatus: formValues.constructionStatus,
       requiredSystems: formValues.requiredSystems,
       engineeringNotes: formValues.engineeringNotes,
-      reportType: formValues.reportType,
+      reportType: permittedReportType,
       caseDescription: formValues.caseDescription,
       buildingLicenseContext: formValues.buildingLicenseContext,
       inspectionNeeded: formValues.inspectionNeeded,
@@ -426,7 +431,14 @@ export function ClientRequestWizard() {
 
           {step === 2 && <FacilityInfoStep form={form} onNext={handleNext} onPrev={handlePrev} />}
 
-          {step === 3 && <SafetyRiskStep form={form} onNext={handleNext} onPrev={handlePrev} />}
+          {step === 3 && (
+            <SafetyRiskStep
+              form={form}
+              instantReportAllowed={instantReportAllowed}
+              onNext={handleNext}
+              onPrev={handlePrev}
+            />
+          )}
 
           {step === 4 && (
             <DocumentsStep

@@ -3,9 +3,21 @@ import { RequestType, RequiredDocument } from "./types";
 
 export type FieldType = "text" | "number" | "select" | "textarea" | "checkbox" | "date";
 
+/**
+ * A rule gate an option depends on. The gate's value is produced by
+ * `workflow.ts#classifyRequest` — never re-derived by the renderer. Declaring it
+ * here keeps the governance rule out of the UI: the form only asks "is this gate
+ * open?", it never decides what opens it.
+ */
+export type FieldOptionGate = "instantReportAllowed";
+
 export interface FieldOption {
   value: string;
   labelKey: string;
+  /** When set, the option is only selectable while this gate is open. */
+  gate?: FieldOptionGate;
+  /** Shown as the reason when `gate` is closed. Required whenever `gate` is set. */
+  gateBlockedReasonKey?: string;
 }
 
 export interface FieldConfig {
@@ -190,7 +202,14 @@ export const SERVICE_REGISTRY: Record<RequestType, ServiceConfig> = {
         placeholderKey: "requests:wizard.serviceDetails.placeholderSelectReportType",
         required: true,
         options: [
-          { value: "instant", labelKey: "requests:wizard.serviceDetails.reportTypeInstant" },
+          {
+            // FR-RUL-05 / FR-RUL-01: an instant report is a Fast-Track privilege.
+            // High-hazard activities and anything outside the Fast-Track band lose it.
+            value: "instant",
+            labelKey: "requests:wizard.serviceDetails.reportTypeInstant",
+            gate: "instantReportAllowed",
+            gateBlockedReasonKey: "requests:wizard.serviceDetails.reportTypeInstantBlockedReason",
+          },
           { value: "non_instant", labelKey: "requests:wizard.serviceDetails.reportTypeNonInstant" },
           { value: "compliance", labelKey: "requests:wizard.serviceDetails.reportTypeCompliance" },
         ],
