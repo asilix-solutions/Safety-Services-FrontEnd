@@ -212,7 +212,7 @@ export default function RequestDetailsPage() {
   const getNextStepInstructions = (req: LicensingRequest) => {
     const stage = req.currentStage;
     const queueNorm = (req.assignedQueue || "").toUpperCase();
-    const classNorm = (req.classification || "").toUpperCase().replace(/_/, "");
+    const classNorm = (req.classification || "").toUpperCase().replace(/_/g, "");
     const isMaintenance = queueNorm === "MAINTENANCE" || classNorm === "MAINTENANCESTRATEGY" || classNorm === "MAINTENANCE";
     const isFastTrack = queueNorm === "FAST_TRACK" || classNorm === "FASTTRACK" || classNorm === "FAST";
     const isHighHazard = queueNorm === "HIGH_HAZARD" || classNorm === "HIGHHAZARDREVIEW" || classNorm === "HIGHHAZARD" || classNorm === "HAZARD";
@@ -340,7 +340,7 @@ export default function RequestDetailsPage() {
   const isClient = isRole(user?.role, [USER_ROLES.CLIENT]);
   const isSalesAgent = isRole(user?.role, [USER_ROLES.SALES_AGENT]);
   const queueNorm = (request.assignedQueue || "").toUpperCase();
-  const classNorm = (request.classification || "").toUpperCase().replace(/_/, "");
+  const classNorm = (request.classification || "").toUpperCase().replace(/_/g, "");
   const isFastOrMaintenance = queueNorm === "FAST_TRACK" || queueNorm === "MAINTENANCE" || classNorm.includes("FAST") || classNorm.includes("MAINTENANCE");
   const isPreQuotationStage = request.currentStage === "SUBMITTED" || request.currentStage === "UNDER_REVIEW";
   const showApproveForQuotationAction = isConsultingEngineer && isFastOrMaintenance && isPreQuotationStage;

@@ -118,7 +118,7 @@ export function getQueueDisplayName(queue: RequestQueue | null, t: (key: string)
 }
 
 export function getClassificationDisplayName(classification: string, t: (key: string) => string): string {
-  const norm = (classification || "").toUpperCase().replace(/_/, "");
+  const norm = (classification || "").toUpperCase().replace(/_/g, "");
   
   if (norm.includes("FASTTRACK") || norm === "FAST_TRACK") {
     return t("requests:classification.client.fastTrack");
@@ -277,7 +277,7 @@ export function classifyRequest(input: ClassificationInput): ClassificationResul
 export function getClassificationReason(request: Partial<LicensingRequest>, t: (key: string) => string): string {
   // Normalize based on existing queue or classification path
   const queueNorm = (request.assignedQueue || "").toUpperCase();
-  const classNorm = (request.classification || "").toUpperCase().replace(/_/, "");
+  const classNorm = (request.classification || "").toUpperCase().replace(/_/g, "");
   
   if (queueNorm === "HIGH_HAZARD" || classNorm.includes("HIGHHAZARD") || classNorm.includes("HAZARD")) {
     return t("requests:classificationReason.HIGH_HAZARD");
