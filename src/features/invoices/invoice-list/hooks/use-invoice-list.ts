@@ -71,7 +71,7 @@ export function useInvoiceList() {
   };
 
   /** Executes the actual domain payment after user confirms in dialog */
-  const handleConfirmPayment = () => {
+  const handleConfirmPayment = (transactionReference: string) => {
     if (!user || !payingInvoice) return;
     setIsPayingConfirm(true);
     try {
@@ -82,7 +82,12 @@ export function useInvoiceList() {
         throw new Error("Associated safety request not found.");
       }
 
-      const result = confirmMockPayment({ request, invoice: payingInvoice, paidBy: user.name || user.role });
+      const result = confirmMockPayment({
+        request,
+        invoice: payingInvoice,
+        paidBy: user.name || user.role,
+        transactionReference,
+      });
 
       // Retrieve the generated project to get its exact ID
       const projectsList = getProjects();

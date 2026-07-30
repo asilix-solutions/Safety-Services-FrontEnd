@@ -17,14 +17,14 @@ import { useRouter } from "next/navigation";
 import { useTranslation } from "@/providers/i18n-provider";
 import { formatCurrency as localFormatCurrency } from "@/lib/formatters";
 import { getStatusLabel, getStatusBadgeVariant } from "../helpers/helpers";
-import { StripePaymentElement } from "./stripe-payment-element";
+import { SimulatedPaymentForm } from "./simulated-payment-form";
 
 interface PaymentConfirmDialogProps {
   invoice: ClientInvoice | null;
   isPaying: boolean;
   isSuccess: boolean;
   createdProjectId?: string | null;
-  onConfirm: () => void;
+  onConfirm: (transactionReference: string) => void;
   onCancel: () => void;
 }
 
@@ -118,8 +118,9 @@ export function PaymentConfirmDialog({
                 </p>
               </div>
 
-              {/* Stripe Payment Element (test mode, simulated confirmation) */}
-              <StripePaymentElement
+              <SimulatedPaymentForm
+                invoiceId={displayInvoice.id}
+                jobNumber={displayInvoice.jobNumber}
                 amount={displayInvoice.grandTotal}
                 currency={displayInvoice.currency}
                 isPaying={isPaying}
