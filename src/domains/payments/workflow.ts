@@ -13,10 +13,13 @@ export function confirmMockPayment({
   invoice,
   request,
   paidBy,
+  transactionReference,
 }: {
   invoice: ClientInvoice;
   request: LicensingRequest;
   paidBy: string;
+  /** Reference returned by the payment provider. Generated locally when omitted. */
+  transactionReference?: string;
 }): {
   updatedInvoice: ClientInvoice;
   paymentRecord: ClientPayment;
@@ -43,7 +46,7 @@ export function confirmMockPayment({
     jobNumber: request.jobNumber,
     amountPaid: invoice.grandTotal,
     paymentMethod: "MOCK_PAYMENT",
-    transactionReference: `TXN-${Math.floor(100000 + Math.random() * 900000)}`,
+    transactionReference: transactionReference ?? `TXN-${Math.floor(100000 + Math.random() * 900000)}`,
     paidAt: nowStr,
     status: "SUCCESS",
   };
