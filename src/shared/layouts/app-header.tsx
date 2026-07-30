@@ -7,8 +7,9 @@ import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
 import { ThemeToggle } from "@/shared/components/theme-toggle";
 import { LanguageSwitcher } from "@/shared/components/language-switcher";
-import { Menu, Bell } from "lucide-react";
+import { Menu } from "lucide-react";
 import { RoleSwitcher } from "@/features/dashboard/components/role-switcher";
+import { NotificationBell } from "@/features/notifications/notification-bell";
 
 interface AppHeaderProps {
   onMenuToggle?: () => void;
@@ -43,10 +44,7 @@ export function AppHeader({ onMenuToggle }: AppHeaderProps) {
         <RoleSwitcher />
 
         {/* Notifications Bell */}
-        <button className="relative h-9 w-9 rounded-lg bg-secondary/15 border border-border/20 flex items-center justify-center hover:bg-accent transition-colors cursor-pointer">
-          <Bell className="h-4 w-4 text-muted-foreground" />
-          <span className="absolute top-2 end-2 h-1.5 w-1.5 rounded-full bg-primary" />
-        </button>
+        <NotificationBell />
 
         {/* Dynamic i18n Language Switcher */}
         <LanguageSwitcher />
