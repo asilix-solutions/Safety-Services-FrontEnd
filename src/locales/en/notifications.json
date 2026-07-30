@@ -1,0 +1,9 @@
+{
+  "title": "Notifications",
+  "unread_count": "{count} unread",
+  "mark_all_read": "Mark all as read",
+  "empty_title": "No notifications",
+  "empty_description": "Updates about your requests, projects and invoices will appear here.",
+  "open_label": "Open notifications",
+  "just_now": "Just now"
+}

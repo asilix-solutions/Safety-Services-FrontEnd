@@ -37,6 +37,8 @@ import arSubscriptions from "@/locales/ar/subscriptions.json";
 import enSubscriptions from "@/locales/en/subscriptions.json";
 import arUsers from "@/locales/ar/users.json";
 import enUsers from "@/locales/en/users.json";
+import arNotifications from "@/locales/ar/notifications.json";
+import enNotifications from "@/locales/en/notifications.json";
 
 // Mapping dictionary registry
 export const DICTIONARIES: Record<Locale, Record<Namespace, Record<string, string>>> = {
@@ -57,6 +59,7 @@ export const DICTIONARIES: Record<Locale, Record<Namespace, Record<string, strin
     closure: arClosure,
     subscriptions: arSubscriptions,
     users: arUsers,
+    notifications: arNotifications,
   },
   en: {
     common: enCommon,
@@ -75,6 +78,7 @@ export const DICTIONARIES: Record<Locale, Record<Namespace, Record<string, strin
     closure: enClosure,
     subscriptions: enSubscriptions,
     users: enUsers,
+    notifications: enNotifications,
   },
 };
 
