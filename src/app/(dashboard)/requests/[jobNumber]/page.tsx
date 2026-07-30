@@ -34,8 +34,10 @@ import {
   getReviewPathDisplayName,
   getRequestStatusDisplayName,
   getWorkflowStageDisplayName,
+  getStageProgressPercent,
   approveRequestForQuotation
 } from "@/domains/requests/workflow";
+import { Progress } from "@/shared/ui/progress";
 
 // Import new storage domains and selectors
 import { ClientInvoice } from "@/domains/invoices/types";
@@ -737,6 +739,19 @@ export default function RequestDetailsPage() {
               <CardDescription className="text-muted-foreground">{t("requests:details.stageTimelineDesc")}</CardDescription>
             </CardHeader>
             <CardContent>
+              {/* FR-COM-02: completion percentage for the linear milestone track */}
+              <div className="mb-5 space-y-1.5">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-semibold text-muted-foreground">
+                    {t("requests:details.stageProgressLabel")}
+                  </span>
+                  <span className="font-bold text-foreground tabular-nums">
+                    {getStageProgressPercent(request.currentStage)}%
+                  </span>
+                </div>
+                <Progress value={getStageProgressPercent(request.currentStage)} className="h-2" />
+              </div>
+
               <div className="space-y-3">
                 {WORKFLOW_STAGES.map((stage, idx) => {
                   const isCompleted = idx < currentStageIndex;

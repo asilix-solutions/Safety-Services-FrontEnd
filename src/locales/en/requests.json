@@ -461,6 +461,7 @@
   "technical_report": "Technical Safety Report",
   "details.stageTimelineTitle": "Workflow Stage Timeline",
   "details.stageTimelineDesc": "Official lifecycle progress tracking",
+  "details.stageProgressLabel": "Completion",
   "wizard.serviceDetails.landPlotNumber": "Land Plot Number",
   "wizard.serviceDetails.gpsCoordinates": "GPS Coordinates / Location Notes",
   "wizard.serviceDetails.buildingStatus": "Building Status",

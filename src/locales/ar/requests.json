@@ -461,6 +461,7 @@
   "technical_report": "تقرير السلامة الفني",
   "details.stageTimelineTitle": "الخط الزمني لمرحلة سير العمل",
   "details.stageTimelineDesc": "متابعة التقدم الرسمي لدورة حياة الطلب",
+  "details.stageProgressLabel": "نسبة الإنجاز",
   "wizard.serviceDetails.landPlotNumber": "رقم المخطط الأرضي",
   "wizard.serviceDetails.gpsCoordinates": "إحداثيات تحديد الموقع / ملاحظات الموقع",
   "wizard.serviceDetails.buildingStatus": "حالة المبنى",

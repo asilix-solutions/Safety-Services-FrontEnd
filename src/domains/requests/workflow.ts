@@ -27,6 +27,20 @@ export function getNextStage(stage: WorkflowStage): WorkflowStage | null {
   return WORKFLOW_STAGES[index + 1];
 }
 
+/**
+ * How far along the linear milestone track a request is, as a whole percentage
+ * (FR-COM-02 / Arabic SRS §3.5 "نسبة الإنجاز").
+ *
+ * Derived from the position in `WORKFLOW_STAGES` so the percentage and the stage
+ * list can never drift apart — the first stage is 0% and the last is 100%.
+ * Pure: the UI decides how to present it.
+ */
+export function getStageProgressPercent(stage: WorkflowStage): number {
+  const index = WORKFLOW_STAGES.indexOf(stage);
+  if (index === -1) return 0;
+  return Math.round((index / (WORKFLOW_STAGES.length - 1)) * 100);
+}
+
 export function canTransition(from: WorkflowStage, to: WorkflowStage): boolean {
   // Linear progression
   const fromIndex = WORKFLOW_STAGES.indexOf(from);
