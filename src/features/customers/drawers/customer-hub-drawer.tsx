@@ -12,7 +12,7 @@ import { useTenantContext } from "@/hooks/use-tenant-context";
 import { getActiveProjects } from "@/domains/projects/storage";
 import { getInvoices } from "@/domains/invoices/storage";
 import { getScopedContracts } from "@/domains/contracts/storage";
-import { getCertificates } from "@/domains/certificates/storage";
+import { getScopedCertificates } from "@/domains/certificates/storage";
 
 interface CustomerHubDrawerProps {
   customer: Customer | null;
@@ -59,7 +59,7 @@ export function CustomerHubDrawer({ customer, isOpen, onClose, onSave, permissio
   const linkedProjects = getActiveProjects(undefined, customer.id);
   const linkedInvoices = getInvoices().filter((i) => i.clientId === customer.id);
   const linkedContracts = getScopedContracts(tenantContext).filter((c) => c.clientId === customer.id);
-  const linkedCertificates = getCertificates().filter((c) => c.clientId === customer.id);
+  const linkedCertificates = getScopedCertificates(tenantContext).filter((c) => c.clientId === customer.id);
 
   const tabs = [
     { id: "overview", label: t("common:customers.tabs.overview"), icon: Info },

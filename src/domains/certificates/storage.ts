@@ -1,3 +1,5 @@
+import { scopeToTenant } from "@/domains/tenancy";
+import { TenantContext } from "@/domains/tenancy/types";
 import { ClientCertificate } from "./types";
 
 export function getCertificates(): ClientCertificate[] {
@@ -21,6 +23,7 @@ export function saveCertificates(certificates: ClientCertificate[]): void {
 }
 
 export function createOrUpdateCertificate(certificate: ClientCertificate): void {
+  // Unscoped on purpose: saving a scoped list would drop other tenants' rows.
   const certificates = getCertificates();
   const index = certificates.findIndex((c) => c.id === certificate.id);
   if (index !== -1) {
@@ -44,4 +47,9 @@ export function getCertificateByContractId(contractId: string): ClientCertificat
 export function getCertificateByProjectId(projectId: string): ClientCertificate | null {
   const certificates = getCertificates();
   return certificates.find((c) => c.projectId === projectId) || null;
+}
+
+/** Certificates visible to the caller's tenant. The getter UI lists must use. */
+export function getScopedCertificates(ctx: TenantContext): ClientCertificate[] {
+  return scopeToTenant(getCertificates(), ctx);
 }

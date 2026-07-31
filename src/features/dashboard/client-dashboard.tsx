@@ -12,7 +12,7 @@ import { useTenantContext } from "@/hooks/use-tenant-context";
 import { getProjects } from "@/domains/projects/storage";
 import { getScopedInvoices } from "@/domains/invoices/storage";
 import { getScopedContracts } from "@/domains/contracts/storage";
-import { getCertificates } from "@/domains/certificates/storage";
+import { getScopedCertificates } from "@/domains/certificates/storage";
 
 import { ClientOverview, prepareClientOverviewViewModel, ClientOverviewViewModel } from "@/features/client-overview";
 
@@ -31,7 +31,7 @@ export function ClientDashboard() {
     const projects = getProjects();
     const invoices = getScopedInvoices(tenantContext);
     const contracts = getScopedContracts(tenantContext);
-    const certificates = getCertificates();
+    const certificates = getScopedCertificates(tenantContext);
 
     const vm = prepareClientOverviewViewModel(
       {

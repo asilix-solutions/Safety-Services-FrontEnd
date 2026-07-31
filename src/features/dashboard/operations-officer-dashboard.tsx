@@ -9,7 +9,7 @@ import { getScopedRequests } from "@/domains/requests/storage";
 import { useTenantContext } from "@/hooks/use-tenant-context";
 import { getScopedInvoices } from "@/domains/invoices/storage";
 import { getScopedContracts } from "@/domains/contracts/storage";
-import { getCertificates } from "@/domains/certificates/storage";
+import { getScopedCertificates } from "@/domains/certificates/storage";
 import { getSiteVisits } from "@/domains/site-visits/storage";
 
 import {
@@ -32,7 +32,7 @@ export function OperationsOfficerDashboard() {
     const requests = getScopedRequests(tenantContext);
     const invoices = getScopedInvoices(tenantContext);
     const contracts = getScopedContracts(tenantContext);
-    const certificates = getCertificates();
+    const certificates = getScopedCertificates(tenantContext);
     const siteVisits = getSiteVisits();
 
     const vm = prepareOperationsOverviewViewModel(

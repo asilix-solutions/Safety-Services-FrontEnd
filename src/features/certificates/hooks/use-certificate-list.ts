@@ -1,9 +1,10 @@
+import { useTenantContext } from "@/hooks/use-tenant-context";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/providers/AuthProvider";
 import { useTranslation, useNamespaceTranslations } from "@/providers/i18n-provider";
 import { ClientCertificate } from "@/domains/certificates/types";
-import { getCertificates } from "@/domains/certificates/storage";
+import { getScopedCertificates } from "@/domains/certificates/storage";
 import { issueCertificateFromProject, revokeCertificate } from "@/domains/certificates/workflow";
 import { getProjects } from "@/domains/projects/storage";
 import { checkProjectCertificateEligibility, CertificateEligibility } from "@/domains/workflow-validation/certificate.validators";
@@ -11,6 +12,7 @@ import { isRole, hasPermission } from "@/constants/permissions";
 
 export function useCertificateList() {
   const { user } = useAuth();
+  const tenantContext = useTenantContext();
   const { t } = useTranslation();
   useNamespaceTranslations(["common", "dashboard"]);
 
@@ -26,7 +28,7 @@ export function useCertificateList() {
   const loadData = () => {
     if (!user) return;
 
-    const allCertificates = getCertificates();
+    const allCertificates = getScopedCertificates(tenantContext);
     let userCertificates = allCertificates;
 
     if (isRole(user.role, ["Client"])) {
