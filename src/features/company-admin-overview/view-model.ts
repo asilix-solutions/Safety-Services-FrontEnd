@@ -1,3 +1,5 @@
+import { UserRole } from "@/types/role";
+import { toTenantContext } from "@/domains/tenancy";
 import { Project } from "@/types/project";
 import { ClientInvoice } from "@/domains/invoices/types";
 import { ClientContract } from "@/domains/contracts/types";
@@ -30,7 +32,7 @@ export interface CompanyAdminOverviewViewModel {
 }
 
 export function prepareCompanyAdminOverviewViewModel(
-  user: { name: string; role: string },
+  user: { name: string; role: UserRole; tenantId?: string },
   data: {
     projects: Project[];
     requests: LicensingRequest[];
@@ -41,7 +43,7 @@ export function prepareCompanyAdminOverviewViewModel(
   }
 ): CompanyAdminOverviewViewModel {
   const activeProjectsList = getActiveProjects();
-  const pendingApprovalsCount = getPendingQuotationApprovals().length;
+  const pendingApprovalsCount = getPendingQuotationApprovals(toTenantContext(user)).length;
   const pendingContractsCount = getPendingContracts().length;
 
 

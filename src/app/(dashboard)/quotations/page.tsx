@@ -16,7 +16,7 @@ import Link from "next/link";
 import { useTranslation, useNamespaceTranslations } from "@/providers/i18n-provider";
 import { ActionMenu } from "@/shared/components/action-menu";
 import { Quotation } from "@/domains/quotations/types";
-import { getQuotations } from "@/domains/quotations/workflow";
+import { getScopedQuotations } from "@/domains/quotations/storage";
 import { getScopedRequests } from "@/domains/requests/storage";
 import { useTenantContext } from "@/hooks/use-tenant-context";
 
@@ -38,7 +38,7 @@ export default function QuotationsQueuePage() {
   // Load and merge requests
   useEffect(() => {
     const merged = getScopedRequests(tenantContext);
-    const localQuotes = getQuotations();
+    const localQuotes = getScopedQuotations(tenantContext);
 
     const quoteStatusMap = new Map<string, DerivedQuotationStatus>();
     localQuotes.forEach((q) => {

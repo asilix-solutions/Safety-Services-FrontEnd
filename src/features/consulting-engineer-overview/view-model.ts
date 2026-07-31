@@ -45,7 +45,7 @@ export function prepareConsultingEngineerOverviewViewModel(
   const engineeringRequests = getEngineeringRequests(toTenantContext(user));
 
   // Filter pending quotations
-  const pendingQuotations = getPendingQuotations();
+  const pendingQuotations = getPendingQuotations(toTenantContext(user));
 
   // Filter pending reports
   const pendingReports = getPendingReports();

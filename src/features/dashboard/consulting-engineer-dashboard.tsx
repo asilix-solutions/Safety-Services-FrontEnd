@@ -7,7 +7,7 @@ import { useTranslation } from "@/providers/i18n-provider";
 import { getProjects } from "@/domains/projects/storage";
 import { getScopedRequests } from "@/domains/requests/storage";
 import { useTenantContext } from "@/hooks/use-tenant-context";
-import { getQuotations } from "@/domains/quotations/storage";
+import { getScopedQuotations } from "@/domains/quotations/storage";
 import { getSiteVisits } from "@/domains/site-visits/storage";
 
 import {
@@ -28,7 +28,7 @@ export function ConsultingEngineerDashboard() {
 
     const projects = getProjects();
     const requests = getScopedRequests(tenantContext);
-    const quotations = getQuotations();
+    const quotations = getScopedQuotations(tenantContext);
     const siteVisits = getSiteVisits();
 
     const vm = prepareConsultingEngineerOverviewViewModel(

@@ -1,5 +1,11 @@
 import { Quotation } from "./types";
+import { scopeToTenant } from "@/domains/tenancy";
+import { TenantContext } from "@/domains/tenancy/types";
 
+/**
+ * Every quotation, unscoped. Internal: writes must read the whole collection
+ * or a save would drop the other tenants' rows.
+ */
 export function getQuotations(): Quotation[] {
   if (typeof window === "undefined") return [];
   try {
@@ -21,7 +27,13 @@ export function saveQuotations(quotations: Quotation[]): void {
   }
 }
 
+/** Quotations visible to the caller's tenant. The getter UI lists must use. */
+export function getScopedQuotations(ctx: TenantContext): Quotation[] {
+  return scopeToTenant(getQuotations(), ctx);
+}
+
 export function createOrUpdateQuotation(quotation: Quotation): void {
+  // Unscoped on purpose: saving a scoped list would drop other tenants' rows.
   const quotations = getQuotations();
   const index = quotations.findIndex((q) => q.jobNumber === quotation.jobNumber);
   if (index !== -1) {
@@ -32,14 +44,14 @@ export function createOrUpdateQuotation(quotation: Quotation): void {
   saveQuotations(quotations);
 }
 
-export function getPendingQuotationApprovals(): Quotation[] {
-  const quotations = getQuotations();
-  return quotations.filter((q) => q.quotationStatus === "SUBMITTED_FOR_APPROVAL");
+export function getPendingQuotationApprovals(ctx: TenantContext): Quotation[] {
+  return getScopedQuotations(ctx).filter((q) => q.quotationStatus === "SUBMITTED_FOR_APPROVAL");
 }
 
-export function getPendingQuotations(): Quotation[] {
-  const quotations = getQuotations();
-  return quotations.filter((q) => q.quotationStatus === "DRAFT" || q.quotationStatus === "CHANGES_REQUESTED");
+export function getPendingQuotations(ctx: TenantContext): Quotation[] {
+  return getScopedQuotations(ctx).filter(
+    (q) => q.quotationStatus === "DRAFT" || q.quotationStatus === "CHANGES_REQUESTED"
+  );
 }
 
 export function getQuotationByJobNumber(jobNumber: string): Quotation | null {

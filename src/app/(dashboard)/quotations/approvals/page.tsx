@@ -15,7 +15,7 @@ import { Eye, FileCheck } from "lucide-react";
 import Link from "next/link";
 import { useTranslation, useNamespaceTranslations } from "@/providers/i18n-provider";
 import { Quotation } from "@/domains/quotations/types";
-import { getQuotations } from "@/domains/quotations/workflow";
+import { getScopedQuotations } from "@/domains/quotations/storage";
 import { getScopedRequests } from "@/domains/requests/storage";
 import { useTenantContext } from "@/hooks/use-tenant-context";
 import { isRole } from "@/constants/permissions";
@@ -29,7 +29,7 @@ export default function QuotationApprovalsQueuePage() {
   const [approvals, setApprovals] = useState<(Quotation & { clientName: string; facilityName: string })[]>([]);
 
   useEffect(() => {
-    const localQuotes = getQuotations();
+    const localQuotes = getScopedQuotations(tenantContext);
     const merged = getScopedRequests(tenantContext);
  
     // Merge requests

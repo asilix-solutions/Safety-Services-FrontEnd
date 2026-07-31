@@ -10,7 +10,7 @@ import { useTenantContext } from "@/hooks/use-tenant-context";
 import { getMergedInvoices } from "@/domains/invoices/storage";
 import { getContracts } from "@/domains/contracts/storage";
 import { getCertificates } from "@/domains/certificates/storage";
-import { getQuotations } from "@/domains/quotations/storage";
+import { getScopedQuotations } from "@/domains/quotations/storage";
 
 import {
   CompanyAdminOverview,
@@ -33,7 +33,7 @@ export function CompanyAdminDashboard() {
     const invoices = getMergedInvoices();
     const contracts = getContracts();
     const certificates = getCertificates();
-    const quotations = getQuotations();
+    const quotations = getScopedQuotations(tenantContext);
 
     const vm = prepareCompanyAdminOverviewViewModel(
       {
