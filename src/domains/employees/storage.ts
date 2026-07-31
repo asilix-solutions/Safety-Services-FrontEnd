@@ -3,6 +3,39 @@ import { scopeToTenant } from "@/domains/tenancy";
 import { TenantContext } from "@/domains/tenancy/types";
 
 export const MOCK_EMPLOYEES: Employee[] = [
+  // COMP-002 — present so switching tenants visibly changes the roster.
+  {
+    id: "EMP-101",
+    tenantId: "COMP-002",
+    userId: "u-8",
+    employeeNumber: "EMP-0101",
+    fullName: "Layla Haddad",
+    email: "layla.h@safetyshield.com",
+    phone: "+966505550101",
+    role: "Company Admin",
+    department: "Administration",
+    status: "Active",
+    availabilityStatus: "Available",
+    avatarUrl: "https://api.dicebear.com/7.x/adventurer/svg?seed=Layla",
+    createdAt: "2026-02-01T08:00:00Z",
+    updatedAt: "2026-02-01T08:00:00Z",
+  },
+  {
+    id: "EMP-002-SHIELD",
+    tenantId: "COMP-002",
+    userId: "u-9",
+    employeeNumber: "EMP-0102",
+    fullName: "Omar Farsi",
+    email: "omar.f@safetyshield.com",
+    phone: "+966505550102",
+    role: "Operations Officer",
+    department: "Operations",
+    status: "Active",
+    availabilityStatus: "Available",
+    avatarUrl: "https://api.dicebear.com/7.x/adventurer/svg?seed=Omar",
+    createdAt: "2026-02-03T08:00:00Z",
+    updatedAt: "2026-02-03T08:00:00Z",
+  },
   {
     id: "EMP-001",
     tenantId: "COMP-001",

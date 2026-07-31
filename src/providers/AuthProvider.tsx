@@ -10,7 +10,8 @@ interface AuthContextType {
   isLoading: boolean;
   login: (role: UserRole) => Promise<void>;
   logout: () => void;
-  switchRole: (role: UserRole, companyId?: string) => void;
+  /** `scopeId` is the client company for a Client, or the tenant for a Company Admin. */
+  switchRole: (role: UserRole, scopeId?: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -116,7 +117,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     localStorage.removeItem(SESSION_STORAGE_KEY);
   };
-  const switchRole = (role: UserRole, companyId?: string) => {
+  const switchRole = (role: UserRole, scopeId?: string) => {
+    const companyId = scopeId;
     const baseProfile = MOCK_PROFILES[role];
     let profile: UserProfile = {
       ...baseProfile,
@@ -144,6 +146,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           companyId: "c-102",
         };
       }
+    }
+
+    // Switching the tenant itself — the only way to observe isolation in the UI.
+    if (role === "Company Admin" && scopeId === "COMP-002") {
+      profile = {
+        ...profile,
+        id: "u-8",
+        name: "Layla Haddad",
+        email: "layla.h@safetyshield.com",
+        tenantId: "COMP-002",
+        avatarUrl: "https://api.dicebear.com/7.x/adventurer/svg?seed=Layla",
+      };
     }
     
     setUser(profile);

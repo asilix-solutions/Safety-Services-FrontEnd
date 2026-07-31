@@ -18,8 +18,9 @@ export function RoleSwitcher() {
   const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const val = e.target.value;
     if (val.startsWith("Client:")) {
-      const companyId = val.split(":")[1];
-      switchRole(USER_ROLES.CLIENT, companyId);
+      switchRole(USER_ROLES.CLIENT, val.split(":")[1]);
+    } else if (val.startsWith("Admin:")) {
+      switchRole(USER_ROLES.COMPANY_ADMIN, val.split(":")[1]);
     } else {
       switchRole(val as UserRole);
     }
@@ -30,6 +31,9 @@ export function RoleSwitcher() {
     // role infrastructure, not a permission check — dev role-switcher enumerating roles
     if (user.role === USER_ROLES.CLIENT) {
       return `Client:${user.companyId || "c-102"}`;
+    }
+    if (user.role === USER_ROLES.COMPANY_ADMIN) {
+      return `Admin:${user.tenantId || "COMP-001"}`;
     }
     return user.role;
   };
@@ -43,10 +47,11 @@ export function RoleSwitcher() {
       <select
         value={getSelectValue()}
         onChange={handleRoleChange}
-        className="bg-transparent text-xs font-semibold text-primary outline-none cursor-pointer focus:ring-0 border-0 p-0 pr-6"
+        className="bg-transparent text-xs font-semibold text-primary outline-none cursor-pointer focus:ring-0 border-0 p-0 pe-6"
       >
         <option value="Super Admin">{t("common:roles.super_admin")}</option>
-        <option value="Company Admin">{t("common:roles.company_admin")}</option>
+        <option value="Admin:COMP-001">{t("common:roles.company_admin_apex")}</option>
+        <option value="Admin:COMP-002">{t("common:roles.company_admin_shield")}</option>
         <option value="Consulting Engineer">{t("common:roles.consulting_engineer")}</option>
         <option value="Operations Officer">{t("common:roles.operations_officer")}</option>
         <option value="Sales Agent">{t("common:roles.sales_agent")}</option>

@@ -8,6 +8,8 @@
   "roles.consulting_engineer": "Consulting Engineer",
   "roles.operations_officer": "Operations Officer",
   "roles.sales_agent": "Sales Agent",
+  "roles.company_admin_apex": "Company Admin - Apex Safety (COMP-001)",
+  "roles.company_admin_shield": "Company Admin - Safety Shield (COMP-002)",
   "roles.client_emaar": "Client - Emaar Properties (c-102)",
   "roles.client_gulf": "Client - Gulf Petroleum (c-103)",
   "searchRecords": "Search records...",

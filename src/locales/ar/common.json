@@ -8,6 +8,8 @@
   "roles.consulting_engineer": "مهندس فاحص",
   "roles.operations_officer": "مسؤول العمليات",
   "roles.sales_agent": "مسؤول مبيعات",
+  "roles.company_admin_apex": "مدير شركة - أبكس للسلامة (COMP-001)",
+  "roles.company_admin_shield": "مدير شركة - درع السلامة (COMP-002)",
   "roles.client_emaar": "عميل - إعمار العقارية (c-102)",
   "roles.client_gulf": "عميل - الخليج للبترول (c-103)",
   "searchRecords": "البحث في السجلات...",
