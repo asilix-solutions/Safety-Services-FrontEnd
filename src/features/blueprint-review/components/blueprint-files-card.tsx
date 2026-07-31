@@ -23,17 +23,26 @@ interface BlueprintFilesCardProps {
   request: BlueprintReviewViewModel;
 }
 
+/** Stable classification keys — drive both the icon mapping and the i18n label. */
+type FileCategory =
+  | "blueprint"
+  | "buildingPermit"
+  | "commercialRegistration"
+  | "leaseContract"
+  | "inspectionPhotos"
+  | "supportingDocument";
+
 export function BlueprintFilesCard({ request }: BlueprintFilesCardProps) {
   const { t } = useTranslation();
 
-  const getFileCategory = (name: string): string => {
+  const getFileCategory = (name: string): FileCategory => {
     const lowerName = name.toLowerCase();
-    if (lowerName.includes("blueprint") || lowerName.includes("drawings")) return "Blueprint";
-    if (lowerName.includes("permit")) return "Building Permit";
-    if (lowerName.includes("registration") || lowerName.includes("cr")) return "Commercial Registration";
-    if (lowerName.includes("lease") || lowerName.includes("agreement")) return "Lease Contract";
-    if (lowerName.includes("alarm") || lowerName.includes("photos")) return "Inspection Photos";
-    return "Supporting Document";
+    if (lowerName.includes("blueprint") || lowerName.includes("drawings")) return "blueprint";
+    if (lowerName.includes("permit")) return "buildingPermit";
+    if (lowerName.includes("registration") || lowerName.includes("cr")) return "commercialRegistration";
+    if (lowerName.includes("lease") || lowerName.includes("agreement")) return "leaseContract";
+    if (lowerName.includes("alarm") || lowerName.includes("photos")) return "inspectionPhotos";
+    return "supportingDocument";
   };
 
   const getFileIcon = (fileName?: string, name?: string) => {
@@ -46,10 +55,10 @@ export function BlueprintFilesCard({ request }: BlueprintFilesCardProps) {
     if (ext === "png" || ext === "jpg" || ext === "jpeg") {
       return <FileImage className="h-5 w-5 text-emerald-500" />;
     }
-    if (cat === "Building Permit") {
+    if (cat === "buildingPermit") {
       return <Layers className="h-5 w-5 text-cyan-500" />;
     }
-    if (cat === "Lease Contract" || cat === "Commercial Registration") {
+    if (cat === "leaseContract" || cat === "commercialRegistration") {
       return <FileText className="h-5 w-5 text-amber-500" />;
     }
     return <FileText className="h-5 w-5 text-primary" />;
@@ -62,7 +71,7 @@ export function BlueprintFilesCard({ request }: BlueprintFilesCardProps) {
           {t("requests:blueprintReview.files.title")}
         </CardTitle>
         <CardDescription className="text-xs text-muted-foreground">
-          Uploaded compliance files and technical attachments (scrollable)
+          {t("requests:blueprintReview.files.desc")}
         </CardDescription>
       </CardHeader>
       <CardContent className="pt-0 max-h-[350px] overflow-y-auto space-y-3 ps-4 pe-2">
@@ -105,19 +114,39 @@ export function BlueprintFilesCard({ request }: BlueprintFilesCardProps) {
                   <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 p-2 bg-background/50 rounded-lg border border-border/40 text-[9px] text-muted-foreground">
                     <div className="flex items-center gap-1">
                       <Layers className="h-3 w-3 shrink-0" />
-                      <span>Category: <strong className="text-foreground">{getFileCategory(doc.name)}</strong></span>
+                      <span>
+                        {t("requests:blueprintReview.files.meta.category")}:{" "}
+                        <strong className="text-foreground">
+                          {t(`requests:blueprintReview.files.category.${getFileCategory(doc.name)}`)}
+                        </strong>
+                      </span>
                     </div>
                     <div className="flex items-center gap-1">
                       <ShieldCheck className="h-3 w-3 shrink-0" />
-                      <span>Security: <strong className="text-foreground">Cleared</strong></span>
+                      <span>
+                        {t("requests:blueprintReview.files.meta.security")}:{" "}
+                        <strong className="text-foreground">
+                          {t("requests:blueprintReview.files.meta.securityCleared")}
+                        </strong>
+                      </span>
                     </div>
                     <div className="flex items-center gap-1">
                       <Calendar className="h-3 w-3 shrink-0" />
-                      <span>Date: <strong className="text-foreground">{new Date(request.createdAt).toLocaleDateString()}</strong></span>
+                      <span>
+                        {t("requests:blueprintReview.files.meta.date")}:{" "}
+                        <strong className="text-foreground">
+                          {new Date(request.createdAt).toLocaleDateString()}
+                        </strong>
+                      </span>
                     </div>
                     <div className="flex items-center gap-1">
                       <User className="h-3 w-3 shrink-0" />
-                      <span>Uploaded by: <strong className="text-foreground">Client</strong></span>
+                      <span>
+                        {t("requests:blueprintReview.files.meta.uploadedBy")}:{" "}
+                        <strong className="text-foreground">
+                          {t("requests:blueprintReview.files.meta.uploadedByClient")}
+                        </strong>
+                      </span>
                     </div>
                   </div>
                 )}
