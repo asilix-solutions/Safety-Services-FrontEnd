@@ -16,7 +16,7 @@ import {
   submitReport
 } from "@/domains/reports";
 import { isRole } from "@/constants/permissions";
-import { getProjects } from "@/domains/projects/storage";
+import { getScopedProjects } from "@/domains/projects/storage";
 import { getSiteVisits } from "@/domains/site-visits/storage";
 import { getRequests } from "@/domains/requests/storage";
 
@@ -88,7 +88,7 @@ export function useReportsHub() {
           sourceDomain: "site-visits",
           sourceId: v.id,
           clientName: "Skyline Corporation", // Default mapping for mock
-          tenantId: user.companyId || "TNT-001",
+          tenantId: user.tenantId || "",
           clientId: "CLI-002",
           projectId: v.projectId,
           siteVisitId: v.id
@@ -97,7 +97,7 @@ export function useReportsHub() {
     });
 
     // Check Projects that need a progress report (no project progress report written yet or in DRAFT)
-    const projects = getProjects();
+    const projects = getScopedProjects(tenantContext);
     const existingProgressReportProjectIds = reports
       .filter((r) => r.reportType === "project_progress")
       .map((r) => r.projectId)

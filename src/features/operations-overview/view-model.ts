@@ -1,3 +1,5 @@
+import { UserRole } from "@/types/role";
+import { toTenantContext } from "@/domains/tenancy";
 import { Project } from "@/types/project";
 import { ClientInvoice } from "@/domains/invoices/types";
 import { ClientContract } from "@/domains/contracts/types";
@@ -33,7 +35,7 @@ export interface OperationsOverviewViewModel {
 }
 
 export function prepareOperationsOverviewViewModel(
-  user: { name: string; role: string },
+  user: { name: string; role: UserRole; tenantId?: string },
   data: {
     projects: Project[];
     requests: LicensingRequest[];
@@ -46,8 +48,8 @@ export function prepareOperationsOverviewViewModel(
   const todayStr = "2026-06-28"; // Consistent with local system time in metadata
 
   // 1. Summary Counts using centralized selectors
-  const activeProjectsList = getActiveProjects();
-  const pendingReportsCount = getPendingReports().length;
+  const activeProjectsList = getActiveProjects(toTenantContext(user));
+  const pendingReportsCount = getPendingReports(toTenantContext(user)).length;
   const todayVisits = data.siteVisits.filter((v) => v.scheduledDate.startsWith(todayStr));
 
 

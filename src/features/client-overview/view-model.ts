@@ -55,7 +55,7 @@ export function prepareClientOverviewViewModel(
     user.id,
     user.companyId
   );
-  const activeProjects = getActiveProjects(user.id, user.companyId);
+  const activeProjects = getActiveProjects({ tenantId: user.tenantId, companyId: user.companyId, role: USER_ROLES.CLIENT }, user.id, user.companyId);
   const unpaidInvoicesCount = getUnpaidInvoices({ tenantId: user.tenantId, companyId: user.companyId, role: USER_ROLES.CLIENT }, user.id, user.companyId).length;
 
 

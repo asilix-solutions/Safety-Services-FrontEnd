@@ -118,7 +118,7 @@ export function CustomerTable({ customers, permissions, onViewDetails, onToggleS
           </thead>
           <tbody className="divide-y divide-border">
             {customers.map((c) => {
-              const activeProjCount = getActiveProjects(undefined, c.id).length;
+              const activeProjCount = getActiveProjects(tenantContext, undefined, c.id).length;
               const unpaidInvCount = getUnpaidInvoices(tenantContext, undefined, c.id).length;
 
               return (
@@ -169,7 +169,7 @@ export function CustomerTable({ customers, permissions, onViewDetails, onToggleS
       {/* Mobile Card Grid View */}
       <div className="grid grid-cols-1 gap-4 md:hidden">
         {customers.map((c) => {
-          const activeProjCount = getActiveProjects(undefined, c.id).length;
+          const activeProjCount = getActiveProjects(tenantContext, undefined, c.id).length;
           const unpaidInvCount = getUnpaidInvoices(tenantContext, undefined, c.id).length;
 
           return (

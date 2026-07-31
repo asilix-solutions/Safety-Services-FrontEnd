@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "@/providers/AuthProvider";
 import { useTranslation } from "@/providers/i18n-provider";
 
-import { getProjects } from "@/domains/projects/storage";
+import { getScopedProjects } from "@/domains/projects/storage";
 import { getScopedRequests } from "@/domains/requests/storage";
 import { useTenantContext } from "@/hooks/use-tenant-context";
 import { getScopedQuotations } from "@/domains/quotations/storage";
@@ -26,7 +26,7 @@ export function ConsultingEngineerDashboard() {
   const loadData = () => {
     if (!user) return;
 
-    const projects = getProjects();
+    const projects = getScopedProjects(tenantContext);
     const requests = getScopedRequests(tenantContext);
     const quotations = getScopedQuotations(tenantContext);
     const siteVisits = getSiteVisits();

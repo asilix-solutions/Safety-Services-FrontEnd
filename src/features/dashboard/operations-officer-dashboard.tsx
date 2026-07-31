@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "@/providers/AuthProvider";
 import { useTranslation } from "@/providers/i18n-provider";
 
-import { getProjects } from "@/domains/projects/storage";
+import { getScopedProjects } from "@/domains/projects/storage";
 import { getScopedRequests } from "@/domains/requests/storage";
 import { useTenantContext } from "@/hooks/use-tenant-context";
 import { getScopedInvoices } from "@/domains/invoices/storage";
@@ -28,7 +28,7 @@ export function OperationsOfficerDashboard() {
   const loadData = () => {
     if (!user) return;
 
-    const projects = getProjects();
+    const projects = getScopedProjects(tenantContext);
     const requests = getScopedRequests(tenantContext);
     const invoices = getScopedInvoices(tenantContext);
     const contracts = getScopedContracts(tenantContext);

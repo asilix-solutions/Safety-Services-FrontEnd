@@ -1,3 +1,5 @@
+import { scopeToTenant } from "@/domains/tenancy";
+import { TenantContext } from "@/domains/tenancy/types";
 import { Project, ProjectWorkspaceData, ProjectWorkspaceTemplate, SiloExecutionData } from "@/types/project";
 import { LicensingRequest } from "@/domains/requests/types";
 
@@ -79,6 +81,7 @@ export function saveProjects(projects: Project[]): void {
 }
 
 export function createOrUpdateProject(project: Project): void {
+  // Unscoped on purpose: saving a scoped list would drop other tenants' rows.
   const projects = getProjects();
   const index = projects.findIndex((p) => p.jobNumber === project.jobNumber || p.id === project.id);
   if (index !== -1) {
@@ -251,7 +254,7 @@ export function provisionProjectFromRequest(request: LicensingRequest): Project 
 
   const newProject: Project = {
     id: `PRJ-${Math.floor(1000 + Math.random() * 9000)}`,
-    tenantId: request.tenantId || "default-tenant",
+    tenantId: request.tenantId,
     jobNumber: request.jobNumber,
     name: `${request.facilityName} - ${meta.projectNameSuffix}`,
     description: meta.projectDescription,
@@ -273,11 +276,28 @@ export function provisionProjectFromRequest(request: LicensingRequest): Project 
   return newProject;
 }
 
-export function getActiveProjects(userId?: string, companyId?: string): Project[] {
-  const projects = getProjects();
+/** Projects visible to the caller's tenant. The getter UI lists must use. */
+export function getScopedProjects(ctx: TenantContext): Project[] {
+  return scopeToTenant(getProjects(), ctx);
+}
+
+/**
+ * Active projects for one client, within the caller's tenant.
+ *
+ * The previous `p.tenantId === companyId` clause compared a tenant id against a
+ * client id. It never matched once the namespaces were unified, and reviving it
+ * would have handed a client every project its provider owns. Tenant is applied
+ * by scopeToTenant; companyId narrows to a client and nothing else.
+ */
+export function getActiveProjects(
+  ctx: TenantContext,
+  userId?: string,
+  companyId?: string
+): Project[] {
+  const projects = getScopedProjects(ctx);
   const active = projects.filter((p) => p.status === "active" || p.executionPhase === "ACTIVE_EXECUTION");
   if (companyId) {
-    return active.filter((p) => p.tenantId === companyId || p.clientId === companyId);
+    return active.filter((p) => p.clientId === companyId);
   }
   if (userId) {
     return active.filter((p) => p.clientId === userId);
@@ -285,8 +305,8 @@ export function getActiveProjects(userId?: string, companyId?: string): Project[
   return active;
 }
 
-export function getPendingReports(inspectorName?: string): Project[] {
-  const projects = getProjects();
+export function getPendingReports(ctx: TenantContext, inspectorName?: string): Project[] {
+  const projects = getScopedProjects(ctx);
   return projects.filter(
     (p) =>
       p.executionPhase === "READY_FOR_FINAL_INSPECTION" &&

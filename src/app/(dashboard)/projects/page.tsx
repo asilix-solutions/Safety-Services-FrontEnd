@@ -1,4 +1,5 @@
 "use client";
+import { useTenantContext } from "@/hooks/use-tenant-context";
 
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/providers/AuthProvider";
@@ -11,18 +12,19 @@ import { Eye, Briefcase } from "lucide-react";
 import Link from "next/link";
 import { useTranslation, useNamespaceTranslations } from "@/providers/i18n-provider";
 import { Project } from "@/types/project";
-import { getProjects } from "@/domains/projects/storage";
+import { getScopedProjects } from "@/domains/projects/storage";
 import { StatusBadge } from "@/shared/components/status-badge";
 import { isRole } from "@/constants/permissions";
 
 export default function ProjectsPage() {
   const { user } = useAuth();
+  const tenantContext = useTenantContext();
   const { t } = useTranslation();
   useNamespaceTranslations(["projects", "common"]);
   const [projects, setProjects] = useState<Project[]>([]);
 
   useEffect(() => {
-    const list = getProjects();
+    const list = getScopedProjects(tenantContext);
     if (isRole(user?.role, ["Client"])) {
       const filtered = list.filter((p) => p.clientId === user!.companyId);
       setProjects(filtered);

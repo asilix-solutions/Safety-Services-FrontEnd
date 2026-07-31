@@ -42,7 +42,7 @@ export function prepareCompanyAdminOverviewViewModel(
     quotations: Quotation[];
   }
 ): CompanyAdminOverviewViewModel {
-  const activeProjectsList = getActiveProjects();
+  const activeProjectsList = getActiveProjects(toTenantContext(user));
   const pendingApprovalsCount = getPendingQuotationApprovals(toTenantContext(user)).length;
   const pendingContractsCount = getPendingContracts(toTenantContext(user)).length;
 

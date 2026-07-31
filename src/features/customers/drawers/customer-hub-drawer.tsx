@@ -56,7 +56,7 @@ export function CustomerHubDrawer({ customer, isOpen, onClose, onSave, permissio
 
   // Linked records aggregation
   const linkedRequests = getActiveRequests(tenantContext, undefined, customer.id);
-  const linkedProjects = getActiveProjects(undefined, customer.id);
+  const linkedProjects = getActiveProjects(tenantContext, undefined, customer.id);
   const linkedInvoices = getInvoices().filter((i) => i.clientId === customer.id);
   const linkedContracts = getScopedContracts(tenantContext).filter((c) => c.clientId === customer.id);
   const linkedCertificates = getScopedCertificates(tenantContext).filter((c) => c.clientId === customer.id);
