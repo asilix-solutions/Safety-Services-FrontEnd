@@ -1,3 +1,4 @@
+import { useTenantContext } from "@/hooks/use-tenant-context";
 import React from "react";
 import { Customer } from "@/domains/customers/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/avatar";
@@ -21,6 +22,7 @@ interface CustomerTableProps {
 
 export function CustomerTable({ customers, permissions, onViewDetails, onToggleStatus }: CustomerTableProps) {
   const { t } = useTranslation();
+  const tenantContext = useTenantContext();
 
   if (customers.length === 0) {
     return (
@@ -117,7 +119,7 @@ export function CustomerTable({ customers, permissions, onViewDetails, onToggleS
           <tbody className="divide-y divide-border">
             {customers.map((c) => {
               const activeProjCount = getActiveProjects(undefined, c.id).length;
-              const unpaidInvCount = getUnpaidInvoices(undefined, c.id).length;
+              const unpaidInvCount = getUnpaidInvoices(tenantContext, undefined, c.id).length;
 
               return (
                 <tr key={c.id} className="hover:bg-secondary/10 transition-colors">
@@ -168,7 +170,7 @@ export function CustomerTable({ customers, permissions, onViewDetails, onToggleS
       <div className="grid grid-cols-1 gap-4 md:hidden">
         {customers.map((c) => {
           const activeProjCount = getActiveProjects(undefined, c.id).length;
-          const unpaidInvCount = getUnpaidInvoices(undefined, c.id).length;
+          const unpaidInvCount = getUnpaidInvoices(tenantContext, undefined, c.id).length;
 
           return (
             <div key={c.id} className="bg-card rounded-xl border border-border p-4 space-y-3">

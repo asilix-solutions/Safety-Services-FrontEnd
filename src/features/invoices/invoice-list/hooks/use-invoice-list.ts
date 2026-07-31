@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/providers/AuthProvider";
+import { useTenantContext } from "@/hooks/use-tenant-context";
 import { useTranslation, useNamespaceTranslations } from "@/providers/i18n-provider";
 import { ClientInvoice } from "@/domains/invoices/types";
-import { getMergedInvoices } from "@/domains/invoices/storage";
+import { getScopedInvoices, getMergedInvoices } from "@/domains/invoices/storage";
 import { getMergedRequests } from "@/domains/requests/storage";
 import { getProjects } from "@/domains/projects/storage";
 import { getContracts } from "@/domains/contracts/storage";
@@ -16,6 +17,7 @@ export type InvoiceWithFacility = ClientInvoice & { facilityName: string };
 
 export function useInvoiceList() {
   const { user } = useAuth();
+  const tenantContext = useTenantContext();
   const { t } = useTranslation();
   useNamespaceTranslations(["common", "dashboard", "projects", "requests"]);
 
@@ -35,7 +37,7 @@ export function useInvoiceList() {
 
   const loadData = () => {
     if (!user) return;
-    const allInvoices = getMergedInvoices();
+    const allInvoices = getScopedInvoices(tenantContext);
     const allRequests = getMergedRequests();
 
     // Enrich invoices with facilityName from linked request (presentation layer only)

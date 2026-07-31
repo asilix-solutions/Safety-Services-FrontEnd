@@ -7,7 +7,7 @@ import { useTranslation } from "@/providers/i18n-provider";
 import { getProjects } from "@/domains/projects/storage";
 import { getScopedRequests } from "@/domains/requests/storage";
 import { useTenantContext } from "@/hooks/use-tenant-context";
-import { getMergedInvoices } from "@/domains/invoices/storage";
+import { getScopedInvoices } from "@/domains/invoices/storage";
 import { getContracts } from "@/domains/contracts/storage";
 import { getCertificates } from "@/domains/certificates/storage";
 import { getSiteVisits } from "@/domains/site-visits/storage";
@@ -30,7 +30,7 @@ export function OperationsOfficerDashboard() {
 
     const projects = getProjects();
     const requests = getScopedRequests(tenantContext);
-    const invoices = getMergedInvoices();
+    const invoices = getScopedInvoices(tenantContext);
     const contracts = getContracts();
     const certificates = getCertificates();
     const siteVisits = getSiteVisits();

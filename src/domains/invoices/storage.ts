@@ -1,3 +1,5 @@
+import { scopeToTenant } from "@/domains/tenancy";
+import { TenantContext } from "@/domains/tenancy/types";
 import { ClientInvoice } from "./types";
 
 export function getInvoices(): ClientInvoice[] {
@@ -22,6 +24,7 @@ export function saveInvoices(invoices: ClientInvoice[]): void {
 }
 
 export function createOrUpdateInvoice(invoice: ClientInvoice): void {
+  // Unscoped on purpose: saving a scoped list would drop other tenants' rows.
   const invoices = getInvoices();
   const index = invoices.findIndex((i) => i.id === invoice.id || i.jobNumber === invoice.jobNumber);
   if (index !== -1) {
@@ -86,8 +89,21 @@ export function getMergedInvoices(): ClientInvoice[] {
   return Array.from(mergedMap.values()).sort((a, b) => new Date(b.issuedAt).getTime() - new Date(a.issuedAt).getTime());
 }
 
-export function getUnpaidInvoices(userId?: string, companyId?: string): ClientInvoice[] {
-  const invoices = getMergedInvoices();
+/** Invoices visible to the caller's tenant. The getter UI lists must use. */
+export function getScopedInvoices(ctx: TenantContext): ClientInvoice[] {
+  return scopeToTenant(getMergedInvoices(), ctx);
+}
+
+/**
+ * Unpaid invoices for one client, within the caller's tenant. Tenant boundary
+ * first, then the client narrowing — kept as separate conditions.
+ */
+export function getUnpaidInvoices(
+  ctx: TenantContext,
+  userId?: string,
+  companyId?: string
+): ClientInvoice[] {
+  const invoices = getScopedInvoices(ctx);
   const unpaid = invoices.filter((i) => i.status === "unpaid");
   if (companyId) {
     return unpaid.filter((i) => i.clientId === companyId);

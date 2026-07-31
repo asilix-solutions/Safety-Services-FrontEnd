@@ -56,7 +56,7 @@ export function useCustomerList() {
     
     // Aggregate Active Projects and Unpaid Invoices across all customer profiles
     const totalActiveProjects = activeCustomers.reduce((acc, c) => acc + getActiveProjects(undefined, c.id).length, 0);
-    const totalUnpaidInvoices = activeCustomers.reduce((acc, c) => acc + getUnpaidInvoices(undefined, c.id).length, 0);
+    const totalUnpaidInvoices = activeCustomers.reduce((acc, c) => acc + getUnpaidInvoices(tenantContext, undefined, c.id).length, 0);
 
     return {
       total: customers.length,

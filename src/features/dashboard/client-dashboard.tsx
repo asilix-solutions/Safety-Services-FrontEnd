@@ -10,7 +10,7 @@ import { Button } from "@/shared/ui/button";
 import { getScopedRequests } from "@/domains/requests/storage";
 import { useTenantContext } from "@/hooks/use-tenant-context";
 import { getProjects } from "@/domains/projects/storage";
-import { getMergedInvoices } from "@/domains/invoices/storage";
+import { getScopedInvoices } from "@/domains/invoices/storage";
 import { getContracts } from "@/domains/contracts/storage";
 import { getCertificates } from "@/domains/certificates/storage";
 
@@ -29,7 +29,7 @@ export function ClientDashboard() {
 
     const requests = getScopedRequests(tenantContext);
     const projects = getProjects();
-    const invoices = getMergedInvoices();
+    const invoices = getScopedInvoices(tenantContext);
     const contracts = getContracts();
     const certificates = getCertificates();
 
