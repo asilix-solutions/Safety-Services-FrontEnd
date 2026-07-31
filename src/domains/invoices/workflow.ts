@@ -37,7 +37,7 @@ export function createInvoiceFromApprovedQuotation({
 
   const newInvoice: ClientInvoice = {
     id: invoiceId,
-    tenantId: request.tenantId || "tenant-1",
+    tenantId: request.tenantId,
     clientId: request.clientId,
     jobNumber: request.jobNumber,
     quotationJobNumber: request.jobNumber,

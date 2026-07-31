@@ -89,7 +89,7 @@ export function useReportsHub() {
           sourceId: v.id,
           clientName: "Skyline Corporation", // Default mapping for mock
           tenantId: user.tenantId || "",
-          clientId: "CLI-002",
+          clientId: "c-102", // Placeholder mock mapping, as with clientName above.
           projectId: v.projectId,
           siteVisitId: v.id
         });
