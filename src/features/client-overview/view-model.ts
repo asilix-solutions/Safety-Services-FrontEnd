@@ -5,6 +5,7 @@ import { ClientInvoice } from "@/domains/invoices/types";
 import { ClientContract } from "@/domains/contracts/types";
 import { ClientCertificate } from "@/domains/certificates/types";
 import { getActiveRequests } from "@/domains/requests/storage";
+import { USER_ROLES } from "@/constants/roles";
 import { getActiveProjects } from "@/domains/projects/storage";
 import { getUnpaidInvoices } from "@/domains/invoices/storage";
 import {
@@ -30,7 +31,7 @@ export interface ClientOverviewViewModel {
 }
 
 export function prepareClientOverviewViewModel(
-  user: { id: string; name: string; companyId: string; companyName?: string },
+  user: { id: string; name: string; tenantId?: string; companyId: string; companyName?: string },
   data: {
     requests: LicensingRequest[];
     projects: Project[];
@@ -49,7 +50,11 @@ export function prepareClientOverviewViewModel(
   const clientCertificates = data.certificates.filter((c) => c.clientId === user.companyId);
 
   // Welcome Stats using centralized domain selectors
-  const activeRequests = getActiveRequests(user.id, user.companyId);
+  const activeRequests = getActiveRequests(
+    { tenantId: user.tenantId, companyId: user.companyId, role: USER_ROLES.CLIENT },
+    user.id,
+    user.companyId
+  );
   const activeProjects = getActiveProjects(user.id, user.companyId);
   const unpaidInvoicesCount = getUnpaidInvoices(user.id, user.companyId).length;
 

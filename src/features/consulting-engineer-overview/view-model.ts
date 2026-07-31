@@ -1,8 +1,10 @@
 import { Project } from "@/types/project";
+import { UserRole } from "@/types/role";
 import { LicensingRequest } from "@/domains/requests/types";
 import { Quotation } from "@/domains/quotations/types";
 import { SiteVisit } from "@/domains/site-visits/types";
 import { getEngineeringRequests } from "@/domains/requests/storage";
+import { toTenantContext } from "@/domains/tenancy";
 import { getPendingQuotations } from "@/domains/quotations/storage";
 import { getPendingReports } from "@/domains/projects/storage";
 import {
@@ -29,7 +31,7 @@ export interface ConsultingEngineerOverviewViewModel {
 }
 
 export function prepareConsultingEngineerOverviewViewModel(
-  user: { name: string; role: string },
+  user: { name: string; role: UserRole; tenantId?: string },
   data: {
     projects: Project[];
     requests: LicensingRequest[];
@@ -40,7 +42,7 @@ export function prepareConsultingEngineerOverviewViewModel(
   const todayStr = "2026-06-28"; // System date for consistent display
 
   // Filter requests that require engineering/blueprint/high hazard review
-  const engineeringRequests = getEngineeringRequests();
+  const engineeringRequests = getEngineeringRequests(toTenantContext(user));
 
   // Filter pending quotations
   const pendingQuotations = getPendingQuotations();

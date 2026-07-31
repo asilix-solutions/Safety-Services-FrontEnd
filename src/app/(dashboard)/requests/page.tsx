@@ -13,20 +13,22 @@ import { Plus, Eye, Calendar } from "lucide-react";
 import Link from "next/link";
 import { useTranslation } from "@/providers/i18n-provider";
 import { getClassificationDisplayName, getRequestStatusDisplayName, getCanonicalRequestTypeDisplayName, getWorkflowStageDisplayName } from "@/domains/requests/workflow";
-import { getMergedRequests } from "@/domains/requests/storage";
+import { getScopedRequests } from "@/domains/requests/storage";
+import { useTenantContext } from "@/hooks/use-tenant-context";
 import { getProjects } from "@/domains/projects/storage";
 import { Project } from "@/types/project";
 import { isRole } from "@/constants/permissions";
  
 export default function RequestsPage() {
   const { user } = useAuth();
+  const tenantContext = useTenantContext();
   const { t } = useTranslation();
   const [requests, setRequests] = useState<LicensingRequest[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
  
   // Load from localStorage and merge with mock requests
   useEffect(() => {
-    const list = getMergedRequests();
+    const list = getScopedRequests(tenantContext);
     if (isRole(user?.role, ["Client"])) {
       const filtered = list.filter((r) => r.clientId === user!.companyId);
       setRequests(filtered);

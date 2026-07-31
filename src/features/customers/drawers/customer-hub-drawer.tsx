@@ -8,6 +8,7 @@ import { Customer } from "@/domains/customers/types";
 import { CustomerValidationError } from "@/domains/customers/validation";
 import { X, Building, Info, Users, Briefcase, Receipt, FileText } from "lucide-react";
 import { getActiveRequests } from "@/domains/requests/storage";
+import { useTenantContext } from "@/hooks/use-tenant-context";
 import { getActiveProjects } from "@/domains/projects/storage";
 import { getInvoices } from "@/domains/invoices/storage";
 import { getContracts } from "@/domains/contracts/storage";
@@ -26,6 +27,7 @@ interface CustomerHubDrawerProps {
 
 export function CustomerHubDrawer({ customer, isOpen, onClose, onSave, permissions, initialEditMode = false }: CustomerHubDrawerProps) {
   const { t } = useTranslation();
+  const tenantContext = useTenantContext();
   const [activeTab, setActiveTab] = useState<"overview" | "representatives" | "records" | "invoices" | "documents">("overview");
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState<Customer | null>(null);
@@ -53,7 +55,7 @@ export function CustomerHubDrawer({ customer, isOpen, onClose, onSave, permissio
   };
 
   // Linked records aggregation
-  const linkedRequests = getActiveRequests(undefined, customer.id);
+  const linkedRequests = getActiveRequests(tenantContext, undefined, customer.id);
   const linkedProjects = getActiveProjects(undefined, customer.id);
   const linkedInvoices = getInvoices().filter((i) => i.clientId === customer.id);
   const linkedContracts = getContracts().filter((c) => c.clientId === customer.id);

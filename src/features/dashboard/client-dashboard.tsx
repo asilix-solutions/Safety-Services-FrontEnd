@@ -7,7 +7,8 @@ import { PageHeader } from "@/shared/components/page-header";
 import { RefreshCw } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 
-import { getMergedRequests } from "@/domains/requests/storage";
+import { getScopedRequests } from "@/domains/requests/storage";
+import { useTenantContext } from "@/hooks/use-tenant-context";
 import { getProjects } from "@/domains/projects/storage";
 import { getMergedInvoices } from "@/domains/invoices/storage";
 import { getContracts } from "@/domains/contracts/storage";
@@ -17,6 +18,7 @@ import { ClientOverview, prepareClientOverviewViewModel, ClientOverviewViewModel
 
 export function ClientDashboard() {
   const { user } = useAuth();
+  const tenantContext = useTenantContext();
   const { t } = useTranslation();
   useNamespaceTranslations(["common", "dashboard"]);
 
@@ -25,7 +27,7 @@ export function ClientDashboard() {
   const loadData = () => {
     if (!user || !user.companyId) return;
 
-    const requests = getMergedRequests();
+    const requests = getScopedRequests(tenantContext);
     const projects = getProjects();
     const invoices = getMergedInvoices();
     const contracts = getContracts();

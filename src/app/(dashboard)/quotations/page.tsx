@@ -17,7 +17,8 @@ import { useTranslation, useNamespaceTranslations } from "@/providers/i18n-provi
 import { ActionMenu } from "@/shared/components/action-menu";
 import { Quotation } from "@/domains/quotations/types";
 import { getQuotations } from "@/domains/quotations/workflow";
-import { getMergedRequests } from "@/domains/requests/storage";
+import { getScopedRequests } from "@/domains/requests/storage";
+import { useTenantContext } from "@/hooks/use-tenant-context";
 
 type DerivedQuotationStatus =
   | "NOT_STARTED"
@@ -29,13 +30,14 @@ type DerivedQuotationStatus =
 
 export default function QuotationsQueuePage() {
   const { user } = useAuth();
+  const tenantContext = useTenantContext();
   const { t } = useTranslation();
   useNamespaceTranslations(["requests", "dashboard", "common"]);
   const [requests, setRequests] = useState<(LicensingRequest & { derivedStatus: DerivedQuotationStatus })[]>([]);
 
   // Load and merge requests
   useEffect(() => {
-    const merged = getMergedRequests();
+    const merged = getScopedRequests(tenantContext);
     const localQuotes = getQuotations();
 
     const quoteStatusMap = new Map<string, DerivedQuotationStatus>();

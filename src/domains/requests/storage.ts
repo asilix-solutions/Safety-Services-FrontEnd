@@ -1,6 +1,8 @@
 import { LicensingRequest } from "./types";
 import { MOCK_REQUESTS } from "@/mock/requests";
 import { mapStatusToStage } from "./workflow";
+import { scopeToTenant } from "@/domains/tenancy";
+import { TenantContext } from "@/domains/tenancy/types";
 
 export function getRequests(): LicensingRequest[] {
   if (typeof window === "undefined") return [];
@@ -23,6 +25,11 @@ export function saveRequests(requests: LicensingRequest[]): void {
   }
 }
 
+/**
+ * Every request, unscoped. Used by workflows that already hold a specific
+ * record, and as the source for the scoped reader below. Not for UI lists —
+ * use `getScopedRequests`.
+ */
 export function getMergedRequests(): LicensingRequest[] {
   const localList = getRequests();
   
@@ -53,7 +60,13 @@ export function getMergedRequests(): LicensingRequest[] {
   return mergedList.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 }
 
+/** Requests visible to the caller's tenant. The getter UI lists must use. */
+export function getScopedRequests(ctx: TenantContext): LicensingRequest[] {
+  return scopeToTenant(getMergedRequests(), ctx);
+}
+
 export function upsertRequest(request: LicensingRequest): void {
+  // Unscoped on purpose: saving a scoped list would drop other tenants' rows.
   const localList = getRequests();
   const index = localList.findIndex((r) => r.jobNumber === request.jobNumber);
   if (index !== -1) {
@@ -93,8 +106,16 @@ export function deleteRequestDraft(): void {
   }
 }
 
-export function getActiveRequests(userId?: string, companyId?: string): LicensingRequest[] {
-  const requests = getMergedRequests();
+/**
+ * Active requests for one client, within the caller's tenant. The two layers
+ * are applied as separate conditions: tenant first, then the client narrowing.
+ */
+export function getActiveRequests(
+  ctx: TenantContext,
+  userId?: string,
+  companyId?: string
+): LicensingRequest[] {
+  const requests = getScopedRequests(ctx);
   const active = requests.filter((r) => r.status !== "completed" && r.status !== "closed");
   if (companyId) {
     return active.filter((r) => r.clientId === companyId);
@@ -105,8 +126,8 @@ export function getActiveRequests(userId?: string, companyId?: string): Licensin
   return active;
 }
 
-export function getEngineeringRequests(): LicensingRequest[] {
-  const requests = getMergedRequests();
+export function getEngineeringRequests(ctx: TenantContext): LicensingRequest[] {
+  const requests = getScopedRequests(ctx);
   return requests.filter(
     (r) =>
       r.currentStage === "UNDER_REVIEW" &&

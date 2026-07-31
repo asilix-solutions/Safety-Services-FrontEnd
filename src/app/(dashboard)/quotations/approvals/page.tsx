@@ -16,19 +16,21 @@ import Link from "next/link";
 import { useTranslation, useNamespaceTranslations } from "@/providers/i18n-provider";
 import { Quotation } from "@/domains/quotations/types";
 import { getQuotations } from "@/domains/quotations/workflow";
-import { getMergedRequests } from "@/domains/requests/storage";
+import { getScopedRequests } from "@/domains/requests/storage";
+import { useTenantContext } from "@/hooks/use-tenant-context";
 import { isRole } from "@/constants/permissions";
 import { USER_ROLES } from "@/constants/roles";
 
 export default function QuotationApprovalsQueuePage() {
   const { user } = useAuth();
+  const tenantContext = useTenantContext();
   const { t } = useTranslation();
   useNamespaceTranslations(["requests", "dashboard", "common"]);
   const [approvals, setApprovals] = useState<(Quotation & { clientName: string; facilityName: string })[]>([]);
 
   useEffect(() => {
     const localQuotes = getQuotations();
-    const merged = getMergedRequests();
+    const merged = getScopedRequests(tenantContext);
  
     // Merge requests
     const requestsMap = new Map<string, LicensingRequest>();

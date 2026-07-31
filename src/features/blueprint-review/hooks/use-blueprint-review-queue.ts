@@ -1,16 +1,18 @@
 import { useState, useEffect, useMemo } from "react";
-import { getMergedRequests } from "@/domains/requests/storage";
+import { getScopedRequests } from "@/domains/requests/storage";
+import { useTenantContext } from "@/hooks/use-tenant-context";
 import { getEngineeringReviews } from "@/domains/engineering/storage";
 import { buildBlueprintReviewViewModel, BlueprintReviewViewModel } from "../helpers/blueprint-review-view-model";
 
 export type QueueFilter = "all" | "engineering" | "high_hazard" | "returned" | "approved";
 
 export function useBlueprintReviewQueue() {
+  const tenantContext = useTenantContext();
   const [requests, setRequests] = useState<BlueprintReviewViewModel[]>([]);
   const [activeFilter, setActiveFilter] = useState<QueueFilter>("all");
 
   useEffect(() => {
-    const mergedRequests = getMergedRequests();
+    const mergedRequests = getScopedRequests(tenantContext);
     const reviews = getEngineeringReviews();
     const reviewMap = new Map(reviews.map((r) => [r.jobNumber, r]));
 
@@ -30,7 +32,7 @@ export function useBlueprintReviewQueue() {
       .map((r) => buildBlueprintReviewViewModel(r, reviewMap.get(r.jobNumber)));
 
     setRequests(filtered);
-  }, []);
+  }, [tenantContext]);
 
   // Compute Statistics
   const stats = useMemo(() => {

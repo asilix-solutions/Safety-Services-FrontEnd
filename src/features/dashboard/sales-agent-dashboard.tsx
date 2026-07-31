@@ -4,7 +4,8 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "@/providers/AuthProvider";
 import { useTranslation } from "@/providers/i18n-provider";
 
-import { getMergedRequests } from "@/domains/requests/storage";
+import { getScopedRequests } from "@/domains/requests/storage";
+import { useTenantContext } from "@/hooks/use-tenant-context";
 
 import {
   SalesAgentOverview,
@@ -14,6 +15,7 @@ import {
 
 export function SalesAgentDashboard() {
   const { user } = useAuth();
+  const tenantContext = useTenantContext();
   const { t } = useTranslation();
 
   const [viewModel, setViewModel] = useState<SalesAgentOverviewViewModel | null>(null);
@@ -21,7 +23,7 @@ export function SalesAgentDashboard() {
   const loadData = () => {
     if (!user) return;
 
-    const requests = getMergedRequests();
+    const requests = getScopedRequests(tenantContext);
 
     const vm = prepareSalesAgentOverviewViewModel(
       {

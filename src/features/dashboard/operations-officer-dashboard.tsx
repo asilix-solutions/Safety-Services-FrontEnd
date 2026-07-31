@@ -5,7 +5,8 @@ import { useAuth } from "@/providers/AuthProvider";
 import { useTranslation } from "@/providers/i18n-provider";
 
 import { getProjects } from "@/domains/projects/storage";
-import { getMergedRequests } from "@/domains/requests/storage";
+import { getScopedRequests } from "@/domains/requests/storage";
+import { useTenantContext } from "@/hooks/use-tenant-context";
 import { getMergedInvoices } from "@/domains/invoices/storage";
 import { getContracts } from "@/domains/contracts/storage";
 import { getCertificates } from "@/domains/certificates/storage";
@@ -19,6 +20,7 @@ import {
 
 export function OperationsOfficerDashboard() {
   const { user } = useAuth();
+  const tenantContext = useTenantContext();
   const { t } = useTranslation();
 
   const [viewModel, setViewModel] = useState<OperationsOverviewViewModel | null>(null);
@@ -27,7 +29,7 @@ export function OperationsOfficerDashboard() {
     if (!user) return;
 
     const projects = getProjects();
-    const requests = getMergedRequests();
+    const requests = getScopedRequests(tenantContext);
     const invoices = getMergedInvoices();
     const contracts = getContracts();
     const certificates = getCertificates();
