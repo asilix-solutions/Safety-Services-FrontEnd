@@ -10,6 +10,7 @@ import { isRole } from "@/constants/permissions";
 import type { UserRole } from "@/types/role";
 import { initiateKickoffVisit, handleKickoffDecision } from "@/domains/projects/workflow/kickoff";
 import { getSiteVisitsByProjectId } from "@/domains/site-visits/storage";
+import type { TFunction } from "../components/overview/types";
 
 interface SiteVisitsTabProps {
   project: Project;
@@ -17,7 +18,7 @@ interface SiteVisitsTabProps {
   user: { role: string; name: string };
   isProcessing: boolean;
   loadData: () => void;
-  t: any;
+  t: TFunction;
 }
 
 export function SiteVisitsTab({ project, setProject, user, isProcessing, loadData, t }: SiteVisitsTabProps) {
@@ -56,7 +57,7 @@ export function SiteVisitsTab({ project, setProject, user, isProcessing, loadDat
                     setProject(updated);
                     toast.success(t("projects:kickoff.scheduledSuccessAlert"));
                     loadData();
-                  } catch (err: any) {
+                  } catch (err: unknown) {
                     console.error("initiateKickoffVisit failed:", err);
                     toast.error(t("common:error_generic_action_failed"));
                   }
@@ -112,7 +113,7 @@ export function SiteVisitsTab({ project, setProject, user, isProcessing, loadDat
             <CardContent className="pt-4 space-y-4">
               {(() => {
                 const visits = getSiteVisitsByProjectId(project.id);
-                const pendingVisit = visits.find((v: any) => v.type === "kickoff" && v.status === "scheduled");
+                const pendingVisit = visits.find((v) => v.type === "kickoff" && v.status === "scheduled");
                 if (!pendingVisit) {
                   return <p className="text-xs text-muted-foreground">{t("projects:kickoff.noScheduledVisits")}</p>;
                 }
@@ -138,7 +139,7 @@ export function SiteVisitsTab({ project, setProject, user, isProcessing, loadDat
                             setProject(updated);
                             toast.success(t("projects:kickoff.savedSuccess"));
                             loadData();
-                          } catch (err: any) {
+                          } catch (err: unknown) {
                             console.error("handleKickoffDecision (approve) failed:", err);
                             toast.error(t("common:error_generic_action_failed"));
                           }
@@ -162,7 +163,7 @@ export function SiteVisitsTab({ project, setProject, user, isProcessing, loadDat
                             setProject(updated);
                             toast.success(t("projects:kickoff.rejectedAlert"));
                             loadData();
-                          } catch (err: any) {
+                          } catch (err: unknown) {
                             console.error("handleKickoffDecision (reject) failed:", err);
                             toast.error(t("common:error_generic_action_failed"));
                           }
