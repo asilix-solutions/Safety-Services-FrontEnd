@@ -158,24 +158,23 @@ export function BlueprintViewer({ request }: BlueprintViewerProps) {
                   </div>
                 </div>
               ) : (
-                <div className="space-y-3.5 z-10 w-full">
-                  <div className="mx-auto h-10 w-10 bg-primary/10 text-primary rounded-full flex items-center justify-center border border-primary/20">
-                    {fileInfo.isImg ? <ImageIcon className="h-5 w-5" /> : <FileText className="h-5 w-5" />}
+                <div className="space-y-3 z-10">
+                  <div className="mx-auto h-12 w-12 bg-primary/10 text-primary rounded-full flex items-center justify-center border border-primary/20">
+                    {fileInfo.isImg ? <ImageIcon className="h-6 w-6" /> : <FileText className="h-6 w-6" />}
                   </div>
                   <div className="space-y-1">
                     <span className="text-xs font-bold text-slate-100 block">
-                      {fileInfo.isImg ? t("requests:blueprintReview.viewer.imageViewport") : t("requests:blueprintReview.viewer.pdfActive")}
+                      {t("requests:blueprintReview.viewer.previewTitle")}
                     </span>
-                    <span className="text-[10px] text-slate-400 block max-w-[240px] mx-auto font-mono truncate">
-                      [ active_render: {primaryDoc.fileName} ]
+                    <span
+                      className="text-[10px] text-slate-300 block max-w-[220px] mx-auto truncate"
+                      title={primaryDoc.fileName}
+                    >
+                      {primaryDoc.fileName}
                     </span>
-                  </div>
-
-                  {/* Document simulation thumbnail outline */}
-                  <div className="max-w-[200px] mx-auto border border-slate-700/60 rounded-lg p-2.5 bg-slate-900/60 space-y-1.5 text-start font-mono text-[9px] text-slate-500 select-none">
-                    <div className="h-1 bg-slate-700 rounded w-1/3" />
-                    <div className="h-1 bg-slate-800 rounded w-5/6" />
-                    <div className="h-1 bg-slate-800 rounded w-2/3" />
+                    <span className="text-[10px] text-slate-400 block max-w-[220px] mx-auto leading-relaxed">
+                      {t("requests:blueprintReview.viewer.previewNotice")}
+                    </span>
                   </div>
                 </div>
               )}
@@ -234,8 +233,8 @@ export function BlueprintViewer({ request }: BlueprintViewerProps) {
               <span className="text-xs font-bold text-foreground block">
                 {t("requests:blueprintReview.files.missingWarning")}
               </span>
-              <span className="text-[10px] text-muted-foreground block max-w-[200px] mx-auto">
-                No vector files found. Engineering compliance review cannot be completed.
+              <span className="text-[10px] text-muted-foreground block max-w-[220px] mx-auto leading-relaxed">
+                {t("requests:blueprintReview.viewer.noFilesNotice")}
               </span>
             </div>
           </div>
