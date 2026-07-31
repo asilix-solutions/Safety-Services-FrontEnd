@@ -1,3 +1,4 @@
+import { useTenantContext } from "@/hooks/use-tenant-context";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/providers/AuthProvider";
@@ -6,13 +7,14 @@ import { Project } from "@/types/project";
 import { getProjects } from "@/domains/projects/storage";
 import { getRequests } from "@/domains/requests/storage";
 import { ClientContract } from "@/domains/contracts/types";
-import { getContracts } from "@/domains/contracts/storage";
+import { getScopedContracts } from "@/domains/contracts/storage";
 import { generateContractFromCompletedProject, signContract, archiveContract } from "@/domains/contracts/workflow";
 import { isRole } from "@/constants/permissions";
 import { USER_ROLES } from "@/constants/roles";
 
 export function useContractList() {
   const { user } = useAuth();
+  const tenantContext = useTenantContext();
   const { t } = useTranslation();
   useNamespaceTranslations(["common", "dashboard", "projects", "requests"]);
 
@@ -25,7 +27,7 @@ export function useContractList() {
   const loadData = () => {
     if (!user) return;
 
-    const allContracts = getContracts();
+    const allContracts = getScopedContracts(tenantContext);
     let userContracts = allContracts;
 
     if (isRole(user.role, [USER_ROLES.CLIENT])) {

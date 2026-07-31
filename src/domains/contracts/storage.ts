@@ -1,3 +1,5 @@
+import { scopeToTenant } from "@/domains/tenancy";
+import { TenantContext } from "@/domains/tenancy/types";
 import { ClientContract } from "./types";
 
 export function getContracts(): ClientContract[] {
@@ -20,7 +22,13 @@ export function saveContracts(contracts: ClientContract[]): void {
   }
 }
 
+/** Contracts visible to the caller's tenant. The getter UI lists must use. */
+export function getScopedContracts(ctx: TenantContext): ClientContract[] {
+  return scopeToTenant(getContracts(), ctx);
+}
+
 export function createOrUpdateContract(contract: ClientContract): void {
+  // Unscoped on purpose: saving a scoped list would drop other tenants' rows.
   const contracts = getContracts();
   const index = contracts.findIndex((c) => c.id === contract.id);
   if (index !== -1) {
@@ -41,8 +49,12 @@ export function getContractByProjectId(projectId: string): ClientContract | null
   return contracts.find((c) => c.projectId === projectId) || null;
 }
 
-export function getPendingContracts(userId?: string, companyId?: string): ClientContract[] {
-  const contracts = getContracts();
+export function getPendingContracts(
+  ctx: TenantContext,
+  userId?: string,
+  companyId?: string
+): ClientContract[] {
+  const contracts = getScopedContracts(ctx);
   const pending = contracts.filter((c) => c.status === "generated");
   if (companyId) {
     return pending.filter((c) => c.clientId === companyId);

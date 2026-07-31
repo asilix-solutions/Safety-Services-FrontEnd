@@ -44,7 +44,7 @@ export function prepareCompanyAdminOverviewViewModel(
 ): CompanyAdminOverviewViewModel {
   const activeProjectsList = getActiveProjects();
   const pendingApprovalsCount = getPendingQuotationApprovals(toTenantContext(user)).length;
-  const pendingContractsCount = getPendingContracts().length;
+  const pendingContractsCount = getPendingContracts(toTenantContext(user)).length;
 
 
   const summaryCards: OverviewStatCard[] = [
