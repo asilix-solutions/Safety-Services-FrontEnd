@@ -103,14 +103,14 @@ export function BlueprintWorkspace({ jobNumber }: BlueprintWorkspaceProps) {
       <div className="flex flex-wrap gap-2 pt-1 font-sans">
         {isHighHazard && (
           <Badge variant="destructive" className="font-bold text-[10px] px-2.5 py-0.5">
-            High Hazard
+            {t("requests:blueprintReview.queue.highHazard")}
           </Badge>
         )}
         <Badge variant="default" className="font-semibold text-[10px] px-2.5 py-0.5">
           {getQueueDisplayName(viewModel.assignedQueue, t)}
         </Badge>
         <Badge variant="secondary" className="font-semibold text-[10px] px-2.5 py-0.5">
-          Area: {viewModel.area} m²
+          {t("requests:blueprintReview.workspace.area")}: {viewModel.area} m²
         </Badge>
         <Badge variant="outline" className="font-semibold text-[10px] px-2.5 py-0.5 text-foreground bg-background">
           {viewModel.activityName}
