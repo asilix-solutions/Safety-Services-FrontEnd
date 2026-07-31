@@ -6,11 +6,11 @@ export { MOCK_REPORTS };
 export function getReports(): Report[] {
   if (typeof window === "undefined") return MOCK_REPORTS;
   try {
-    const raw = localStorage.getItem("SSLM_REPORTS");
+    const raw = localStorage.getItem("SSLM_REPORTS_V2");
     if (raw) {
       return JSON.parse(raw);
     }
-    localStorage.setItem("SSLM_REPORTS", JSON.stringify(MOCK_REPORTS));
+    localStorage.setItem("SSLM_REPORTS_V2", JSON.stringify(MOCK_REPORTS));
   } catch (err) {
     console.error("Failed to load reports from storage", err);
   }
@@ -20,7 +20,7 @@ export function getReports(): Report[] {
 export function saveReports(reports: Report[]): void {
   if (typeof window === "undefined") return;
   try {
-    localStorage.setItem("SSLM_REPORTS", JSON.stringify(reports));
+    localStorage.setItem("SSLM_REPORTS_V2", JSON.stringify(reports));
   } catch (err) {
     console.error("Failed to save reports to storage", err);
   }

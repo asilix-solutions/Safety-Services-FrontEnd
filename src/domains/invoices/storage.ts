@@ -3,7 +3,7 @@ import { ClientInvoice } from "./types";
 export function getInvoices(): ClientInvoice[] {
   if (typeof window === "undefined") return [];
   try {
-    const raw = localStorage.getItem("SSLM_INVOICES");
+    const raw = localStorage.getItem("SSLM_INVOICES_V2");
     const list: ClientInvoice[] = raw ? JSON.parse(raw) : [];
     return list.sort((a, b) => new Date(b.issuedAt).getTime() - new Date(a.issuedAt).getTime());
   } catch (err) {
@@ -15,7 +15,7 @@ export function getInvoices(): ClientInvoice[] {
 export function saveInvoices(invoices: ClientInvoice[]): void {
   if (typeof window === "undefined") return;
   try {
-    localStorage.setItem("SSLM_INVOICES", JSON.stringify(invoices));
+    localStorage.setItem("SSLM_INVOICES_V2", JSON.stringify(invoices));
   } catch (err) {
     console.error("Failed to write SSLM_INVOICES to localStorage", err);
   }
@@ -35,7 +35,7 @@ export function createOrUpdateInvoice(invoice: ClientInvoice): void {
 const MOCK_INVOICES: ClientInvoice[] = [
   {
     id: "INV-2026-001",
-    tenantId: "tenant-1",
+    tenantId: "COMP-001",
     clientId: "c-102", // client companyId
     jobNumber: "SSLM-2026-000001",
     quotationJobNumber: "SSLM-2026-000001",
@@ -49,7 +49,7 @@ const MOCK_INVOICES: ClientInvoice[] = [
   },
   {
     id: "INV-2026-002",
-    tenantId: "tenant-1",
+    tenantId: "COMP-001",
     clientId: "c-103", // client companyId
     jobNumber: "SSLM-2026-000002",
     quotationJobNumber: "SSLM-2026-000002",

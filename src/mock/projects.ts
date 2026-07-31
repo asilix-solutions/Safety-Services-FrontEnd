@@ -3,7 +3,7 @@ import { Project } from "@/types/project";
 export const MOCK_PROJECTS: Project[] = [
   {
     id: "PROJ-8821",
-    tenantId: "tenant-1",
+    tenantId: "COMP-001",
     name: "Skyline Tower Fire Certification",
     description: "Full-scale building inspection and fire sprinkler compliance evaluation for the Skyline commercial tower.",
     clientName: "Emaar Properties",
@@ -24,7 +24,7 @@ export const MOCK_PROJECTS: Project[] = [
   },
   {
     id: "PROJ-7643",
-    tenantId: "tenant-1",
+    tenantId: "COMP-001",
     name: "Gulf Industrial Gas Pipe Audit",
     description: "Mechanical safety audits and hydrostatic pipeline checks for Gulf Petroleum's storage tanks.",
     clientName: "Gulf Petroleum",
@@ -44,7 +44,7 @@ export const MOCK_PROJECTS: Project[] = [
   },
   {
     id: "PROJ-5512",
-    tenantId: "tenant-1",
+    tenantId: "COMP-001",
     name: "Vertex Structural Blueprint Review",
     description: "Comprehensive civil analysis of structural columns and load distribution coefficients for Vertex HQ.",
     clientName: "Vertex Development",
@@ -62,7 +62,7 @@ export const MOCK_PROJECTS: Project[] = [
   },
   {
     id: "PROJ-4432",
-    tenantId: "tenant-1",
+    tenantId: "COMP-001",
     name: "Marina Retail Electrical Inspection",
     description: "Inspection of main low-voltage switchboards and emergency generator configurations.",
     clientName: "Marina Mall LLC",
@@ -80,7 +80,7 @@ export const MOCK_PROJECTS: Project[] = [
   },
   {
     id: "PROJ-3199",
-    tenantId: "tenant-1",
+    tenantId: "COMP-001",
     name: "Metro Line 4 Ventilation Plan",
     description: "Engineering audit of subterranean ventilation and smoke extraction layout files.",
     clientName: "City Transit Authority",
@@ -98,7 +98,7 @@ export const MOCK_PROJECTS: Project[] = [
   },
   {
     id: "PROJ-1102",
-    tenantId: "tenant-1",
+    tenantId: "COMP-001",
     name: "Al Hamra Mall Yearly Fire Pump Maintenance",
     description: "Contracted annual testing, maintenance, and certification of wet pipe sprinkler pumps.",
     clientName: "Al Hamra Retail Co.",

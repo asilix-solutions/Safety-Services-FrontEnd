@@ -3,7 +3,7 @@ import { Customer } from "./types";
 export const MOCK_CUSTOMERS: Customer[] = [
   {
     id: "c-101",
-    tenantId: "c-101",
+    tenantId: "COMP-001",
     companyName: "Vertex Development Ltd",
     commercialRegistration: "CR-908122",
     industry: "Real Estate Development",
@@ -22,25 +22,7 @@ export const MOCK_CUSTOMERS: Customer[] = [
   },
   {
     id: "c-102",
-    tenantId: "c-102",
-    companyName: "Gulf Petroleum",
-    commercialRegistration: "CR-774431",
-    industry: "Oil & Gas",
-    status: "Active",
-    primaryContactName: "Rayyan Al-Mansoor",
-    primaryContactEmail: "rayyan@gulfpetroleum.com",
-    primaryContactPhone: "+971-55-7654321",
-    city: "Abu Dhabi",
-    address: "Gulf Oil Tower, Corniche Road",
-    representatives: [
-      { id: "rep-3", name: "Rayyan Al-Mansoor", email: "rayyan@gulfpetroleum.com", phone: "+971-55-7654321", role: "Operations Director" }
-    ],
-    createdAt: "2024-06-10T11:00:00Z",
-    updatedAt: "2026-06-03T11:20:00Z",
-  },
-  {
-    id: "c-103",
-    tenantId: "c-103",
+    tenantId: "COMP-001",
     companyName: "Emaar Properties PJSC",
     commercialRegistration: "CR-334412",
     industry: "Real Estate & Infrastructure",
@@ -57,8 +39,26 @@ export const MOCK_CUSTOMERS: Customer[] = [
     updatedAt: "2026-06-01T14:30:00Z",
   },
   {
+    id: "c-103",
+    tenantId: "COMP-001",
+    companyName: "Gulf Petroleum",
+    commercialRegistration: "CR-774431",
+    industry: "Oil & Gas",
+    status: "Active",
+    primaryContactName: "Rayyan Al-Mansoor",
+    primaryContactEmail: "rayyan@gulfpetroleum.com",
+    primaryContactPhone: "+971-55-7654321",
+    city: "Abu Dhabi",
+    address: "Gulf Oil Tower, Corniche Road",
+    representatives: [
+      { id: "rep-3", name: "Rayyan Al-Mansoor", email: "rayyan@gulfpetroleum.com", phone: "+971-55-7654321", role: "Operations Director" }
+    ],
+    createdAt: "2024-06-10T11:00:00Z",
+    updatedAt: "2026-06-03T11:20:00Z",
+  },
+  {
     id: "c-104",
-    tenantId: "c-104",
+    tenantId: "COMP-002",
     companyName: "Marina Mall LLC",
     commercialRegistration: "CR-882290",
     industry: "Retail & Leisure",
@@ -76,7 +76,7 @@ export const MOCK_CUSTOMERS: Customer[] = [
   },
   {
     id: "c-105",
-    tenantId: "c-105",
+    tenantId: "COMP-002",
     companyName: "City Transit Authority",
     commercialRegistration: "CR-110022",
     industry: "Public Transportation",
@@ -97,11 +97,11 @@ export const MOCK_CUSTOMERS: Customer[] = [
 export function getCustomers(): Customer[] {
   if (typeof window === "undefined") return MOCK_CUSTOMERS;
   try {
-    const stored = localStorage.getItem("SSLM_CUSTOMERS");
+    const stored = localStorage.getItem("SSLM_CUSTOMERS_V2");
     if (stored) {
       return JSON.parse(stored);
     } else {
-      localStorage.setItem("SSLM_CUSTOMERS", JSON.stringify(MOCK_CUSTOMERS));
+      localStorage.setItem("SSLM_CUSTOMERS_V2", JSON.stringify(MOCK_CUSTOMERS));
       return MOCK_CUSTOMERS;
     }
   } catch (e) {
@@ -118,7 +118,7 @@ export function getCustomerById(id: string): Customer | undefined {
 export function saveCustomers(customers: Customer[]): void {
   if (typeof window === "undefined") return;
   try {
-    localStorage.setItem("SSLM_CUSTOMERS", JSON.stringify(customers));
+    localStorage.setItem("SSLM_CUSTOMERS_V2", JSON.stringify(customers));
   } catch (e) {
     console.error("Failed to save customers to storage", e);
   }

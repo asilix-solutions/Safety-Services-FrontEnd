@@ -3,7 +3,7 @@ import { ClientPayment } from "./types";
 export function getPayments(): ClientPayment[] {
   if (typeof window === "undefined") return [];
   try {
-    const raw = localStorage.getItem("SSLM_PAYMENTS");
+    const raw = localStorage.getItem("SSLM_PAYMENTS_V2");
     const list: ClientPayment[] = raw ? JSON.parse(raw) : [];
     return list.sort((a, b) => new Date(b.paidAt).getTime() - new Date(a.paidAt).getTime());
   } catch (err) {
@@ -15,7 +15,7 @@ export function getPayments(): ClientPayment[] {
 export function savePayments(payments: ClientPayment[]): void {
   if (typeof window === "undefined") return;
   try {
-    localStorage.setItem("SSLM_PAYMENTS", JSON.stringify(payments));
+    localStorage.setItem("SSLM_PAYMENTS_V2", JSON.stringify(payments));
   } catch (err) {
     console.error("Failed to write SSLM_PAYMENTS to localStorage", err);
   }

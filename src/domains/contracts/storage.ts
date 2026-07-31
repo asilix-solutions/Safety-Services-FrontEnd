@@ -3,7 +3,7 @@ import { ClientContract } from "./types";
 export function getContracts(): ClientContract[] {
   if (typeof window === "undefined") return [];
   try {
-    const raw = localStorage.getItem("SSLM_CONTRACTS");
+    const raw = localStorage.getItem("SSLM_CONTRACTS_V2");
     return raw ? JSON.parse(raw) : [];
   } catch (err) {
     console.error("Failed to parse SSLM_CONTRACTS", err);
@@ -14,7 +14,7 @@ export function getContracts(): ClientContract[] {
 export function saveContracts(contracts: ClientContract[]): void {
   if (typeof window === "undefined") return;
   try {
-    localStorage.setItem("SSLM_CONTRACTS", JSON.stringify(contracts));
+    localStorage.setItem("SSLM_CONTRACTS_V2", JSON.stringify(contracts));
   } catch (err) {
     console.error("Failed to save SSLM_CONTRACTS", err);
   }

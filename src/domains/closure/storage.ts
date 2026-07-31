@@ -1,6 +1,6 @@
 import { ClosureRecord } from "./types";
 
-const STORAGE_KEY = "SSLM_CLOSURE";
+const STORAGE_KEY = "SSLM_CLOSURE_V2";
 
 /** ONLY function in the domain allowed to read localStorage for closure (ADR-002). */
 export function listClosure(): ClosureRecord[] {

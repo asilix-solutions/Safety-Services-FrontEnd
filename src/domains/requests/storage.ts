@@ -5,7 +5,7 @@ import { mapStatusToStage } from "./workflow";
 export function getRequests(): LicensingRequest[] {
   if (typeof window === "undefined") return [];
   try {
-    const raw = localStorage.getItem("SSLM_CLIENT_REQUESTS");
+    const raw = localStorage.getItem("SSLM_CLIENT_REQUESTS_V2");
     const list: LicensingRequest[] = raw ? JSON.parse(raw) : [];
     return list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   } catch (err) {
@@ -17,7 +17,7 @@ export function getRequests(): LicensingRequest[] {
 export function saveRequests(requests: LicensingRequest[]): void {
   if (typeof window === "undefined") return;
   try {
-    localStorage.setItem("SSLM_CLIENT_REQUESTS", JSON.stringify(requests));
+    localStorage.setItem("SSLM_CLIENT_REQUESTS_V2", JSON.stringify(requests));
   } catch (err) {
     console.error("Failed to save SSLM_CLIENT_REQUESTS", err);
   }
@@ -67,7 +67,7 @@ export function upsertRequest(request: LicensingRequest): void {
 export function getRequestDraft(): any | null {
   if (typeof window === "undefined") return null;
   try {
-    const draft = localStorage.getItem("SSLM_CLIENT_REQUEST_DRAFT");
+    const draft = localStorage.getItem("SSLM_CLIENT_REQUEST_DRAFT_V2");
     return draft ? JSON.parse(draft) : null;
   } catch (err) {
     console.error("Failed to parse SSLM_CLIENT_REQUEST_DRAFT", err);
@@ -78,7 +78,7 @@ export function getRequestDraft(): any | null {
 export function saveRequestDraft(draft: any): void {
   if (typeof window === "undefined") return;
   try {
-    localStorage.setItem("SSLM_CLIENT_REQUEST_DRAFT", JSON.stringify(draft));
+    localStorage.setItem("SSLM_CLIENT_REQUEST_DRAFT_V2", JSON.stringify(draft));
   } catch (err) {
     console.error("Failed to save SSLM_CLIENT_REQUEST_DRAFT", err);
   }
@@ -87,7 +87,7 @@ export function saveRequestDraft(draft: any): void {
 export function deleteRequestDraft(): void {
   if (typeof window === "undefined") return;
   try {
-    localStorage.removeItem("SSLM_CLIENT_REQUEST_DRAFT");
+    localStorage.removeItem("SSLM_CLIENT_REQUEST_DRAFT_V2");
   } catch (err) {
     console.error("Failed to remove SSLM_CLIENT_REQUEST_DRAFT", err);
   }

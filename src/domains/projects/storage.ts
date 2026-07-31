@@ -59,7 +59,7 @@ export function migrateProjectWorkspace(project: Project): Project {
 export function getProjects(): Project[] {
   if (typeof window === "undefined") return [];
   try {
-    const raw = localStorage.getItem("SSLM_PROJECTS");
+    const raw = localStorage.getItem("SSLM_PROJECTS_V2");
     const list: Project[] = raw ? JSON.parse(raw) : [];
     const migrated = list.map(migrateProjectWorkspace);
     return migrated.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -72,7 +72,7 @@ export function getProjects(): Project[] {
 export function saveProjects(projects: Project[]): void {
   if (typeof window === "undefined") return;
   try {
-    localStorage.setItem("SSLM_PROJECTS", JSON.stringify(projects));
+    localStorage.setItem("SSLM_PROJECTS_V2", JSON.stringify(projects));
   } catch (err) {
     console.error("Failed to write SSLM_PROJECTS to localStorage", err);
   }

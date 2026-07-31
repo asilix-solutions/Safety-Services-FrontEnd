@@ -3,7 +3,7 @@ import { ClientCertificate } from "./types";
 export function getCertificates(): ClientCertificate[] {
   if (typeof window === "undefined") return [];
   try {
-    const raw = localStorage.getItem("SSLM_CERTIFICATES");
+    const raw = localStorage.getItem("SSLM_CERTIFICATES_V2");
     return raw ? JSON.parse(raw) : [];
   } catch (err) {
     console.error("Failed to parse SSLM_CERTIFICATES", err);
@@ -14,7 +14,7 @@ export function getCertificates(): ClientCertificate[] {
 export function saveCertificates(certificates: ClientCertificate[]): void {
   if (typeof window === "undefined") return;
   try {
-    localStorage.setItem("SSLM_CERTIFICATES", JSON.stringify(certificates));
+    localStorage.setItem("SSLM_CERTIFICATES_V2", JSON.stringify(certificates));
   } catch (err) {
     console.error("Failed to save SSLM_CERTIFICATES", err);
   }

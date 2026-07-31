@@ -15,6 +15,13 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+/**
+ * Bumped when the profile shape changes. A profile cached before `tenantId`
+ * existed would scope to nothing, so the old key is abandoned rather than
+ * migrated — re-login costs nothing in a mock build.
+ */
+const SESSION_STORAGE_KEY = "sslm_user_profile_v2";
+
 const MOCK_PROFILES: Record<UserRole, Omit<UserProfile, "permissions">> = {
   "Super Admin": {
     id: "u-1",
@@ -29,7 +36,7 @@ const MOCK_PROFILES: Record<UserRole, Omit<UserProfile, "permissions">> = {
     name: "Sarah Jenkins",
     email: "sarah.j@vertexindustrial.com",
     role: "Company Admin",
-    companyId: "c-101",
+    tenantId: "COMP-001",
     avatarUrl: "https://api.dicebear.com/7.x/adventurer/svg?seed=Sarah",
     active: true,
   },
@@ -38,6 +45,7 @@ const MOCK_PROFILES: Record<UserRole, Omit<UserProfile, "permissions">> = {
     name: "Dr. Marcus Vance",
     email: "marcus.v@safetysystem.com",
     role: "Consulting Engineer",
+    tenantId: "COMP-001",
     avatarUrl: "https://api.dicebear.com/7.x/adventurer/svg?seed=Marcus",
     active: true,
   },
@@ -46,7 +54,7 @@ const MOCK_PROFILES: Record<UserRole, Omit<UserProfile, "permissions">> = {
     name: "Elena Rostova",
     email: "elena.r@vertexindustrial.com",
     role: "Operations Officer",
-    companyId: "c-101",
+    tenantId: "COMP-001",
     avatarUrl: "https://api.dicebear.com/7.x/adventurer/svg?seed=Elena",
     active: true,
   },
@@ -55,16 +63,18 @@ const MOCK_PROFILES: Record<UserRole, Omit<UserProfile, "permissions">> = {
     name: "James Sterling",
     email: "james.s@safetysystem.com",
     role: "Sales Agent",
+    tenantId: "COMP-001",
     avatarUrl: "https://api.dicebear.com/7.x/adventurer/svg?seed=James",
     active: true,
   },
   Client: {
     id: "u-6",
-    name: "Rayyan Al-Mansoor",
-    email: "rayyan@gulfpetroleum.com",
+    name: "David Sterling",
+    email: "d.sterling@emaar.ae",
     role: "Client",
+    tenantId: "COMP-001",
     companyId: "c-102",
-    avatarUrl: "https://api.dicebear.com/7.x/adventurer/svg?seed=Rayyan",
+    avatarUrl: "https://api.dicebear.com/7.x/adventurer/svg?seed=David",
     active: true,
   },
 };
@@ -75,7 +85,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Initialize session from LocalStorage
   useEffect(() => {
-    const savedProfile = localStorage.getItem("sslm_user_profile");
+    const savedProfile = localStorage.getItem(SESSION_STORAGE_KEY);
     if (savedProfile) {
       try {
         setUser(JSON.parse(savedProfile));
@@ -98,13 +108,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
     
     setUser(profile);
-    localStorage.setItem("sslm_user_profile", JSON.stringify(profile));
+    localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(profile));
     setIsLoading(false);
   };
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem("sslm_user_profile");
+    localStorage.removeItem(SESSION_STORAGE_KEY);
   };
   const switchRole = (role: UserRole, companyId?: string) => {
     const baseProfile = MOCK_PROFILES[role];
@@ -119,23 +129,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         profile = {
           ...profile,
           id: "u-7",
-          name: "Gulf Petroleum Representative",
-          email: "client@gulfpetroleum.com",
+          name: "Rayyan Al-Mansoor",
+          email: "rayyan@gulfpetroleum.com",
+          tenantId: "COMP-001",
           companyId: "c-103",
         };
       } else {
         profile = {
           ...profile,
           id: "u-6",
-          name: "Rayyan Al-Mansoor",
-          email: "rayyan@gulfpetroleum.com",
+          name: "David Sterling",
+          email: "d.sterling@emaar.ae",
+          tenantId: "COMP-001",
           companyId: "c-102",
         };
       }
     }
     
     setUser(profile);
-    localStorage.setItem("sslm_user_profile", JSON.stringify(profile));
+    localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(profile));
   };
   return (
     <AuthContext.Provider

@@ -1,6 +1,6 @@
 import { ProcurementRecord } from "./types";
 
-const STORAGE_KEY = "SSLM_PROCUREMENT";
+const STORAGE_KEY = "SSLM_PROCUREMENT_V2";
 
 /** ONLY function in the domain allowed to read localStorage for procurement (ADR-002). */
 export function listProcurement(): ProcurementRecord[] {

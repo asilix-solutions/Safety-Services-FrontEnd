@@ -1,6 +1,6 @@
 import { Company } from "./types";
 
-const STORAGE_KEY = "SSLM_COMPANIES";
+const STORAGE_KEY = "SSLM_COMPANIES_V2";
 
 export const MOCK_COMPANIES: Company[] = [
   {

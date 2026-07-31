@@ -1,7 +1,7 @@
 import { Notification } from "@/types/notification";
 import { MOCK_NOTIFICATIONS } from "@/mock/notifications";
 
-const STORAGE_KEY = "SSLM_NOTIFICATIONS";
+const STORAGE_KEY = "SSLM_NOTIFICATIONS_V2";
 
 function readAll(): Notification[] {
   if (typeof window === "undefined") return MOCK_NOTIFICATIONS;

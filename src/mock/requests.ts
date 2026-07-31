@@ -4,7 +4,7 @@ export const MOCK_REQUESTS: LicensingRequest[] = [
   {
     id: "REQ-9011",
     jobNumber: "SSLM-2026-000001",
-    tenantId: "tenant-1",
+    tenantId: "COMP-001",
     requestType: "new_license",
     status: "submitted",
     clientId: "c-102",
@@ -46,7 +46,7 @@ export const MOCK_REQUESTS: LicensingRequest[] = [
   {
     id: "REQ-7782",
     jobNumber: "SSLM-2026-000002",
-    tenantId: "tenant-1",
+    tenantId: "COMP-001",
     requestType: "technical_report",
     status: "under_review",
     clientId: "c-103",

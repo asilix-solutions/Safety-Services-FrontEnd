@@ -3,7 +3,7 @@ import { Quotation } from "./types";
 export function getQuotations(): Quotation[] {
   if (typeof window === "undefined") return [];
   try {
-    const raw = localStorage.getItem("SSLM_QUOTATIONS");
+    const raw = localStorage.getItem("SSLM_QUOTATIONS_V2");
     const list: Quotation[] = raw ? JSON.parse(raw) : [];
     return list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   } catch (err) {
@@ -15,7 +15,7 @@ export function getQuotations(): Quotation[] {
 export function saveQuotations(quotations: Quotation[]): void {
   if (typeof window === "undefined") return;
   try {
-    localStorage.setItem("SSLM_QUOTATIONS", JSON.stringify(quotations));
+    localStorage.setItem("SSLM_QUOTATIONS_V2", JSON.stringify(quotations));
   } catch (err) {
     console.error("Failed to save SSLM_QUOTATIONS", err);
   }

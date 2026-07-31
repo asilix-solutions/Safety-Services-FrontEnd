@@ -1,6 +1,6 @@
 import { User } from "./types";
 
-const STORAGE_KEY = "SSLM_USERS";
+const STORAGE_KEY = "SSLM_USERS_V2";
 
 export const MOCK_USERS: User[] = [
   { id: "USR-001", name: "Alexander Vance", role: "Super Admin", status: "active", createdAt: "2026-01-05T09:00:00Z" },

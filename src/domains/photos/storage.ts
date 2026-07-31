@@ -1,6 +1,6 @@
 import { InstallationPhoto } from "./types";
 
-const STORAGE_KEY = "SSLM_PHOTOS";
+const STORAGE_KEY = "SSLM_PHOTOS_V2";
 
 /** ONLY function in the domain allowed to read localStorage for photos (ADR-002). */
 export function listPhotos(): InstallationPhoto[] {

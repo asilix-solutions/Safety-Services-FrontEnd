@@ -63,7 +63,7 @@ const DEFAULT_SECURITY: SecuritySettings = {
 export function getCompanyProfile(): CompanyProfileSettings {
   if (typeof window === "undefined") return DEFAULT_PROFILE;
   try {
-    const raw = localStorage.getItem("SSLM_COMPANY_PROFILE");
+    const raw = localStorage.getItem("SSLM_COMPANY_PROFILE_V2");
     return raw ? JSON.parse(raw) : DEFAULT_PROFILE;
   } catch {
     return DEFAULT_PROFILE;
@@ -72,14 +72,14 @@ export function getCompanyProfile(): CompanyProfileSettings {
 
 export function saveCompanyProfile(profile: CompanyProfileSettings): void {
   if (typeof window === "undefined") return;
-  localStorage.setItem("SSLM_COMPANY_PROFILE", JSON.stringify(profile));
+  localStorage.setItem("SSLM_COMPANY_PROFILE_V2", JSON.stringify(profile));
 }
 
 // Branding Storage
 export function getBranding(): BrandingSettings {
   if (typeof window === "undefined") return DEFAULT_BRANDING;
   try {
-    const raw = localStorage.getItem("SSLM_BRANDING");
+    const raw = localStorage.getItem("SSLM_BRANDING_V2");
     return raw ? JSON.parse(raw) : DEFAULT_BRANDING;
   } catch {
     return DEFAULT_BRANDING;
@@ -88,14 +88,14 @@ export function getBranding(): BrandingSettings {
 
 export function saveBranding(branding: BrandingSettings): void {
   if (typeof window === "undefined") return;
-  localStorage.setItem("SSLM_BRANDING", JSON.stringify(branding));
+  localStorage.setItem("SSLM_BRANDING_V2", JSON.stringify(branding));
 }
 
 // Preferences Storage
 export function getWorkspacePreferences(): WorkspacePreferenceSettings {
   if (typeof window === "undefined") return DEFAULT_PREFERENCES;
   try {
-    const raw = localStorage.getItem("SSLM_WORKSPACE_PREFERENCES");
+    const raw = localStorage.getItem("SSLM_WORKSPACE_PREFERENCES_V2");
     return raw ? JSON.parse(raw) : DEFAULT_PREFERENCES;
   } catch {
     return DEFAULT_PREFERENCES;
@@ -104,14 +104,14 @@ export function getWorkspacePreferences(): WorkspacePreferenceSettings {
 
 export function saveWorkspacePreferences(prefs: WorkspacePreferenceSettings): void {
   if (typeof window === "undefined") return;
-  localStorage.setItem("SSLM_WORKSPACE_PREFERENCES", JSON.stringify(prefs));
+  localStorage.setItem("SSLM_WORKSPACE_PREFERENCES_V2", JSON.stringify(prefs));
 }
 
 // Notifications Storage
 export function getNotificationSettings(): DomainNotificationSettings {
   if (typeof window === "undefined") return DEFAULT_NOTIFICATIONS;
   try {
-    const raw = localStorage.getItem("SSLM_NOTIFICATION_SETTINGS");
+    const raw = localStorage.getItem("SSLM_NOTIFICATION_SETTINGS_V2");
     return raw ? JSON.parse(raw) : DEFAULT_NOTIFICATIONS;
   } catch {
     return DEFAULT_NOTIFICATIONS;
@@ -120,14 +120,14 @@ export function getNotificationSettings(): DomainNotificationSettings {
 
 export function saveNotificationSettings(settings: DomainNotificationSettings): void {
   if (typeof window === "undefined") return;
-  localStorage.setItem("SSLM_NOTIFICATION_SETTINGS", JSON.stringify(settings));
+  localStorage.setItem("SSLM_NOTIFICATION_SETTINGS_V2", JSON.stringify(settings));
 }
 
 // Security Storage
 export function getSecuritySettings(): SecuritySettings {
   if (typeof window === "undefined") return DEFAULT_SECURITY;
   try {
-    const raw = localStorage.getItem("SSLM_SECURITY_SETTINGS");
+    const raw = localStorage.getItem("SSLM_SECURITY_SETTINGS_V2");
     return raw ? JSON.parse(raw) : DEFAULT_SECURITY;
   } catch {
     return DEFAULT_SECURITY;
@@ -136,7 +136,7 @@ export function getSecuritySettings(): SecuritySettings {
 
 export function saveSecuritySettings(settings: SecuritySettings): void {
   if (typeof window === "undefined") return;
-  localStorage.setItem("SSLM_SECURITY_SETTINGS", JSON.stringify(settings));
+  localStorage.setItem("SSLM_SECURITY_SETTINGS_V2", JSON.stringify(settings));
 }
 
 // Organization Info

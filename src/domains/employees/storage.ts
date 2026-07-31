@@ -3,7 +3,7 @@ import { Employee } from "./types";
 export const MOCK_EMPLOYEES: Employee[] = [
   {
     id: "EMP-001",
-    tenantId: "c-101",
+    tenantId: "COMP-001",
     userId: "u-2",
     employeeNumber: "EMP-0001",
     fullName: "Sarah Jenkins",
@@ -19,7 +19,7 @@ export const MOCK_EMPLOYEES: Employee[] = [
   },
   {
     id: "EMP-002",
-    tenantId: "c-101",
+    tenantId: "COMP-001",
     userId: "u-4",
     employeeNumber: "EMP-0002",
     fullName: "Elena Rostova",
@@ -35,7 +35,7 @@ export const MOCK_EMPLOYEES: Employee[] = [
   },
   {
     id: "EMP-003",
-    tenantId: "c-101",
+    tenantId: "COMP-001",
     userId: "u-3",
     employeeNumber: "EMP-0003",
     fullName: "Dr. Marcus Vance",
@@ -51,7 +51,7 @@ export const MOCK_EMPLOYEES: Employee[] = [
   },
   {
     id: "EMP-004",
-    tenantId: "c-101",
+    tenantId: "COMP-001",
     userId: "u-5",
     employeeNumber: "EMP-0004",
     fullName: "James Sterling",
@@ -70,13 +70,13 @@ export const MOCK_EMPLOYEES: Employee[] = [
 export function getEmployees(tenantId?: string): Employee[] {
   if (typeof window === "undefined") return MOCK_EMPLOYEES;
   try {
-    const stored = localStorage.getItem("SSLM_EMPLOYEES");
+    const stored = localStorage.getItem("SSLM_EMPLOYEES_V2");
     let list: Employee[] = [];
     if (stored) {
       list = JSON.parse(stored);
     } else {
       list = MOCK_EMPLOYEES;
-      localStorage.setItem("SSLM_EMPLOYEES", JSON.stringify(list));
+      localStorage.setItem("SSLM_EMPLOYEES_V2", JSON.stringify(list));
     }
     if (tenantId) {
       return list.filter((emp) => emp.tenantId === tenantId);
@@ -91,7 +91,7 @@ export function getEmployees(tenantId?: string): Employee[] {
 export function saveEmployees(employees: Employee[]): void {
   if (typeof window === "undefined") return;
   try {
-    localStorage.setItem("SSLM_EMPLOYEES", JSON.stringify(employees));
+    localStorage.setItem("SSLM_EMPLOYEES_V2", JSON.stringify(employees));
   } catch (e) {
     console.error("Failed to save employees to storage", e);
   }

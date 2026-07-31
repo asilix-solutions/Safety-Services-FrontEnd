@@ -19,11 +19,11 @@ export const MOCK_VISITS: SiteVisit[] = [
 export function getSiteVisits(): SiteVisit[] {
   if (typeof window === "undefined") return MOCK_VISITS;
   try {
-    const stored = localStorage.getItem("SSLM_SITE_VISITS");
+    const stored = localStorage.getItem("SSLM_SITE_VISITS_V2");
     if (stored) {
       return JSON.parse(stored);
     }
-    localStorage.setItem("SSLM_SITE_VISITS", JSON.stringify(MOCK_VISITS));
+    localStorage.setItem("SSLM_SITE_VISITS_V2", JSON.stringify(MOCK_VISITS));
   } catch (e) {
     console.error("Failed to load site visits from storage", e);
   }
@@ -33,7 +33,7 @@ export function getSiteVisits(): SiteVisit[] {
 export function saveSiteVisits(visits: SiteVisit[]): void {
   if (typeof window === "undefined") return;
   try {
-    localStorage.setItem("SSLM_SITE_VISITS", JSON.stringify(visits));
+    localStorage.setItem("SSLM_SITE_VISITS_V2", JSON.stringify(visits));
   } catch (e) {
     console.error("Failed to save site visits to storage", e);
   }

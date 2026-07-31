@@ -1,6 +1,6 @@
 import { LaborRecord } from "./types";
 
-const STORAGE_KEY = "SSLM_LABOR";
+const STORAGE_KEY = "SSLM_LABOR_V2";
 
 /** ONLY function in the domain allowed to read localStorage for labor (ADR-002). */
 export function listLabor(): LaborRecord[] {

@@ -249,7 +249,8 @@ export function ClientRequestWizard() {
     const newRequest: LicensingRequest = {
       id: `REQ-${Math.floor(1000 + Math.random() * 9000)}`,
       jobNumber,
-      tenantId: "tenant-1",
+      // Stamped from the creating user, or the record would be invisible to its own tenant.
+      tenantId: user?.tenantId || "COMP-001",
       requestType: selectedRequestType,
       status: "submitted",
       clientId: user?.companyId || "c-102",

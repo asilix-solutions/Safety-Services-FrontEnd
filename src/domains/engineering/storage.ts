@@ -1,6 +1,6 @@
 import { EngineeringReviewRecord } from "./types";
 
-const STORAGE_KEY = "SSLM_ENGINEERING_REVIEWS";
+const STORAGE_KEY = "SSLM_ENGINEERING_REVIEWS_V2";
 
 export function getEngineeringReviews(): EngineeringReviewRecord[] {
   if (typeof window === "undefined") return [];

@@ -62,7 +62,7 @@ export function createProcurementRecord(
 
   const record: ProcurementRecord = {
     id: `PROC-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-    tenantId: "tenant-1",
+    tenantId: "COMP-001",
     projectId: draft.projectId,
     supplierName: draft.supplierName.trim(),
     siloTag: draft.siloTag,
