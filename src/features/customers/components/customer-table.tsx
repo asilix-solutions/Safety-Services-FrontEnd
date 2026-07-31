@@ -103,7 +103,7 @@ export function CustomerTable({ customers, permissions, onViewDetails, onToggleS
     <div className="space-y-4">
       {/* Desktop Table View */}
       <div className="hidden md:block overflow-x-auto rounded-xl border border-border bg-card">
-        <table className="w-full border-collapse text-left text-xs text-foreground">
+        <table className="w-full border-collapse text-start text-xs text-foreground">
           <thead>
             <tr className="border-b border-border bg-muted/40 font-semibold text-muted-foreground">
               <th className="p-4">{t("common:customers.table.name")}</th>
@@ -113,7 +113,7 @@ export function CustomerTable({ customers, permissions, onViewDetails, onToggleS
               <th className="p-4">{t("common:customers.table.city")}</th>
               <th className="p-4">{t("common:customers.linked_records")}</th>
               <th className="p-4">{t("common:status")}</th>
-              <th className="p-4 text-right">{t("common:customers.table.actions")}</th>
+              <th className="p-4 text-end">{t("common:customers.table.actions")}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
@@ -156,7 +156,7 @@ export function CustomerTable({ customers, permissions, onViewDetails, onToggleS
                       {t(`common:customers.status.${c.status}`)}
                     </Badge>
                   </td>
-                  <td className="p-4 text-right">
+                  <td className="p-4 text-end">
                     <ActionMenu items={getRowActions(c)} />
                   </td>
                 </tr>

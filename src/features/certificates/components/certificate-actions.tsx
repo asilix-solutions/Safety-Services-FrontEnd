@@ -48,10 +48,10 @@ export function CertificateActions({
       {/* Backdrop click to close */}
       <div className="absolute inset-0 -z-10" onClick={onClose} />
 
-      <div className="w-full sm:max-w-md h-full bg-card border-l border-border shadow-2xl p-6 flex flex-col justify-between overflow-y-auto relative animate-in slide-in-from-right duration-200">
+      <div className="w-full sm:max-w-md h-full bg-card border-s border-border shadow-2xl p-6 flex flex-col justify-between overflow-y-auto relative animate-in slide-in-from-right duration-200">
         <button
           onClick={onClose}
-          className="absolute right-4 top-4 text-muted-foreground hover:text-foreground cursor-pointer"
+          className="absolute end-4 top-4 text-muted-foreground hover:text-foreground cursor-pointer"
         >
           <X className="h-5 w-5" />
         </button>
@@ -160,22 +160,22 @@ export function CertificateActions({
               <History className="h-4 w-4 text-muted-foreground" />
               {t("common:certificates_timeline") || "Audit Timeline"}
             </h4>
-            <div className="space-y-3 text-xs pl-2 border-l-2 border-primary/20 ml-2">
+            <div className="space-y-3 text-xs ps-2 border-s-2 border-primary/20 ms-2">
               <div className="relative">
-                <span className="absolute -left-[15px] top-1 h-2.5 w-2.5 rounded-full bg-primary" />
+                <span className="absolute -start-[15px] top-1 h-2.5 w-2.5 rounded-full bg-primary" />
                 <span className="font-semibold block">{t("common:certificates_milestone_issued") || "Certificate Issued"}</span>
                 <span className="text-[10px] text-muted-foreground">{formatDateTime(certificate.issuedAt)}</span>
               </div>
               
               <div className="relative">
-                <span className="absolute -left-[15px] top-1 h-2.5 w-2.5 rounded-full bg-emerald-500" />
+                <span className="absolute -start-[15px] top-1 h-2.5 w-2.5 rounded-full bg-emerald-500" />
                 <span className="font-semibold block">{t("common:certificates_milestone_downloaded") || "PDF Access Registered"}</span>
                 <span className="text-[10px] text-muted-foreground">{t("common:certificates_timeline_download_desc") || "System ready for branded verification download"}</span>
               </div>
 
               {isRevoked && (
                 <div className="relative text-destructive">
-                  <span className="absolute -left-[15px] top-1 h-2.5 w-2.5 rounded-full bg-destructive" />
+                  <span className="absolute -start-[15px] top-1 h-2.5 w-2.5 rounded-full bg-destructive" />
                   <span className="font-bold block">{t("common:certificates_milestone_revoked") || "Certificate Revoked"}</span>
                   <span className="text-[10px] block">{formatDateTime(certificate.revokedAt)}</span>
                   <span className="text-[10px] block mt-0.5 text-muted-foreground">

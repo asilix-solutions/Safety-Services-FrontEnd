@@ -165,7 +165,7 @@ export default function LoginPage() {
                     key={role}
                     onClick={() => handleQuickLogin(role)}
                     disabled={isSubmitting}
-                    className="flex flex-col items-start p-3 rounded-lg border border-border/60 bg-secondary/50 dark:bg-secondary/20 text-left hover:bg-secondary/80 dark:hover:bg-secondary/40 hover:border-primary/45 transition-all cursor-pointer group"
+                    className="flex flex-col items-start p-3 rounded-lg border border-border/60 bg-secondary/50 dark:bg-secondary/20 text-start hover:bg-secondary/80 dark:hover:bg-secondary/40 hover:border-primary/45 transition-all cursor-pointer group"
                   >
                     <span className="text-xs font-semibold text-foreground group-hover:text-primary transition-colors">
                       {t(getRoleTranslationKey(role))}
@@ -183,12 +183,12 @@ export default function LoginPage() {
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-foreground/80">{t("auth:emailLabel")}</label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Mail className="absolute start-3 top-3 h-4 w-4 text-muted-foreground" />
                   <input
                     type="email"
                     placeholder={t("auth:emailPlaceholder")}
                     {...register("email")}
-                    className="w-full bg-background/50 border border-border rounded-lg pl-10 pr-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary placeholder-muted-foreground/60"
+                    className="w-full bg-background/50 border border-border rounded-lg ps-10 pe-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary placeholder-muted-foreground/60"
                   />
                 </div>
                 {errors.email && (
@@ -200,12 +200,12 @@ export default function LoginPage() {
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-foreground/80">{t("auth:passwordLabel")}</label>
                 <div className="relative">
-                  <KeyRound className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <KeyRound className="absolute start-3 top-3 h-4 w-4 text-muted-foreground" />
                   <input
                     type="password"
                     placeholder={t("auth:passwordPlaceholder")}
                     {...register("password")}
-                    className="w-full bg-background/50 border border-border rounded-lg pl-10 pr-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary placeholder-muted-foreground/60"
+                    className="w-full bg-background/50 border border-border rounded-lg ps-10 pe-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary placeholder-muted-foreground/60"
                   />
                 </div>
                 {errors.password && (

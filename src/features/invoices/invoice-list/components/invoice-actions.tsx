@@ -58,12 +58,12 @@ export function InvoiceActions({
       <Card className="max-w-md w-full border-border bg-card shadow-2xl overflow-hidden relative">
         <button
           onClick={onClose}
-          className="absolute right-4 top-4 text-muted-foreground hover:text-foreground cursor-pointer"
+          className="absolute end-4 top-4 text-muted-foreground hover:text-foreground cursor-pointer"
         >
           <X className="h-4 w-4" />
         </button>
 
-        <CardHeader className="border-b border-border pb-4 pr-10">
+        <CardHeader className="border-b border-border pb-4 pe-10">
           <CardTitle className="text-sm font-bold flex items-center gap-2">
             <FileText className="h-4.5 w-4.5 text-primary" />
             {t("invoices_dialog_title")}

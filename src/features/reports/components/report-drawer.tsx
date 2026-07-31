@@ -68,10 +68,10 @@ export function ReportDrawer({
       {/* Backdrop click to close */}
       <div className="absolute inset-0 -z-10" onClick={onClose} />
 
-      <div className="w-full sm:max-w-md h-full bg-card border-l border-border shadow-2xl p-6 flex flex-col justify-between overflow-y-auto relative animate-in slide-in-from-right duration-200">
+      <div className="w-full sm:max-w-md h-full bg-card border-s border-border shadow-2xl p-6 flex flex-col justify-between overflow-y-auto relative animate-in slide-in-from-right duration-200">
         <button
           onClick={onClose}
-          className="absolute right-4 top-4 text-muted-foreground hover:text-foreground cursor-pointer"
+          className="absolute end-4 top-4 text-muted-foreground hover:text-foreground cursor-pointer"
         >
           <X className="h-5 w-5" />
         </button>
@@ -106,24 +106,24 @@ export function ReportDrawer({
             <div className="space-y-2 text-xs font-mono">
               <div className="flex justify-between border-b border-border/40 pb-1">
                 <span className="text-muted-foreground">{t("reports:fieldClient")}:</span>
-                <span className="text-foreground text-right">{report.clientId}</span>
+                <span className="text-foreground text-end">{report.clientId}</span>
               </div>
               {report.jobNumber && (
                 <div className="flex justify-between border-b border-border/40 pb-1">
                   <span className="text-muted-foreground">{t("reports:fieldRequest")}:</span>
-                  <span className="text-foreground text-right">{report.jobNumber}</span>
+                  <span className="text-foreground text-end">{report.jobNumber}</span>
                 </div>
               )}
               {report.projectId && (
                 <div className="flex justify-between border-b border-border/40 pb-1">
                   <span className="text-muted-foreground">{t("reports:fieldProject")}:</span>
-                  <span className="text-foreground text-right">{report.projectId}</span>
+                  <span className="text-foreground text-end">{report.projectId}</span>
                 </div>
               )}
               {report.siteVisitId && (
                 <div className="flex justify-between pb-1">
                   <span className="text-muted-foreground">{t("reports:fieldSiteVisit")}:</span>
-                  <span className="text-foreground text-right">{report.siteVisitId}</span>
+                  <span className="text-foreground text-end">{report.siteVisitId}</span>
                 </div>
               )}
             </div>
@@ -153,7 +153,7 @@ export function ReportDrawer({
                     <span className="text-muted-foreground font-semibold uppercase text-[10px]">
                       {t("reports:fieldObservations")}
                     </span>
-                    <ul className="list-disc pl-4 mt-1 text-foreground space-y-1">
+                    <ul className="list-disc ps-4 mt-1 text-foreground space-y-1">
                       {contentData.observations.map((obs: string, idx: number) => (
                         <li key={idx}>{t(obs) || obs}</li>
                       ))}
@@ -166,7 +166,7 @@ export function ReportDrawer({
                     <span className="text-muted-foreground font-semibold uppercase text-[10px]">
                       {t("reports:fieldFindings")}
                     </span>
-                    <ul className="list-disc pl-4 mt-1 text-foreground space-y-1">
+                    <ul className="list-disc ps-4 mt-1 text-foreground space-y-1">
                       {contentData.findings.map((finding: string, idx: number) => (
                         <li key={idx} className="text-warning-foreground">{t(finding) || finding}</li>
                       ))}
@@ -179,7 +179,7 @@ export function ReportDrawer({
                     <span className="text-muted-foreground font-semibold uppercase text-[10px]">
                       {t("reports:fieldRecommendations")}
                     </span>
-                    <ul className="list-disc pl-4 mt-1 text-foreground space-y-1">
+                    <ul className="list-disc ps-4 mt-1 text-foreground space-y-1">
                       {contentData.recommendations.map((rec: string, idx: number) => (
                         <li key={idx}>{t(rec) || rec}</li>
                       ))}
@@ -196,10 +196,10 @@ export function ReportDrawer({
               <History className="h-4 w-4 text-muted-foreground" />
               {t("reports:timelineTitle")}
             </h4>
-            <div className="space-y-3 text-xs pl-2 border-l-2 border-primary/20 ml-2">
+            <div className="space-y-3 text-xs ps-2 border-s-2 border-primary/20 ms-2">
               {report.timeline.map((event) => (
-                <div className="relative pl-3" key={event.id}>
-                  <span className="absolute -left-[18px] top-1 h-2.5 w-2.5 rounded-full bg-primary" />
+                <div className="relative ps-3" key={event.id}>
+                  <span className="absolute -start-[18px] top-1 h-2.5 w-2.5 rounded-full bg-primary" />
                   <span className="font-semibold block capitalize">{t(`reports:action_${event.action}`) || event.action}</span>
                   <span className="text-[10px] text-muted-foreground block">{formatDateTime(event.performedAt)} - {event.performedBy}</span>
                   {event.notes && <span className="text-[10px] text-muted-foreground block mt-0.5">{t(event.notes) || event.notes}</span>}

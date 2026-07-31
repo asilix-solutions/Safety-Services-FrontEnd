@@ -376,7 +376,7 @@ export default function QuotationBuilderPage() {
                     disabled={isReadOnly}
                     className="h-8 text-xs font-medium"
                   >
-                    <Plus className="h-3 w-3 mr-1" />
+                    <Plus className="h-3 w-3 me-1" />
                     {sug.label}
                   </Button>
                 ))}
@@ -397,45 +397,45 @@ export default function QuotationBuilderPage() {
             <CardContent className="pt-4 divide-y divide-border/50 text-xs space-y-1">
               <div className="py-2 grid grid-cols-2 gap-2">
                 <span className="text-muted-foreground">{t("requests:quotations.builder.fieldJobNumber")}</span>
-                <span className="font-mono font-bold text-primary text-right">{request.jobNumber}</span>
+                <span className="font-mono font-bold text-primary text-end">{request.jobNumber}</span>
               </div>
               <div className="py-2 grid grid-cols-2 gap-2">
                 <span className="text-muted-foreground">{t("requests:quotations.builder.fieldClientName")}</span>
-                <span className="font-semibold text-foreground text-right">{request.clientName}</span>
+                <span className="font-semibold text-foreground text-end">{request.clientName}</span>
               </div>
               <div className="py-2 grid grid-cols-2 gap-2">
                 <span className="text-muted-foreground">{t("requests:quotations.builder.fieldFacilityName")}</span>
-                <span className="font-semibold text-foreground text-right">{request.facilityName}</span>
+                <span className="font-semibold text-foreground text-end">{request.facilityName}</span>
               </div>
               <div className="py-2 grid grid-cols-2 gap-2">
                 <span className="text-muted-foreground">{t("requests:quotations.builder.fieldRequestType")}</span>
-                <span className="font-semibold text-foreground text-right">{getRequestTypeLabel(request.requestType)}</span>
+                <span className="font-semibold text-foreground text-end">{getRequestTypeLabel(request.requestType)}</span>
               </div>
               <div className="py-2 grid grid-cols-2 gap-2">
                 <span className="text-muted-foreground">{t("requests:details.reviewPathLabel") || "Review Path"}</span>
-                <span className="font-semibold text-foreground text-right">
+                <span className="font-semibold text-foreground text-end">
                   {getReviewPathDisplayName(request, t)}
                 </span>
               </div>
               <div className="py-2 grid grid-cols-2 gap-2">
                 <span className="text-muted-foreground">{t("requests:details.serviceScopeLabel") || "Service Scope"}</span>
-                <span className="font-semibold text-foreground text-right">
+                <span className="font-semibold text-foreground text-end">
                   {getCommercialServiceLabel(request, t)}
                 </span>
               </div>
               <div className="py-2 grid grid-cols-2 gap-2">
                 <span className="text-muted-foreground">{t("requests:quotations.builder.fieldAssignedDepartment")}</span>
-                <span className="font-semibold text-foreground text-right">
+                <span className="font-semibold text-foreground text-end">
                   {getQueueDisplayName(request.assignedQueue, t)}
                 </span>
               </div>
               <div className="py-2 grid grid-cols-2 gap-2">
                 <span className="text-muted-foreground">{t("requests:quotations.builder.fieldArea")}</span>
-                <span className="font-semibold text-foreground text-right">{request.area} m²</span>
+                <span className="font-semibold text-foreground text-end">{request.area} m²</span>
               </div>
               <div className="py-2 grid grid-cols-2 gap-2">
                 <span className="text-muted-foreground">{t("requests:quotations.builder.fieldCurrentStage")}</span>
-                <div className="text-right">
+                <div className="text-end">
                   <Badge variant="warning" className="capitalize">
                     {getWorkflowStageDisplayName(request.currentStage, t)}
                   </Badge>

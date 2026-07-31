@@ -60,10 +60,10 @@ export function EmployeeDetailsDrawer({ employee, isOpen, onClose, onSave, canMa
       {/* Backdrop area click to close */}
       <div className="absolute inset-0 -z-10" onClick={onClose} />
 
-      <div className="w-full sm:max-w-md h-full bg-card border-l border-border shadow-2xl p-6 flex flex-col justify-between overflow-y-auto relative animate-in slide-in-from-right duration-200">
+      <div className="w-full sm:max-w-md h-full bg-card border-s border-border shadow-2xl p-6 flex flex-col justify-between overflow-y-auto relative animate-in slide-in-from-right duration-200">
         <button
           onClick={onClose}
-          className="absolute right-4 top-4 text-muted-foreground hover:text-foreground cursor-pointer"
+          className="absolute end-4 top-4 text-muted-foreground hover:text-foreground cursor-pointer"
         >
           <X className="h-5 w-5" />
         </button>

@@ -559,14 +559,14 @@ export default function RequestDetailsPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     {doc.uploaded ? (
-                      <div className="text-end mr-2">
+                      <div className="text-end me-2">
                         <span className="text-emerald-500 font-bold block text-[10px]">✓ {t("dashboard:uploaded_label")}</span>
                         <span className="text-[9px] text-muted-foreground font-mono truncate max-w-[120px] block">
                           {doc.fileName}
                         </span>
                       </div>
                     ) : (
-                      <span className="text-amber-500 font-medium mr-2">{t("dashboard:pending_document")}</span>
+                      <span className="text-amber-500 font-medium me-2">{t("dashboard:pending_document")}</span>
                     )}
 
                     <div className="flex gap-1 shrink-0">

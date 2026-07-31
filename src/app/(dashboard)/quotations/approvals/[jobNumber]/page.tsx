@@ -258,14 +258,14 @@ export default function QuotationApprovalDetailsPage() {
             </CardHeader>
             <CardContent className="p-0">
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm border-collapse">
+                <table className="w-full text-start text-sm border-collapse">
                   <thead>
                     <tr className="border-b border-border bg-secondary/30 text-muted-foreground font-medium">
                       <th className="p-3 font-semibold">{t("requests:quotations.builder.itemDescription")}</th>
                       <th className="p-3 text-center font-semibold">{t("requests:quotations.builder.quantity")}</th>
-                      <th className="p-3 text-right font-semibold">{t("requests:quotations.builder.unitPrice")}</th>
+                      <th className="p-3 text-end font-semibold">{t("requests:quotations.builder.unitPrice")}</th>
                       <th className="p-3 text-center font-semibold">{t("requests:quotations.builder.taxable")}</th>
-                      <th className="p-3 text-right font-semibold">{t("requests:quotations.builder.lineTotal")}</th>
+                      <th className="p-3 text-end font-semibold">{t("requests:quotations.builder.lineTotal")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -273,13 +273,13 @@ export default function QuotationApprovalDetailsPage() {
                       <tr key={item.id} className="border-b border-border/40 hover:bg-secondary/10 last:border-0">
                         <td className="p-3 font-medium text-foreground">{getQuotationItemDescription(item.description)}</td>
                         <td className="p-3 text-center text-muted-foreground">{item.quantity}</td>
-                        <td className="p-3 text-right text-muted-foreground">
+                        <td className="p-3 text-end text-muted-foreground">
                           {item.unitPrice.toLocaleString()} {t("common:sar") || "SAR"}
                         </td>
                         <td className="p-3 text-center text-muted-foreground">
                           {item.taxable ? t("common:yes") || "Yes" : t("common:no") || "No"}
                         </td>
-                        <td className="p-3 text-right font-semibold text-foreground">
+                        <td className="p-3 text-end font-semibold text-foreground">
                           {(item.quantity * item.unitPrice).toLocaleString()} {t("common:sar") || "SAR"}
                         </td>
                       </tr>

@@ -38,18 +38,18 @@ export function SearchInput({
 
   return (
     <div className={`relative ${className}`}>
-      <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+      <Search className="absolute start-3 top-2.5 h-4 w-4 text-muted-foreground" />
       <input
         type="text"
         value={value}
         onChange={(e) => setValue(e.target.value)}
         placeholder={placeholder}
-        className="pl-9 pr-8 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary placeholder-muted-foreground"
+        className="ps-9 pe-8 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary placeholder-muted-foreground"
       />
       {value && (
         <button
           onClick={() => setValue("")}
-          className="absolute right-2.5 top-2.5 h-4.5 w-4.5 flex items-center justify-center text-muted-foreground hover:text-foreground cursor-pointer"
+          className="absolute end-2.5 top-2.5 h-4.5 w-4.5 flex items-center justify-center text-muted-foreground hover:text-foreground cursor-pointer"
         >
           <X className="h-3.5 w-3.5" />
         </button>

@@ -60,7 +60,7 @@ export function CompanyTable({
 
   return (
     <div className="hidden md:block overflow-x-auto rounded-xl border border-border bg-card">
-      <table className="w-full border-collapse text-left text-xs text-foreground">
+      <table className="w-full border-collapse text-start text-xs text-foreground">
         <thead>
           <tr className="border-b border-border bg-muted/40 font-semibold text-muted-foreground">
             <th className="p-4">{t("common:companies.table.name")}</th>
@@ -68,7 +68,7 @@ export function CompanyTable({
             <th className="p-4">{t("common:companies.table.status")}</th>
             <th className="p-4">{t("common:companies.table.projects")}</th>
             <th className="p-4">{t("common:companies.table.personnel")}</th>
-            <th className="p-4 text-right">{t("common:companies.table.actions")}</th>
+            <th className="p-4 text-end">{t("common:companies.table.actions")}</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-border">
@@ -114,7 +114,7 @@ export function CompanyTable({
                     {personnelLimitLabel}
                   </Badge>
                 </td>
-                <td className="p-4 text-right">
+                <td className="p-4 text-end">
                   <ActionMenu items={getRowActions(c)} />
                 </td>
               </tr>

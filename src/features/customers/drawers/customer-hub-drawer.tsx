@@ -73,10 +73,10 @@ export function CustomerHubDrawer({ customer, isOpen, onClose, onSave, permissio
     <div className="fixed inset-0 z-50 flex justify-end bg-slate-950/60 backdrop-blur-sm">
       <div className="absolute inset-0 -z-10" onClick={onClose} />
 
-      <div className="w-full sm:max-w-xl h-full bg-card border-l border-border shadow-2xl p-6 flex flex-col justify-between overflow-y-auto relative animate-in slide-in-from-right duration-200">
+      <div className="w-full sm:max-w-xl h-full bg-card border-s border-border shadow-2xl p-6 flex flex-col justify-between overflow-y-auto relative animate-in slide-in-from-right duration-200">
         <button
           onClick={onClose}
-          className="absolute right-4 top-4 text-muted-foreground hover:text-foreground cursor-pointer"
+          className="absolute end-4 top-4 text-muted-foreground hover:text-foreground cursor-pointer"
         >
           <X className="h-5 w-5" />
         </button>
@@ -272,7 +272,7 @@ export function CustomerHubDrawer({ customer, isOpen, onClose, onSave, permissio
                       <p className="font-bold text-foreground text-sm">{rep.name}</p>
                       <p className="text-[10px] text-muted-foreground">{rep.role}</p>
                     </div>
-                    <div className="text-right text-[10px] text-muted-foreground">
+                    <div className="text-end text-[10px] text-muted-foreground">
                       <p>{rep.email}</p>
                       <p>{rep.phone}</p>
                     </div>
@@ -341,7 +341,7 @@ export function CustomerHubDrawer({ customer, isOpen, onClose, onSave, permissio
                         <p className="font-semibold text-foreground">Invoice #{inv.id}</p>
                         <p className="text-[10px] text-muted-foreground">Due: {new Date(inv.dueDate).toLocaleDateString()}</p>
                       </div>
-                      <div className="text-right">
+                      <div className="text-end">
                         <p className="font-bold text-foreground">{inv.grandTotal} SAR</p>
                         <Badge variant={inv.status === "paid" ? "default" : "destructive"} className="text-[9px] scale-90 origin-right">
                           {inv.status.toUpperCase()}

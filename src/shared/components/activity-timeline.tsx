@@ -24,7 +24,7 @@ export function ActivityTimeline({ items, className }: ActivityTimelineProps) {
             <div className="relative pb-8">
               {idx !== items.length - 1 && (
                 <span
-                  className="absolute top-4 left-4 -ml-px h-full w-0.5 bg-border"
+                  className="absolute top-4 start-4 -ms-px h-full w-0.5 bg-border"
                   aria-hidden="true"
                 />
               )}
@@ -50,7 +50,7 @@ export function ActivityTimeline({ items, className }: ActivityTimelineProps) {
                     <p className="text-xs font-semibold text-foreground">{item.title}</p>
                     <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>
                   </div>
-                  <div className="text-right text-[10px] whitespace-nowrap text-muted-foreground">
+                  <div className="text-end text-[10px] whitespace-nowrap text-muted-foreground">
                     <time dateTime={item.timestamp}>{item.timestamp}</time>
                   </div>
                 </div>

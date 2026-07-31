@@ -73,7 +73,7 @@ export function AddCustomerDialog({ onAdd, trigger }: AddCustomerDialogProps) {
           <Card className="sm:max-w-[450px] w-full border-border bg-card shadow-2xl relative">
             <button
               onClick={() => handleOpenChange(false)}
-              className="absolute right-4 top-4 text-muted-foreground hover:text-foreground cursor-pointer"
+              className="absolute end-4 top-4 text-muted-foreground hover:text-foreground cursor-pointer"
             >
               <X className="h-4 w-4" />
             </button>

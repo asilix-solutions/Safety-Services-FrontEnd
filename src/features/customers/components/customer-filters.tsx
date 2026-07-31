@@ -35,12 +35,12 @@ export function CustomerFiltersComponent({ filters, onFiltersChange, industries,
     <div className="flex flex-col md:flex-row gap-3 items-center justify-between bg-card p-4 rounded-xl border border-border">
       {/* Search Input */}
       <div className="relative w-full md:w-72">
-        <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+        <Search className="absolute start-3 top-2.5 h-4 w-4 text-muted-foreground" />
         <Input
           placeholder={t("common:customers.filter.search_placeholder")}
           value={filters.search}
           onChange={handleSearchChange}
-          className="pl-9 h-9 text-xs"
+          className="ps-9 h-9 text-xs"
         />
       </div>
 

@@ -25,7 +25,7 @@ export function UsersTable({ rows, canManage, onActivate, onDeactivate, isBusy }
 
   return (
     <div className="hidden md:block overflow-x-auto rounded-xl border border-border bg-card">
-      <table className="w-full border-collapse text-left text-xs text-foreground">
+      <table className="w-full border-collapse text-start text-xs text-foreground">
         <thead>
           <tr className="border-b border-border bg-muted/40 font-semibold text-muted-foreground">
             <th className="p-4">{t("users:table.name")}</th>

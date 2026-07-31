@@ -126,7 +126,7 @@ function InvoiceMobileCard({
             {localFormatCurrency(invoice.grandTotal, locale, invoice.currency)}
           </p>
         </div>
-        <div className="text-right">
+        <div className="text-end">
           <p className="text-[10px] text-muted-foreground">{t("invoices_table_due")}</p>
           <p className="text-xs font-medium text-foreground">
             {localFormatDate(invoice.dueDate, locale, { dateStyle: "medium" })}
