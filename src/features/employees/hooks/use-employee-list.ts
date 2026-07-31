@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/providers/AuthProvider";
+import { useTenantContext } from "@/hooks/use-tenant-context";
 import { Employee, EmployeeDepartment, EmployeeStatus, EmployeeAvailability } from "@/domains/employees/types";
 import { getEmployees, createOrUpdateEmployee } from "@/domains/employees/storage";
 import { validateEmployee } from "@/domains/employees/validation";
@@ -9,6 +10,7 @@ import { EmployeeFilters } from "../types";
 
 export function useEmployeeList() {
   const { user } = useAuth();
+  const tenantContext = useTenantContext();
   const [employees, setEmployees] = useState<Employee[]>([]);
   
   // Active state filters
@@ -23,10 +25,7 @@ export function useEmployeeList() {
   // Load employees under current user tenant
   const loadEmployees = () => {
     if (!user) return;
-    // Super Admin sees everything; Company Admin and others see only their company's employees
-    const tenantId = isRole(user.role, [USER_ROLES.SUPER_ADMIN]) ? undefined : user.companyId;
-    const list = getEmployees(tenantId);
-    setEmployees(list);
+    setEmployees(getEmployees(tenantContext));
   };
 
   useEffect(() => {

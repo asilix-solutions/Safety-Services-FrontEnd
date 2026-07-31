@@ -1,5 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/providers/AuthProvider";
+import { useTenantContext } from "@/hooks/use-tenant-context";
+import { scopeToTenant, scopeToClient } from "@/domains/tenancy";
 import { useTranslation } from "@/providers/i18n-provider";
 import {
   Report,
@@ -34,6 +36,7 @@ export interface ReadyToGenerateItem {
 
 export function useReportsHub() {
   const { user } = useAuth();
+  const tenantContext = useTenantContext();
   const { t } = useTranslation();
 
   const [reports, setReports] = useState<Report[]>([]);
@@ -147,16 +150,12 @@ export function useReportsHub() {
   const filteredReports = useMemo(() => {
     if (!user) return [];
 
-    let list = reports;
-
-    // Tenant enforcement (except Super Admin)
-    if (!isRole(user.role, ["Super Admin"]) && user.companyId) {
-      list = list.filter((r) => r.tenantId === user.companyId);
-    }
+    // Tenant boundary first, then the narrower client boundary within it.
+    let list = scopeToTenant(reports, tenantContext);
 
     // Client restriction (only see approved reports belonging to them)
     if (isClient) {
-      list = list.filter((r) => r.clientId === user.companyId && r.status === "APPROVED");
+      list = scopeToClient(list, tenantContext).filter((r) => r.status === "APPROVED");
     }
 
     // Status filter
@@ -185,13 +184,10 @@ export function useReportsHub() {
   }, [reports, user, isClient, statusFilter, typeFilter, searchQuery]);
 
   const kpis = useMemo(() => {
-    const userCompanyId = user?.companyId;
-    const tenantReports = user && !isRole(user.role, ["Super Admin"]) && userCompanyId
-      ? reports.filter((r) => r.tenantId === userCompanyId)
-      : reports;
+    const tenantReports = scopeToTenant(reports, tenantContext);
 
-    const visibleReports = isClient && userCompanyId
-      ? tenantReports.filter((r) => r.clientId === userCompanyId && r.status === "APPROVED")
+    const visibleReports = isClient
+      ? scopeToClient(tenantReports, tenantContext).filter((r) => r.status === "APPROVED")
       : tenantReports;
 
     return {

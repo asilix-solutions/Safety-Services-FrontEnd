@@ -1,4 +1,6 @@
 import { Customer } from "./types";
+import { scopeToTenant } from "@/domains/tenancy";
+import { TenantContext } from "@/domains/tenancy/types";
 
 export const MOCK_CUSTOMERS: Customer[] = [
   {
@@ -94,7 +96,11 @@ export const MOCK_CUSTOMERS: Customer[] = [
   }
 ];
 
-export function getCustomers(): Customer[] {
+/**
+ * Every customer on record, unscoped. Internal: writes must read the whole
+ * collection or a save would drop the other tenants' rows.
+ */
+function readAllCustomers(): Customer[] {
   if (typeof window === "undefined") return MOCK_CUSTOMERS;
   try {
     const stored = localStorage.getItem("SSLM_CUSTOMERS_V2");
@@ -110,9 +116,13 @@ export function getCustomers(): Customer[] {
   }
 }
 
+export function getCustomers(ctx: TenantContext): Customer[] {
+  if (typeof window === "undefined") return [];
+  return scopeToTenant(readAllCustomers(), ctx);
+}
+
 export function getCustomerById(id: string): Customer | undefined {
-  const customers = getCustomers();
-  return customers.find((c) => c.id === id);
+  return readAllCustomers().find((c) => c.id === id);
 }
 
 export function saveCustomers(customers: Customer[]): void {
@@ -125,7 +135,7 @@ export function saveCustomers(customers: Customer[]): void {
 }
 
 export function createOrUpdateCustomer(customer: Customer): void {
-  const list = getCustomers();
+  const list = readAllCustomers();
   const idx = list.findIndex((c) => c.id === customer.id);
   if (idx !== -1) {
     list[idx] = customer;
@@ -136,7 +146,7 @@ export function createOrUpdateCustomer(customer: Customer): void {
 }
 
 export function updateCustomerStatus(id: string, status: "Active" | "Inactive"): void {
-  const list = getCustomers();
+  const list = readAllCustomers();
   const idx = list.findIndex((c) => c.id === id);
   if (idx !== -1) {
     list[idx].status = status;
@@ -146,7 +156,7 @@ export function updateCustomerStatus(id: string, status: "Active" | "Inactive"):
 }
 
 export function generateCustomerId(): string {
-  const list = getCustomers();
+  const list = readAllCustomers();
   const numericIds = list
     .map((c) => parseInt(c.id.replace("c-", "")))
     .filter((num) => !isNaN(num));

@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/providers/AuthProvider";
+import { useTenantContext } from "@/hooks/use-tenant-context";
 import { Customer, CustomerStatus } from "@/domains/customers/types";
 import { getCustomers, createOrUpdateCustomer, updateCustomerStatus, generateCustomerId } from "@/domains/customers/storage";
 import { validateCustomer } from "@/domains/customers/validation";
@@ -11,6 +12,7 @@ import { USER_ROLES } from "@/constants/roles";
 
 export function useCustomerList() {
   const { user } = useAuth();
+  const tenantContext = useTenantContext();
   const [customers, setCustomers] = useState<Customer[]>([]);
 
   const [filters, setFilters] = useState<CustomerFilters>({
@@ -21,13 +23,12 @@ export function useCustomerList() {
   });
 
   const loadCustomers = () => {
-    const list = getCustomers();
-    setCustomers(list);
+    setCustomers(getCustomers(tenantContext));
   };
 
   useEffect(() => {
     loadCustomers();
-  }, []);
+  }, [tenantContext]);
 
   const permissions = useMemo(() => {
     if (!user) {
@@ -118,7 +119,8 @@ export function useCustomerList() {
     const newCustomer: Customer = {
       ...data,
       id: newId,
-      tenantId: newId,
+      // The creating user's tenant owns the customer — not the customer's own id.
+      tenantId: tenantContext.tenantId || "",
       representatives: [
         {
           id: `rep-${Math.random().toString(36).substr(2, 9)}`,

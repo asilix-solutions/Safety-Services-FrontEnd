@@ -1,4 +1,6 @@
 import { Employee } from "./types";
+import { scopeToTenant } from "@/domains/tenancy";
+import { TenantContext } from "@/domains/tenancy/types";
 
 export const MOCK_EMPLOYEES: Employee[] = [
   {
@@ -67,25 +69,26 @@ export const MOCK_EMPLOYEES: Employee[] = [
   },
 ];
 
-export function getEmployees(tenantId?: string): Employee[] {
+/**
+ * Every employee on record, unscoped. Internal to this module: writes must
+ * read the whole collection or a save would drop the other tenants' rows.
+ */
+function readAllEmployees(): Employee[] {
   if (typeof window === "undefined") return MOCK_EMPLOYEES;
   try {
     const stored = localStorage.getItem("SSLM_EMPLOYEES_V2");
-    let list: Employee[] = [];
-    if (stored) {
-      list = JSON.parse(stored);
-    } else {
-      list = MOCK_EMPLOYEES;
-      localStorage.setItem("SSLM_EMPLOYEES_V2", JSON.stringify(list));
-    }
-    if (tenantId) {
-      return list.filter((emp) => emp.tenantId === tenantId);
-    }
-    return list;
+    if (stored) return JSON.parse(stored);
+    localStorage.setItem("SSLM_EMPLOYEES_V2", JSON.stringify(MOCK_EMPLOYEES));
+    return MOCK_EMPLOYEES;
   } catch (e) {
     console.error("Failed to load employees from storage", e);
     return MOCK_EMPLOYEES;
   }
+}
+
+export function getEmployees(ctx: TenantContext): Employee[] {
+  if (typeof window === "undefined") return [];
+  return scopeToTenant(readAllEmployees(), ctx);
 }
 
 export function saveEmployees(employees: Employee[]): void {
@@ -98,7 +101,7 @@ export function saveEmployees(employees: Employee[]): void {
 }
 
 export function createOrUpdateEmployee(employee: Employee): void {
-  const list = getEmployees();
+  const list = readAllEmployees();
   const idx = list.findIndex((emp) => emp.id === employee.id);
   if (idx !== -1) {
     list[idx] = employee;
