@@ -38,30 +38,40 @@ export function ClassificationMatrixCard({ request }: ClassificationMatrixCardPr
           <table className="w-full text-start border-collapse text-[11px]">
             <thead>
               <tr className="bg-secondary/20 border-b border-border">
-                <th className="p-2.5 text-start font-semibold text-muted-foreground w-1/3">Rule / Metric</th>
-                <th className="p-2.5 text-start font-semibold text-muted-foreground w-2/3">Evaluation Result</th>
+                <th className="p-2.5 text-start font-semibold text-muted-foreground w-1/3">
+                  {t("requests:blueprintReview.workspace.matrix.ruleMetric")}
+                </th>
+                <th className="p-2.5 text-start font-semibold text-muted-foreground w-2/3">
+                  {t("requests:blueprintReview.workspace.matrix.evaluationResult")}
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
               <tr className="hover:bg-secondary/5">
-                <td className="p-2.5 font-medium text-foreground">Area Constraint</td>
+                <td className="p-2.5 font-medium text-foreground">
+                  {t("requests:blueprintReview.workspace.matrix.areaConstraint")}
+                </td>
                 <td className="p-2.5 text-foreground font-semibold">
                   {request.area} m² ({t(`requests:classification.areaBand.${rules.areaBand}`)})
                 </td>
               </tr>
               <tr className="hover:bg-secondary/5">
-                <td className="p-2.5 font-medium text-foreground">Activity Type</td>
+                <td className="p-2.5 font-medium text-foreground">
+                  {t("requests:blueprintReview.workspace.matrix.activityType")}
+                </td>
                 <td className="p-2.5">
                   <span className="font-semibold text-foreground">{request.activityName}</span>{" "}
                   {isHighHazard && (
                     <Badge variant="destructive" className="ms-2 py-0 px-1.5 text-[8px] font-bold">
-                      High Hazard Override
+                      {t("requests:blueprintReview.workspace.matrix.highHazardOverride")}
                     </Badge>
                   )}
                 </td>
               </tr>
               <tr className="hover:bg-secondary/5">
-                <td className="p-2.5 font-medium text-foreground">Final Target Queue</td>
+                <td className="p-2.5 font-medium text-foreground">
+                  {t("requests:blueprintReview.workspace.matrix.finalTargetQueue")}
+                </td>
                 <td className="p-2.5">
                   <Badge variant={request.assignedQueue === "HIGH_HAZARD" ? "destructive" : "default"} className="py-0 px-1.5 text-[8px] font-bold">
                     {getQueueDisplayName(request.assignedQueue, t)}
@@ -69,7 +79,9 @@ export function ClassificationMatrixCard({ request }: ClassificationMatrixCardPr
                 </td>
               </tr>
               <tr className="hover:bg-secondary/5">
-                <td className="p-2.5 font-medium text-foreground">Routing Reason</td>
+                <td className="p-2.5 font-medium text-foreground">
+                  {t("requests:blueprintReview.workspace.matrix.routingReason")}
+                </td>
                 <td className="p-2.5 text-muted-foreground leading-relaxed">
                   {getClassificationReason(request, t)}
                 </td>
