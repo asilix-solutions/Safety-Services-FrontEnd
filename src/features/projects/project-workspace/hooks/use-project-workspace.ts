@@ -9,7 +9,8 @@ import { LicensingRequest } from "@/domains/requests/types";
 import { getMergedRequests } from "@/domains/requests/storage";
 import { getContracts } from "@/domains/contracts/storage";
 import { getCertificateByProjectId } from "@/domains/certificates/storage";
-import { getQuotationByJobNumber } from "@/domains/quotations/storage";
+import { getScopedQuotationByJobNumber } from "@/domains/quotations/storage";
+import { useTenantContext } from "@/hooks/use-tenant-context";
 import { getInvoiceByJobNumber } from "@/domains/invoices/storage";
 import { Quotation } from "@/domains/quotations/types";
 import { ClientInvoice } from "@/domains/invoices/types";
@@ -30,6 +31,7 @@ export function useProjectWorkspace() {
   const { user } = useAuth();
   const params = useParams();
   const { t, dir } = useTranslation();
+  const tenantContext = useTenantContext();
 
   const [project, setProject] = useState<Project | null>(null);
   const [request, setRequest] = useState<LicensingRequest | null>(null);
@@ -118,7 +120,7 @@ export function useProjectWorkspace() {
 
         if (foundProject.jobNumber) {
           try {
-            setQuotation(getQuotationByJobNumber(foundProject.jobNumber));
+            setQuotation(getScopedQuotationByJobNumber(foundProject.jobNumber, tenantContext));
           } catch (e) {
             console.error("Failed to load quotation:", e);
           }
@@ -133,9 +135,13 @@ export function useProjectWorkspace() {
     }
   };
 
+  // `tenantContext` is a dependency because the scoped readers fail closed: on the
+  // first render, before AuthProvider has resolved, it carries no tenantId and every
+  // scoped read returns null. Without the re-run the owning tenant would see the
+  // record's panels stay permanently empty.
   useEffect(() => {
     loadData();
-  }, [projectId]);
+  }, [projectId, tenantContext]);
 
   const handleStartExecution = () => {
     if (!project || isProcessing) return;

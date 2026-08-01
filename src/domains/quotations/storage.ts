@@ -54,8 +54,36 @@ export function getPendingQuotations(ctx: TenantContext): Quotation[] {
   );
 }
 
+/**
+ * A single quotation by job number, unscoped.
+ *
+ * Internal: for write paths and duplicate guards that already hold a specific
+ * job number and must see the row whoever owns it. UI must never call this —
+ * use `getScopedQuotationByJobNumber`.
+ */
 export function getQuotationByJobNumber(jobNumber: string): Quotation | null {
   const list = getQuotations();
   return list.find((q) => q.jobNumber === jobNumber) || null;
+}
+
+/**
+ * The single-record reader every UI surface must use.
+ *
+ * Resolves the record, then applies the same tenant rule as the list readers,
+ * so a quotation outside the caller's tenant comes back as null rather than as
+ * a viewable page. Returning null rather than the record keeps a foreign job
+ * number indistinguishable from a missing one, so an id guessed from the
+ * `SSLM-YYYY-NNNNNN` sequence leaks nothing.
+ *
+ * Super Admin still reads across tenants — `scopeToTenant` short-circuits on
+ * `isCrossTenant` before any filtering.
+ */
+export function getScopedQuotationByJobNumber(
+  jobNumber: string,
+  ctx: TenantContext
+): Quotation | null {
+  const found = getQuotationByJobNumber(jobNumber);
+  if (!found) return null;
+  return scopeToTenant([found], ctx)[0] ?? null;
 }
 

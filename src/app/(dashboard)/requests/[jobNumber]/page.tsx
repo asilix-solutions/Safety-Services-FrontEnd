@@ -47,7 +47,7 @@ import { ClientPayment } from "@/domains/payments/types";
 import { getScopedRequestByJobNumber, upsertRequest } from "@/domains/requests/storage";
 import { useTenantContext } from "@/hooks/use-tenant-context";
 import { Quotation } from "@/domains/quotations/types";
-import { getQuotationByJobNumber } from "@/domains/quotations/storage";
+import { getScopedQuotationByJobNumber } from "@/domains/quotations/storage";
 import { confirmMockPayment } from "@/domains/payments/workflow";
 import { Project } from "@/types/project";
 import { getProjectByJobNumber, getProjectTemplateMetadata } from "@/domains/projects/storage";
@@ -91,7 +91,7 @@ export default function RequestDetailsPage() {
 
       // Load quotation if exists
       try {
-        const foundQuote = getQuotationByJobNumber(jobNumber);
+        const foundQuote = getScopedQuotationByJobNumber(jobNumber, tenantContext);
         setQuotation(foundQuote);
       } catch (e) {
         console.error("Failed to read quotations", e);
