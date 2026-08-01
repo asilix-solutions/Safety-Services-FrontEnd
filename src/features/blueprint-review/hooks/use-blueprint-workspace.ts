@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
 import { getScopedRequestByJobNumber, upsertRequest } from "@/domains/requests/storage";
 import { getEngineeringReviewByJobNumber, saveEngineeringReview } from "@/domains/engineering/storage";
-import { buildBlueprintReviewViewModel, BlueprintReviewViewModel } from "../helpers/blueprint-review-view-model";
+import { approveRequestForQuotation } from "@/domains/requests/workflow";
+import { buildBlueprintReviewViewModel, toLicensingRequest, BlueprintReviewViewModel } from "../helpers/blueprint-review-view-model";
 import { useTranslation } from "@/providers/i18n-provider";
 import { useTenantContext } from "@/hooks/use-tenant-context";
 import { useRouter } from "next/navigation";
@@ -88,16 +89,9 @@ export function useBlueprintWorkspace(jobNumber: string) {
     };
     saveEngineeringReview(reviewRecord);
 
-    // 2. Update request.currentStage to QUOTATION
-    const updatedRequest = {
-      ...viewModel,
-      currentStage: "QUOTATION" as const,
-    };
-    // Delete viewmodel-specific extensions before saving to request storage
-    delete (updatedRequest as any).reviewRecord;
-    delete (updatedRequest as any).reviewStatus;
-
-    upsertRequest(updatedRequest);
+    // 2. Advance the request through the canonical transition, which writes
+    //    status + currentStage + updatedAt and appends the audit event.
+    upsertRequest(approveRequestForQuotation(toLicensingRequest(viewModel)));
 
     setSuccessMessage(t("requests:blueprintReview.status.APPROVED"));
     

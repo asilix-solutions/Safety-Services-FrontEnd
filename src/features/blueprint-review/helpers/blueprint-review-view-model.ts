@@ -7,6 +7,18 @@ export type BlueprintReviewViewModel = LicensingRequest & {
   reviewStatus: EngineeringReviewRecord["status"];
 };
 
+/**
+ * Strips the view-model-only extensions back off, so a decision handler can
+ * hand a clean LicensingRequest to the workflow domain. Without this the
+ * reviewRecord/reviewStatus fields leak into request storage.
+ */
+export function toLicensingRequest(viewModel: BlueprintReviewViewModel): LicensingRequest {
+  const { reviewRecord, reviewStatus, ...request } = viewModel;
+  void reviewRecord;
+  void reviewStatus;
+  return request;
+}
+
 export function buildBlueprintReviewViewModel(
   request: LicensingRequest,
   reviewRecordInput?: EngineeringReviewRecord
