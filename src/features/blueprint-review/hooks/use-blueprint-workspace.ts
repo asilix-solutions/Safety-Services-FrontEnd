@@ -1,7 +1,11 @@
 import { useState, useEffect, useMemo } from "react";
 import { getScopedRequestByJobNumber, upsertRequest } from "@/domains/requests/storage";
 import { getEngineeringReviewByJobNumber, saveEngineeringReview } from "@/domains/engineering/storage";
-import { approveRequestForQuotation } from "@/domains/requests/workflow";
+import {
+  approveRequestForQuotation,
+  returnRequestForModification,
+  returnRequestForMissingDocuments,
+} from "@/domains/requests/workflow";
 import { buildBlueprintReviewViewModel, toLicensingRequest, BlueprintReviewViewModel } from "../helpers/blueprint-review-view-model";
 import { useTranslation } from "@/providers/i18n-provider";
 import { useTenantContext } from "@/hooks/use-tenant-context";
@@ -123,9 +127,14 @@ export function useBlueprintWorkspace(jobNumber: string) {
     };
     saveEngineeringReview(reviewRecord);
 
+    // Send the request itself back to the client, carrying the reason.
+    upsertRequest(
+      returnRequestForModification(toLicensingRequest(viewModel), correctionReason)
+    );
+
     setShowReturnDialog(false);
     setSuccessMessage(t("requests:blueprintReview.status.MODIFICATION_REQUIRED"));
-    
+
     loadData();
 
     setTimeout(() => setSuccessMessage(""), 4000);
@@ -149,6 +158,11 @@ export function useBlueprintWorkspace(jobNumber: string) {
       missingDocumentsNote,
     };
     saveEngineeringReview(reviewRecord);
+
+    // Send the request itself back to the client, carrying the note.
+    upsertRequest(
+      returnRequestForMissingDocuments(toLicensingRequest(viewModel), missingDocumentsNote)
+    );
 
     setShowMissingDocsDialog(false);
     setSuccessMessage(t("requests:blueprintReview.status.MISSING_DOCUMENTS"));
