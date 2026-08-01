@@ -85,9 +85,9 @@
   "wizard.safetyRisk.hazardousTitle": "Hazardous / Flammables",
   "wizard.safetyRisk.hazardousDesc": "Overriding Hazard Element: Instantly flags high risk.",
   "wizard.safetyRisk.declaredRisk": "Declared Risk Category",
-  "wizard.safetyRisk.riskLow": "low Risk",
-  "wizard.safetyRisk.riskMedium": "medium Risk",
-  "wizard.safetyRisk.riskHigh": "high Risk",
+  "wizard.safetyRisk.riskLow": "Low Risk",
+  "wizard.safetyRisk.riskMedium": "Medium Risk",
+  "wizard.safetyRisk.riskHigh": "High Risk",
   "wizard.safetyRisk.notes": "Notes / Special Requests",
   "wizard.safetyRisk.notesPlaceholder": "Describe any special conditions, access codes, or timing preferences...",
   "wizard.safetyRisk.hazardWarningTitle": "High Hazard Elements Detected",
@@ -561,7 +561,6 @@
   "blueprintReview.workspace.location": "Location / Geospatial",
   "blueprintReview.workspace.gps": "GPS Coordinates",
   "blueprintReview.workspace.locationDesc": "Location Description",
-  "blueprintReview.workspace.mapPlaceholder": "Interactive Map Simulation Placeholder",
   "blueprintReview.workspace.classificationMatrix": "Classification Matrix",
   "blueprintReview.workspace.classificationMatrixDesc": "Derivation rationale for routing request to engineering review",
   "blueprintReview.workspace.matrix.ruleMetric": "Rule / Metric",
@@ -643,5 +642,6 @@
   "blueprintReview.decisions.missingDocsDesc": "The client is notified that additional documentation is required, and the request returns to them for completion.",
   "blueprintReview.decisions.missingDocsImpact": "Pending client document upload",
   "blueprintReview.workspace.openMaps": "Open in Google Maps",
-  "blueprintReview.workspace.mapSim": "Interactive Map Simulation"
+  "blueprintReview.workspace.noCoordinates": "No location captured",
+  "blueprintReview.workspace.noCoordinatesHint": "The client did not record coordinates for this facility. Use the location description above, or ask them to provide the coordinates."
 }

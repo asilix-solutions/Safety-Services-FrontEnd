@@ -228,7 +228,13 @@ export function BlueprintWorkspace({ jobNumber }: BlueprintWorkspaceProps) {
                   </span>
                   <span className="font-semibold text-foreground flex items-center gap-1 font-mono text-[11px]">
                     <MapPin className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                    {viewModel.gpsCoordinates || "N/A"}
+                    {viewModel.gpsCoordinates ? (
+                      <span dir="ltr">{viewModel.gpsCoordinates}</span>
+                    ) : (
+                      <span className="font-sans text-muted-foreground">
+                        {t("requests:blueprintReview.workspace.noCoordinates")}
+                      </span>
+                    )}
                   </span>
                 </div>
                 <div className="space-y-0.5">
@@ -241,16 +247,17 @@ export function BlueprintWorkspace({ jobNumber }: BlueprintWorkspaceProps) {
                 </div>
               </div>
 
-              {/* Compact Map Simulation Visual */}
-              <div className="relative h-24 rounded-lg bg-secondary/20 flex flex-col items-center justify-center text-muted-foreground border border-border">
-                <MapPin className="h-5 w-5 text-primary/50 mb-0.5 animate-pulse" />
-                <span className="text-[10px] font-semibold text-foreground">
-                  {t("requests:blueprintReview.workspace.mapSim")}
-                </span>
-                <span className="text-[9px] text-muted-foreground font-mono">
-                  {viewModel.gpsCoordinates || "24.7136, 46.6753"}
-                </span>
-              </div>
+              {/*
+                No embedded map: the MVP has no maps integration, and the box
+                that used to sit here claimed to be one while showing a
+                hardcoded Riyadh pin for requests that carried no location at
+                all. State plainly what was captured, and link out to confirm it.
+              */}
+              {!mapsUrl && (
+                <p className="text-[10px] leading-relaxed text-muted-foreground">
+                  {t("requests:blueprintReview.workspace.noCoordinatesHint")}
+                </p>
+              )}
 
               {/* Google Maps External Action */}
               {mapsUrl && (

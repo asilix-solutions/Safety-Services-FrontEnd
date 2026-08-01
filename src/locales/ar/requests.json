@@ -561,7 +561,6 @@
   "blueprintReview.workspace.location": "الموقع الجغرافي / الخريطة",
   "blueprintReview.workspace.gps": "إحداثيات GPS",
   "blueprintReview.workspace.locationDesc": "وصف الموقع",
-  "blueprintReview.workspace.mapPlaceholder": "موقع محاكاة الخريطة التفاعلية",
   "blueprintReview.workspace.classificationMatrix": "مصفوفة التصنيف والتوجيه",
   "blueprintReview.workspace.classificationMatrixDesc": "أسباب ومبررات توجيه هذا الطلب لمسار المراجعة الهندسية",
   "blueprintReview.workspace.matrix.ruleMetric": "القاعدة / المؤشر",
@@ -643,5 +642,6 @@
   "blueprintReview.decisions.missingDocsDesc": "سيُبلَّغ العميل بأن هناك مستندات إضافية مطلوبة، وسيعود الطلب إليه لاستكمالها.",
   "blueprintReview.decisions.missingDocsImpact": "في انتظار رفع المستندات المطلوبة من العميل",
   "blueprintReview.workspace.openMaps": "الفتح في خرائط جوجل",
-  "blueprintReview.workspace.mapSim": "محاكاة الخريطة التفاعلية"
+  "blueprintReview.workspace.noCoordinates": "لم يُحدَّد موقع",
+  "blueprintReview.workspace.noCoordinatesHint": "لم يسجّل العميل إحداثيات لهذه المنشأة. اعتمد على وصف الموقع أعلاه، أو اطلب تحديد الإحداثيات."
 }
