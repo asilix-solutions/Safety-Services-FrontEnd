@@ -10,6 +10,7 @@ import { Label } from "@/shared/ui/label";
 import { Input } from "@/shared/ui/input";
 import { Textarea } from "@/shared/ui/textarea";
 import { Select } from "@/shared/ui/select";
+import { Checkbox } from "@/shared/ui/checkbox";
 import { AlertTriangle } from "lucide-react";
 import { SERVICE_REGISTRY, FieldConfig, FieldOption } from "@/domains/requests/service-config";
 import { RequestType } from "@/domains/requests/types";
@@ -31,6 +32,14 @@ export function SafetyRiskStep({ form, instantReportAllowed, onNext, onPrev }: S
 
   const requestType = watch("requestType") as RequestType;
   const config = SERVICE_REGISTRY[requestType];
+
+  // FR-RUL-05 / UC-01.5: the client-declared hazard elements. Read here only to
+  // decide whether to *explain* the consequence — the consequence itself is
+  // decided by `workflow.ts#classifyRequest`, which reads the same three fields.
+  const hasDeclaredHazard =
+    watch("gasExtensions") === true ||
+    watch("hazardousMaterials") === true ||
+    watch("riskCategory") === "high";
 
   const isGateOpen = (option: FieldOption): boolean =>
     option.gate === "instantReportAllowed" ? instantReportAllowed : true;
@@ -75,6 +84,69 @@ export function SafetyRiskStep({ form, instantReportAllowed, onNext, onPrev }: S
           {t("requests:wizard.safetyRisk.subtitle")}
         </p>
       </div>
+
+      {/*
+        FR-RUL-05 hazard declaration. Common to every request type, so it lives
+        here rather than being repeated across all four `SERVICE_REGISTRY`
+        entries. These three fields are inputs to `classifyRequest` — this block
+        only collects them, it never classifies (ADR-003).
+      */}
+      <fieldset className="space-y-3 rounded-lg border border-border bg-card/50 p-4">
+        <legend className="px-1 text-xs font-bold text-foreground">
+          {t("requests:wizard.safetyRisk.declaredRisk")}
+        </legend>
+
+        <div className="grid gap-3 sm:grid-cols-2">
+          <label className="flex items-start gap-2.5 p-3 rounded-lg border border-border bg-card hover:bg-secondary/10 transition-colors cursor-pointer">
+            <Checkbox className="mt-0.5" {...register("gasExtensions")} />
+            <span className="space-y-0.5">
+              <span className="block text-xs font-semibold text-foreground">
+                {t("requests:wizard.safetyRisk.gasTitle")}
+              </span>
+              <span className="block text-[10px] text-muted-foreground leading-relaxed">
+                {t("requests:wizard.safetyRisk.gasDesc")}
+              </span>
+            </span>
+          </label>
+
+          <label className="flex items-start gap-2.5 p-3 rounded-lg border border-border bg-card hover:bg-secondary/10 transition-colors cursor-pointer">
+            <Checkbox className="mt-0.5" {...register("hazardousMaterials")} />
+            <span className="space-y-0.5">
+              <span className="block text-xs font-semibold text-foreground">
+                {t("requests:wizard.safetyRisk.hazardousTitle")}
+              </span>
+              <span className="block text-[10px] text-muted-foreground leading-relaxed">
+                {t("requests:wizard.safetyRisk.hazardousDesc")}
+              </span>
+            </span>
+          </label>
+        </div>
+
+        <div className="space-y-1.5 sm:max-w-xs">
+          <Label htmlFor="riskCategory" className="text-xs font-semibold text-foreground/80">
+            {t("requests:wizard.safetyRisk.declaredRisk")}
+          </Label>
+          <Select id="riskCategory" {...register("riskCategory")}>
+            <option value="low">{t("requests:wizard.safetyRisk.riskLow")}</option>
+            <option value="medium">{t("requests:wizard.safetyRisk.riskMedium")}</option>
+            <option value="high">{t("requests:wizard.safetyRisk.riskHigh")}</option>
+          </Select>
+        </div>
+
+        {hasDeclaredHazard && (
+          <div className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/[0.06] p-3">
+            <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" />
+            <div className="space-y-0.5">
+              <p className="text-xs font-bold text-amber-700 dark:text-amber-400">
+                {t("requests:wizard.safetyRisk.hazardWarningTitle")}
+              </p>
+              <p className="text-[10px] leading-relaxed text-amber-700/90 dark:text-amber-400/90">
+                {t("requests:wizard.safetyRisk.hazardWarningDesc")}
+              </p>
+            </div>
+          </div>
+        )}
+      </fieldset>
 
       <div className="grid gap-4 sm:grid-cols-2">
         {config?.fields.map((field) => {
