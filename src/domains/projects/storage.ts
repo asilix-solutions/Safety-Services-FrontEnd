@@ -320,5 +320,14 @@ export function getProjectByJobNumber(jobNumber: string): Project | null {
   return list.find((p) => p.jobNumber === jobNumber) || null;
 }
 
+/**
+ * Unscoped single-record lookup by id. For workflows that already hold a specific
+ * projectId and must compare its tenant against the caller's — a scoped read would
+ * return null and hide the very mismatch the caller needs to detect. Not for display.
+ */
+export function getProjectById(projectId: string): Project | null {
+  return getProjects().find((p) => p.id === projectId) || null;
+}
+
 
 

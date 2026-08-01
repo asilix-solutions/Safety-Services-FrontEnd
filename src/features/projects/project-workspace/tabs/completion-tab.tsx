@@ -8,9 +8,10 @@ import { ClosurePanel } from "../closure";
 interface CompletionTabProps {
   project: Project;
   t: (key: string) => string;
+  loadData: () => void;
 }
 
-export function CompletionTab({ project, t }: CompletionTabProps) {
+export function CompletionTab({ project, t, loadData }: CompletionTabProps) {
   return (
     <div className="space-y-6">
       {project.executionPhase !== "COMPLETED" ? (
@@ -22,7 +23,7 @@ export function CompletionTab({ project, t }: CompletionTabProps) {
       ) : (
         <ProjectCompletedCard project={project} t={t} />
       )}
-      <ClosurePanel projectId={project.id} />
+      <ClosurePanel projectId={project.id} onClosed={loadData} />
     </div>
   );
 }

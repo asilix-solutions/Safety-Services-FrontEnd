@@ -1,7 +1,12 @@
+import { Project } from "@/types/project";
 import { TenantContext } from "@/domains/tenancy/types";
 import { ClosureDraft, ClosureRecord, ClosureStatus } from "./types";
 import { getClosureByProject, getScopedClosureByProject, upsertClosure } from "./storage";
 import { getPhotoSummary } from "@/domains/photos";
+import { getProjectById } from "@/domains/projects/storage";
+import { getRequestByJobNumber } from "@/domains/requests/storage";
+import { completeProjectExecution } from "@/domains/projects/workflow/completion";
+import { canCompleteExecution } from "@/domains/workflow-validation";
 
 /** AF-3: blocks creating a closure record without a bound signature/upload artifact. */
 export function assertSignaturePresent(draft: Pick<ClosureDraft, "signatureImage">): void {
@@ -24,7 +29,37 @@ export function assertNotClosed(projectId: string): void {
   }
 }
 
-/** ONLY write path for a closure record — validates, stamps audit fields, persists. */
+/**
+ * Resolves the project being closed and refuses a cross-tenant close.
+ *
+ * Reads the project unscoped on purpose: a scoped read returns null for a
+ * foreign project, which is indistinguishable from "does not exist" and would
+ * let the mismatch pass as a plain not-found instead of being rejected.
+ */
+export function resolveClosableProject(projectId: string, tenantId: string): Project {
+  const project = getProjectById(projectId);
+  if (!project) {
+    throw new Error("Closure requires an existing project.");
+  }
+  if (project.tenantId !== tenantId) {
+    throw new Error("A project may only be closed by its owning tenant.");
+  }
+  return project;
+}
+
+/**
+ * ONLY write path for a closure record — validates, stamps audit fields, persists,
+ * then advances the project.
+ *
+ * SRS FR-OPS-10: the signed/stamped report *is* the Complete-Ticket lock, so closing
+ * hands off to `completeProjectExecution` rather than writing an execution phase
+ * here — the phase transition and its guards have exactly one owner (ADR-003).
+ *
+ * Every precondition, including the project's own, is checked before the record is
+ * written. The closure record is WORM: a failure after the write would leave a
+ * project closed on paper but never advanced, and `assertNotClosed` would block the
+ * retry that fixes it.
+ */
 export function createClosureRecord(
   draft: ClosureDraft,
   createdBy: { id: string; name: string }
@@ -45,6 +80,16 @@ export function createClosureRecord(
     throw new Error("Closure record requires a valid capture method.");
   }
 
+  const project = resolveClosableProject(draft.projectId, draft.tenantId);
+  const request = project.jobNumber ? getRequestByJobNumber(project.jobNumber) : null;
+
+  // Dry-run the project guard before the irreversible write, so a project that
+  // cannot advance is rejected instead of being locked out of ever closing.
+  const transitionCheck = canCompleteExecution(project, request);
+  if (!transitionCheck.valid) {
+    throw new Error(transitionCheck.reason);
+  }
+
   const record: ClosureRecord = {
     id: `CLOSURE-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
     tenantId: draft.tenantId,
@@ -57,7 +102,17 @@ export function createClosureRecord(
     ipAddress: null,
   };
 
-  return upsertClosure(record);
+  const saved = upsertClosure(record);
+
+  // Owned by domains/projects: advances the phase, syncs the request stage, appends
+  // the timeline event and persists both. Nothing about the project is written here.
+  completeProjectExecution({
+    project,
+    request,
+    completionNotes: `Project closed against the signed and stamped inspection report by ${saved.closedBy}.`,
+  });
+
+  return saved;
 }
 
 /**

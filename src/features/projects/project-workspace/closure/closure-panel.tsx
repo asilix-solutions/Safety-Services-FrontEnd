@@ -9,10 +9,12 @@ import { ClosureSummary } from "./components/closure-summary";
 
 interface ClosurePanelProps {
   projectId: string;
+  /** Reloads the workspace once the close has advanced the project's execution phase. */
+  onClosed?: () => void;
 }
 
-export function ClosurePanel({ projectId }: ClosurePanelProps) {
-  const { canEdit, viewModel, isLoading, hasPhotos, closeProject, isClosing, closeError, t } = useClosure(projectId);
+export function ClosurePanel({ projectId, onClosed }: ClosurePanelProps) {
+  const { canEdit, viewModel, isLoading, hasPhotos, closeProject, isClosing, closeError, t } = useClosure(projectId, onClosed);
 
   if (isLoading) return null;
 

@@ -200,7 +200,7 @@ export default function ProjectWorkspace() {
           </TabsContent>
 
           <TabsContent value="completion">
-            <CompletionTab project={project} t={t} />
+            <CompletionTab project={project} t={t} loadData={loadData} />
           </TabsContent>
         </Tabs>
       </WorkspaceContent>

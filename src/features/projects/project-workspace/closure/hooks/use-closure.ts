@@ -13,7 +13,12 @@ import { QUERY_KEYS } from "@/constants/query-keys";
 import { ClosureFormValues } from "@/schemas/closure.schema";
 import { buildClosureViewModel } from "../view-models/closure.viewmodel";
 
-export function useClosure(projectId: string) {
+/**
+ * @param onClosed Reloads the workspace after a close. Closing advances the project's
+ * execution phase, and the surrounding tabs hold that project in their own state — without
+ * this the record would show as closed while the rest of the page still showed the old phase.
+ */
+export function useClosure(projectId: string, onClosed?: () => void) {
   const { user } = useAuth();
   const { t, locale } = useTranslation();
   useNamespaceTranslations(["closure", "validation", "common"]);
@@ -51,6 +56,7 @@ export function useClosure(projectId: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.CLOSURE.DETAIL(projectId, user?.tenantId) });
+      onClosed?.();
     },
   });
 
