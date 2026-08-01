@@ -1,13 +1,12 @@
 import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/providers/AuthProvider";
 import { useTenantContext } from "@/hooks/use-tenant-context";
-import { scopeToTenant, scopeToClient } from "@/domains/tenancy";
 import { useTranslation } from "@/providers/i18n-provider";
 import {
   Report,
   ReportStatus,
   ReportType,
-  getReports,
+  getScopedReports,
   createReport,
   approveReport,
   rejectReport,
@@ -18,7 +17,7 @@ import {
 import { isRole } from "@/constants/permissions";
 import { getScopedProjects } from "@/domains/projects/storage";
 import { getSiteVisits } from "@/domains/site-visits/storage";
-import { getRequests } from "@/domains/requests/storage";
+import { getScopedRequests } from "@/domains/requests/storage";
 
 export interface ReadyToGenerateItem {
   id: string;
@@ -48,15 +47,18 @@ export function useReportsHub() {
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [typeFilter, setTypeFilter] = useState<string>("ALL");
 
+  // `reports` never holds a foreign tenant's row: the boundary is enforced at the
+  // read, not at render, so nothing downstream (KPIs, search, the drawer) can
+  // reintroduce a record the caller may not see.
   useEffect(() => {
-    setReports(getReports());
-  }, []);
+    setReports(getScopedReports(tenantContext));
+  }, [tenantContext]);
 
   const refreshReports = () => {
-    setReports(getReports());
+    const scoped = getScopedReports(tenantContext);
+    setReports(scoped);
     if (selectedReport) {
-      const fresh = getReports().find((r) => r.id === selectedReport.id);
-      setSelectedReport(fresh || null);
+      setSelectedReport(scoped.find((r) => r.id === selectedReport.id) || null);
     }
   };
 
@@ -75,10 +77,18 @@ export function useReportsHub() {
 
     const items: ReadyToGenerateItem[] = [];
 
-    // Check Site Visits that do not have a registered report yet
-    const visits = getSiteVisits();
+    // Every source below is read scoped. This list is not just a view: each row
+    // is an input to `createReport`, so an unscoped source would let one tenant
+    // mint a report against another tenant's request or visit.
+    const scopedProjects = getScopedProjects(tenantContext);
+
+    // Check Site Visits that do not have a registered report yet.
+    // A SiteVisit carries no tenantId of its own, so it inherits the boundary of
+    // the project it belongs to.
+    const visibleProjectIds = new Set(scopedProjects.map((p) => p.id));
+    const visits = getSiteVisits().filter((v) => visibleProjectIds.has(v.projectId));
     const existingInspections = reports.map((r) => r.siteVisitId).filter(Boolean);
-    
+
     visits.forEach((v) => {
       if (v.status === "completed" && !existingInspections.includes(v.id)) {
         items.push({
@@ -97,7 +107,7 @@ export function useReportsHub() {
     });
 
     // Check Projects that need a progress report (no project progress report written yet or in DRAFT)
-    const projects = getScopedProjects(tenantContext);
+    const projects = scopedProjects;
     const existingProgressReportProjectIds = reports
       .filter((r) => r.reportType === "project_progress")
       .map((r) => r.projectId)
@@ -124,7 +134,7 @@ export function useReportsHub() {
     });
 
     // Check Requests of type technical_report that don't have a report yet
-    const requests = getRequests();
+    const requests = getScopedRequests(tenantContext);
     const existingRequestJobNumbers = reports.map((r) => r.jobNumber).filter(Boolean);
 
     requests.forEach((r) => {
@@ -144,19 +154,16 @@ export function useReportsHub() {
     });
 
     return items;
-  }, [reports, user, isClient, t]);
+  }, [reports, user, isClient, tenantContext, t]);
 
   // 2. Filter Reports based on permissions & inputs
   const filteredReports = useMemo(() => {
     if (!user) return [];
 
-    // Tenant boundary first, then the narrower client boundary within it.
-    let list = scopeToTenant(reports, tenantContext);
-
-    // Client restriction (only see approved reports belonging to them)
-    if (isClient) {
-      list = scopeToClient(list, tenantContext).filter((r) => r.status === "APPROVED");
-    }
+    // Tenant and client boundaries are already applied by `getScopedReports`.
+    // What remains here is the visibility rule a client has *inside* its own
+    // records: drafts and rejections are internal to the safety company.
+    let list = isClient ? reports.filter((r) => r.status === "APPROVED") : reports;
 
     // Status filter
     if (statusFilter !== "ALL") {
@@ -184,11 +191,11 @@ export function useReportsHub() {
   }, [reports, user, isClient, statusFilter, typeFilter, searchQuery]);
 
   const kpis = useMemo(() => {
-    const tenantReports = scopeToTenant(reports, tenantContext);
-
+    // Same visibility rule as `filteredReports`, minus the search/filter inputs —
+    // the counters describe everything the caller may see, not the current view.
     const visibleReports = isClient
-      ? scopeToClient(tenantReports, tenantContext).filter((r) => r.status === "APPROVED")
-      : tenantReports;
+      ? reports.filter((r) => r.status === "APPROVED")
+      : reports;
 
     return {
       total: visibleReports.length,

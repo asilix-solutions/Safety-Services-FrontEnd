@@ -1,5 +1,5 @@
 import { Report, ReportStatus, ReportType, ReportAuditEvent, CreateReportInput } from "./types";
-import { createOrUpdateReport, getReportById, getReports } from "./storage";
+import { createOrUpdateReport, getReportById, listReports } from "./storage";
 
 export function generateReportNumber(type: ReportType): string {
   const year = new Date().getFullYear();
@@ -22,7 +22,9 @@ export function generateReportNumber(type: ReportType): string {
       break;
   }
   const prefix = `REP-${typeCode}-${year}-`;
-  const reports = getReports();
+  // Unscoped read: the sequence must be unique across every tenant, otherwise
+  // two tenants would mint the same report number (which is also the record id).
+  const reports = listReports();
   const matching = reports.filter((r) => r.reportNumber.startsWith(prefix));
   
   let nextSeq = 1;
