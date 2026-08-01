@@ -18,6 +18,8 @@ import { isRole } from "@/constants/permissions";
 import { getScopedProjects } from "@/domains/projects/storage";
 import { getSiteVisits } from "@/domains/site-visits/storage";
 import { getScopedRequests } from "@/domains/requests/storage";
+import { getBranding, getCompanyProfile } from "@/domains/settings/storage";
+import { BrandingSettings, CompanyProfileSettings } from "@/domains/settings/types";
 
 export interface ReadyToGenerateItem {
   id: string;
@@ -47,11 +49,19 @@ export function useReportsHub() {
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [typeFilter, setTypeFilter] = useState<string>("ALL");
 
+  // Letterhead identity for the printed sheet (FR-CON-05). Read after mount
+  // alongside the reports: both come from localStorage, which does not exist
+  // during the server render.
+  const [branding, setBranding] = useState<BrandingSettings>(() => getBranding());
+  const [company, setCompany] = useState<CompanyProfileSettings>(() => getCompanyProfile());
+
   // `reports` never holds a foreign tenant's row: the boundary is enforced at the
   // read, not at render, so nothing downstream (KPIs, search, the drawer) can
   // reintroduce a record the caller may not see.
   useEffect(() => {
     setReports(getScopedReports(tenantContext));
+    setBranding(getBranding());
+    setCompany(getCompanyProfile());
   }, [tenantContext]);
 
   const refreshReports = () => {
@@ -295,20 +305,35 @@ export function useReportsHub() {
     }
   };
 
+  /**
+   * Records the export in the audit timeline, then hands the sheet to the
+   * browser's print dialog — "Save as PDF" there is the PDF export (FR-CON-05).
+   *
+   * The audit event is written first: a print that is cancelled at the dialog
+   * still means the document was rendered and shown, and losing that trail is
+   * worse than logging an export the user did not ultimately save.
+   */
   const handleDownloadReport = (report: Report) => {
     try {
       downloadReport(report.id, user?.name || "Downloader");
-      setAlertMsg({ text: `Downloading ${report.reportNumber} (Mock Export PDF)...`, type: "success" });
       refreshReports();
-    } catch (e: any) {
+    } catch (e) {
       console.error("downloadReport failed:", e);
       setAlertMsg({ text: t("common:error_generic_action_failed"), type: "error" });
+      return;
     }
+
+    // Deferred a frame so React has committed the refreshed report to the DOM;
+    // window.print() snapshots the document synchronously and would otherwise
+    // capture the pre-update render.
+    requestAnimationFrame(() => window.print());
   };
 
   return {
     user,
     reports: filteredReports,
+    branding,
+    company,
     readyToGenerateItems,
     selectedReport,
     setSelectedReport,

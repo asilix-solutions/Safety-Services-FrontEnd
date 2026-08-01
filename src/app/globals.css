@@ -138,3 +138,62 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--muted-foreground);
 }
+
+/* ---------------------------------------------------------------------------
+   Printed report document (SRS FR-CON-05)
+   window.print() must output the report sheet alone — no sidebar, header, nav,
+   drawer chrome or action buttons.
+
+   Everything is hidden by visibility rather than display: the print root lives
+   inside the report drawer, so collapsing its ancestors with display:none would
+   take the document down with them. visibility:hidden hides an ancestor while
+   still letting a descendant opt back in.
+   --------------------------------------------------------------------------- */
+@media print {
+  @page {
+    size: A4;
+    margin: 15mm;
+  }
+
+  html,
+  body {
+    min-height: 0;
+    background: #ffffff;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  #report-print-root,
+  #report-print-root * {
+    visibility: visible;
+  }
+
+  /* Lifted out of the drawer's fixed/scrolling context so the sheet starts at
+     the top of page 1 and paginates normally instead of clipping to a panel.
+     Logical inset keeps the origin on the correct edge in both LTR and RTL. */
+  #report-print-root {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    width: 100%;
+    /* The app may be in dark theme; a printed sheet is always light. Set here
+       rather than on the component so the override cannot be themed away. */
+    background: #ffffff;
+    color: #0f172a;
+  }
+
+  /* Letterhead rules, the tenant seal and status tints are not decoration —
+     they carry the document's identity, so they must survive the browser's
+     default "economy" colour stripping. */
+  #report-print-root * {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  /* Keep a section and its heading on one page. */
+  #report-print-root section {
+    break-inside: avoid;
+  }
+}

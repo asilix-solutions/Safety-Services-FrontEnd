@@ -2,11 +2,15 @@ import React, { useState } from "react";
 import { Report } from "@/domains/reports/types";
 import { Button } from "@/shared/ui/button";
 import { Badge } from "@/shared/ui/badge";
-import { X, Award, Download, History, Calendar, FileText, Link, Check, AlertTriangle, Archive, Send } from "lucide-react";
+import { X, Award, Printer, History, Calendar, FileText, Link, Check, AlertTriangle, Archive, Send } from "lucide-react";
 import { getReportStatusBadgeVariant, getReportStatusDisplayName, getReportTypeDisplayName } from "@/domains/reports/helpers";
+import { BrandingSettings, CompanyProfileSettings } from "@/domains/settings/types";
+import { ReportDocument } from "../report-document";
 
 interface ReportDrawerProps {
   report: Report | null;
+  branding: BrandingSettings;
+  company: CompanyProfileSettings;
   onClose: () => void;
   onApprove: (report: Report) => void;
   onReject: (report: Report, reason: string) => void;
@@ -19,6 +23,8 @@ interface ReportDrawerProps {
 
 export function ReportDrawer({
   report,
+  branding,
+  company,
   onClose,
   onApprove,
   onReject,
@@ -282,15 +288,15 @@ export function ReportDrawer({
             </Button>
           )}
 
-          {/* Download always available */}
+          {/* Print / save as PDF — always available */}
           <Button
             variant="outline"
             size="sm"
             onClick={() => onDownload(report)}
             className="gap-1.5 text-xs cursor-pointer"
           >
-            <Download className="h-4 w-4" />
-            {t("reports:btnDownload")}
+            <Printer className="h-4 w-4" />
+            {t("reports:btnPrint")}
           </Button>
 
           <Button variant="secondary" size="sm" onClick={onClose} className="cursor-pointer">
@@ -298,6 +304,14 @@ export function ReportDrawer({
           </Button>
         </div>
       </div>
+
+      {/*
+        The printable artifact for the report currently open. Mounted here rather
+        than at the page root so it always describes the selected report — the
+        drawer is the only place a report is selected, and `@media print` reveals
+        this subtree alone.
+      */}
+      <ReportDocument report={report} branding={branding} company={company} t={t} />
     </div>
   );
 }

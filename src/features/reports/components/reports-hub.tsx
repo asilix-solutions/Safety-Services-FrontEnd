@@ -11,6 +11,8 @@ export function ReportsHub() {
   const {
     user,
     reports,
+    branding,
+    company,
     readyToGenerateItems,
     selectedReport,
     setSelectedReport,
@@ -140,6 +142,8 @@ export function ReportsHub() {
       {/* Details drawer */}
       <ReportDrawer
         report={selectedReport}
+        branding={branding}
+        company={company}
         onClose={() => setSelectedReport(null)}
         onApprove={handleApproveReport}
         onReject={handleRejectReport}
