@@ -112,10 +112,13 @@ export function FileUpload({ onFileSelect, accept = ".pdf,.dwg,.zip", maxSizeMB 
 
         <UploadCloud className="h-10 w-10 text-muted-foreground mb-3" />
         <p className="text-xs font-semibold text-foreground">
-          Drag & drop your files here, or <span className="text-primary font-bold">browse</span>
+          {t("requests:wizard.uploads.dropzone")}{" "}
+          <span className="text-primary font-bold">{t("requests:wizard.uploads.browse")}</span>
         </p>
         <p className="text-[10px] text-muted-foreground mt-1">
-          Supports: {accept} (Max {maxSizeMB}MB)
+          {t("requests:wizard.uploads.supports")
+            .replace("{{formats}}", accept)
+            .replace("{{max}}", String(maxSizeMB))}
         </p>
       </div>
 
