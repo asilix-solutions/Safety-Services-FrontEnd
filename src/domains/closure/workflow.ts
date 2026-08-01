@@ -1,5 +1,6 @@
+import { TenantContext } from "@/domains/tenancy/types";
 import { ClosureDraft, ClosureRecord, ClosureStatus } from "./types";
-import { getClosureByProject, upsertClosure } from "./storage";
+import { getClosureByProject, getScopedClosureByProject, upsertClosure } from "./storage";
 import { getPhotoSummary } from "@/domains/photos";
 
 /** AF-3: blocks creating a closure record without a bound signature/upload artifact. */
@@ -35,12 +36,18 @@ export function createClosureRecord(
   if (!draft.projectId) {
     throw new Error("Closure record requires a projectId.");
   }
+  // Fails closed: an untenanted record is invisible to scoped reads for everyone
+  // except a Super Admin, so refuse to create one rather than write an orphan.
+  if (!draft.tenantId) {
+    throw new Error("Closure record requires the closing user's tenantId.");
+  }
   if (draft.method !== "canvas" && draft.method !== "upload") {
     throw new Error("Closure record requires a valid capture method.");
   }
 
   const record: ClosureRecord = {
     id: `CLOSURE-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+    tenantId: draft.tenantId,
     projectId: draft.projectId,
     signatureImage: draft.signatureImage,
     method: draft.method,
@@ -53,9 +60,13 @@ export function createClosureRecord(
   return upsertClosure(record);
 }
 
-/** ADR-005 — centralized status selector; view-models must call this, never inspect storage directly. */
-export function getClosureStatus(projectId: string): ClosureStatus {
-  const record = getClosureByProject(projectId);
+/**
+ * ADR-005 — centralized status selector; view-models must call this, never inspect
+ * storage directly. Tenant-scoped: this feeds the UI, so another tenant's closure
+ * must read as "not closed" rather than leaking its closer and timestamp.
+ */
+export function getClosureStatus(projectId: string, ctx: TenantContext): ClosureStatus {
+  const record = getScopedClosureByProject(projectId, ctx);
   if (!record) {
     return { isClosed: false, closedAt: null, closedBy: null, method: null };
   }

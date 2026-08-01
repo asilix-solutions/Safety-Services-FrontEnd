@@ -24,7 +24,11 @@ export const QUERY_KEYS = {
     LIST: (projectId: string) => ["labor", projectId] as const,
   },
   CLOSURE: {
-    DETAIL: (projectId: string) => ["closure", projectId] as const,
+    /**
+     * Tenant-keyed: the cache is not cleared on sign-out, so without the tenant in
+     * the key a re-login in the same tab would serve the previous tenant's closure.
+     */
+    DETAIL: (projectId: string, tenantId?: string) => ["closure", tenantId, projectId] as const,
   },
   CUSTOMERS: {
     LIST: ["customers"] as const,

@@ -1,5 +1,6 @@
 import { ClosureRecord } from "@/domains/closure/types";
 import { getClosureStatus } from "@/domains/closure/workflow";
+import { TenantContext } from "@/domains/tenancy/types";
 import { formatDate } from "@/lib/formatters";
 import { Locale } from "@/types/i18n";
 import { methodLabelKey } from "../helpers/helpers";
@@ -21,9 +22,10 @@ export interface ClosureStatusViewModel {
 export function buildClosureViewModel(
   record: ClosureRecord | null,
   projectId: string,
-  locale: Locale
+  locale: Locale,
+  ctx: TenantContext
 ): ClosureStatusViewModel {
-  const status = getClosureStatus(projectId);
+  const status = getClosureStatus(projectId, ctx);
 
   return {
     isClosed: status.isClosed,

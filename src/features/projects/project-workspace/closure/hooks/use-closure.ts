@@ -4,8 +4,9 @@ import { useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/providers/AuthProvider";
 import { useNamespaceTranslations, useTranslation } from "@/providers/i18n-provider";
-import { getClosureByProject, createClosureRecord } from "@/domains/closure";
+import { getScopedClosureByProject, createClosureRecord } from "@/domains/closure";
 import { ClosureDraft } from "@/domains/closure/types";
+import { toTenantContext } from "@/domains/tenancy";
 import { getPhotoSummary } from "@/domains/photos";
 import { canEditProjectWorkspace } from "@/constants/permissions";
 import { QUERY_KEYS } from "@/constants/query-keys";
@@ -19,10 +20,11 @@ export function useClosure(projectId: string) {
   const queryClient = useQueryClient();
 
   const canEdit = canEditProjectWorkspace(user?.role);
+  const tenantCtx = useMemo(() => toTenantContext(user), [user]);
 
   const { data: record = null, isLoading } = useQuery({
-    queryKey: QUERY_KEYS.CLOSURE.DETAIL(projectId),
-    queryFn: () => getClosureByProject(projectId),
+    queryKey: QUERY_KEYS.CLOSURE.DETAIL(projectId, user?.tenantId),
+    queryFn: () => getScopedClosureByProject(projectId, tenantCtx),
     enabled: !!projectId,
   });
 
@@ -38,6 +40,7 @@ export function useClosure(projectId: string) {
       if (!user) throw new Error("A signed-in user is required to close the project.");
       const draft: ClosureDraft = {
         projectId,
+        tenantId: user.tenantId,
         signatureImage: values.signatureImage,
         method: values.method,
         signedBy: values.signedBy || undefined,
@@ -45,11 +48,14 @@ export function useClosure(projectId: string) {
       return createClosureRecord(draft, { id: user.id, name: user.name || user.role });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.CLOSURE.DETAIL(projectId) });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.CLOSURE.DETAIL(projectId, user?.tenantId) });
     },
   });
 
-  const viewModel = useMemo(() => buildClosureViewModel(record, projectId, locale), [record, projectId, locale]);
+  const viewModel = useMemo(
+    () => buildClosureViewModel(record, projectId, locale, tenantCtx),
+    [record, projectId, locale, tenantCtx]
+  );
 
   return {
     canEdit,
