@@ -13,6 +13,7 @@ import { Select } from "@/shared/ui/select";
 import { Checkbox } from "@/shared/ui/checkbox";
 import { AlertTriangle } from "lucide-react";
 import { SERVICE_REGISTRY, FieldConfig, FieldOption } from "@/domains/requests/service-config";
+import { GeoCoordinatesField } from "./geo-coordinates-field";
 import { RequestType } from "@/domains/requests/types";
 
 interface SafetyRiskStepProps {
@@ -166,6 +167,22 @@ export function SafetyRiskStep({ form, instantReportAllowed, onNext, onPrev }: S
                     {t(field.labelKey)}
                   </span>
                 </label>
+              </div>
+            );
+          }
+
+          // Paired lat/lng inputs writing one "lat, lng" string. It owns its own
+          // label and layout, so it bypasses the generic renderer below.
+          if (field.type === "geo") {
+            const geoValue = watch(field.key);
+            return (
+              <div key={field.key} className="sm:col-span-2">
+                <GeoCoordinatesField
+                  value={typeof geoValue === "string" ? geoValue : ""}
+                  onChange={(next) => setValue(field.key, next, { shouldValidate: true })}
+                  label={t(field.labelKey)}
+                  required={field.required}
+                />
               </div>
             );
           }
