@@ -10,6 +10,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Label } from "@/shared/ui/label";
 import { Input } from "@/shared/ui/input";
 import { Button } from "@/shared/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/shared/ui/alert-dialog";
 import { SignatureCapture } from "./signature-capture";
 
 interface ClosureFormProps {
@@ -35,10 +45,20 @@ export function ClosureForm({ onSubmit, isSaving, saveError, hasPhotos }: Closur
 
   const signatureImage = form.watch("signatureImage");
   const method = form.watch("method");
+  const [confirmOpen, setConfirmOpen] = React.useState(false);
 
-  const handleFormSubmit = form.handleSubmit(async (values) => {
-    await onSubmit(values);
-  });
+  // Submitting only opens the confirmation: validation runs first, so the dialog
+  // never appears for a form that would be rejected anyway.
+  const handleFormSubmit = form.handleSubmit(() => setConfirmOpen(true));
+
+  const handleConfirm = async () => {
+    setConfirmOpen(false);
+    try {
+      await onSubmit(form.getValues());
+    } catch {
+      // Surfaced by the mutation's error toast and the inline saveError message.
+    }
+  };
 
   return (
     <Card>
@@ -90,6 +110,25 @@ export function ClosureForm({ onSubmit, isSaving, saveError, hasPhotos }: Closur
             {t("closure:form.close")}
           </Button>
         </form>
+
+        {/* Cancel and Escape both resolve to no action — the close is irreversible. */}
+        <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t("closure:confirm.title")}</AlertDialogTitle>
+              <AlertDialogDescription>{t("closure:confirm.description")}</AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{t("closure:confirm.cancel")}</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                onClick={handleConfirm}
+              >
+                {t("closure:confirm.action")}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </CardContent>
     </Card>
   );

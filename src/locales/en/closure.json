@@ -14,6 +14,13 @@
   "form.close": "Complete Ticket / Close Project",
   "form.saveFailed": "Failed to close the project. Please check your connection and try again — your captured signature has been kept.",
 
+  "confirm.title": "Close this project permanently?",
+  "confirm.description": "The signed and stamped inspection report will be bound to the project as an unalterable attachment, and the project will advance to final inspection. This cannot be undone.",
+  "confirm.action": "Yes, close the project",
+  "confirm.cancel": "Cancel",
+  "toast.closed": "Project closed. The signed report is bound and the project has advanced to final inspection.",
+  "toast.closeFailed": "Could not close the project. Nothing was recorded.",
+
   "method.canvas": "Drawn Signature",
   "method.upload": "Uploaded Signed Report",
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { toast } from "sonner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/providers/AuthProvider";
 import { useNamespaceTranslations, useTranslation } from "@/providers/i18n-provider";
@@ -56,7 +57,13 @@ export function useClosure(projectId: string, onClosed?: () => void) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.CLOSURE.DETAIL(projectId, user?.tenantId) });
+      toast.success(t("closure:toast.closed"));
       onClosed?.();
+    },
+    onError: () => {
+      // The domain validates every precondition before the WORM write, so a failure
+      // here means nothing was recorded and the officer can safely retry.
+      toast.error(t("closure:toast.closeFailed"));
     },
   });
 
