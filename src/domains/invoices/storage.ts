@@ -60,10 +60,12 @@ const MOCK_INVOICES: ClientInvoice[] = [
     vatAmount: 1800,
     grandTotal: 13800,
     currency: "SAR",
-    status: "paid",
+    // Unpaid on purpose: SSLM-2026-000002 is seeded at UNDER_REVIEW, so a paid
+    // invoice here would be an orphan — no payment record, no quotation behind
+    // it — and would deadlock the request. See the commit message.
+    status: "unpaid",
     dueDate: "2026-06-30T00:00:00Z",
     issuedAt: "2026-05-31T09:00:00Z",
-    paidAt: "2026-06-10T14:30:00Z",
   }
 ];
 
