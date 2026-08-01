@@ -1,7 +1,12 @@
 import { ClientRequestFormValues } from "@/schemas/client-request.schema";
 import { RequestType, RequiredDocument } from "./types";
 
-export type FieldType = "text" | "number" | "select" | "textarea" | "checkbox" | "date";
+/**
+ * `geo` is a paired latitude/longitude control that writes a single
+ * `"lat, lng"` string into the field. Kept as one stored value so the existing
+ * external-maps link keeps working without a type or storage migration.
+ */
+export type FieldType = "text" | "number" | "select" | "textarea" | "checkbox" | "date" | "geo";
 
 /**
  * A rule gate an option depends on. The gate's value is produced by
@@ -54,7 +59,7 @@ export const SERVICE_REGISTRY: Record<RequestType, ServiceConfig> = {
       },
       {
         key: "gpsCoordinates",
-        type: "text",
+        type: "geo",
         labelKey: "requests:wizard.serviceDetails.gpsCoordinates",
         placeholderKey: "requests:wizard.serviceDetails.gpsCoordinatesPlaceholder",
         required: false,
