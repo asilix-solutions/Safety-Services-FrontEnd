@@ -59,8 +59,23 @@ export function confirmPaymentAndCreateProject({
     "PROJECT_CREATED" as WorkflowStage
   );
 
+  // `syncInvoiceAndRequest` writes `currentStage` only, so the paired `status`
+  // has to be set here — exactly as the four `syncQuotationAndRequest` callers
+  // in approval.ts do. `appendTimelineEvent` below does NOT do it: its status
+  // argument labels the timeline entry and never touches the field, so relying
+  // on it left the request persisted at PROJECT_CREATED while `status` still
+  // read `awaiting_payment` — a paid, provisioned request displaying as
+  // awaiting payment, since `status` drives the badges and the active filter.
+  //
+  // `approved` is the pairing `provisionProjectWorkspace` uses for
+  // PROJECT_CREATED, so both provisioning paths agree.
+  const requestWithUpdatedStatus: LicensingRequest = {
+    ...syncedRequest,
+    status: "approved" as const,
+  };
+
   const updatedRequest = appendTimelineEvent(
-    syncedRequest,
+    requestWithUpdatedStatus,
     "approved", // status in timeline schema matches Payment approved
     `Payment Confirmed. Ref: ${transactionReference}`
   );
