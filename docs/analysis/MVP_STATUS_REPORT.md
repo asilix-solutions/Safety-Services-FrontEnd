@@ -1,5 +1,27 @@
 # SSLM MVP Status Report
 
+> ## ⚠️ SCOPE DECISION — 2026-08-01 (supersedes this report where they conflict)
+>
+> **MVP scope = the licensing cycle. That cycle is complete.**
+> Request intake → classification → blueprint review → quotation → invoice → payment →
+> project execution (procurement, labor, photos, obstacles) → signature-locked closure →
+> final inspection → certificate → contract. Sessions 1–22 closed the gaps this report
+> lists as P-critical below.
+>
+> **Maintenance is DEFERRED to a post-MVP phase.** The maintenance-contract system
+> (contract creation from approved 150–1000 m² requests, quarterly visit scheduling, the
+> 4 periodic visits, visit completion) is **intentionally not built**. See
+> **`docs/BACKLOG.md`** for the full record.
+>
+> The rule engine already routes 150–1000 m² to the maintenance track
+> (`classifyRequest` → `"maintenance_strategy"` / queue `MAINTENANCE`) and correctly
+> stops there. **A routed request producing no maintenance contract is a product-scope
+> decision, not a bug.**
+>
+> The body of this report is a snapshot dated 2026-07-08 and is **stale** on
+> completion percentages and on the procurement / labor / photos / signature-closure
+> rows. It is kept for its SRS grounding and its structural findings.
+
 _Generated: 2026-07-08 — read-only audit. Sources: `docs/srs/(Software Requirements Specification - SRS).pdf` (Arabic original, text extraction partially garbled by RTL reflow — used only for MVP-boundary/roadmap corroboration), `docs/srs/Safety Services & Licensing Management System.pdf` (English SRS, FR-ID numbered, primary grounding source, cited as `SRS §n` / `FR-XXX-NN`), `docs/architecture/RECONCILIATION.md`, ADR-001..006, `docs/analysis/PROJECT_ANALYSIS.md`, `docs/debt/ANY_BACKLOG.md`, and the code on disk as of this commit._
 
 > Note on SRS grounding: the English SRS (`Safety Services & Licensing Management System.pdf`) describes a **full backend SaaS platform** (multi-tenant DB, Redis, WebSocket chat, government integrations, TOTP MFA, S3 object storage). `CLAUDE.md` and `RECONCILIATION.md` explicitly scope this repository to a **frontend-only MVP with LocalStorage mock persistence**, excluding all of that infrastructure. Every "required per SRS" claim below is filtered through that MVP boundary — features whose SRS description is inherently backend/infra (multi-tenant DB, Redis, WebSocket, government API, real MFA) are marked POST-MVP regardless of SRS priority, per `CLAUDE.md` "MVP Boundaries."
@@ -122,7 +144,7 @@ Lifecycle per `CLAUDE.md`: `DRAFT → SUBMITTED → UNDER_REVIEW → QUOTATION �
 
 ### P-important (SRS-required, doesn't block a role's minimum journey)
 
-8. **Recurring maintenance scheduling** (`features/maintenance/`) — quarterly visit generation UI. Size: **M**. Why: `SRS FR-OPS-09`; domain-adjacent data may already exist via `site-visits`.
+8. ~~**Recurring maintenance scheduling** (`features/maintenance/`) — quarterly visit generation UI. Size: **M**. Why: `SRS FR-OPS-09`; domain-adjacent data may already exist via `site-visits`.~~ **→ REMOVED FROM MVP SCOPE (2026-08-01).** The whole maintenance-contract system is deferred post-MVP — see `docs/BACKLOG.md`. Do not pick this up as remaining MVP work.
 9. **Company Admin analytics/BI screen** (`features/analytics/`) — month-over-month revenue/expense charts by silo, using existing `shared/charts/*` (Recharts wrappers already built). Size: **M**. Why: `SRS FR-COM-05`; the chart infra already exists and is unused for this purpose.
 10. **`licenses` vs `certificates` scoping decision, then build** — per `RECONCILIATION.md` §5, `licenses` was earmarked as the reference build for the new convention but has zero UI; needs a product decision on whether it's a duplicate of `certificates` or a distinct SRS concept before building. Size: **S** (decision) + **M** (build).
 11. **TOTP MFA** for admin/operations/cash accounts — Area: `features/auth/` (currently `.gitkeep`) + login flow. Size: **M**. Why: `NFR-SEC-05` is High priority and currently has zero implementation trace (`TOTP`/`mfa`/`authenticator` grep across `src/` → 0 hits).
@@ -158,6 +180,12 @@ Per `CLAUDE.md` "MVP Boundaries" and `RECONCILIATION.md`, the following SRS-desc
 - Government/Civil Defense portal integration, OpenAPI/GraphQL adapters (`NFR-INT-01/02`).
 - Full document e-signature engine beyond the local canvas-signature-pad capture already scoped into the project workspace `completion` tab.
 - Native mobile app — SRS itself already scopes the MVP to responsive web only (§1.2, §2.4).
+- **The maintenance-contract system (`FR-OPS-09`, `FR-RUL-02` downstream)** — contract
+  creation from approved 150–1000 m² requests, quarterly visit scheduling, the 4 periodic
+  visits, and visit completion. Deferred 2026-08-01 as a **product-scope decision**: the
+  MVP delivers the licensing cycle, and maintenance is a later phase. Unlike the entries
+  above, this one is not blocked by missing infrastructure — it is simply out of scope.
+  Full record and prerequisites: `docs/BACKLOG.md`.
 - Full CRM beyond the Sales Agent pipeline gap noted as P-critical above (advanced lead scoring, external CRM sync, etc. — out of scope; the *basic* pipeline view is in-scope and listed as P-critical item 5).
 - Advanced BI beyond the single analytics screen listed as P-important item 9 (predictive analytics, custom report builder, etc.).
 
