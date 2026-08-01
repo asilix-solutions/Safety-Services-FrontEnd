@@ -62,12 +62,40 @@ function DocumentSection({
   );
 }
 
-function MetaRow({ label, value }: { label: string; value?: string }) {
+/**
+ * Isolates a Latin/numeric token inside an Arabic run.
+ *
+ * Without this the bidi algorithm reorders identifiers that start or end with
+ * punctuation or digits — a report number prints as "0001-2026-TSR-REP", and a
+ * phone number loses its leading "+" to the end of the line. `dir="ltr"` alone
+ * is not enough inside a flow of RTL text; the isolation is what stops the token
+ * from being re-ordered against its neighbours.
+ */
+function Ltr({ children, className }: { children: React.ReactNode; className?: string }) {
+  return (
+    <span dir="ltr" className={`inline-block [unicode-bidi:isolate] ${className ?? ""}`}>
+      {children}
+    </span>
+  );
+}
+
+function MetaRow({
+  label,
+  value,
+  code,
+}: {
+  label: string;
+  value?: string;
+  /** Identifiers, numbers and dates — isolated so RTL cannot reorder them. */
+  code?: boolean;
+}) {
   if (!value) return null;
   return (
     <div className="flex justify-between gap-4 border-b border-slate-200 py-1">
       <span className="text-slate-500">{label}</span>
-      <span className="font-semibold text-slate-900 text-end">{value}</span>
+      <span className="font-semibold text-slate-900 text-end">
+        {code ? <Ltr>{value}</Ltr> : value}
+      </span>
     </div>
   );
 }
@@ -119,20 +147,21 @@ export function ReportDocument({ report, branding, company, t }: ReportDocumentP
               {[company.address, company.city, company.country].filter(Boolean).join(" — ")}
             </div>
             <div className="text-[11px] leading-snug text-slate-600">
-              {company.phone} · {company.email}
+              <Ltr>{company.phone}</Ltr> · <Ltr>{company.email}</Ltr>
             </div>
           </div>
         </div>
 
         <div className="text-[11px] leading-snug text-slate-600 text-end">
           <div>
-            {t("reports:docCommercialRegistration")}: {company.commercialRegistration}
+            {t("reports:docCommercialRegistration")}:{" "}
+            <Ltr>{company.commercialRegistration}</Ltr>
           </div>
           <div>
-            {t("reports:docTaxNumber")}: {company.taxNumber}
+            {t("reports:docTaxNumber")}: <Ltr>{company.taxNumber}</Ltr>
           </div>
           <div>
-            {t("reports:docLicenseNumber")}: {company.licenseNumber}
+            {t("reports:docLicenseNumber")}: <Ltr>{company.licenseNumber}</Ltr>
           </div>
         </div>
       </header>
@@ -144,20 +173,20 @@ export function ReportDocument({ report, branding, company, t }: ReportDocumentP
           {getReportTypeDisplayName(report.reportType, t)}
         </div>
         <div className="mt-1 font-mono text-sm font-bold text-slate-900">
-          {report.reportNumber}
+          <Ltr>{report.reportNumber}</Ltr>
         </div>
       </div>
 
       {/* Registry metadata */}
       <section className="mt-6 grid grid-cols-2 gap-x-10 text-[12px]">
         <div>
-          <MetaRow label={t("reports:fieldClient")} value={report.clientId} />
-          <MetaRow label={t("reports:fieldRequest")} value={report.jobNumber} />
-          <MetaRow label={t("reports:fieldProject")} value={report.projectId} />
+          <MetaRow label={t("reports:fieldClient")} value={report.clientId} code />
+          <MetaRow label={t("reports:fieldRequest")} value={report.jobNumber} code />
+          <MetaRow label={t("reports:fieldProject")} value={report.projectId} code />
         </div>
         <div>
           <MetaRow label={t("reports:fieldAuthor")} value={report.authorName} />
-          <MetaRow label={t("reports:fieldDate")} value={formatDate(report.createdAt)} />
+          <MetaRow label={t("reports:fieldDate")} value={formatDate(report.createdAt)} code />
           <MetaRow
             label={t("reports:status")}
             value={getReportStatusDisplayName(report.status, t)}
@@ -230,8 +259,8 @@ export function ReportDocument({ report, branding, company, t }: ReportDocumentP
       </footer>
 
       <div className="mt-4 text-center text-[10px] text-slate-500">
-        {t("reports:docGeneratedOn")}: {formatDate(new Date().toISOString())} ·{" "}
-        {report.reportNumber}
+        {t("reports:docGeneratedOn")}: <Ltr>{formatDate(new Date().toISOString())}</Ltr> ·{" "}
+        <Ltr>{report.reportNumber}</Ltr>
       </div>
     </div>
   );

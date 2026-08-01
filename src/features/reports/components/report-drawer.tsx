@@ -70,6 +70,7 @@ export function ReportDrawer({
   };
 
   return (
+    <>
     <div className="fixed inset-0 z-50 flex justify-end bg-slate-950/60 backdrop-blur-sm">
       {/* Backdrop click to close */}
       <div className="absolute inset-0 -z-10" onClick={onClose} />
@@ -304,15 +305,18 @@ export function ReportDrawer({
           </Button>
         </div>
       </div>
-
-      {/*
-        The printable artifact for the report currently open. Mounted here rather
-        than at the page root so it always describes the selected report — the
-        drawer is the only place a report is selected, and `@media print` reveals
-        this subtree alone.
-      */}
-      <ReportDocument report={report} branding={branding} company={company} t={t} />
     </div>
+
+    {/*
+      The printable artifact for the report currently open.
+
+      A sibling of the overlay, not a child: the overlay is `fixed inset-0`, which
+      would become the containing block for the sheet's absolute print lift and
+      clip it to one viewport height — a report longer than a page would simply
+      lose its later pages.
+    */}
+    <ReportDocument report={report} branding={branding} company={company} t={t} />
+    </>
   );
 }
 export default ReportDrawer;
