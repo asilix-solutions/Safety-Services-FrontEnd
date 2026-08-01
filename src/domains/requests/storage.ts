@@ -137,8 +137,28 @@ export function getEngineeringRequests(ctx: TenantContext): LicensingRequest[] {
   );
 }
 
+/**
+ * Unscoped single-record lookup. For workflows and write paths that already
+ * hold, or are about to rewrite, a specific record. Never call this from a
+ * page or feature to decide what a user may see — use the scoped reader below,
+ * otherwise a job number from another tenant resolves and becomes actionable.
+ */
 export function getRequestByJobNumber(jobNumber: string): LicensingRequest | null {
   const list = getMergedRequests();
   return list.find((r) => r.jobNumber === jobNumber) || null;
+}
+
+/**
+ * The reader every UI surface must use. Resolves the record, then applies the
+ * same tenant rule as the list readers, so a request outside the caller's
+ * tenant comes back as null rather than as a viewable — and decidable — page.
+ */
+export function getScopedRequestByJobNumber(
+  jobNumber: string,
+  ctx: TenantContext
+): LicensingRequest | null {
+  const found = getRequestByJobNumber(jobNumber);
+  if (!found) return null;
+  return scopeToTenant([found], ctx)[0] || null;
 }
 

@@ -1,13 +1,15 @@
 import { useState, useEffect, useMemo } from "react";
-import { getRequestByJobNumber, upsertRequest } from "@/domains/requests/storage";
+import { getScopedRequestByJobNumber, upsertRequest } from "@/domains/requests/storage";
 import { getEngineeringReviewByJobNumber, saveEngineeringReview } from "@/domains/engineering/storage";
 import { buildBlueprintReviewViewModel, BlueprintReviewViewModel } from "../helpers/blueprint-review-view-model";
 import { useTranslation } from "@/providers/i18n-provider";
+import { useTenantContext } from "@/hooks/use-tenant-context";
 import { useRouter } from "next/navigation";
 
 export function useBlueprintWorkspace(jobNumber: string) {
   const router = useRouter();
   const { t } = useTranslation();
+  const tenantContext = useTenantContext();
 
   const [viewModel, setViewModel] = useState<BlueprintReviewViewModel | null>(null);
   const [engineerNotes, setEngineerNotes] = useState("");
@@ -23,7 +25,7 @@ export function useBlueprintWorkspace(jobNumber: string) {
   // Load request and review record
   const loadData = () => {
     if (!jobNumber) return;
-    const request = getRequestByJobNumber(jobNumber);
+    const request = getScopedRequestByJobNumber(jobNumber, tenantContext);
     if (request) {
       const reviewRecord = getEngineeringReviewByJobNumber(jobNumber);
       const vm = buildBlueprintReviewViewModel(request, reviewRecord);
@@ -38,7 +40,7 @@ export function useBlueprintWorkspace(jobNumber: string) {
 
   useEffect(() => {
     loadData();
-  }, [jobNumber]);
+  }, [jobNumber, tenantContext]);
 
   // Check if assigned/eligible for engineering review
   const isEngineeringEligible = useMemo(() => {

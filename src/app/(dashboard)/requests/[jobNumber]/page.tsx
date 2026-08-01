@@ -44,7 +44,8 @@ import { ClientInvoice } from "@/domains/invoices/types";
 import { getInvoiceByJobNumber } from "@/domains/invoices/storage";
 import { createInvoiceFromApprovedQuotation } from "@/domains/invoices/workflow";
 import { ClientPayment } from "@/domains/payments/types";
-import { getRequestByJobNumber, upsertRequest } from "@/domains/requests/storage";
+import { getScopedRequestByJobNumber, upsertRequest } from "@/domains/requests/storage";
+import { useTenantContext } from "@/hooks/use-tenant-context";
 import { Quotation } from "@/domains/quotations/types";
 import { getQuotationByJobNumber } from "@/domains/quotations/storage";
 import { confirmMockPayment } from "@/domains/payments/workflow";
@@ -59,6 +60,7 @@ export default function RequestDetailsPage() {
   const { user } = useAuth();
   const params = useParams();
   const { t } = useTranslation();
+  const tenantContext = useTenantContext();
   useNamespaceTranslations(["requests", "dashboard", "common", "projects"]);
   const [request, setRequest] = useState<LicensingRequest | null>(null);
   const [invoice, setInvoice] = useState<ClientInvoice | null>(null);
@@ -74,10 +76,10 @@ export default function RequestDetailsPage() {
 
   const loadData = () => {
     if (jobNumber) {
-      const foundRequest = getRequestByJobNumber(jobNumber);
-      if (foundRequest) {
-        setRequest(foundRequest);
-      }
+      // Scoped: a job number outside the caller's tenant must resolve to null
+      // and fall through to the not-found view, not stay on screen.
+      const foundRequest = getScopedRequestByJobNumber(jobNumber, tenantContext);
+      setRequest(foundRequest);
 
       // Load invoice if exists
       const foundInvoice = getInvoiceByJobNumber(jobNumber);
@@ -99,7 +101,7 @@ export default function RequestDetailsPage() {
 
   useEffect(() => {
     loadData();
-  }, [jobNumber]);
+  }, [jobNumber, tenantContext]);
 
   const handleRegenerateInvoice = () => {
     if (!user || !quotation || quotation.quotationStatus !== "APPROVED" || !request) return;
@@ -294,7 +296,7 @@ export default function RequestDetailsPage() {
     // Update using centralized upsert
     try {
       upsertRequest(updatedRequest);
-    } catch(e) {
+    } catch (e) {
       console.error("Failed to sync file replacement to localStorage", e);
     }
     toast.success(t("requests:details.alertFileReplaced"));
@@ -307,7 +309,7 @@ export default function RequestDetailsPage() {
     const actor = user.name || user.role;
     const updatedRequest = approveRequestForQuotation(request, actor);
     setRequest(updatedRequest);
-    
+
     try {
       upsertRequest(updatedRequest);
       toast.success(t("requests:details.alertTransitionQuotation"));
@@ -455,7 +457,7 @@ export default function RequestDetailsPage() {
                     </Badge>
                   </span>
                 </div>
-                
+
                 {invoice.status !== "paid" && (
                   <div className="pt-4 flex justify-end">
                     <Button
@@ -559,14 +561,14 @@ export default function RequestDetailsPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     {doc.uploaded ? (
-                      <div className="text-end me-2">
+                      <div className="text-end mr-2">
                         <span className="text-emerald-500 font-bold block text-[10px]">✓ {t("dashboard:uploaded_label")}</span>
                         <span className="text-[9px] text-muted-foreground font-mono truncate max-w-[120px] block">
                           {doc.fileName}
                         </span>
                       </div>
                     ) : (
-                      <span className="text-amber-500 font-medium me-2">{t("dashboard:pending_document")}</span>
+                      <span className="text-amber-500 font-medium mr-2">{t("dashboard:pending_document")}</span>
                     )}
 
                     <div className="flex gap-1 shrink-0">
@@ -654,7 +656,7 @@ export default function RequestDetailsPage() {
                     <span className="text-[9px] text-muted-foreground block uppercase">{t("projects:details.id") || "Project ID"}</span>
                     <span className="font-mono font-bold text-foreground">{linkedProject.id}</span>
                   </div>
-                  
+
                   {isClient ? (
                     <div className="space-y-1">
                       <span className="text-[9px] text-muted-foreground block uppercase">{t("projects:status") || "Status"}</span>
@@ -756,7 +758,7 @@ export default function RequestDetailsPage() {
                 {WORKFLOW_STAGES.map((stage, idx) => {
                   const isCompleted = idx < currentStageIndex;
                   const isActive = idx === currentStageIndex;
-                  
+
                   return (
                     <div key={stage} className="flex items-center gap-3 text-xs">
                       <div className="shrink-0">
