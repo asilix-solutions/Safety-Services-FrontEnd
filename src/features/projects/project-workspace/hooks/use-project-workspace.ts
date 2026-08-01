@@ -7,7 +7,7 @@ import { Project, SiloExecutionData } from "@/types/project";
 import { getProjects } from "@/domains/projects/storage";
 import { LicensingRequest } from "@/domains/requests/types";
 import { getMergedRequests } from "@/domains/requests/storage";
-import { getContracts } from "@/domains/contracts/storage";
+import { getScopedContractByProjectId } from "@/domains/contracts/storage";
 import { getCertificateByProjectId } from "@/domains/certificates/storage";
 import { getScopedQuotationByJobNumber } from "@/domains/quotations/storage";
 import { useTenantContext } from "@/hooks/use-tenant-context";
@@ -104,9 +104,7 @@ export function useProjectWorkspace() {
         }
 
         try {
-          const allContracts = getContracts();
-          const linkedContract = allContracts.find((c) => c.projectId === foundProject.id);
-          setContract(linkedContract || null);
+          setContract(getScopedContractByProjectId(foundProject.id, tenantContext));
         } catch (e) {
           console.error("Failed to load contract:", e);
         }
