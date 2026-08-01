@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { toast } from "sonner";
 import { getScopedRequestByJobNumber, upsertRequest } from "@/domains/requests/storage";
 import { getEngineeringReviewByJobNumber, saveEngineeringReview } from "@/domains/engineering/storage";
 import {
@@ -24,7 +25,6 @@ export function useBlueprintWorkspace(jobNumber: string) {
   const [showReturnDialog, setShowReturnDialog] = useState(false);
   const [showMissingDocsDialog, setShowMissingDocsDialog] = useState(false);
 
-  const [successMessage, setSuccessMessage] = useState("");
   const [validationError, setValidationError] = useState("");
 
   // Load request and review record
@@ -97,7 +97,7 @@ export function useBlueprintWorkspace(jobNumber: string) {
     //    status + currentStage + updatedAt and appends the audit event.
     upsertRequest(approveRequestForQuotation(toLicensingRequest(viewModel)));
 
-    setSuccessMessage(t("requests:blueprintReview.status.APPROVED"));
+    toast.success(t("requests:blueprintReview.status.APPROVED"));
     
     // Reload model
     loadData();
@@ -133,11 +133,10 @@ export function useBlueprintWorkspace(jobNumber: string) {
     );
 
     setShowReturnDialog(false);
-    setSuccessMessage(t("requests:blueprintReview.status.MODIFICATION_REQUIRED"));
+    toast.success(t("requests:blueprintReview.status.MODIFICATION_REQUIRED"));
 
     loadData();
 
-    setTimeout(() => setSuccessMessage(""), 4000);
   };
 
   const handleRequestMissingDocs = () => {
@@ -165,11 +164,10 @@ export function useBlueprintWorkspace(jobNumber: string) {
     );
 
     setShowMissingDocsDialog(false);
-    setSuccessMessage(t("requests:blueprintReview.status.MISSING_DOCUMENTS"));
+    toast.success(t("requests:blueprintReview.status.MISSING_DOCUMENTS"));
 
     loadData();
 
-    setTimeout(() => setSuccessMessage(""), 4000);
   };
 
   return {
@@ -184,7 +182,6 @@ export function useBlueprintWorkspace(jobNumber: string) {
     setShowReturnDialog,
     showMissingDocsDialog,
     setShowMissingDocsDialog,
-    successMessage,
     validationError,
     setValidationError,
     isReadonly,

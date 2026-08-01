@@ -630,6 +630,8 @@
   "blueprintReview.decisions.approveDesc": "This will complete the engineering review of drawing plans and move the request into the Quotation workflow.",
   "blueprintReview.decisions.approveBtn": "Approve",
   "blueprintReview.decisions.returnNextStage": "Returned/Correction Mode",
+  "blueprintReview.decisions.returnDesc": "The request goes back to the client with your technical reason, and they are shown a notice that action is required from them.",
+  "blueprintReview.decisions.missingDocsDesc": "The client is notified that additional documentation is required, and the request returns to them for completion.",
   "blueprintReview.decisions.missingDocsImpact": "Pending client document upload",
   "blueprintReview.workspace.openMaps": "Open in Google Maps",
   "blueprintReview.workspace.mapSim": "Interactive Map Simulation"

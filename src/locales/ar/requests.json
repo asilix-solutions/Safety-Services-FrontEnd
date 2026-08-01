@@ -630,6 +630,8 @@
   "blueprintReview.decisions.approveDesc": "سيؤدي هذا إلى إكمال المراجعة الهندسية للمخططات ونقل الطلب لمرحلة إعداد عروض الأسعار.",
   "blueprintReview.decisions.approveBtn": "اعتماد وموافقة",
   "blueprintReview.decisions.returnNextStage": "نمط الإعادة والتعديل والتصحيح",
+  "blueprintReview.decisions.returnDesc": "سيعود الطلب إلى العميل مع مبررك الفني، وسيظهر له إشعار بأن هناك إجراءً مطلوباً منه.",
+  "blueprintReview.decisions.missingDocsDesc": "سيُبلَّغ العميل بأن هناك مستندات إضافية مطلوبة، وسيعود الطلب إليه لاستكمالها.",
   "blueprintReview.decisions.missingDocsImpact": "في انتظار رفع المستندات المطلوبة من العميل",
   "blueprintReview.workspace.openMaps": "الفتح في خرائط جوجل",
   "blueprintReview.workspace.mapSim": "محاكاة الخريطة التفاعلية"

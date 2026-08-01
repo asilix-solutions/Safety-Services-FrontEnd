@@ -4,7 +4,7 @@ import { Button } from "@/shared/ui/button";
 import { Badge } from "@/shared/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
 import { ServiceDetailsCard } from "@/features/requests/components/service-details-card";
-import { ArrowLeft, AlertTriangle, Check, MapPin, ExternalLink } from "lucide-react";
+import { ArrowLeft, AlertTriangle, MapPin, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { useBlueprintWorkspace } from "../hooks/use-blueprint-workspace";
 import { RequestSummaryCard } from "./request-summary-card";
@@ -37,7 +37,6 @@ export function BlueprintWorkspace({ jobNumber }: BlueprintWorkspaceProps) {
     setShowReturnDialog,
     showMissingDocsDialog,
     setShowMissingDocsDialog,
-    successMessage,
     validationError,
     isReadonly,
     handleApprove,
@@ -137,16 +136,6 @@ export function BlueprintWorkspace({ jobNumber }: BlueprintWorkspaceProps) {
             </div>
           </CardContent>
         </Card>
-      )}
-
-      {/* Success Notification Banner */}
-      {successMessage && (
-        <div className="p-4 rounded-xl border border-emerald-500/20 bg-emerald-500/5 text-emerald-600 dark:text-emerald-400 text-xs flex items-center gap-2 font-medium">
-          <Check className="h-4 w-4 shrink-0" />
-          <span>
-            {t("requests:engineeringWorkspace.successTransition")} ({t(`requests:blueprintReview.status.${successMessage}`)})
-          </span>
-        </div>
       )}
 
       {/* Validation Error Banner */}
