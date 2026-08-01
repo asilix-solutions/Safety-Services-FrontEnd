@@ -1,6 +1,7 @@
 import { SiloTag } from "@/domains/procurement/types";
+import { TenantContext } from "@/domains/tenancy/types";
 import { PhotoDraft, InstallationPhoto, PhotoSummary } from "./types";
-import { getPhotosByProject, upsertPhoto } from "./storage";
+import { getPhotosByProject, getScopedPhotosByProject, upsertPhoto } from "./storage";
 
 const SILO_TAGS: SiloTag[] = ["alarm", "suppression", "ventilation"];
 
@@ -21,9 +22,15 @@ export function createPhotoRecord(
   if (!draft.projectId) {
     throw new Error("Installation photo record requires a projectId.");
   }
+  // Fails closed: an untenanted photo is invisible to scoped reads for everyone
+  // except a Super Admin, so refuse to create one rather than write an orphan.
+  if (!draft.tenantId) {
+    throw new Error("Installation photo record requires the capturing user's tenantId.");
+  }
 
   const record: InstallationPhoto = {
     id: `PHOTO-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+    tenantId: draft.tenantId,
     projectId: draft.projectId,
     siloTag: draft.siloTag,
     caption: draft.caption?.trim() || undefined,
@@ -35,9 +42,7 @@ export function createPhotoRecord(
   return upsertPhoto(record);
 }
 
-/** ADR-005 — centralized KPI selector; view-models must call this, never sum records inline. */
-export function getPhotoSummary(projectId: string): PhotoSummary {
-  const records = getPhotosByProject(projectId);
+function summarize(records: InstallationPhoto[]): PhotoSummary {
   const bySilo = SILO_TAGS.reduce((acc, silo) => {
     acc[silo] = 0;
     return acc;
@@ -48,4 +53,20 @@ export function getPhotoSummary(projectId: string): PhotoSummary {
   });
 
   return { total: records.length, bySilo };
+}
+
+/**
+ * Unscoped KPI selector — for the closure gate only.
+ *
+ * The gate asks whether the project has field evidence at all, so it must count
+ * every row. Scoping it would let a caller who cannot see the photos conclude
+ * none exist and weaken the gate.
+ */
+export function getPhotoSummary(projectId: string): PhotoSummary {
+  return summarize(getPhotosByProject(projectId));
+}
+
+/** ADR-005 — centralized KPI selector for display; view-models must call this, never sum records inline. */
+export function getScopedPhotoSummary(projectId: string, ctx: TenantContext): PhotoSummary {
+  return summarize(getScopedPhotosByProject(projectId, ctx));
 }

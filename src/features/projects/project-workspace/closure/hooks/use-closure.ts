@@ -7,7 +7,7 @@ import { useNamespaceTranslations, useTranslation } from "@/providers/i18n-provi
 import { getScopedClosureByProject, createClosureRecord } from "@/domains/closure";
 import { ClosureDraft } from "@/domains/closure/types";
 import { toTenantContext } from "@/domains/tenancy";
-import { getPhotoSummary } from "@/domains/photos";
+import { getScopedPhotoSummary } from "@/domains/photos";
 import { canEditProjectWorkspace } from "@/constants/permissions";
 import { QUERY_KEYS } from "@/constants/query-keys";
 import { ClosureFormValues } from "@/schemas/closure.schema";
@@ -28,9 +28,11 @@ export function useClosure(projectId: string) {
     enabled: !!projectId,
   });
 
+  // Scoped, unlike the domain gate: the button must reflect the photos this user
+  // can see. Scoped ⊆ unscoped, so this only ever disables close, never enables it.
   const { data: photoSummary } = useQuery({
-    queryKey: QUERY_KEYS.PHOTOS.LIST(projectId),
-    queryFn: () => getPhotoSummary(projectId),
+    queryKey: QUERY_KEYS.PHOTOS.LIST(projectId, user?.tenantId),
+    queryFn: () => getScopedPhotoSummary(projectId, tenantCtx),
     enabled: !!projectId,
   });
   const hasPhotos = (photoSummary?.total ?? 0) > 0;

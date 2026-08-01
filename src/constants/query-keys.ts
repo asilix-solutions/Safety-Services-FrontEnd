@@ -18,7 +18,8 @@ export const QUERY_KEYS = {
     LIST: (projectId: string) => ["procurement", projectId] as const,
   },
   PHOTOS: {
-    LIST: (projectId: string) => ["photos", projectId] as const,
+    /** Tenant-keyed for the same reason as CLOSURE.DETAIL below. */
+    LIST: (projectId: string, tenantId?: string) => ["photos", tenantId, projectId] as const,
   },
   LABOR: {
     LIST: (projectId: string) => ["labor", projectId] as const,

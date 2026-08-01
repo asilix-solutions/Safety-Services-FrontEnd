@@ -1,5 +1,6 @@
 import { InstallationPhoto, SiloTag } from "@/domains/photos/types";
-import { getPhotoSummary } from "@/domains/photos/workflow";
+import { getScopedPhotoSummary } from "@/domains/photos/workflow";
+import { TenantContext } from "@/domains/tenancy/types";
 import { formatDate } from "@/lib/formatters";
 import { Locale } from "@/types/i18n";
 import { siloLabelKey } from "../helpers/helpers";
@@ -25,14 +26,16 @@ export interface PhotosViewModel {
 
 /**
  * Shapes installation photo records + the ADR-005 domain KPI selector into display-ready values.
- * The summary numbers always come from `getPhotoSummary` — never summed here.
+ * The summary numbers always come from `getScopedPhotoSummary` — never summed here,
+ * and scoped so the count matches the rows the caller can actually see.
  */
 export function buildPhotosViewModel(
   records: InstallationPhoto[],
   projectId: string,
-  locale: Locale
+  locale: Locale,
+  ctx: TenantContext
 ): PhotosViewModel {
-  const summary = getPhotoSummary(projectId);
+  const summary = getScopedPhotoSummary(projectId, ctx);
 
   const rows: PhotoRowViewModel[] = [...records]
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
