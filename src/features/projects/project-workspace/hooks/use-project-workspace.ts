@@ -8,7 +8,7 @@ import { getProjects } from "@/domains/projects/storage";
 import { LicensingRequest } from "@/domains/requests/types";
 import { getMergedRequests } from "@/domains/requests/storage";
 import { getScopedContractByProjectId } from "@/domains/contracts/storage";
-import { getCertificateByProjectId } from "@/domains/certificates/storage";
+import { getScopedCertificateByProjectId } from "@/domains/certificates/storage";
 import { getScopedQuotationByJobNumber } from "@/domains/quotations/storage";
 import { useTenantContext } from "@/hooks/use-tenant-context";
 import { getInvoiceByJobNumber } from "@/domains/invoices/storage";
@@ -110,8 +110,7 @@ export function useProjectWorkspace() {
         }
 
         try {
-          const linkedCert = getCertificateByProjectId(foundProject.id);
-          setCertificate(linkedCert || null);
+          setCertificate(getScopedCertificateByProjectId(foundProject.id, tenantContext));
         } catch (e) {
           console.error("Failed to load certificate:", e);
         }
