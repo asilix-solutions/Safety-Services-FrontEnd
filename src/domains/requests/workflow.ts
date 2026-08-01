@@ -361,3 +361,65 @@ export function approveRequestForQuotation(
   };
 }
 
+/**
+ * FR-CON-02: send a reviewed request back to the client.
+ *
+ * There is no "returned" state in either lifecycle list, and inventing one
+ * would break the linear milestone track the SRS mandates for the client view
+ * (FR-COM-02). So the request regresses to SUBMITTED — the milestone the
+ * client is genuinely back at — and the *kind* of return is carried by the
+ * timeline comment and the EngineeringReviewRecord, which already distinguishes
+ * MODIFICATION_REQUIRED from MISSING_DOCUMENTS.
+ *
+ * Sibling of approveRequestForQuotation: the pair are the only writers of the
+ * status/currentStage combination for a review decision, which is what keeps
+ * the two fields from drifting into separate sources of truth.
+ */
+function returnRequestToClient(
+  request: LicensingRequest,
+  reason: string,
+  comment: string
+): LicensingRequest {
+  const trimmed = reason.trim();
+  if (!trimmed) {
+    // FR-CON-02 blocks a return unless correction reasons are filled.
+    throw new Error("A reason is required to return a request to the client.");
+  }
+
+  const now = new Date().toISOString();
+
+  return {
+    ...request,
+    currentStage: "SUBMITTED",
+    status: "submitted",
+    rejectionReason: trimmed,
+    updatedAt: now,
+    timeline: [
+      ...(request.timeline || []),
+      { status: "submitted" as RequestStatus, comment, date: now },
+    ],
+  };
+}
+
+export function returnRequestForModification(
+  request: LicensingRequest,
+  reason: string
+): LicensingRequest {
+  return returnRequestToClient(
+    request,
+    reason,
+    `Returned for modification. Reason: ${reason.trim()}`
+  );
+}
+
+export function returnRequestForMissingDocuments(
+  request: LicensingRequest,
+  note: string
+): LicensingRequest {
+  return returnRequestToClient(
+    request,
+    note,
+    `Missing documents requested. Details: ${note.trim()}`
+  );
+}
+

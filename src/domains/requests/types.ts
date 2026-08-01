@@ -107,6 +107,16 @@ export interface LicensingRequest {
   // Refinements
   currentStage: WorkflowStage;
   assignedQueue: RequestQueue | null;
+
+  /**
+   * The consulting engineer's reason when a request is sent back to the client
+   * (FR-CON-02). Written only by the return transitions in workflow.ts, and
+   * read by the client-facing action-required banner — an annotation beside
+   * the linear milestone track, not a stage of it (FR-COM-02).
+   * Left in place after the client acts: the banner is gated on the request
+   * still sitting at SUBMITTED, so it clears itself as the stage moves on.
+   */
+  rejectionReason?: string;
   
   // Documents
   documents: RequiredDocument[];
