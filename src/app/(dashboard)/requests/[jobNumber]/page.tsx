@@ -186,6 +186,15 @@ export default function RequestDetailsPage() {
       return t("requests:timeline.comments.inspectionReturned").replace("{{notes}}", notes);
     }
 
+    if (c.startsWith("Returned for modification. Reason: ")) {
+      const reason = c.substring("Returned for modification. Reason: ".length);
+      return t("requests:timeline.comments.returnedForModification").replace("{{reason}}", reason);
+    }
+    if (c.startsWith("Missing documents requested. Details: ")) {
+      const details = c.substring("Missing documents requested. Details: ".length);
+      return t("requests:timeline.comments.missingDocumentsRequested").replace("{{details}}", details);
+    }
+
     if (c.startsWith("Quotation submitted for review by ")) {
       const parts = c.split(". Total: SAR ");
       const userStr = parts[0].substring("Quotation submitted for review by ".length);
@@ -362,6 +371,30 @@ export default function RequestDetailsPage() {
           description={t("dashboard:track_progress_desc")}
         />
       </div>
+
+      {/* Consultant returned this request: an annotation beside the linear
+          milestone track, not a stage of it (FR-COM-02). Gated on the request
+          still sitting at SUBMITTED, so it clears once the stage moves on. */}
+      {request.currentStage === "SUBMITTED" && request.rejectionReason && (
+        <Card className="border-rose-500/20 bg-rose-500/5 shadow-sm">
+          <CardContent className="p-4 flex items-start gap-3">
+            <div className="p-2 bg-rose-600/10 rounded-lg text-rose-600 shrink-0">
+              <ShieldAlert className="h-5 w-5" />
+            </div>
+            <div className="space-y-1">
+              <h4 className="text-sm font-bold text-rose-700 dark:text-rose-400">
+                {t("requests:details.actionRequiredTitle")}
+              </h4>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                {t("requests:details.actionRequiredDesc")}
+              </p>
+              <p className="text-xs font-semibold text-foreground pt-1 leading-relaxed">
+                {request.rejectionReason}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Next Action Card */}
       <Card className="border-indigo-500/20 bg-indigo-500/5 shadow-sm">
