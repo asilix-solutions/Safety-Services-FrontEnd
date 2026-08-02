@@ -16,8 +16,10 @@ import Link from "next/link";
 import { useTranslation, useNamespaceTranslations } from "@/providers/i18n-provider";
 import { Quotation } from "@/domains/quotations/types";
 import { useRouter, useParams } from "next/navigation";
-import { getQuotations, approveQuotation, rejectQuotation, requestChangesOnQuotation } from "@/domains/quotations/workflow";
-import { getMergedRequests } from "@/domains/requests/storage";
+import { approveQuotation, rejectQuotation, requestChangesOnQuotation } from "@/domains/quotations/workflow";
+import { getScopedQuotationByJobNumber } from "@/domains/quotations/storage";
+import { getScopedRequestByJobNumber } from "@/domains/requests/storage";
+import { useTenantContext } from "@/hooks/use-tenant-context";
 import { getInvoiceByJobNumber } from "@/domains/invoices/storage";
 import { isRole } from "@/constants/permissions";
 import { USER_ROLES } from "@/constants/roles";
@@ -51,6 +53,7 @@ export default function QuotationApprovalDetailsPage() {
   };
   const router = useRouter();
   const params = useParams();
+  const tenantContext = useTenantContext();
   const jobNumber = params?.jobNumber as string;
 
   const [request, setRequest] = useState<LicensingRequest | null>(null);
@@ -62,20 +65,12 @@ export default function QuotationApprovalDetailsPage() {
   useEffect(() => {
     if (!jobNumber) return;
 
-    // Find request using domain function
-    const merged = getMergedRequests();
-    const foundReq = merged.find((r) => r.jobNumber === jobNumber);
-    if (foundReq) {
-      setRequest(foundReq);
-    }
-
-    // Find quotation using domain function
-    const quotes = getQuotations();
-    const foundQuote = quotes.find((q) => q.jobNumber === jobNumber);
-    if (foundQuote) {
-      setQuotation(foundQuote);
-    }
-  }, [jobNumber]);
+    // Scoped: a job number outside the caller's tenant must resolve to null and
+    // fall through to the not-found view, not render another company's priced
+    // quotation with live approve/reject controls on it.
+    setRequest(getScopedRequestByJobNumber(jobNumber, tenantContext));
+    setQuotation(getScopedQuotationByJobNumber(jobNumber, tenantContext));
+  }, [jobNumber, tenantContext]);
 
   if (!user || !isRole(user.role, [USER_ROLES.COMPANY_ADMIN])) {
     return (
@@ -119,6 +114,7 @@ export default function QuotationApprovalDetailsPage() {
         quotation,
         request,
         approvedBy: updaterName,
+        ctx: tenantContext,
       });
     } else if (actionType === "REQUEST_CHANGES") {
       requestChangesOnQuotation({
@@ -126,6 +122,7 @@ export default function QuotationApprovalDetailsPage() {
         request,
         reviewedBy: updaterName,
         comments: inputText,
+        ctx: tenantContext,
       });
     } else if (actionType === "REJECT") {
       rejectQuotation({
@@ -133,6 +130,7 @@ export default function QuotationApprovalDetailsPage() {
         request,
         rejectedBy: updaterName,
         reason: inputText,
+        ctx: tenantContext,
       });
     }
 

@@ -5,6 +5,43 @@ import { appendTimelineEvent } from "./helpers/timeline";
 import { persistQuotation, persistRequest } from "./helpers/persist";
 import { canSubmitQuotation, canApproveQuotation } from "@/domains/workflow-validation";
 import { createInvoiceFromApprovedQuotation } from "@/domains/invoices/workflow";
+import { isCrossTenant } from "@/domains/tenancy";
+import { TenantContext } from "@/domains/tenancy/types";
+
+/**
+ * Refuses a cross-tenant decision on a quotation.
+ *
+ * Rejects rather than returning not-found — the mirror of the scoped *readers*.
+ * A reader is handed an id and cannot tell a foreign record from a missing one,
+ * so it fails closed to null. A decision function is handed a resolved record,
+ * so a tenant mismatch is an attempt to act on another company's quotation and
+ * must be refused explicitly. Same shape as `resolveClosableProject`
+ * (`domains/closure/workflow.ts`).
+ *
+ * Keyed on the request's `tenantId`, which is required by the type; the
+ * quotation's is optional and only checked when present, so pre-tenancy rows
+ * still decide correctly instead of dead-locking.
+ *
+ * Super Admin passes through via `isCrossTenant`, matching `scopeToTenant`.
+ */
+function assertTenantMayDecide(
+  quotation: Quotation,
+  request: LicensingRequest,
+  ctx: TenantContext
+): void {
+  if (isCrossTenant(ctx.role)) return;
+  // Fails closed: an unauthenticated or half-initialised context must never be
+  // indistinguishable from a super admin.
+  if (!ctx.tenantId) {
+    throw new Error("A quotation decision requires the acting user's tenant.");
+  }
+  if (request.tenantId !== ctx.tenantId) {
+    throw new Error("A quotation may only be decided by its owning tenant.");
+  }
+  if (quotation.tenantId && quotation.tenantId !== ctx.tenantId) {
+    throw new Error("A quotation may only be decided by its owning tenant.");
+  }
+}
 
 
 export function submitQuotationForApproval({
@@ -62,11 +99,16 @@ export function approveQuotation({
   quotation,
   request,
   approvedBy,
+  ctx,
 }: {
   quotation: Quotation;
   request: LicensingRequest;
   approvedBy: string;
+  /** Acting user's tenant. Required — a decision cannot be attributed without it. */
+  ctx: TenantContext;
 }): { updatedQuotation: Quotation; updatedRequest: LicensingRequest } {
+  assertTenantMayDecide(quotation, request, ctx);
+
   const validation = canApproveQuotation(quotation, request);
   if (!validation.valid) {
     throw new Error(validation.reason);
@@ -121,12 +163,17 @@ export function rejectQuotation({
   request,
   rejectedBy,
   reason,
+  ctx,
 }: {
   quotation: Quotation;
   request: LicensingRequest;
   rejectedBy: string;
   reason: string;
+  /** Acting user's tenant. Required — a decision cannot be attributed without it. */
+  ctx: TenantContext;
 }): { updatedQuotation: Quotation; updatedRequest: LicensingRequest } {
+  assertTenantMayDecide(quotation, request, ctx);
+
   const nowStr = new Date().toISOString();
 
   const rejectedQuote = {
@@ -170,12 +217,17 @@ export function requestChangesOnQuotation({
   request,
   reviewedBy,
   comments,
+  ctx,
 }: {
   quotation: Quotation;
   request: LicensingRequest;
   reviewedBy: string;
   comments: string;
+  /** Acting user's tenant. Required — a decision cannot be attributed without it. */
+  ctx: TenantContext;
 }): { updatedQuotation: Quotation; updatedRequest: LicensingRequest } {
+  assertTenantMayDecide(quotation, request, ctx);
+
   const nowStr = new Date().toISOString();
 
   const reviewedQuote = {
