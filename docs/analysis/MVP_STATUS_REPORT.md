@@ -23,16 +23,17 @@ design and is listed in `docs/BACKLOG.md`, not counted as a gap here.
 - **Maintenance contracts are deferred post-MVP** by an explicit product decision
   (2026-08-01). The rule engine correctly routes 150–1000 m² to the maintenance
   track and stops there. See `docs/BACKLOG.md`.
-- **Tenant isolation is complete in the domain layer and incomplete at four UI
-  surfaces.** Thirteen domains scope their reads, and every single-record reader
-  in the licensing cycle now has a fail-closed scoped variant. But four feature
-  and route files bypass those readers and query unscoped collections directly —
-  two of them are cross-tenant *write* surfaces. These are listed in §4 and in
-  `docs/BACKLOG.md` as blocking.
-- **Readiness for API wiring: blocked on §4 only.** Nothing else in the licensing
-  cycle needs frontend work first. The four fixes are each a substitution of an
-  unscoped reader for its existing scoped counterpart — no new mechanism is
-  required.
+- **Tenant isolation is complete across both the domain and the interface layer**
+  (closed 2026-08-02, Session 28). Thirteen domains scope their reads, every
+  single-record reader in the licensing cycle has a fail-closed scoped variant,
+  and the four interface surfaces that used to bypass them now resolve through
+  the scoped path. The two that carried cross-tenant *write* risk are guarded at
+  the action, not only at the display.
+- **Ready for API wiring.** No known isolation gap remains in the licensing cycle.
+  Everything still outstanding is in `docs/BACKLOG.md`: bucket B needs a backend,
+  bucket C needs an owner decision or a refactor. Four domains outside the
+  licensing cycle — `procurement`, `labor`, `site-visits`, `notifications` — are
+  still unscoped and are tracked there as C1.
 
 ---
 
@@ -87,33 +88,47 @@ and every scoped reader routes through it.
 
 ---
 
-## 4. Open before API wiring — four UI surfaces bypass the scoped readers
+## 4. Interface-layer isolation — closed 2026-08-02
 
-These are the only items standing between this repository and API wiring. Each is
-a substitution, not a new mechanism.
+Four surfaces used to bypass the scoped readers. All four now resolve through
+them; the two write surfaces are additionally guarded at the action.
 
-| # | Surface | File | Why it matters |
+| # | Surface | Was | Now |
 |---|---|---|---|
-| 1 | Quotation **approval** page | `app/(dashboard)/quotations/approvals/[jobNumber]/page.tsx:66-77` | Resolves request and quotation from unscoped collections by URL job number. `grep -c tenant` on the file returns **0**. Role-gated to Company Admin but not tenant-gated, so an admin of one tenant can **approve or reject another tenant's quotation** — a cross-tenant financial write |
-| 2 | Quotation **builder** page | `app/(dashboard)/quotations/[jobNumber]/page.tsx:45-53` | Same hand-rolled `.find()` over unscoped collections; does not use `getScopedQuotationByJobNumber`. Allows pricing a foreign tenant's request |
-| 3 | Project workspace shell | `features/projects/project-workspace/hooks/use-project-workspace.ts:69` | `getProjects()` unscoped. The contract, certificate and quotation panels inside are scoped, but the project record itself — name, client, job number, silos, costs — is not |
-| 4 | "Ready to generate" sections | `features/contracts/contract-list/hooks/use-contract-list.ts:38`; `features/certificates/hooks/use-certificate-list.ts:41,56` | Eligible-project lists are built from all tenants' projects, so a contract or certificate can be issued against a foreign project |
+| 1 | Quotation **approval** page | Hand-rolled `.find()` over `getMergedRequests()` and `getQuotations()`; `grep -c tenant` = **0**. Role-gated to Company Admin but not tenant-gated, so one tenant's admin could approve or reject another tenant's quotation | Reads via `getScopedRequestByJobNumber` / `getScopedQuotationByJobNumber`; a foreign job number falls through to not-found. `approveQuotation`, `rejectQuotation` and `requestChangesOnQuotation` take the acting `TenantContext` and run `assertTenantMayDecide`, which **rejects** a cross-tenant decision |
+| 2 | Quotation **builder** page | Same unscoped `.find()`; the only `tenant` reference was a write stamp | Same scoped readers; `submitQuotationForApproval` is guarded the same way |
+| 3 | Project workspace shell | `getProjects()` unscoped — the panels inside were scoped, the shell was not | `getScopedProjects(tenantContext)` |
+| 4 | "Ready to generate" sections | Eligible-project lists built from every tenant's projects, driving contract generation and certificate issuance | `getScopedProjects(tenantContext)`, in the certificate hook at **both** the list and the issuance re-resolve |
 
-Domains still lacking tenant scoping altogether — `procurement` (has an unused
-`tenantId` field), `labor` (no `tenantId`), `site-visits`, `notifications` — are
-described in `docs/BACKLOG.md` under bucket C.
+`assertTenantMayDecide` rejects rather than returning not-found, mirroring
+`resolveClosableProject`: a reader is handed an id and cannot tell foreign from
+missing, so it fails closed to null; a decision function is handed a resolved
+record, so a mismatch is an attempt to act on another company's data. `ctx` is a
+required field on all four decision functions, so the type checker refuses any
+unguarded call site.
+
+Super Admin cross-tenant access is preserved throughout via `isCrossTenant`.
+
+**Still unscoped, outside the licensing cycle:** `procurement` (has an unused
+`tenantId` field), `labor` (no `tenantId`), `site-visits`, `notifications` —
+tracked in `docs/BACKLOG.md` as C1.
 
 ---
 
 ## 5. Verdict
 
 **The licensing-cycle MVP is functionally complete.** Maintenance is deferred by
-product decision. Tenant isolation is complete in the domain layer.
+product decision. **Tenant isolation is complete across the domain and interface
+layers**, with cross-tenant decisions refused at the action and not only hidden
+from the display.
 
-**Ready for API wiring once the four surfaces in §4 are closed.** Until then the
-system leaks across tenants at those four points, and two of them permit
-cross-tenant writes — on a real backend those become real cross-tenant mutations,
-which is why they are called out here rather than filed as ordinary backlog.
+**Ready for API wiring.** No known isolation gap remains in the licensing cycle.
+
+One caveat worth carrying forward: frontend scoping is advisory. `localStorage`
+is fully readable by the client whatever the UI does, so what this work
+guarantees is that no application path exposes or mutates another tenant's
+records — and, just as importantly, that the contract the backend must enforce
+is now defined precisely. Server-side `tenant_id` enforcement is bucket B.
 
 Everything else outstanding is documented in `docs/BACKLOG.md`, split into what
 needs a backend (bucket B) and what needs an owner decision or a structural

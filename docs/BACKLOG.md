@@ -5,7 +5,7 @@ unblocks it. Current status of what *is* done: `docs/analysis/MVP_STATUS_REPORT.
 
 Items are bucketed:
 
-- **BLOCKING** — must close before API wiring.
+- **CLOSED** — kept as a record. Nothing here blocks API wiring any more.
 - **B — needs the backend.** Cannot be built against a LocalStorage mock.
 - **C — needs an owner decision or a structural refactor.** Changes behaviour or
   touches stable logic; not cleanup, and not to be picked up inside a tidy-up pass.
@@ -15,23 +15,29 @@ cleanup) and `docs/debt/FR_RU_BACKLOG.md` (rule-engine deviations).
 
 ---
 
-## 🚧 BLOCKING — four UI surfaces bypass the scoped readers
+## ✅ CLOSED — interface-layer isolation (2026-08-02)
 
-Tenant isolation is complete in the domain layer; these four files query unscoped
-collections directly instead of using the scoped readers that already exist. Two
-of them permit cross-tenant **writes**. Each fix is a substitution — no new
-mechanism is needed.
+Four interface surfaces used to bypass the scoped readers; two of them permitted
+cross-tenant **writes**. All four are closed. Kept as the record of what was wrong
+and how it was fixed.
 
-| # | Surface | File | Unblocker |
-|---|---|---|---|
-| 1 | Quotation approval | `app/(dashboard)/quotations/approvals/[jobNumber]/page.tsx:66-77` | Use `getScopedQuotationByJobNumber` + `getScopedRequestByJobNumber`. Today an admin of one tenant can approve/reject another tenant's quotation |
-| 2 | Quotation builder | `app/(dashboard)/quotations/[jobNumber]/page.tsx:45-53` | Same substitution; allows pricing a foreign request |
-| 3 | Project workspace shell | `features/projects/project-workspace/hooks/use-project-workspace.ts:69` | Replace `getProjects()` with `getScopedProjects(tenantContext)` — the hook already holds `tenantContext` |
-| 4 | "Ready to generate" lists | `features/contracts/contract-list/hooks/use-contract-list.ts:38`; `features/certificates/hooks/use-certificate-list.ts:41,56` | Replace `getProjects()` with `getScopedProjects(tenantContext)` |
+| # | Surface | Fix |
+|---|---|---|
+| 1 | Quotation approval | Scoped readers for the display, **plus** `assertTenantMayDecide` inside `approveQuotation` / `rejectQuotation` / `requestChangesOnQuotation` — a cross-tenant decision is refused at the action, not merely hidden from the view |
+| 2 | Quotation builder | Same scoped readers; `submitQuotationForApproval` guarded identically |
+| 3 | Project workspace shell | `getProjects()` → `getScopedProjects(tenantContext)` |
+| 4 | "Ready to generate" lists | `getProjects()` → `getScopedProjects(tenantContext)`, scoped in the certificate hook at **both** the eligibility list and the issuance re-resolve |
 
-**Why not fixed in the Session-27 cleanup pass:** these change who can access and
-mutate what. That is a behaviour change, and behaviour changes do not belong in a
-cleanup commit — they need their own session with verification per fix.
+`assertTenantMayDecide` rejects rather than returning not-found, mirroring
+`resolveClosableProject`: a reader cannot tell a foreign id from a missing one and
+fails closed to null, but a decision function holds a resolved record, so a
+mismatch is an attempt to act on another company's data. `ctx` is a **required**
+field on all four decision functions, so the type checker refuses an unguarded
+call site instead of leaving it to review. Super Admin access is preserved via
+`isCrossTenant`.
+
+**No blocking isolation item remains in the licensing cycle.** The four domains
+outside it that are still unscoped are tracked below as C1.
 
 ---
 
