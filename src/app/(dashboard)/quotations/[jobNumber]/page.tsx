@@ -13,8 +13,10 @@ import { Input } from "@/shared/ui/input";
 import { Checkbox } from "@/shared/ui/checkbox";
 import { Label } from "@/shared/ui/label";
 import { Quotation, QuotationItem, QuotationStatus } from "@/domains/quotations/types";
-import { getMergedRequests } from "@/domains/requests/storage";
-import { getQuotations, persistQuotation, updateQuotationItems, createQuotationDraft, submitQuotationForApproval, getQuotationSuggestedItems, computeQuotationTotals } from "@/domains/quotations/workflow";
+import { getScopedRequestByJobNumber } from "@/domains/requests/storage";
+import { getScopedQuotationByJobNumber } from "@/domains/quotations/storage";
+import { useTenantContext } from "@/hooks/use-tenant-context";
+import { persistQuotation, updateQuotationItems, createQuotationDraft, submitQuotationForApproval, getQuotationSuggestedItems, computeQuotationTotals } from "@/domains/quotations/workflow";
 import { Plus, Trash2, ArrowLeft, Save, Send, X } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -28,6 +30,7 @@ export default function QuotationBuilderPage() {
   useNamespaceTranslations(["requests", "dashboard", "common"]);
 
   const jobNumber = params?.jobNumber as string;
+  const tenantContext = useTenantContext();
 
   const [request, setRequest] = useState<LicensingRequest | null>(null);
   const [items, setItems] = useState<QuotationItem[]>([]);
@@ -41,23 +44,22 @@ export default function QuotationBuilderPage() {
   // Load request details and existing quotation if any
   useEffect(() => {
     if (jobNumber) {
-      // Find request using domain function
-      const merged = getMergedRequests();
-      const foundRequest = merged.find((r) => r.jobNumber === jobNumber);
-      if (foundRequest) {
-        setRequest(foundRequest);
-      }
+      // Scoped: a job number outside the caller's tenant must resolve to null
+      // and fall through to the not-found view, not open a pricing workspace on
+      // another company's request.
+      setRequest(getScopedRequestByJobNumber(jobNumber, tenantContext));
 
-      // Find existing quotation using domain storage helper
-      const quotes = getQuotations();
-      const foundQuote = quotes.find((q) => q.jobNumber === jobNumber);
+      const foundQuote = getScopedQuotationByJobNumber(jobNumber, tenantContext);
       if (foundQuote) {
         setExistingQuotation(foundQuote);
         setItems(foundQuote.items);
         setQuotationStatus(foundQuote.quotationStatus);
       }
     }
-  }, [jobNumber]);
+    // `tenantContext` is a dependency because the scoped readers fail closed:
+    // before AuthProvider resolves it carries no tenantId, so without the re-run
+    // the owning tenant's builder would stay permanently empty.
+  }, [jobNumber, tenantContext]);
 
   if (!user) return null;
 
@@ -168,6 +170,7 @@ export default function QuotationBuilderPage() {
           quotation: updated,
           request,
           submittedBy: userNameOrId,
+          ctx: tenantContext,
         });
         setQuotationStatus("SUBMITTED_FOR_APPROVAL");
         setExistingQuotation(updatedQuotation);

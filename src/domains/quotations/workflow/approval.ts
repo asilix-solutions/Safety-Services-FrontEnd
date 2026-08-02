@@ -48,11 +48,16 @@ export function submitQuotationForApproval({
   quotation,
   request,
   submittedBy,
+  ctx,
 }: {
   quotation: Quotation;
   request: LicensingRequest;
   submittedBy: string;
+  /** Acting user's tenant. Required — a submission cannot be attributed without it. */
+  ctx: TenantContext;
 }): { updatedQuotation: Quotation; updatedRequest: LicensingRequest } {
+  assertTenantMayDecide(quotation, request, ctx);
+
   const validation = canSubmitQuotation(quotation, request);
   if (!validation.valid) {
     throw new Error(validation.reason);
