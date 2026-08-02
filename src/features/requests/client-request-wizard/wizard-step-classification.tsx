@@ -101,7 +101,7 @@ export function ClassificationStep({
             {clientMeta.icon}
           </div>
           <div className="space-y-1">
-            <span className="text-[10px] uppercase font-bold tracking-wider opacity-75">Assigned Path</span>
+            <span className="text-[10px] uppercase font-bold tracking-wider opacity-75">{t("requests:wizard.classification.assignedPath")}</span>
             <h3 className="font-bold text-base tracking-tight text-foreground">{clientMeta.title}</h3>
           </div>
         </div>

@@ -102,6 +102,7 @@
   "wizard.documents.loaded": "تم الرفع",
   "wizard.documents.remove": "حذف",
   "wizard.documents.continueToClassification": "المتابعة للتصنيف التلقائي",
+  "wizard.classification.assignedPath": "المسار المُعيَّن",
   "wizard.classification.title": "محرك تصنيف مسارات العمل",
   "wizard.classification.subtitle": "قام النظام بتحليل مساحة منشأتك وقائمة معدات السلامة لتوجيه طلبك للمسار المناسب.",
   "wizard.classification.fastTrackTitle": "مسار سريع - سلامة أساسية",

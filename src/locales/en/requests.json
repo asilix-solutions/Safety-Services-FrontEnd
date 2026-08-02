@@ -102,6 +102,7 @@
   "wizard.documents.loaded": "Loaded",
   "wizard.documents.remove": "Remove",
   "wizard.documents.continueToClassification": "Continue to Auto Classification",
+  "wizard.classification.assignedPath": "Assigned Path",
   "wizard.classification.title": "Workflow Classification Engine",
   "wizard.classification.subtitle": "SSLM has analyzed your facility area and safety equipment checklist to route your request.",
   "wizard.classification.fastTrackTitle": "Fast-Track basic Safety",
