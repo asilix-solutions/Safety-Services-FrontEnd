@@ -6,7 +6,7 @@ import { useTranslation, useNamespaceTranslations } from "@/providers/i18n-provi
 import { ClientCertificate } from "@/domains/certificates/types";
 import { getScopedCertificates } from "@/domains/certificates/storage";
 import { issueCertificateFromProject, revokeCertificate } from "@/domains/certificates/workflow";
-import { getProjects } from "@/domains/projects/storage";
+import { getScopedProjects } from "@/domains/projects/storage";
 import { checkProjectCertificateEligibility, CertificateEligibility } from "@/domains/workflow-validation/certificate.validators";
 import { isRole, hasPermission } from "@/constants/permissions";
 
@@ -38,7 +38,9 @@ export function useCertificateList() {
 
     const isAdmin = hasPermission(user.role, "certificates.manage");
     if (isAdmin) {
-      const allProjects = getProjects();
+      // Scoped: the eligibility list drives issuance, so an unscoped list would
+      // offer another tenant's completed projects as certifiable.
+      const allProjects = getScopedProjects(tenantContext);
       const eligible = allProjects
         .map((proj) => checkProjectCertificateEligibility(proj, allCertificates))
         .filter((item) => item.eligible);
@@ -53,7 +55,10 @@ export function useCertificateList() {
   const handleIssueCertificate = (item: CertificateEligibility) => {
     if (!user) return;
     try {
-      const allProjects = getProjects();
+      // Scoped again at the point of the write, not just where the list is
+      // built: the id travels through component state, so re-resolving it
+      // unscoped here would reopen the hole the eligibility fix closes.
+      const allProjects = getScopedProjects(tenantContext);
       const targetProject = allProjects.find((p) => p.id === item.sourceId);
       if (!targetProject) {
         throw new Error("Target project not found.");

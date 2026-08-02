@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/providers/AuthProvider";
 import { useTranslation, useNamespaceTranslations } from "@/providers/i18n-provider";
 import { Project } from "@/types/project";
-import { getProjects } from "@/domains/projects/storage";
+import { getScopedProjects } from "@/domains/projects/storage";
 import { getRequests } from "@/domains/requests/storage";
 import { ClientContract } from "@/domains/contracts/types";
 import { getScopedContracts } from "@/domains/contracts/storage";
@@ -35,7 +35,10 @@ export function useContractList() {
     }
     setContracts(userContracts);
 
-    const allProjects = getProjects();
+    // Scoped: the "ready to generate" list drives a write — generating a
+    // contract against whatever project is picked here — so an unscoped list
+    // would let one tenant issue a contract on another tenant's project.
+    const allProjects = getScopedProjects(tenantContext);
     const completed = allProjects.filter((p) => p.status === "completed" || p.executionPhase === "COMPLETED");
     const withoutContracts = completed.filter((p) => !allContracts.some((c) => c.projectId === p.id));
     setCompletedProjectsWithoutContracts(withoutContracts);
