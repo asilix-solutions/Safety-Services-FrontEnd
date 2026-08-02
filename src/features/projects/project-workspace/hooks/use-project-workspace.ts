@@ -4,7 +4,7 @@ import { useAuth } from "@/providers/AuthProvider";
 import { useParams } from "next/navigation";
 import { useTranslation } from "@/providers/i18n-provider";
 import { Project, SiloExecutionData } from "@/types/project";
-import { getProjects } from "@/domains/projects/storage";
+import { getScopedProjects } from "@/domains/projects/storage";
 import { LicensingRequest } from "@/domains/requests/types";
 import { getMergedRequests } from "@/domains/requests/storage";
 import { getScopedContractByProjectId } from "@/domains/contracts/storage";
@@ -66,7 +66,12 @@ export function useProjectWorkspace() {
 
   const loadData = () => {
     if (projectId) {
-      const list = getProjects();
+      // Scoped: the workspace resolves the project from the caller's own tenant
+      // only, so a foreign projectId in the URL renders as not-found instead of
+      // exposing the record, its client, its silos and its costs. The contract,
+      // certificate and quotation panels inside were already scoped; this closes
+      // the shell that hosts them.
+      const list = getScopedProjects(tenantContext);
       const foundProject = list.find(
         (p) => p.id === projectId || p.jobNumber === projectId
       );
