@@ -59,7 +59,7 @@ export function DocumentsStep({ requestType, documents, onDocumentUploaded, onNe
               key={index}
               className={`transition-all duration-200 border-dashed ${
                 doc.uploaded
-                  ? "border-emerald-500/30 bg-emerald-500/[0.03] dark:bg-emerald-950/[0.08]"
+                  ? "border-success/30 bg-success/[0.03]"
                   : "border-border bg-card hover:bg-muted/30"
               }`}
             >
@@ -67,26 +67,26 @@ export function DocumentsStep({ requestType, documents, onDocumentUploaded, onNe
                 <div className="space-y-1.5 md:max-w-xs">
                   <div className="flex items-center gap-2">
                     {doc.uploaded ? (
-                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-500">
+                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-success/10 text-success">
                         <CheckCircle2 className="h-3.5 w-3.5" />
                       </span>
                     ) : (
-                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-500/10 text-amber-500">
+                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-warning/10 text-warning">
                         <AlertCircle className="h-3.5 w-3.5 animate-pulse" />
                       </span>
                     )}
                     <span className="text-sm font-semibold text-foreground tracking-tight">{doc.name}</span>
                   </div>
-                  <p className="text-[11px] text-muted-foreground leading-relaxed pl-7 rtl:pl-0 rtl:pr-7">
+                  <p className="text-[11px] text-muted-foreground leading-relaxed ps-7">
                     {t("requests:wizard.documents.expectedFormats").replace("{{formats}}", doc.type.toUpperCase())}
                   </p>
                 </div>
 
                 <div className="flex-1 max-w-sm">
                   {doc.uploaded ? (
-                    <div className="p-3 rounded-lg border border-emerald-500/15 bg-background shadow-sm flex items-center justify-between gap-3 text-xs">
+                    <div className="p-3 rounded-lg border border-success/15 bg-background shadow-sm flex items-center justify-between gap-3 text-xs">
                       <div className="flex items-center gap-2 min-w-0">
-                        <span className="text-emerald-500 font-medium whitespace-nowrap">
+                        <span className="text-success font-medium whitespace-nowrap">
                           {t("requests:wizard.uploads.uploaded")}:
                         </span>
                         <span className="font-mono font-medium truncate text-foreground/80">

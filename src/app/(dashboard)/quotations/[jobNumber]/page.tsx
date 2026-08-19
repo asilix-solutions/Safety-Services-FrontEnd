@@ -212,7 +212,7 @@ export default function QuotationBuilderPage() {
       </div>
 
       {successMessage && (
-        <div className="p-4 rounded-xl border border-emerald-500/20 bg-emerald-500/5 text-emerald-600 dark:text-emerald-400 text-xs font-semibold">
+        <div className="p-4 rounded-xl border border-success/20 bg-success/5 text-success text-xs font-semibold">
           {successMessage}
         </div>
       )}

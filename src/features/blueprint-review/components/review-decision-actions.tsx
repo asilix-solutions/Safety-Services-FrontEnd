@@ -74,7 +74,7 @@ export function ReviewDecisionActions({
           <div className="flex flex-col gap-2 font-sans">
             <div className="grid grid-cols-2 gap-2">
               <Button
-                className="h-9 text-xs gap-1 bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm font-bold"
+                className="h-9 text-xs gap-1 bg-success hover:bg-success/90 text-success-foreground shadow-sm font-bold"
                 disabled={disabled}
                 onClick={() => setShowApproveConfirm(true)}
               >
@@ -83,7 +83,7 @@ export function ReviewDecisionActions({
               </Button>
 
               <Button
-                className="h-9 text-xs gap-1 bg-orange-600 hover:bg-orange-700 text-white shadow-sm font-bold"
+                className="h-9 text-xs gap-1 bg-warning hover:bg-warning/90 text-warning-foreground shadow-sm font-bold"
                 disabled={disabled}
                 onClick={onReturn}
               >
@@ -94,7 +94,7 @@ export function ReviewDecisionActions({
 
             <Button
               variant="outline"
-              className="w-full h-9 text-xs gap-1 text-purple-600 border-purple-500/30 hover:bg-purple-500/5 hover:text-purple-700 font-bold"
+              className="w-full h-9 text-xs gap-1 text-info border-info/30 hover:bg-info/5 hover:text-info font-bold"
               disabled={disabled}
               onClick={onRequestMissingDocs}
             >
@@ -110,7 +110,7 @@ export function ReviewDecisionActions({
         <AlertDialogContent className="font-sans">
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2 text-sm">
-              <Check className="h-5 w-5 text-emerald-500 shrink-0" />
+              <Check className="h-5 w-5 text-success shrink-0" />
               {t("requests:blueprintReview.decisions.approveTitle")}
             </AlertDialogTitle>
             <AlertDialogDescription className="text-xs leading-relaxed">
@@ -125,7 +125,7 @@ export function ReviewDecisionActions({
             </div>
             <div className="flex justify-between gap-3">
               <span className="text-muted-foreground">{t("requests:blueprintReview.decisions.nextStage")}</span>
-              <span className="font-bold text-emerald-600">{t("requests:stages.QUOTATION")}</span>
+              <span className="font-bold text-success">{t("requests:stages.QUOTATION")}</span>
             </div>
             <div className="flex justify-between gap-3">
               <span className="text-muted-foreground">{t("requests:blueprintReview.decisions.impact")}</span>
@@ -136,7 +136,7 @@ export function ReviewDecisionActions({
           <AlertDialogFooter>
             <AlertDialogCancel>{t("requests:blueprintReview.decisions.cancel")}</AlertDialogCancel>
             <AlertDialogAction
-              className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
+              className="bg-success hover:bg-success/90 text-success-foreground font-semibold"
               onClick={onApprove}
             >
               {t("requests:blueprintReview.decisions.approveBtn")}
@@ -156,7 +156,7 @@ export function ReviewDecisionActions({
         <AlertDialogContent className="font-sans">
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2 text-sm">
-              <CornerUpLeft className="h-5 w-5 text-orange-500 shrink-0" />
+              <CornerUpLeft className="h-5 w-5 text-warning shrink-0" />
               {t("requests:blueprintReview.decisions.return")}
             </AlertDialogTitle>
             <AlertDialogDescription className="text-xs leading-relaxed">
@@ -181,7 +181,7 @@ export function ReviewDecisionActions({
           <AlertDialogFooter>
             <AlertDialogCancel>{t("requests:blueprintReview.decisions.cancel")}</AlertDialogCancel>
             <AlertDialogAction
-              className="bg-orange-600 hover:bg-orange-700 text-white font-semibold"
+              className="bg-warning hover:bg-warning/90 text-warning-foreground font-semibold"
               disabled={!correctionReason.trim()}
               onClick={onSubmitReturn}
             >
@@ -202,7 +202,7 @@ export function ReviewDecisionActions({
         <AlertDialogContent className="font-sans">
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2 text-sm">
-              <FileQuestion className="h-5 w-5 text-purple-500 shrink-0" />
+              <FileQuestion className="h-5 w-5 text-info shrink-0" />
               {t("requests:blueprintReview.decisions.missingDocs")}
             </AlertDialogTitle>
             <AlertDialogDescription className="text-xs leading-relaxed">
@@ -227,7 +227,7 @@ export function ReviewDecisionActions({
           <AlertDialogFooter>
             <AlertDialogCancel>{t("requests:blueprintReview.decisions.cancel")}</AlertDialogCancel>
             <AlertDialogAction
-              className="bg-purple-600 hover:bg-purple-700 text-white font-semibold"
+              className="bg-info hover:bg-info/90 text-info-foreground font-semibold"
               disabled={!missingDocumentsNote.trim()}
               onClick={onSubmitMissingDocs}
             >

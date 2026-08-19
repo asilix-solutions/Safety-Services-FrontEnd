@@ -139,20 +139,20 @@ export function BlueprintViewer({ request }: BlueprintViewerProps) {
             </div>
 
             {/* Document Vector Frame Viewport */}
-            <div className="flex-1 min-h-[260px] rounded-xl border border-border bg-slate-950 flex flex-col items-center justify-center p-6 text-center shadow-inner relative overflow-hidden">
+            <div className="flex-1 min-h-[260px] rounded-xl border border-border bg-muted/30 flex flex-col items-center justify-center p-6 text-center shadow-inner relative overflow-hidden">
               {/* Vector Grid Background Simulation */}
-              <div className="absolute inset-0 opacity-5 pointer-events-none bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:16px_16px]" />
+              <div className="absolute inset-0 opacity-5 pointer-events-none bg-[radial-gradient(currentColor_1px,transparent_1px)] [background-size:16px_16px]" />
 
               {fileInfo.isCad ? (
                 <div className="space-y-3 z-10">
-                  <div className="mx-auto h-12 w-12 bg-indigo-500/10 text-indigo-500 rounded-full flex items-center justify-center border border-indigo-500/20">
+                  <div className="mx-auto h-12 w-12 bg-primary/10 text-primary rounded-full flex items-center justify-center border border-primary/20">
                     <FileCode className="h-6 w-6" />
                   </div>
                   <div className="space-y-1">
-                    <span className="text-xs font-bold text-slate-100 block">
+                    <span className="text-xs font-bold text-foreground block">
                       {t("requests:blueprintReview.viewer.cadViewerTitle")} ({fileInfo.ext.toUpperCase()})
                     </span>
-                    <span className="text-[10px] text-slate-400 block max-w-[220px] mx-auto leading-relaxed">
+                    <span className="text-[10px] text-muted-foreground block max-w-[220px] mx-auto leading-relaxed">
                       {t("requests:blueprintReview.viewer.cadNotice")}
                     </span>
                   </div>
@@ -194,7 +194,7 @@ export function BlueprintViewer({ request }: BlueprintViewerProps) {
               </div>
               <div>
                 <span className="text-muted-foreground block">{t("requests:blueprintReview.viewer.status")}</span>
-                <span className="font-semibold text-emerald-500">{t("requests:blueprintReview.viewer.verified")}</span>
+                <span className="font-semibold text-success">{t("requests:blueprintReview.viewer.verified")}</span>
               </div>
               <div>
                 <span className="text-muted-foreground block">{t("requests:blueprintReview.viewer.category")}</span>
@@ -226,7 +226,7 @@ export function BlueprintViewer({ request }: BlueprintViewerProps) {
           </div>
         ) : (
           <div className="p-8 text-center space-y-3 py-14">
-            <div className="mx-auto h-12 w-12 bg-rose-500/10 text-rose-500 rounded-full flex items-center justify-center">
+            <div className="mx-auto h-12 w-12 bg-destructive/10 text-destructive rounded-full flex items-center justify-center">
               <AlertTriangle className="h-6 w-6" />
             </div>
             <div className="space-y-1">

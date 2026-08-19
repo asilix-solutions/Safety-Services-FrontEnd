@@ -15,7 +15,7 @@ export function RequestDocumentsCard({ documents, t }: RequestDocumentsCardProps
     <Card className="border-border bg-card">
       <CardHeader className="pb-2 border-b border-border">
         <CardTitle className="text-sm font-bold flex items-center gap-2">
-          <FileText className="h-4 w-4 text-indigo-500" />
+          <FileText className="h-4 w-4 text-primary" />
           {t("projects:documents.linkedRequestFiles")}
         </CardTitle>
       </CardHeader>

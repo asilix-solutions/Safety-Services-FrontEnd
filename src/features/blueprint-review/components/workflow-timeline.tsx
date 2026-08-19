@@ -40,9 +40,9 @@ export function WorkflowTimeline({ currentStage }: WorkflowTimelineProps) {
                   <div
                     className={`h-7 w-7 rounded-full flex items-center justify-center border text-xs font-bold transition-all ${
                       isCompleted
-                        ? "bg-emerald-600 border-emerald-600 text-white"
+                        ? "bg-success border-success text-success-foreground"
                         : isActive
-                        ? "bg-primary border-primary text-white shadow-sm ring-2 ring-primary/20"
+                        ? "bg-primary border-primary text-primary-foreground shadow-sm ring-2 ring-primary/20"
                         : "bg-background border-border text-muted-foreground"
                     }`}
                   >
@@ -61,7 +61,7 @@ export function WorkflowTimeline({ currentStage }: WorkflowTimelineProps) {
                 {idx < steps.length - 1 && (
                   <div
                     className={`flex-1 h-0.5 mx-2 transition-all ${
-                      idx < currentStepIndex ? "bg-emerald-600" : "bg-border"
+                      idx < currentStepIndex ? "bg-success" : "bg-border"
                     }`}
                   />
                 )}

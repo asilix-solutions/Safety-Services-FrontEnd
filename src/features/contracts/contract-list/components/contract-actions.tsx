@@ -23,7 +23,7 @@ export function ContractActions({
   if (!contract) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       <Card className="max-w-md w-full border-border bg-card shadow-2xl overflow-hidden">
         <CardHeader className="border-b border-border pb-4">
           <CardTitle className="text-sm font-bold flex items-center gap-2">

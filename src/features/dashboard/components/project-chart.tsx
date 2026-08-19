@@ -27,12 +27,17 @@ export function ProjectChart() {
               <YAxis fontSize={11} tickLine={false} />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: "#0f172a",
-                  borderColor: "rgba(255,255,255,0.1)",
+                  backgroundColor: "var(--popover)",
+                  borderColor: "var(--border)",
+                  color: "var(--popover-foreground)",
                   borderRadius: "8px",
+                  boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                }}
+                itemStyle={{
+                  color: "var(--popover-foreground)",
                 }}
               />
-              <Bar dataKey="value" fill="var(--color-primary)" radius={[4, 4, 0, 0]} name="Inspection Count" />
+              <Bar dataKey="value" fill="hsl(var(--chart-1))" radius={[4, 4, 0, 0]} name="Inspection Count" />
             </BarChart>
           </ResponsiveContainer>
         ) : (

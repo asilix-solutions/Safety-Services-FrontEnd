@@ -59,7 +59,7 @@ export function ClientOverview({ viewModel }: ClientOverviewProps) {
             viewAllKey="overview_view_all"
             viewAllHref="/projects"
             items={viewModel.activeProjects}
-            icon={<FolderOpen className="h-4.5 w-4.5 text-sky-500" />}
+            icon={<FolderOpen className="h-4.5 w-4.5 text-primary" />}
           />
         </div>
 

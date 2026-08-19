@@ -68,12 +68,12 @@ export function ObstacleList({ viewModel, t }: ObstacleListProps) {
           <CardContent className="space-y-4">
             {viewModel.critical.length > 0 && (
               <div className="space-y-2">
-                <h4 className="text-[10px] font-bold text-red-600 dark:text-red-400 uppercase tracking-wide">
-                  {t("projects:obstacles.criticalHeading")}
+                <h4 className="text-[10px] font-bold text-destructive uppercase tracking-wide">
+                  {t("projects:obstacles.openCritical") || "Open Critical Items"}
                 </h4>
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   {viewModel.critical.map(task => (
-                    <div key={task.id} className="p-3 border border-red-500/20 rounded-lg flex items-center justify-between gap-4 text-xs bg-red-500/[0.02]">
+                    <div key={task.id} className="p-3 border border-destructive/20 rounded-lg flex items-center justify-between gap-4 text-xs bg-destructive/[0.02]">
                       <div>
                         <span className="font-semibold text-foreground block">{taskTitle(t, task)}</span>
                         <span className="text-[10px] text-muted-foreground">{taskDescription(t, task)}</span>

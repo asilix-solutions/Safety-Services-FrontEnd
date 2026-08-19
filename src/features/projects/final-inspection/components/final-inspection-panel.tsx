@@ -47,9 +47,9 @@ export function FinalInspectionPanel({
 
   return (
     <div className="space-y-6">
-      <div className="p-4 rounded-xl border border-indigo-500/10 bg-indigo-500/[0.03] dark:bg-indigo-950/[0.08] text-xs flex gap-3 items-start">
-        <ShieldAlert className="h-5 w-5 text-indigo-500 shrink-0 mt-0.5" />
-        <div className="space-y-0.5 text-left rtl:text-right">
+      <div className="p-4 rounded-xl border border-primary/10 bg-primary/[0.03] text-xs flex gap-3 items-start">
+        <ShieldAlert className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+        <div className="space-y-0.5 text-start">
           <h4 className="font-bold text-foreground">
             {t("projects:inspection.title") || "Final Compliance Inspection & Decision"}
           </h4>

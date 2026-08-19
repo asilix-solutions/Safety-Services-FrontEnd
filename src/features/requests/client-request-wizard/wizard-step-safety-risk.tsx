@@ -135,13 +135,13 @@ export function SafetyRiskStep({ form, instantReportAllowed, onNext, onPrev }: S
         </div>
 
         {hasDeclaredHazard && (
-          <div className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/[0.06] p-3">
-            <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" />
+          <div className="flex items-start gap-2 rounded-lg border border-warning/30 bg-warning/[0.06] p-3">
+            <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5 text-warning" />
             <div className="space-y-0.5">
-              <p className="text-xs font-bold text-amber-700 dark:text-amber-400">
+              <p className="text-xs font-bold text-warning">
                 {t("requests:wizard.safetyRisk.hazardWarningTitle")}
               </p>
-              <p className="text-[10px] leading-relaxed text-amber-700/90 dark:text-amber-400/90">
+              <p className="text-[10px] leading-relaxed text-warning/90">
                 {t("requests:wizard.safetyRisk.hazardWarningDesc")}
               </p>
             </div>
@@ -161,7 +161,7 @@ export function SafetyRiskStep({ form, instantReportAllowed, onNext, onPrev }: S
                   <input
                     type="checkbox"
                     {...register(field.key)}
-                    className="h-4 w-4 rounded border-input text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                    className="h-4 w-4 rounded border-input text-primary focus:ring-ring cursor-pointer"
                   />
                   <span className="text-xs font-semibold text-foreground">
                     {t(field.labelKey)}
@@ -215,7 +215,7 @@ export function SafetyRiskStep({ form, instantReportAllowed, onNext, onPrev }: S
               {blockedOptions.map((opt) => (
                 <p
                   key={opt.value}
-                  className="flex items-start gap-1.5 text-[10px] text-amber-700 dark:text-amber-400 leading-relaxed mt-1"
+                  className="flex items-start gap-1.5 text-[10px] text-warning leading-relaxed mt-1"
                 >
                   <AlertTriangle className="h-3 w-3 shrink-0 mt-0.5" />
                   <span>{opt.gateBlockedReasonKey ? t(opt.gateBlockedReasonKey) : ""}</span>

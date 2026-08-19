@@ -124,7 +124,7 @@ export function DashboardMetrics() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">SLA Compliance</CardTitle>
-              <TrendingUp className="h-4 w-4 text-indigo-400" />
+              <TrendingUp className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">96.8%</div>
@@ -151,8 +151,8 @@ export function DashboardMetrics() {
                   <AreaChart data={COMPLIANCE_DATA} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                     <defs>
                       <linearGradient id="colorPermits" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="var(--color-primary)" stopOpacity={0.4} />
-                        <stop offset="95%" stopColor="var(--color-primary)" stopOpacity={0} />
+                        <stop offset="5%" stopColor="hsl(var(--chart-1))" stopOpacity={0.4} />
+                        <stop offset="95%" stopColor="hsl(var(--chart-1))" stopOpacity={0} />
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" opacity={0.15} />
@@ -160,15 +160,20 @@ export function DashboardMetrics() {
                     <YAxis fontSize={11} tickLine={false} />
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: "#0f172a",
-                        borderColor: "rgba(255,255,255,0.1)",
+                        backgroundColor: "var(--popover)",
+                        borderColor: "var(--border)",
+                        color: "var(--popover-foreground)",
                         borderRadius: "8px",
+                        boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                      }}
+                      itemStyle={{
+                        color: "var(--popover-foreground)",
                       }}
                     />
                     <Area
                       type="monotone"
                       dataKey="permits"
-                      stroke="var(--color-primary)"
+                      stroke="hsl(var(--chart-1))"
                       strokeWidth={2.5}
                       fillOpacity={1}
                       fill="url(#colorPermits)"
@@ -201,14 +206,19 @@ export function DashboardMetrics() {
                     <YAxis fontSize={11} tickLine={false} />
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: "#0f172a",
-                        borderColor: "rgba(255,255,255,0.1)",
+                        backgroundColor: "var(--popover)",
+                        borderColor: "var(--border)",
+                        color: "var(--popover-foreground)",
                         borderRadius: "8px",
+                        boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                      }}
+                      itemStyle={{
+                        color: "var(--popover-foreground)",
                       }}
                     />
                     <Legend verticalAlign="top" height={36} fontSize={12} />
-                    <Bar dataKey="approved" fill="var(--color-success)" name="Approved" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="pending" fill="var(--color-warning)" name="In Review" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="approved" fill="hsl(var(--chart-2))" name="Approved" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="pending" fill="hsl(var(--chart-3))" name="In Review" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               ) : (

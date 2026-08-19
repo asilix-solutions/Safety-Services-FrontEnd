@@ -33,14 +33,14 @@ export function ThemeToggle() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" className="h-9 w-9 rounded-lg border border-border/20 bg-secondary/15 relative">
-          <Sun className="h-4 w-4 scale-100 rotate-0 transition-transform dark:scale-0 dark:-rotate-90 text-amber-500" />
+          <Sun className="h-4 w-4 scale-100 rotate-0 transition-transform dark:scale-0 dark:-rotate-90 text-warning" />
           <Moon className="absolute h-4 w-4 scale-0 rotate-90 transition-transform dark:scale-100 dark:rotate-0 text-primary" />
           <span className="sr-only">Toggle theme</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-32 border-border/80 bg-popover">
         <DropdownMenuItem onClick={() => setTheme("light")} className="gap-2">
-          <Sun className="h-4 w-4 text-amber-500" />
+          <Sun className="h-4 w-4 text-warning" />
           <span>Light</span>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => setTheme("dark")} className="gap-2">

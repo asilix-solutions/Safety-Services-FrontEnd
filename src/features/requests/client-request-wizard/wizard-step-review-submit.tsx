@@ -255,7 +255,7 @@ export function ReviewSubmitStep({
                       </Button>
                     </div>
                   ) : (
-                    <div className="flex items-center gap-1.5 text-[10px] text-amber-600 dark:text-amber-400 mt-1">
+                    <div className="flex items-center gap-1.5 text-[10px] text-warning mt-1">
                       <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
                       <span>{t("requests:wizard.review.pendingUpload")}</span>
                     </div>
@@ -270,22 +270,22 @@ export function ReviewSubmitStep({
       {/* Pre-submit Notice & Terms & Submit button */}
       <div className="space-y-4 pt-5 border-t border-border mt-6">
         {/* Pre-submit notice banner */}
-        <div className="p-3.5 rounded-xl border border-blue-500/10 bg-blue-500/[0.02] dark:bg-blue-950/[0.04] text-[11px] text-muted-foreground leading-relaxed flex flex-col gap-1.5 text-left rtl:text-right">
+        <div className="p-3.5 rounded-xl border border-primary/10 bg-primary/[0.02] text-[11px] text-muted-foreground leading-relaxed flex flex-col gap-1.5 text-start">
           <div className="font-semibold text-foreground flex items-center gap-1.5 text-xs">
-            <CheckCircle2 className="h-4 w-4 text-blue-500 shrink-0" />
+            <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
             <span>{t("requests:wizard.review.submitNoticeHeading")}</span>
           </div>
-          <div className="pl-5.5 rtl:pr-5.5">
+          <div className="ps-5.5">
             {t("requests:wizard.review.submitNotice")}
           </div>
         </div>
 
-        <label className="flex items-start gap-3 cursor-pointer select-none py-1.5 text-left rtl:text-right">
+        <label className="flex items-start gap-3 cursor-pointer select-none py-1.5 text-start">
           <input
             type="checkbox"
             checked={termsAccepted}
             onChange={(e) => setTermsAccepted(e.target.checked)}
-            className="h-4 w-4 rounded border-border text-indigo-600 focus:ring-indigo-500 mt-0.5"
+            className="h-4 w-4 rounded border-border text-primary focus:ring-ring mt-0.5"
           />
           <span className="text-[11px] text-muted-foreground leading-relaxed block">
             {t("requests:wizard.review.termsText.part1")}
@@ -303,7 +303,6 @@ export function ReviewSubmitStep({
               type="button"
               variant="outline"
               size="sm"
-              className="text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50/20 dark:hover:bg-indigo-950/20"
               onClick={() => {
                 onSaveDraft();
                 toast.success(t("requests:wizard.review.saveDraftSuccess"));
@@ -318,7 +317,7 @@ export function ReviewSubmitStep({
             disabled={!termsAccepted || isSubmitting}
             isLoading={isSubmitting}
             onClick={onSubmit}
-            className="bg-indigo-600 text-white hover:bg-indigo-700 shadow-md shadow-indigo-600/10 px-5"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-md shadow-primary/10 px-5"
           >
             {t("requests:wizard.review.submitButton")}
           </Button>

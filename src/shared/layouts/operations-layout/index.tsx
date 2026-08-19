@@ -52,10 +52,10 @@ export function OperationsLayout({ children }: { children: React.ReactNode }) {
       <aside className="hidden md:flex w-64 flex-col border-e border-border bg-card/90 backdrop-blur-md">
         {/* Sidebar Header */}
         <div className="flex h-16 items-center px-6 border-b border-border gap-2.5">
-          <div className="h-7 w-7 rounded bg-amber-600 flex items-center justify-center shadow-lg shadow-amber-600/30">
-            <Icons.HardHat className="h-4 w-4 text-white" />
+          <div className="h-7 w-7 rounded bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
+            <Icons.HardHat className="h-4 w-4 text-primary-foreground" />
           </div>
-          <span className="font-bold text-sm tracking-wide bg-gradient-to-r from-amber-500 to-amber-300 dark:from-amber-400 dark:to-amber-200 bg-clip-text text-transparent">
+          <span className="font-bold text-sm tracking-wide text-foreground">
             Operations Portal
           </span>
         </div>
@@ -70,7 +70,7 @@ export function OperationsLayout({ children }: { children: React.ReactNode }) {
                 href={item.path}
                 className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-all ${
                   isActive
-                    ? "bg-amber-600 text-white shadow-md shadow-amber-600/20"
+                    ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
                     : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                 }`}
               >

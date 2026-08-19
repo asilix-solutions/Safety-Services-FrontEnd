@@ -1,5 +1,6 @@
 import React from "react";
 import { Card, CardContent } from "@/shared/ui/card";
+import { Check } from "lucide-react";
 import { ProjectOverviewWidgetId } from "@/constants/permissions";
 import { Project } from "@/types/project";
 import { LicensingRequest } from "@/domains/requests/types";
@@ -43,24 +44,24 @@ export function WidgetGrid({ widgets, project, request, documents, viewModel, t 
                   </h3>
                   <div className="grid grid-cols-5 gap-2 relative">
                     {viewModel.internalPhases.map((phase, idx) => {
-                      const isPassed = idx < viewModel.currentPhaseIndex;
+                      const isPast = idx < viewModel.currentPhaseIndex;
                       const isCurrent = idx === viewModel.currentPhaseIndex;
                       return (
                         <div key={phase.id} className="flex flex-col items-center text-center space-y-2 relative">
                           <div
-                            className={`h-8 w-8 rounded-full flex items-center justify-center font-bold text-xs transition-all z-10 ${
-                              isPassed
-                                ? "bg-emerald-500 text-white"
+                            className={`h-5 w-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                              isPast
+                                ? "bg-success text-success-foreground"
                                 : isCurrent
-                                ? "bg-indigo-600 text-white ring-4 ring-indigo-500/20"
-                                : "bg-secondary border border-border text-muted-foreground"
+                                ? "bg-primary text-primary-foreground ring-4 ring-primary/20"
+                                : "bg-muted text-muted-foreground"
                             }`}
                           >
-                            {isPassed ? "✓" : idx + 1}
+                            {isPast ? <Check className="h-3 w-3" /> : idx + 1}
                           </div>
                           <span
-                            className={`text-[10px] sm:text-xs font-semibold ${
-                              isCurrent ? "text-indigo-600 dark:text-indigo-400 font-bold" : "text-muted-foreground"
+                            className={`text-[10px] ${
+                              isCurrent ? "text-primary font-bold" : "text-muted-foreground"
                             }`}
                           >
                             {t(phase.labelKey)}

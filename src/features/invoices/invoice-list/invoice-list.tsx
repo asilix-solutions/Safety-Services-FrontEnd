@@ -60,7 +60,7 @@ export function InvoiceList() {
         <div
           className={`flex items-start gap-3 p-4 rounded-xl border ${
             alertMsg.type === "success"
-              ? "border-emerald-500/20 bg-emerald-500/5 text-emerald-600 dark:text-emerald-400"
+              ? "border-success/20 bg-success/5 text-success"
               : "border-destructive/20 bg-destructive/5 text-destructive"
           }`}
         >

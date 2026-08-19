@@ -50,16 +50,16 @@ export function BlueprintFilesCard({ request }: BlueprintFilesCardProps) {
     const cat = getFileCategory(name || "");
 
     if (ext === "dwg" || ext === "dxf") {
-      return <FileCode className="h-5 w-5 text-indigo-500" />;
+      return <FileCode className="h-5 w-5 text-primary" />;
     }
     if (ext === "png" || ext === "jpg" || ext === "jpeg") {
-      return <FileImage className="h-5 w-5 text-emerald-500" />;
+      return <FileImage className="h-5 w-5 text-success" />;
     }
     if (cat === "buildingPermit") {
-      return <Layers className="h-5 w-5 text-cyan-500" />;
+      return <Layers className="h-5 w-5 text-info" />;
     }
     if (cat === "leaseContract" || cat === "commercialRegistration") {
-      return <FileText className="h-5 w-5 text-amber-500" />;
+      return <FileText className="h-5 w-5 text-warning" />;
     }
     return <FileText className="h-5 w-5 text-primary" />;
   };
@@ -81,7 +81,7 @@ export function BlueprintFilesCard({ request }: BlueprintFilesCardProps) {
               <div
                 key={idx}
                 className={`p-3 border rounded-xl space-y-2.5 transition-colors ${
-                  doc.uploaded ? "bg-secondary/15 border-border" : "bg-rose-500/5 border-rose-500/10"
+                  doc.uploaded ? "bg-secondary/15 border-border" : "bg-destructive/5 border-destructive/10"
                 }`}
               >
                 {/* File Title Header */}
@@ -102,7 +102,7 @@ export function BlueprintFilesCard({ request }: BlueprintFilesCardProps) {
                   <Badge
                     variant={doc.uploaded ? "secondary" : "destructive"}
                     className={`text-[9px] font-semibold border-none ${
-                      doc.uploaded ? "bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20" : ""
+                      doc.uploaded ? "bg-success/10 text-success hover:bg-success/20" : ""
                     }`}
                   >
                     {doc.uploaded ? t("dashboard:uploaded_label") : t("requests:wizard.uploads.pending")}

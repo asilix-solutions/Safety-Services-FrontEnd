@@ -73,7 +73,7 @@ export function ConsultingEngineerOverview({ viewModel }: ConsultingEngineerOver
           viewAllKey="overview_view_all"
           viewAllHref="/requests"
           items={viewModel.reviewQueue}
-          icon={<FileQuestion className="h-4.5 w-4.5 text-sky-500" />}
+          icon={<FileQuestion className="h-4.5 w-4.5 text-primary" />}
         />
 
         <OverviewEntityList
@@ -82,7 +82,7 @@ export function ConsultingEngineerOverview({ viewModel }: ConsultingEngineerOver
           viewAllKey="overview_view_all"
           viewAllHref="/quotations"
           items={viewModel.pendingQuotationsQueue}
-          icon={<FolderOpen className="h-4.5 w-4.5 text-amber-500" />}
+          icon={<FolderOpen className="h-4.5 w-4.5 text-warning" />}
         />
       </div>
 

@@ -31,7 +31,7 @@ export function SecurityTab({ draft, setDraft, errors, isEditable, t }: Security
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Warning note */}
-        <div className="p-3 border border-amber-500/20 bg-amber-500/5 rounded-xl text-amber-600 dark:text-amber-400 text-xs">
+        <div className="p-3 border border-warning/20 bg-warning/5 rounded-xl text-warning text-xs">
           <span className="font-bold uppercase block mb-1">{t("settings:security_note_title") || "SSLM MVP Configuration Node"}</span>
           {t("settings:security_note_desc") || "These controls set client-side session timeout intervals and testing parameters."}
         </div>

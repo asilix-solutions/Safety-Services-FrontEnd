@@ -48,7 +48,7 @@ export function ReadyToGenerate({ items, onGenerate, t }: ReadyToGenerateProps) 
           label={t("reports:btnGenerate")}
           icon={Plus}
           onClick={() => onGenerate(row)}
-          className="h-8 text-xs bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm border-none cursor-pointer"
+          className="h-8 text-xs bg-success text-success-foreground hover:bg-success/90 shadow-sm border-none cursor-pointer"
         />
       ),
     },
@@ -58,7 +58,7 @@ export function ReadyToGenerate({ items, onGenerate, t }: ReadyToGenerateProps) 
     <Card className="border-border bg-card shadow-sm">
       <CardHeader>
         <CardTitle className="text-base font-semibold flex items-center gap-2">
-          <Award className="h-4.5 w-4.5 text-emerald-500" />
+          <Award className="h-4.5 w-4.5 text-success" />
           {t("reports:readyToGenerateTitle")}
         </CardTitle>
         <CardDescription>

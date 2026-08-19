@@ -322,7 +322,7 @@ export default function QuotationApprovalDetailsPage() {
               {/* Action Buttons */}
               {quotation.quotationStatus === "APPROVED" ? (
                 <div className="pt-4 border-t border-border/80 space-y-3">
-                  <div className="flex items-center gap-2 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400">
+                  <div className="flex items-center gap-2 p-3 rounded-lg bg-success/10 border border-success/20 text-success">
                     <CheckCircle className="h-5 w-5 shrink-0" />
                     <div className="text-xs">
                       <p className="font-semibold">{t("requests:quotations.status.alreadyApproved")}</p>
@@ -472,7 +472,7 @@ export default function QuotationApprovalDetailsPage() {
                     {quotation.reviewedAt ? new Date(quotation.reviewedAt).toLocaleString() : "-"}
                   </span>
                   {quotation.reviewComments && (
-                    <div className="mt-1 p-2 rounded bg-amber-500/10 text-amber-500 font-mono text-[11px]">
+                    <div className="mt-1 p-2 rounded bg-warning/10 text-warning font-mono text-[11px]">
                       {quotation.reviewComments}
                     </div>
                   )}

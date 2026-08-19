@@ -30,7 +30,7 @@ export function SiteVisitsTab({ project, setProject, user, isProcessing, loadDat
           <Card className="border-border bg-card">
             <CardHeader className="pb-3 border-b border-border">
               <CardTitle className="text-sm font-bold flex items-center gap-2">
-                <Settings className="h-4 w-4 text-indigo-500" />
+                <Settings className="h-4 w-4 text-primary" />
                 {t("projects:kickoff.title") || "Schedule Kickoff Site Visit"}
               </CardTitle>
               <CardDescription className="text-xs text-muted-foreground">
@@ -88,7 +88,7 @@ export function SiteVisitsTab({ project, setProject, user, isProcessing, loadDat
                     type="submit"
                     size="sm"
                     disabled={isProcessing}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold"
                   >
                     {t("projects:kickoff.scheduleBtn")}
                   </Button>
@@ -103,7 +103,7 @@ export function SiteVisitsTab({ project, setProject, user, isProcessing, loadDat
           <Card className="border-border bg-card">
             <CardHeader className="pb-3 border-b border-border">
               <CardTitle className="text-sm font-bold flex items-center gap-2">
-                <Settings className="h-4 w-4 text-indigo-500" />
+                <Settings className="h-4 w-4 text-primary" />
                 {t("projects:kickoff.performInspectionTitle")}
               </CardTitle>
               <CardDescription className="text-xs text-muted-foreground">
@@ -126,7 +126,7 @@ export function SiteVisitsTab({ project, setProject, user, isProcessing, loadDat
                     <div className="flex gap-2 justify-end">
                       <Button
                         size="sm"
-                        className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold"
+                        className="bg-success hover:bg-success/90 text-success-foreground font-bold"
                         onClick={() => {
                           try {
                             const updated = handleKickoffDecision({
@@ -200,7 +200,7 @@ export function SiteVisitsTab({ project, setProject, user, isProcessing, loadDat
               <CardDescription className="text-xs">{t("projects:details.opsDesc")}</CardDescription>
             </CardHeader>
             <CardContent className="text-xs space-y-2">
-              <p>{t("projects:kickoff.statusLabel")} <span className="font-semibold text-emerald-600">{t("projects:kickoff.approvedForSiteWorks")}</span></p>
+              <p>{t("projects:kickoff.statusLabel")} <span className="font-semibold text-success">{t("projects:kickoff.approvedForSiteWorks")}</span></p>
             </CardContent>
           </Card>
         )}

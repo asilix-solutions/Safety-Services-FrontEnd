@@ -42,7 +42,7 @@ export function OverviewCards({ companyName, theme, language, timeout, t }: Over
 
       <Card className="border-border bg-card shadow-sm">
         <CardContent className="p-4 flex items-center gap-3">
-          <div className="h-9 w-9 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
+          <div className="h-9 w-9 rounded-lg bg-success/10 text-success flex items-center justify-center">
             <SunMoon className="h-5 w-5" />
           </div>
           <div>
@@ -54,7 +54,7 @@ export function OverviewCards({ companyName, theme, language, timeout, t }: Over
 
       <Card className="border-border bg-card shadow-sm">
         <CardContent className="p-4 flex items-center gap-3">
-          <div className="h-9 w-9 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center">
+          <div className="h-9 w-9 rounded-lg bg-warning/10 text-warning flex items-center justify-center">
             <Languages className="h-5 w-5" />
           </div>
           <div>
@@ -66,7 +66,7 @@ export function OverviewCards({ companyName, theme, language, timeout, t }: Over
 
       <Card className="border-border bg-card shadow-sm">
         <CardContent className="p-4 flex items-center gap-3">
-          <div className="h-9 w-9 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center">
+          <div className="h-9 w-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
             <Hourglass className="h-5 w-5" />
           </div>
           <div>

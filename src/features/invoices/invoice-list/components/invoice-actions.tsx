@@ -54,7 +54,7 @@ export function InvoiceActions({
   const isPaid = invoice.status === "paid";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       <Card className="max-w-md w-full border-border bg-card shadow-2xl overflow-hidden relative">
         <button
           onClick={onClose}
@@ -122,10 +122,10 @@ export function InvoiceActions({
             <h4 className="font-semibold text-[10px] text-muted-foreground tracking-wider uppercase">
               {t("invoices_dialog_timeline")}
             </h4>
-            <div className="relative pl-6 rtl:pl-0 rtl:pr-6 border-l rtl:border-l-0 rtl:border-r border-border space-y-4 py-1">
+            <div className="relative ps-6 border-s border-border space-y-4 py-1">
               {/* Step 1: Issued */}
               <div className="relative">
-                <div className="absolute -left-[30px] rtl:-right-[30px] top-0 h-4.5 w-4.5 rounded-full bg-primary flex items-center justify-center border-4 border-card">
+                <div className="absolute -start-[30px] top-0 h-4.5 w-4.5 rounded-full bg-primary flex items-center justify-center border-4 border-card">
                   <div className="h-1.5 w-1.5 rounded-full bg-card" />
                 </div>
                 <div>
@@ -137,8 +137,8 @@ export function InvoiceActions({
               {/* Step 2: Paid */}
               <div className="relative">
                 <div
-                  className={`absolute -left-[30px] rtl:-right-[30px] top-0 h-4.5 w-4.5 rounded-full flex items-center justify-center border-4 border-card ${
-                    isPaid ? "bg-emerald-500" : "bg-muted"
+                  className={`absolute -start-[30px] top-0 h-4.5 w-4.5 rounded-full flex items-center justify-center border-4 border-card ${
+                    isPaid ? "bg-success" : "bg-muted"
                   }`}
                 >
                   <div className="h-1.5 w-1.5 rounded-full bg-card" />
@@ -156,8 +156,8 @@ export function InvoiceActions({
               {/* Step 3: Project Initialized */}
               <div className="relative">
                 <div
-                  className={`absolute -left-[30px] rtl:-right-[30px] top-0 h-4.5 w-4.5 rounded-full flex items-center justify-center border-4 border-card ${
-                    isPaid ? "bg-indigo-500" : "bg-muted"
+                  className={`absolute -start-[30px] top-0 h-4.5 w-4.5 rounded-full flex items-center justify-center border-4 border-card ${
+                    isPaid ? "bg-primary" : "bg-muted"
                   }`}
                 >
                   <div className="h-1.5 w-1.5 rounded-full bg-card" />

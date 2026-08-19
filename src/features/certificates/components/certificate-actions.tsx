@@ -44,7 +44,7 @@ export function CertificateActions({
   const isRevoked = certificate.status === "revoked" || certificate.status === "REVOKED";
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-slate-950/60 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm">
       {/* Backdrop click to close */}
       <div className="absolute inset-0 -z-10" onClick={onClose} />
 
@@ -168,7 +168,7 @@ export function CertificateActions({
               </div>
               
               <div className="relative">
-                <span className="absolute -start-[15px] top-1 h-2.5 w-2.5 rounded-full bg-emerald-500" />
+                <span className="absolute -start-[15px] top-1 h-2.5 w-2.5 rounded-full bg-success" />
                 <span className="font-semibold block">{t("common:certificates_milestone_downloaded") || "PDF Access Registered"}</span>
                 <span className="text-[10px] text-muted-foreground">{t("common:certificates_timeline_download_desc") || "System ready for branded verification download"}</span>
               </div>

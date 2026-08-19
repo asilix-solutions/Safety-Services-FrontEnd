@@ -17,9 +17,9 @@ export function ProjectCompletedCard({ project, t }: ProjectCompletedCardProps) 
     : new Date().toLocaleDateString();
 
   return (
-    <Card className="border-emerald-500/20 bg-emerald-500/[0.03] dark:bg-emerald-950/[0.08]">
-      <CardHeader className="pb-3 border-b border-border">
-        <CardTitle className="text-base font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-2">
+    <Card className="border-success/20 bg-success/[0.03]">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base font-bold text-success flex items-center gap-2">
           <CheckCircle className="h-5 w-5" />
           {t("projects:completed.title") || "Project Completed & Approved"}
         </CardTitle>

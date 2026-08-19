@@ -44,10 +44,10 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
       <aside className="hidden md:flex w-64 flex-col border-e border-border bg-card shadow-sm">
         {/* Sidebar Header */}
         <div className="flex h-16 items-center px-6 border-b border-border gap-2.5">
-          <div className="h-8 w-8 rounded-full bg-emerald-500 flex items-center justify-center shadow-md shadow-emerald-500/20">
-            <Icons.Building className="h-4.5 w-4.5 text-white" />
+          <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center shadow-md shadow-primary/20">
+            <Icons.Building className="h-4.5 w-4.5 text-primary-foreground" />
           </div>
-          <span className="font-extrabold text-sm tracking-wide text-emerald-600 dark:text-emerald-400">
+          <span className="font-extrabold text-sm tracking-wide text-foreground">
             Client Hub
           </span>
         </div>
@@ -62,7 +62,7 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
                 href={item.path}
                 className={`flex items-center gap-3 px-3 py-2.5 text-sm font-semibold rounded-xl transition-all ${
                   isActive
-                    ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/10"
+                    ? "bg-primary text-primary-foreground shadow-md shadow-primary/10"
                     : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                 }`}
               >

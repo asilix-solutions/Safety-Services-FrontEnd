@@ -37,7 +37,7 @@ export function BlueprintReviewQueue() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="border-border bg-card">
           <CardContent className="p-4 flex items-center gap-4">
-            <div className="p-2.5 rounded-lg bg-indigo-500/10 text-indigo-500">
+            <div className="p-2.5 rounded-lg bg-primary/10 text-primary">
               <ClipboardList className="h-5 w-5" />
             </div>
             <div>
@@ -53,7 +53,7 @@ export function BlueprintReviewQueue() {
 
         <Card className="border-border bg-card">
           <CardContent className="p-4 flex items-center gap-4">
-            <div className="p-2.5 rounded-lg bg-rose-500/10 text-rose-500">
+            <div className="p-2.5 rounded-lg bg-destructive/10 text-destructive">
               <ShieldAlert className="h-5 w-5" />
             </div>
             <div>
@@ -69,7 +69,7 @@ export function BlueprintReviewQueue() {
 
         <Card className="border-border bg-card">
           <CardContent className="p-4 flex items-center gap-4">
-            <div className="p-2.5 rounded-lg bg-amber-500/10 text-amber-500">
+            <div className="p-2.5 rounded-lg bg-warning/10 text-warning">
               <RotateCcw className="h-5 w-5" />
             </div>
             <div>
@@ -85,7 +85,7 @@ export function BlueprintReviewQueue() {
 
         <Card className="border-border bg-card">
           <CardContent className="p-4 flex items-center gap-4">
-            <div className="p-2.5 rounded-lg bg-emerald-500/10 text-emerald-500">
+            <div className="p-2.5 rounded-lg bg-success/10 text-success">
               <CheckSquare className="h-5 w-5" />
             </div>
             <div>

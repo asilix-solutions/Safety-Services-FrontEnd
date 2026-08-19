@@ -23,7 +23,7 @@ export function InspectionChecklist({ project, t }: InspectionChecklistProps) {
     <Card className="border-border bg-card shadow-sm rounded-xl">
       <CardHeader className="pb-3 border-b border-border">
         <CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-          <CheckSquare className="h-4 w-4 text-indigo-500" />
+          <CheckSquare className="h-4 w-4 text-primary" />
           {t("projects:compliance.checklist") || "Compliance Verification Checklist"}
         </CardTitle>
       </CardHeader>

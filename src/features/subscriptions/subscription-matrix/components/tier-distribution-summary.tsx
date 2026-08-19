@@ -17,7 +17,7 @@ const TIER_ICON: Record<TierDistribution["tier"], typeof Layers> = {
 
 const TIER_COLOR: Record<TierDistribution["tier"], string> = {
   Trial: "text-muted-foreground bg-muted/40 border-border",
-  Basic: "text-blue-500 bg-blue-500/10 border-blue-500/20",
+  Basic: "text-primary bg-primary/10 border-primary/20",
   Professional: "text-success bg-success/10 border-success/20",
 };
 

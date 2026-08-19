@@ -20,11 +20,11 @@ export function getCertificateStatusBadgeClass(
   const displayStatus = deriveCertificateDisplayStatus(status, expiresAt);
   switch (displayStatus) {
     case "active":
-      return "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20";
+      return "bg-success/10 text-success border-success/20";
     case "expired":
-      return "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20";
+      return "bg-destructive/10 text-destructive border-destructive/20";
     case "revoked":
-      return "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20";
+      return "bg-warning/10 text-warning border-warning/20";
     default:
       return "bg-secondary text-secondary-foreground border-border";
   }
@@ -76,12 +76,12 @@ export function getExpirationBadgeVariant(expiresAt: string, status: Certificate
   const level = getExpirationWarningLevel(expiresAt, status);
   switch (level) {
     case "normal":
-      return "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20";
+      return "bg-success/10 text-success border-success/20";
     case "warning":
-      return "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20";
+      return "bg-warning/10 text-warning border-warning/20";
     case "critical":
     default:
-      return "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20";
+      return "bg-destructive/10 text-destructive border-destructive/20";
   }
 }
 

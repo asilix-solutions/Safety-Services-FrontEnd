@@ -40,32 +40,32 @@ export function ClassificationStep({
           title: t("requests:wizard.classification.fastReviewLabel"),
           desc: t("requests:wizard.classification.fastTrackClientDesc"),
           timeline: t("requests:wizard.classification.fastTrackTimeline"),
-          colorClass: "border-emerald-500/20 bg-emerald-500/[0.03] dark:bg-emerald-950/[0.08] text-emerald-800 dark:text-emerald-300",
-          icon: <ShieldCheck className="h-6 w-6 text-emerald-500" />,
+          colorClass: "border-success/20 bg-success/[0.03] text-success",
+          icon: <ShieldCheck className="h-6 w-6 text-success" />,
         };
       case "maintenance_strategy":
         return {
           title: t("requests:wizard.classification.maintenanceReviewLabel"),
           desc: t("requests:wizard.classification.maintenanceClientDesc"),
           timeline: t("requests:wizard.classification.maintenanceTimeline"),
-          colorClass: "border-amber-500/20 bg-amber-500/[0.03] dark:bg-amber-950/[0.08] text-amber-800 dark:text-amber-300",
-          icon: <HardHat className="h-6 w-6 text-amber-500" />,
+          colorClass: "border-warning/20 bg-warning/[0.03] text-warning",
+          icon: <HardHat className="h-6 w-6 text-warning" />,
         };
       case "engineering_project":
         return {
           title: t("requests:wizard.classification.engineeringReviewLabel"),
           desc: t("requests:wizard.classification.engineeringClientDesc"),
           timeline: t("requests:wizard.classification.engineeringTimeline"),
-          colorClass: "border-indigo-500/20 bg-indigo-500/[0.03] dark:bg-indigo-950/[0.08] text-indigo-800 dark:text-indigo-300",
-          icon: <FileSignature className="h-6 w-6 text-indigo-500" />,
+          colorClass: "border-primary/20 bg-primary/[0.03] text-primary",
+          icon: <FileSignature className="h-6 w-6 text-primary" />,
         };
       case "high_hazard_review":
         return {
           title: t("requests:wizard.classification.enhancedSafetyReviewLabel"),
           desc: t("requests:wizard.classification.highHazardClientDesc"),
           timeline: t("requests:wizard.classification.highHazardTimeline"),
-          colorClass: "border-amber-500/20 bg-amber-500/[0.03] dark:bg-amber-950/[0.08] text-amber-800 dark:text-amber-300",
-          icon: <BadgeAlert className="h-6 w-6 text-amber-500" />,
+          colorClass: "border-warning/20 bg-warning/[0.03] text-warning",
+          icon: <BadgeAlert className="h-6 w-6 text-warning" />,
         };
     }
   };
@@ -75,9 +75,9 @@ export function ClassificationStep({
   return (
     <div className="space-y-6">
       {/* Success Confirmation Banner */}
-      <div className="p-4 rounded-xl border border-emerald-500/10 bg-emerald-500/[0.03] dark:bg-emerald-950/[0.08] text-xs flex gap-3 items-start">
-        <ShieldCheck className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
-        <div className="space-y-0.5 text-left rtl:text-right">
+      <div className="p-4 rounded-xl border border-success/20 bg-success/[0.03] text-xs flex gap-3 items-start">
+        <ShieldCheck className="h-5 w-5 text-success shrink-0 mt-0.5" />
+        <div className="space-y-0.5 text-start">
           <h4 className="font-bold text-foreground">{t("requests:wizard.classification.bannerTitle")}</h4>
           <p className="text-muted-foreground leading-relaxed">
             {t("requests:wizard.classification.bannerDesc")}

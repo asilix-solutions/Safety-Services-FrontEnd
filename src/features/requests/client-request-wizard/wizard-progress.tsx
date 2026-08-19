@@ -24,7 +24,7 @@ export function WizardProgress({ currentStep, steps }: WizardProgressProps) {
                 <div
                   className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 ${
                     isCompleted
-                      ? "bg-emerald-500 text-white"
+                      ? "bg-success text-success-foreground"
                       : isActive
                       ? "bg-primary text-primary-foreground ring-4 ring-primary/20"
                       : "bg-muted text-muted-foreground"
@@ -34,7 +34,7 @@ export function WizardProgress({ currentStep, steps }: WizardProgressProps) {
                 </div>
                 <span
                   className={`text-[10px] font-bold tracking-wide uppercase transition-colors ${
-                    isActive ? "text-primary dark:text-primary" : "text-muted-foreground"
+                    isActive ? "text-primary" : "text-muted-foreground"
                   }`}
                 >
                   {stepName}
@@ -45,7 +45,7 @@ export function WizardProgress({ currentStep, steps }: WizardProgressProps) {
               {index < steps.length - 1 && (
                 <div className="flex-1 h-0.5 mx-2 bg-muted relative -top-3">
                   <div
-                    className="absolute h-full bg-emerald-500 transition-all duration-500 start-0"
+                    className="absolute h-full bg-success transition-all duration-500 start-0"
                     style={{
                       width: isCompleted ? "100%" : "0%",
                     }}

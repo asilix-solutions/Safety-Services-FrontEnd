@@ -24,14 +24,14 @@ export function ActivityTimeline({ request }: ActivityTimelineProps) {
         return <ClipboardList className="h-4 w-4 text-primary" />;
       case "assigned":
       case "under_review":
-        return <ClipboardList className="h-4 w-4 text-indigo-500" />;
+        return <ClipboardList className="h-4 w-4 text-primary" />;
       case "quotation_created":
       case "awaiting_approval":
       case "awaiting_payment":
-        return <DollarSign className="h-4 w-4 text-amber-500" />;
+        return <DollarSign className="h-4 w-4 text-warning" />;
       case "approved":
       case "completed":
-        return <CheckCircle2 className="h-4 w-4 text-emerald-500" />;
+        return <CheckCircle2 className="h-4 w-4 text-success" />;
       default:
         return <FileText className="h-4 w-4 text-foreground" />;
     }

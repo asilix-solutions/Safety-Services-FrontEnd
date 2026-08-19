@@ -69,7 +69,7 @@ export function AddCustomerDialog({ onAdd, trigger }: AddCustomerDialogProps) {
       )}
 
       {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <Card className="sm:max-w-[450px] w-full border-border bg-card shadow-2xl relative">
             <button
               onClick={() => handleOpenChange(false)}

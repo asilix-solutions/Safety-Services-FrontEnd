@@ -20,20 +20,20 @@ export function OverviewRecentActivity({
   const { t } = useTranslation();
 
   const getFeedIcon = (type?: OverviewActivityItem["type"]) => {
-    const cls = "h-3.5 w-3.5 text-white";
+    const cls = "h-3.5 w-3.5 text-primary-foreground";
     switch (type) {
       case "request":
-        return <div className="p-1 rounded-full bg-emerald-500 shrink-0">{getOverviewIcon("request", cls)}</div>;
+        return <div className="p-1 rounded-full bg-success shrink-0">{getOverviewIcon("request", "h-3.5 w-3.5 text-success-foreground")}</div>;
       case "project":
-        return <div className="p-1 rounded-full bg-sky-500 shrink-0">{getOverviewIcon("project", cls)}</div>;
+        return <div className="p-1 rounded-full bg-primary shrink-0">{getOverviewIcon("project", cls)}</div>;
       case "contract":
-        return <div className="p-1 rounded-full bg-amber-500 shrink-0">{getOverviewIcon("contract", cls)}</div>;
+        return <div className="p-1 rounded-full bg-warning shrink-0">{getOverviewIcon("contract", "h-3.5 w-3.5 text-warning-foreground")}</div>;
       case "invoice":
-        return <div className="p-1 rounded-full bg-indigo-500 shrink-0">{getOverviewIcon("invoice", cls)}</div>;
+        return <div className="p-1 rounded-full bg-primary shrink-0">{getOverviewIcon("invoice", cls)}</div>;
       case "certificate":
-        return <div className="p-1 rounded-full bg-teal-500 shrink-0">{getOverviewIcon("certificate", cls)}</div>;
+        return <div className="p-1 rounded-full bg-info shrink-0">{getOverviewIcon("certificate", "h-3.5 w-3.5 text-info-foreground")}</div>;
       default:
-        return <div className="p-1 rounded-full bg-slate-500 shrink-0">{getOverviewIcon("help", cls)}</div>;
+        return <div className="p-1 rounded-full bg-muted-foreground shrink-0">{getOverviewIcon("help", cls)}</div>;
     }
   };
 

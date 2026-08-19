@@ -71,7 +71,7 @@ export function ReportDrawer({
 
   return (
     <>
-    <div className="fixed inset-0 z-50 flex justify-end bg-slate-950/60 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm">
       {/* Backdrop click to close */}
       <div className="absolute inset-0 -z-10" onClick={onClose} />
 
@@ -259,7 +259,7 @@ export function ReportDrawer({
               <Button
                 size="sm"
                 onClick={() => onApprove(report)}
-                className="gap-1.5 text-xs cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white border-none"
+                className="gap-1.5 text-xs cursor-pointer bg-success hover:bg-success/90 text-success-foreground border-none"
               >
                 <Check className="h-4 w-4" />
                 {t("reports:btnApprove")}

@@ -48,9 +48,14 @@ export function LineChart({
               <YAxis fontSize={11} tickLine={false} />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: "#0f172a",
-                  borderColor: "rgba(255,255,255,0.1)",
+                  backgroundColor: "var(--popover)",
+                  borderColor: "var(--border)",
+                  color: "var(--popover-foreground)",
                   borderRadius: "8px",
+                  boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                }}
+                itemStyle={{
+                  color: "var(--popover-foreground)",
                 }}
               />
               <Legend verticalAlign="top" height={36} fontSize={12} />
@@ -58,7 +63,7 @@ export function LineChart({
                 type="monotone"
                 dataKey={yKey}
                 name={lineName}
-                stroke="var(--color-primary)"
+                stroke="hsl(var(--chart-1))"
                 strokeWidth={2.5}
                 activeDot={{ r: 6 }}
               />
@@ -67,7 +72,7 @@ export function LineChart({
                   type="monotone"
                   dataKey={yKeySecondary}
                   name={lineNameSecondary}
-                  stroke="var(--color-success)"
+                  stroke="hsl(var(--chart-2))"
                   strokeWidth={2}
                 />
               )}

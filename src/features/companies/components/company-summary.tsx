@@ -16,7 +16,7 @@ export function CompanySummary({ summary }: CompanySummaryProps) {
       title: t("common:companies.kpi.total"),
       value: summary.total,
       icon: Building2,
-      color: "text-blue-500 bg-blue-500/10 border-blue-500/20",
+      color: "text-primary bg-primary/10 border-primary/20",
     },
     {
       title: t("common:companies.kpi.active"),

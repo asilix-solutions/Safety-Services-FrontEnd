@@ -91,7 +91,7 @@ export function SystemsTab({
         <Card className="border-border bg-card">
           <CardHeader className="pb-3 border-b border-border">
             <CardTitle className="text-sm font-bold flex items-center gap-2">
-              <Briefcase className="h-4 w-4 text-indigo-500" />
+              <Briefcase className="h-4 w-4 text-primary" />
               {t("projects:silos.title") || "Project Operational Silos"}
             </CardTitle>
             <CardDescription className="text-xs text-muted-foreground">
@@ -214,7 +214,7 @@ export function SystemsTab({
                               </Button>
                               <Button
                                 size="sm"
-                                className="h-7 text-[10px] px-2 bg-indigo-600 text-white font-bold"
+                                className="h-7 text-[10px] px-2 bg-primary text-primary-foreground font-bold"
                                 onClick={() => handleSaveSilo(silo.id)}
                               >
                                 {t("projects:silos.saveBtn")}
@@ -225,7 +225,7 @@ export function SystemsTab({
                               {(silo.status === "pending" || silo.status === "ready") && (
                                 <Button
                                   size="sm"
-                                  className="h-7 text-[10px] px-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold"
+                                  className="h-7 text-[10px] px-3 bg-primary hover:bg-primary/90 text-primary-foreground font-bold"
                                   onClick={() => handleStartSilo(silo.id)}
                                   disabled={isProcessing}
                                 >
@@ -242,7 +242,7 @@ export function SystemsTab({
                                   />
                                   <Button
                                     size="sm"
-                                    className="h-7 text-[10px] px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold"
+                                    className="h-7 text-[10px] px-3 bg-success hover:bg-success/90 text-success-foreground font-bold"
                                     onClick={() => {
                                       const inputEl = document.getElementById(`notes-${silo.id}`) as HTMLInputElement;
                                       handleCompleteSilo(silo.id, inputEl?.value || "");
@@ -254,7 +254,7 @@ export function SystemsTab({
                                 </div>
                               )}
                               {silo.status === "completed" && (
-                                <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                                <span className="text-[10px] font-bold text-success">
                                   {t("projects:execution.completed") || "Completed"}
                                 </span>
                               )}
@@ -282,10 +282,10 @@ export function SystemsTab({
 
       {/* Execution Completion / Readiness - Operations Only */}
       {project.executionPhase === "ACTIVE_EXECUTION" && (
-        <Card className="border-indigo-500/35 bg-card">
+        <Card className="border-primary/35 bg-card">
           <CardHeader className="pb-3 border-b border-border">
             <CardTitle className="text-sm font-bold flex items-center gap-2">
-              <CheckCircle className="h-4 w-4 text-indigo-500" />
+              <CheckCircle className="h-4 w-4 text-primary" />
               {t("projects:completion.title")}
             </CardTitle>
             <CardDescription className="text-xs text-muted-foreground">
@@ -311,7 +311,7 @@ export function SystemsTab({
                 <Checkbox
                   checked={readyForFinalInspection}
                   onChange={(e) => setReadyForFinalInspection(e.target.checked)}
-                  className="focus:ring-indigo-500 h-4 w-4"
+                  className="focus:ring-ring h-4 w-4"
                 />
                 <span className="font-semibold text-foreground">
                   {t("projects:completion.readyCheckbox")}
@@ -320,7 +320,7 @@ export function SystemsTab({
               <Button
                 onClick={handleCompleteExecution}
                 disabled={isProcessing || !completionNotes.trim() || !readyForFinalInspection}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold"
               >
                 {isProcessing ? t("projects:completion.submitting") : t("projects:completion.submitBtn")}
               </Button>

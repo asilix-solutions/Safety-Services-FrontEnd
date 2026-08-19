@@ -20,7 +20,7 @@ export function ProjectTimelineCard({ timeline, t }: ProjectTimelineCardProps) {
           <div className="relative border-s border-border ps-4 ms-2 space-y-4 pt-1">
             {timeline.map((item, idx) => (
               <div key={idx} className="relative">
-                <div className="absolute -start-[21px] mt-1 h-2.5 w-2.5 rounded-full bg-indigo-500 ring-4 ring-background" />
+                <div className="absolute -start-[21px] mt-1 h-2.5 w-2.5 rounded-full bg-primary ring-4 ring-background" />
                 <div className="flex justify-between items-center gap-2">
                   <span className="font-bold text-foreground capitalize">{item.status.replace(/_/g, " ")}</span>
                   <span className="text-[10px] text-muted-foreground font-mono">{new Date(item.date).toLocaleDateString()}</span>

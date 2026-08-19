@@ -82,7 +82,7 @@ export function SuperAdminOverview({ viewModel }: SuperAdminOverviewProps) {
           viewAllKey="overview_view_all"
           viewAllHref="/subscriptions"
           items={viewModel.expiringSubscriptionsQueue}
-          icon={<Clock className="h-4.5 w-4.5 text-amber-500" />}
+          icon={<Clock className="h-4.5 w-4.5 text-warning" />}
         />
       </div>
 

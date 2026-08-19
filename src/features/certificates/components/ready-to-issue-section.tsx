@@ -38,7 +38,7 @@ export function ReadyToIssueSection({
     {
       header: t("common:status") || "Status",
       render: () => (
-        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-500/10 text-blue-600 dark:text-blue-400">
+        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
           {(t("common:certificates_eligible") || "Eligible").toUpperCase()}
         </span>
       ),
@@ -50,7 +50,7 @@ export function ReadyToIssueSection({
           label={t("common:certificates_issue_btn")}
           icon={Plus}
           onClick={() => onIssueCertificate(row)}
-          className="h-8 text-xs bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm border-none cursor-pointer"
+          className="h-8 text-xs bg-success text-success-foreground hover:bg-success/90 shadow-sm border-none cursor-pointer"
         />
       ),
     },
@@ -60,7 +60,7 @@ export function ReadyToIssueSection({
     <Card className="border-border bg-card shadow-sm">
       <CardHeader>
         <CardTitle className="text-base font-semibold flex items-center gap-2">
-          <Award className="h-4.5 w-4.5 text-emerald-500" />
+          <Award className="h-4.5 w-4.5 text-success" />
           {t("common:certificates_eligible_section_title") || "Eligible Compliance Certificates"}
         </CardTitle>
         <CardDescription>

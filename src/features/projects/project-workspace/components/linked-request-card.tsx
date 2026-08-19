@@ -16,7 +16,7 @@ export function LinkedRequestCard({ request, t }: LinkedRequestCardProps) {
     <Card className="border-border bg-card">
       <CardHeader className="pb-3 border-b border-border">
         <CardTitle className="text-xs font-bold text-foreground uppercase tracking-wide flex items-center gap-1.5">
-          <LinkIcon className="h-4 w-4 text-indigo-500" />
+          <LinkIcon className="h-4 w-4 text-primary" />
           {t("projects:details.linkedRequest") || "Linked Safety Request"}
         </CardTitle>
       </CardHeader>

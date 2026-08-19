@@ -111,7 +111,7 @@ export function PaymentConfirmDialog({
               </div>
 
               {/* MVP Notice */}
-              <div className="flex items-start gap-2.5 p-3 rounded-lg border border-amber-500/30 bg-amber-500/5 text-amber-700 dark:text-amber-400">
+              <div className="flex items-start gap-2.5 p-3 rounded-lg border border-warning/30 bg-warning/5 text-warning">
                 <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
                 <p className="text-[11px] leading-relaxed">
                   {t("common:invoices_pay_confirm_mvp_notice")}
@@ -132,7 +132,7 @@ export function PaymentConfirmDialog({
         ) : (
           <>
             <DialogHeader>
-              <DialogTitle className="text-emerald-600 dark:text-emerald-400">
+              <DialogTitle className="text-success">
                 <CheckCircle2 className="h-4 w-4" />
                 {t("common:invoices_pay_success_title")}
               </DialogTitle>

@@ -24,9 +24,9 @@ export function OverviewActionList({
     const cls = "h-4.5 w-4.5";
     switch (type) {
       case "pay_invoice":
-        return <CreditCard className={`${cls} text-rose-500`} />;
+        return <CreditCard className={`${cls} text-destructive`} />;
       case "sign_contract":
-        return <FileSignature className={`${cls} text-amber-500`} />;
+        return <FileSignature className={`${cls} text-warning`} />;
       default:
         return <AlertOctagon className={`${cls} text-primary`} />;
     }
@@ -38,10 +38,10 @@ export function OverviewActionList({
     <OverviewSection
       title={
         <>
-          <AlertCircle className="h-4.5 w-4.5 text-rose-500 animate-pulse" />
+          <AlertCircle className="h-4.5 w-4.5 text-destructive animate-pulse" />
           {title}
           {items.length > 0 && (
-            <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500 text-white leading-none">
+            <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-destructive text-destructive-foreground leading-none">
               {items.length}
             </span>
           )}

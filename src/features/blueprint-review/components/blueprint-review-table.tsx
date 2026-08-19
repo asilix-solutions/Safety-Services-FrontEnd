@@ -17,13 +17,13 @@ export function BlueprintReviewTable({ requests }: BlueprintReviewTableProps) {
   const getStatusBadge = (status: BlueprintReviewViewModel["reviewStatus"]) => {
     switch (status) {
       case "APPROVED":
-        return <Badge className="bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 border-none">{t(`requests:blueprintReview.status.${status}`)}</Badge>;
+        return <Badge className="bg-success/10 text-success hover:bg-success/20 border-none">{t(`requests:blueprintReview.status.${status}`)}</Badge>;
       case "MODIFICATION_REQUIRED":
-        return <Badge className="bg-rose-500/10 text-rose-500 hover:bg-rose-500/20 border-none">{t(`requests:blueprintReview.status.${status}`)}</Badge>;
+        return <Badge className="bg-destructive/10 text-destructive hover:bg-destructive/20 border-none">{t(`requests:blueprintReview.status.${status}`)}</Badge>;
       case "MISSING_DOCUMENTS":
-        return <Badge className="bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 border-none">{t(`requests:blueprintReview.status.${status}`)}</Badge>;
+        return <Badge className="bg-warning/10 text-warning hover:bg-warning/20 border-none">{t(`requests:blueprintReview.status.${status}`)}</Badge>;
       case "IN_REVIEW":
-        return <Badge className="bg-indigo-500/10 text-indigo-500 hover:bg-indigo-500/20 border-none">{t(`requests:blueprintReview.status.${status}`)}</Badge>;
+        return <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-none">{t(`requests:blueprintReview.status.${status}`)}</Badge>;
       case "PENDING":
       default:
         return <Badge className="bg-secondary text-muted-foreground border-none">{t(`requests:blueprintReview.status.PENDING`)}</Badge>;

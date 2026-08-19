@@ -360,8 +360,8 @@ export function ClientRequestWizard() {
     return (
       <Card className="max-w-xl mx-auto border-border bg-card shadow-xl overflow-hidden rounded-2xl">
         <CardContent className="p-8 text-center space-y-6">
-          <div className="mx-auto h-16 w-16 bg-emerald-500/10 text-emerald-500 rounded-full flex items-center justify-center border border-emerald-500/20">
-            <CheckCircle2 className="h-8 w-8 text-emerald-500" />
+          <div className="mx-auto h-16 w-16 bg-success/10 text-success rounded-full flex items-center justify-center border border-success/20">
+            <CheckCircle2 className="h-8 w-8 text-success" />
           </div>
 
           <div className="space-y-2">
@@ -376,7 +376,7 @@ export function ClientRequestWizard() {
           <div className="p-5 rounded-2xl border border-border bg-muted/20 max-w-md mx-auto space-y-3.5 text-left rtl:text-right">
             <div className="flex justify-between items-center text-xs">
               <span className="text-muted-foreground">{t("requests:wizard.success.requestNumber")}:</span>
-              <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400 text-sm">{submittedRequest.jobNumber}</span>
+              <span className="font-mono font-bold text-primary text-sm">{submittedRequest.jobNumber}</span>
             </div>
 
             <div className="flex justify-between items-center text-xs pt-2 border-t border-border/50">
@@ -406,7 +406,7 @@ export function ClientRequestWizard() {
               </Button>
             </Link>
             <Link href={`/requests/${submittedRequest.jobNumber}`} className="flex-1">
-              <Button className="w-full text-xs gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white h-10 shadow-md shadow-indigo-600/10 rounded-xl">
+              <Button className="w-full text-xs gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground h-10 shadow-md shadow-primary/10 rounded-xl">
                 {t("requests:wizard.success.viewDetails")} <ChevronRight className="h-4 w-4 rtl:rotate-180" />
               </Button>
             </Link>

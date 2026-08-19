@@ -68,11 +68,11 @@ function StatCard({
 }: {
   label: string;
   value: number;
-  accent: "emerald" | "red" | "primary";
+  accent: "success" | "destructive" | "primary";
 }) {
   const colorMap: Record<string, string> = {
-    emerald: "text-emerald-600 dark:text-emerald-400 bg-emerald-500/5 border-emerald-500/20",
-    red: "text-red-600 dark:text-red-400 bg-red-500/5 border-red-500/20",
+    success: "text-success bg-success/5 border-success/20",
+    destructive: "text-destructive bg-destructive/5 border-destructive/20",
     primary: "text-primary bg-primary/5 border-primary/20",
   };
   return (
@@ -344,7 +344,7 @@ export function InvoiceTable({
                 }
                 icon={
                   showEmptyUnpaid ? (
-                    <CheckCircle2 className="h-8 w-8 text-emerald-500" />
+                    <CheckCircle2 className="h-8 w-8 text-success" />
                   ) : (
                     <FileText className="h-8 w-8 text-muted-foreground" />
                   )
@@ -376,7 +376,7 @@ export function InvoiceTable({
                 }
                 icon={
                   showEmptyUnpaid ? (
-                    <CheckCircle2 className="h-8 w-8 text-emerald-500" />
+                    <CheckCircle2 className="h-8 w-8 text-success" />
                   ) : (
                     <Layers className="h-8 w-8 text-muted-foreground" />
                   )

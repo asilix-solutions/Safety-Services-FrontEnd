@@ -20,7 +20,7 @@ export function RequestTypeStep({ value, onChange, onNext }: RequestTypeStepProp
       id: "new_license" as RequestType,
       title: t("requests:wizard.requestTypes.newLicense.title"),
       description: t("requests:wizard.requestTypes.newLicense.description"),
-      icon: <FileSignature className="h-6 w-6 text-emerald-500" />,
+      icon: <FileSignature className="h-6 w-6 text-success" />,
       docs: [
         t("requests:wizard.documents.commercialRegistration"),
         t("requests:wizard.documents.buildingPermit"),
@@ -31,7 +31,7 @@ export function RequestTypeStep({ value, onChange, onNext }: RequestTypeStepProp
       id: "maintenance_contract" as RequestType,
       title: t("requests:wizard.requestTypes.maintenanceContract.title"),
       description: t("requests:wizard.requestTypes.maintenanceContract.description"),
-      icon: <Wrench className="h-6 w-6 text-amber-500" />,
+      icon: <Wrench className="h-6 w-6 text-warning" />,
       docs: [
         t("requests:wizard.documents.existingAgreements"),
         t("requests:wizard.documents.alarmExtinguisherPhotos")
@@ -41,7 +41,7 @@ export function RequestTypeStep({ value, onChange, onNext }: RequestTypeStepProp
       id: "engineering_blueprint" as RequestType,
       title: t("requests:wizard.requestTypes.engineeringBlueprint.title"),
       description: t("requests:wizard.requestTypes.engineeringBlueprint.description"),
-      icon: <FileCheck className="h-6 w-6 text-blue-500" />,
+      icon: <FileCheck className="h-6 w-6 text-primary" />,
       docs: [
         t("requests:wizard.documents.architecturalBlueprintPdf"),
         t("requests:wizard.documents.buildingPermit")
@@ -51,7 +51,7 @@ export function RequestTypeStep({ value, onChange, onNext }: RequestTypeStepProp
       id: "technical_report" as RequestType,
       title: t("requests:wizard.requestTypes.technicalReport.title"),
       description: t("requests:wizard.requestTypes.technicalReport.description"),
-      icon: <FileText className="h-6 w-6 text-indigo-500" />,
+      icon: <FileText className="h-6 w-6 text-primary" />,
       docs: [
         t("requests:wizard.documents.leaseAgreement"),
         t("requests:wizard.documents.facilityLayoutPhotos")

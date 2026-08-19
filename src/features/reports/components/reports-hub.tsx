@@ -50,7 +50,7 @@ export function ReportsHub() {
         <div
           className={`flex items-start gap-3 p-4 rounded-xl border ${
             alertMsg.type === "success"
-              ? "border-emerald-500/20 bg-emerald-500/5 text-emerald-600 dark:text-emerald-400"
+              ? "border-success/20 bg-success/5 text-success"
               : "border-destructive/20 bg-destructive/5 text-destructive"
           }`}
         >
@@ -84,10 +84,10 @@ export function ReportsHub() {
             <CardTitle className="text-xs font-semibold text-muted-foreground uppercase">
               {t("reports:kpiReady")}
             </CardTitle>
-            <Clock className="h-4.5 w-4.5 text-amber-500 animate-pulse" />
+            <Clock className="h-4.5 w-4.5 text-warning animate-pulse" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-amber-500">{kpis.readyToGenerate}</div>
+            <div className="text-2xl font-bold text-warning">{kpis.readyToGenerate}</div>
           </CardContent>
         </Card>
 
@@ -96,10 +96,10 @@ export function ReportsHub() {
             <CardTitle className="text-xs font-semibold text-muted-foreground uppercase">
               {t("reports:kpiApproved")}
             </CardTitle>
-            <CheckCircle className="h-4.5 w-4.5 text-emerald-500" />
+            <CheckCircle className="h-4.5 w-4.5 text-success" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-emerald-500">{kpis.approved}</div>
+            <div className="text-2xl font-bold text-success">{kpis.approved}</div>
           </CardContent>
         </Card>
 

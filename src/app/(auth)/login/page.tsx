@@ -96,9 +96,8 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4 relative overflow-hidden">
-      {/* Decorative Gradients */}
-      <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-primary/10 dark:bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-indigo-500/10 dark:bg-indigo-500/5 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-[-20%] start-[-10%] w-[500px] h-[500px] bg-primary/10 dark:bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-20%] end-[-10%] w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
 
       <Card className="w-full max-w-xl border-border bg-card/85 backdrop-blur-xl relative z-10 shadow-2xl">
         <CardHeader className="text-center space-y-2 border-b border-border/40 pb-6">

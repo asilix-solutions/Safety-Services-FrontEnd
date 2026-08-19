@@ -16,8 +16,8 @@ export function InspectionStatusCard({ project, t }: InspectionStatusCardProps) 
   return (
     <Card className="border-border bg-card">
       <CardHeader className="pb-2 border-b border-border">
-        <CardTitle className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
-          <ClipboardCheck className="h-4 w-4 text-indigo-500" />
+        <CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+          <ClipboardCheck className="h-4 w-4 text-primary" />
           {t("projects:overview.inspection.title")}
         </CardTitle>
       </CardHeader>

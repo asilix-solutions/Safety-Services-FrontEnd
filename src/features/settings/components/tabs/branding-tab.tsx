@@ -163,7 +163,7 @@ export function BrandingTab({
             
             <div className="pt-4 mt-4 border-t border-border flex items-center gap-3">
               {draft.logoUrl && (
-                <div className="h-10 w-10 border border-border rounded p-1 bg-white flex items-center justify-center">
+                <div className="h-10 w-10 border border-border rounded p-1 bg-card flex items-center justify-center">
                   <img src={draft.logoUrl} alt="Logo" className="max-h-full max-w-full object-contain" />
                 </div>
               )}

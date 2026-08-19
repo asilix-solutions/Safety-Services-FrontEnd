@@ -77,7 +77,7 @@ export function SettingsHub() {
         <div
           className={`p-3 text-xs rounded-xl border ${
             alertMsg.type === "success"
-              ? "border-emerald-500/20 bg-emerald-500/5 text-emerald-600 dark:text-emerald-400"
+              ? "border-success/20 bg-success/5 text-success"
               : "border-destructive/20 bg-destructive/5 text-destructive"
           }`}
         >
@@ -179,7 +179,7 @@ export function SettingsHub() {
 
       {/* Restore Defaults Confirmation Dialog overlay */}
       {showResetConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
           <div className="bg-card border border-border shadow-2xl rounded-2xl max-w-md w-full p-6 space-y-4">
             <h3 className="text-base font-bold text-foreground">
               {t("settings:resetConfirmTitle") || "Restore default settings?"}

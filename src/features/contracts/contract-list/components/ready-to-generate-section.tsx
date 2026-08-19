@@ -38,7 +38,7 @@ export function ReadyToGenerateSection({
     {
       header: t("common:contracts_completion_status"),
       render: () => (
-        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-success/10 text-success">
           {t("common:status_Completed").toUpperCase()}
         </span>
       ),
@@ -50,7 +50,7 @@ export function ReadyToGenerateSection({
           label={t("common:contracts_generate_btn")}
           icon={Plus}
           onClick={() => onGenerateContract(row)}
-          className="h-8 text-xs bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm border-none cursor-pointer"
+          className="h-8 text-xs bg-success text-success-foreground hover:bg-success/90 shadow-sm border-none cursor-pointer"
         />
       ),
     },
@@ -60,7 +60,7 @@ export function ReadyToGenerateSection({
     <Card className="border-border bg-card shadow-sm">
       <CardHeader>
         <CardTitle className="text-base font-semibold flex items-center gap-2">
-          <ShieldAlert className="h-4.5 w-4.5 text-amber-500" />
+          <ShieldAlert className="h-4.5 w-4.5 text-warning" />
           {t("common:contracts_ready_to_generate")}
         </CardTitle>
         <CardDescription>

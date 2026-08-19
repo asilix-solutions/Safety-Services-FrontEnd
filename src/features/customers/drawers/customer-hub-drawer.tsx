@@ -70,7 +70,7 @@ export function CustomerHubDrawer({ customer, isOpen, onClose, onSave, permissio
   ] as const;
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-slate-950/60 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm">
       <div className="absolute inset-0 -z-10" onClick={onClose} />
 
       <div className="w-full sm:max-w-xl h-full bg-card border-s border-border shadow-2xl p-6 flex flex-col justify-between overflow-y-auto relative animate-in slide-in-from-right duration-200">

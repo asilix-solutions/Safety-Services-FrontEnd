@@ -24,8 +24,8 @@ export function RevenueChart() {
             <AreaChart data={MOCK_DASHBOARD_STATS.revenueTrend} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
               <defs>
                 <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="var(--color-primary)" stopOpacity={0.4} />
-                  <stop offset="95%" stopColor="var(--color-primary)" stopOpacity={0} />
+                  <stop offset="5%" stopColor="hsl(var(--chart-1))" stopOpacity={0.4} />
+                  <stop offset="95%" stopColor="hsl(var(--chart-1))" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" opacity={0.12} />
@@ -34,15 +34,20 @@ export function RevenueChart() {
               <Tooltip
                 formatter={(value) => [`$${value}`, "Revenue"]}
                 contentStyle={{
-                  backgroundColor: "#0f172a",
-                  borderColor: "rgba(255,255,255,0.1)",
+                  backgroundColor: "var(--popover)",
+                  borderColor: "var(--border)",
+                  color: "var(--popover-foreground)",
                   borderRadius: "8px",
+                  boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                }}
+                itemStyle={{
+                  color: "var(--popover-foreground)",
                 }}
               />
               <Area
                 type="monotone"
                 dataKey="value"
-                stroke="var(--color-primary)"
+                stroke="hsl(var(--chart-1))"
                 strokeWidth={2.5}
                 fillOpacity={1}
                 fill="url(#revenueGrad)"

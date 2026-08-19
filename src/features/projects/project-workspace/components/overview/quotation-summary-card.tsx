@@ -16,8 +16,8 @@ export function QuotationSummaryCard({ quotation, t }: QuotationSummaryCardProps
   return (
     <Card className="border-border bg-card">
       <CardHeader className="pb-2 border-b border-border">
-        <CardTitle className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
-          <FileSpreadsheet className="h-4 w-4 text-indigo-500" />
+        <CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+          <FileSpreadsheet className="h-4 w-4 text-primary" />
           {t("projects:overview.quotation.title")}
         </CardTitle>
       </CardHeader>

@@ -12,11 +12,11 @@ interface PieChartProps {
 }
 
 const COLORS = [
-  "#4f46e5", // primary indigo
-  "#10b981", // success emerald
-  "#f59e0b", // warning amber
-  "#ef4444", // destructive red
-  "#06b6d4", // accent cyan
+  "hsl(var(--chart-1))",
+  "hsl(var(--chart-2))",
+  "hsl(var(--chart-3))",
+  "hsl(var(--chart-4))",
+  "hsl(var(--chart-5))",
 ];
 
 export function PieChart({ title, description, data, height = 300 }: PieChartProps) {
@@ -42,7 +42,7 @@ export function PieChart({ title, description, data, height = 300 }: PieChartPro
                 cy="50%"
                 labelLine={false}
                 outerRadius={80}
-                fill="#8884d8"
+                fill="hsl(var(--chart-1))"
                 dataKey="value"
               >
                 {data.map((_, index) => (
@@ -51,9 +51,14 @@ export function PieChart({ title, description, data, height = 300 }: PieChartPro
               </Pie>
               <Tooltip
                 contentStyle={{
-                  backgroundColor: "#0f172a",
-                  borderColor: "rgba(255,255,255,0.1)",
+                  backgroundColor: "var(--popover)",
+                  borderColor: "var(--border)",
+                  color: "var(--popover-foreground)",
                   borderRadius: "8px",
+                  boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                }}
+                itemStyle={{
+                  color: "var(--popover-foreground)",
                 }}
               />
               <Legend layout="horizontal" align="center" verticalAlign="bottom" fontSize={11} />

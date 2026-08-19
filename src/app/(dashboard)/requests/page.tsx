@@ -203,7 +203,7 @@ export default function RequestsPage() {
           if (linkedProject && (row.currentStage === "FINAL_INSPECTION" || row.currentStage === "COMPLETED")) {
             return (
               <Link href={`/projects/${linkedProject.id}`}>
-                <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs text-indigo-600 border-indigo-500/20 hover:bg-indigo-500/5 hover:text-indigo-600 font-semibold">
+                <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs text-primary border-primary/20 hover:bg-primary/5 hover:text-primary font-semibold">
                   <Eye className="h-3.5 w-3.5" /> {t("requests:details.openWorkspace") || "Open Workspace"}
                 </Button>
               </Link>

@@ -25,9 +25,9 @@ export function formatOverviewDate(dateStr?: string | null, t?: (key: string) =>
 }
 
 export function getOverviewProgressColor(progress: number): string {
-  if (progress >= 80) return "bg-emerald-500";
-  if (progress >= 40) return "bg-sky-500";
-  return "bg-amber-500";
+  if (progress >= 80) return "bg-success";
+  if (progress >= 40) return "bg-primary";
+  return "bg-warning";
 }
 
 export function getOverviewIcon(name?: string, className = "h-5 w-5") {
@@ -56,13 +56,13 @@ export function getOverviewIcon(name?: string, className = "h-5 w-5") {
 export function getOverviewBadgeClass(variant?: string): string {
   switch (variant) {
     case "success":
-      return "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20";
+      return "bg-success/10 text-success border-success/20";
     case "warning":
-      return "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20";
+      return "bg-warning/10 text-warning border-warning/20";
     case "destructive":
-      return "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20";
+      return "bg-destructive/10 text-destructive border-destructive/20";
     case "info":
-      return "bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/20";
+      return "bg-info/10 text-info border-info/20";
     default:
       return "bg-secondary text-secondary-foreground border-border";
   }

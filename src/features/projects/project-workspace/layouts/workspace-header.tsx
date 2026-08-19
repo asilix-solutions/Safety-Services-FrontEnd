@@ -38,7 +38,7 @@ export function WorkspaceHeader({
         />
       </div>
       <div className="flex items-center gap-4">
-        <span className="text-xs bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold px-2 py-1 rounded">
+        <span className="text-xs bg-primary/10 text-primary font-bold px-2 py-1 rounded">
           {projectProgramLabel}
         </span>
         <StatusBadge status={projectStatus} type="project" />

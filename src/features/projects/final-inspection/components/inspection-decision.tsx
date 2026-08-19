@@ -32,9 +32,9 @@ export function InspectionDecision({
 }: InspectionDecisionProps) {
   if (!isConsultingEngineer) {
     return (
-      <Card className="border-amber-500/25 bg-amber-500/[0.02] shadow-sm rounded-xl">
+      <Card className="border-warning/25 bg-warning/[0.02] shadow-sm rounded-xl">
         <CardContent className="p-5 text-center space-y-3">
-          <AlertCircle className="h-6 w-6 text-amber-500 mx-auto" />
+          <AlertCircle className="h-6 w-6 text-warning mx-auto" />
           <h4 className="font-bold text-xs text-foreground uppercase tracking-wide">
             {t("projects:inspection.awaitingDecision") || "Awaiting Consulting Engineer Decision"}
           </h4>
@@ -47,10 +47,10 @@ export function InspectionDecision({
   }
 
   return (
-    <Card className="border-indigo-500/20 bg-card shadow-sm rounded-xl">
+    <Card className="border-primary/20 bg-card shadow-sm rounded-xl">
       <CardHeader className="pb-3 border-b border-border">
         <CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-          <FileEdit className="h-4 w-4 text-indigo-500" />
+          <FileEdit className="h-4 w-4 text-primary" />
           {t("projects:inspection.title") || "Final Compliance Decision"}
         </CardTitle>
       </CardHeader>
@@ -63,7 +63,7 @@ export function InspectionDecision({
         )}
 
         {successMessage && (
-          <div className="p-3 border border-emerald-500/20 bg-emerald-500/5 text-emerald-600 dark:text-emerald-400 rounded-lg flex items-start gap-2">
+          <div className="p-3 border border-success/20 bg-success/5 text-success rounded-lg flex items-start gap-2">
             <CheckCircle2 className="h-4 w-4 shrink-0 mt-0.5" />
             <span>{t(successMessage) || successMessage}</span>
           </div>
@@ -89,14 +89,14 @@ export function InspectionDecision({
               onClick={handleRequestFixes}
               disabled={isSubmitting || !notes.trim()}
               variant="outline"
-              className="flex-1 text-xs font-bold border-rose-500/30 text-rose-600 hover:bg-rose-50/20 dark:hover:bg-rose-950/20 h-10"
+              className="flex-1 text-xs font-bold border-destructive/30 text-destructive hover:bg-destructive/10 h-10"
             >
               {t("projects:inspection.requestFixesBtn") || "Request Fixes / Return to Execution"}
             </Button>
             <Button
               onClick={handleApprove}
               disabled={isSubmitting || !notes.trim()}
-              className="flex-1 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white h-10"
+              className="flex-1 text-xs font-bold bg-success hover:bg-success/90 text-success-foreground h-10"
             >
               {t("projects:inspection.approveBtn") || "Approve Final Inspection"}
             </Button>

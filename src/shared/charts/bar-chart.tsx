@@ -48,15 +48,20 @@ export function BarChart({
               <YAxis fontSize={11} tickLine={false} />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: "#0f172a",
-                  borderColor: "rgba(255,255,255,0.1)",
+                  backgroundColor: "var(--popover)",
+                  borderColor: "var(--border)",
+                  color: "var(--popover-foreground)",
                   borderRadius: "8px",
+                  boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                }}
+                itemStyle={{
+                  color: "var(--popover-foreground)",
                 }}
               />
               <Legend verticalAlign="top" height={36} fontSize={12} />
-              <Bar dataKey={yKey} fill="var(--color-primary)" radius={[4, 4, 0, 0]} name={barName} />
+              <Bar dataKey={yKey} fill="hsl(var(--chart-1))" radius={[4, 4, 0, 0]} name={barName} />
               {yKeySecondary && (
-                <Bar dataKey={yKeySecondary} fill="var(--color-warning)" radius={[4, 4, 0, 0]} name={barNameSecondary} />
+                <Bar dataKey={yKeySecondary} fill="hsl(var(--chart-2))" radius={[4, 4, 0, 0]} name={barNameSecondary} />
               )}
             </RechartsBarChart>
           </ResponsiveContainer>

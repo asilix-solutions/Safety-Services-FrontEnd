@@ -115,7 +115,7 @@ export function BlueprintWorkspace({ jobNumber }: BlueprintWorkspaceProps) {
           {viewModel.activityName}
         </Badge>
         {viewModel.reviewStatus && (
-          <Badge className="bg-indigo-500/10 text-indigo-500 border-none font-bold text-[10px] px-2.5 py-0.5">
+          <Badge className="bg-primary/10 text-primary border-none font-bold text-[10px] px-2.5 py-0.5">
             {t(`requests:blueprintReview.status.${viewModel.reviewStatus}`)}
           </Badge>
         )}
@@ -123,11 +123,11 @@ export function BlueprintWorkspace({ jobNumber }: BlueprintWorkspaceProps) {
 
       {/* Warning/Gatekeeper banner if read-only */}
       {isReadonly && (
-        <Card className="border-rose-500/20 bg-rose-500/5">
+        <Card className="border-destructive/20 bg-destructive/5">
           <CardContent className="p-4 flex items-start gap-3">
-            <AlertTriangle className="h-5 w-5 text-rose-500 shrink-0 mt-0.5" />
+            <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
             <div className="space-y-1">
-              <h4 className="font-bold text-xs text-rose-700 dark:text-rose-400 uppercase tracking-wide">
+              <h4 className="font-bold text-xs text-destructive uppercase tracking-wide">
                 {t("requests:blueprintReview.workspace.isReadonly")}
               </h4>
               <p className="text-xs text-muted-foreground leading-relaxed">
@@ -140,7 +140,7 @@ export function BlueprintWorkspace({ jobNumber }: BlueprintWorkspaceProps) {
 
       {/* Validation Error Banner */}
       {validationError && (
-        <div className="p-4 rounded-xl border border-rose-500/20 bg-rose-500/5 text-rose-600 dark:text-rose-400 text-xs flex items-center gap-2 font-medium">
+        <div className="p-4 rounded-xl border border-destructive/20 bg-destructive/5 text-destructive text-xs flex items-center gap-2 font-medium">
           <AlertTriangle className="h-4 w-4 shrink-0" />
           <span>{validationError}</span>
         </div>

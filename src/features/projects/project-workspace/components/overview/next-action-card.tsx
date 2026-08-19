@@ -17,7 +17,7 @@ export function NextActionCard({ nextActionLabelKey, t }: NextActionCardProps) {
         </CardTitle>
       </CardHeader>
       <CardContent className="flex items-center gap-2 text-sm font-semibold text-foreground">
-        <ArrowRight className="h-4 w-4 text-indigo-500 shrink-0" />
+        <ArrowRight className="h-4 w-4 text-primary shrink-0" />
         {t(nextActionLabelKey)}
       </CardContent>
     </Card>

@@ -11,7 +11,7 @@ export function getProjectHealth(project: Project, silos: SiloExecutionData[]): 
     return {
       status: "blocked",
       labelKey: "projects:health.blocked",
-      color: "border-red-200 bg-red-50 text-red-700 dark:border-red-900/30 dark:bg-red-950/20 dark:text-red-400",
+      color: "border-destructive/20 bg-destructive/15 text-destructive",
     };
   }
 
@@ -19,13 +19,13 @@ export function getProjectHealth(project: Project, silos: SiloExecutionData[]): 
     return {
       status: "healthy",
       labelKey: "projects:health.healthy",
-      color: "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/30 dark:bg-emerald-950/20 dark:text-emerald-400",
+      color: "border-success/20 bg-success/15 text-success",
     };
   }
 
   return {
     status: "attention",
     labelKey: "projects:health.attention",
-    color: "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/30 dark:bg-amber-950/20 dark:text-amber-400",
+    color: "border-warning/20 bg-warning/15 text-warning",
   };
 }

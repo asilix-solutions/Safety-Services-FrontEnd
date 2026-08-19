@@ -376,13 +376,13 @@ export default function RequestDetailsPage() {
           milestone track, not a stage of it (FR-COM-02). Gated on the request
           still sitting at SUBMITTED, so it clears once the stage moves on. */}
       {request.currentStage === "SUBMITTED" && request.rejectionReason && (
-        <Card className="border-rose-500/20 bg-rose-500/5 shadow-sm">
+        <Card className="border-destructive/20 bg-destructive/5 shadow-sm">
           <CardContent className="p-4 flex items-start gap-3">
-            <div className="p-2 bg-rose-600/10 rounded-lg text-rose-600 shrink-0">
+            <div className="p-2 bg-destructive/10 rounded-lg text-destructive shrink-0">
               <ShieldAlert className="h-5 w-5" />
             </div>
             <div className="space-y-1">
-              <h4 className="text-sm font-bold text-rose-700 dark:text-rose-400">
+              <h4 className="text-sm font-bold text-destructive">
                 {t("requests:details.actionRequiredTitle")}
               </h4>
               <p className="text-xs text-muted-foreground leading-relaxed">
@@ -397,10 +397,10 @@ export default function RequestDetailsPage() {
       )}
 
       {/* Next Action Card */}
-      <Card className="border-indigo-500/20 bg-indigo-500/5 shadow-sm">
+      <Card className="border-primary/20 bg-primary/5 shadow-sm">
         <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-start gap-3">
-            <div className="p-2 bg-indigo-600/10 rounded-lg text-indigo-600 shrink-0">
+            <div className="p-2 bg-primary/10 rounded-lg text-primary shrink-0">
               <Clock className="h-5 w-5" />
             </div>
             <div className="space-y-1">
@@ -414,7 +414,7 @@ export default function RequestDetailsPage() {
             <Button
               size="sm"
               onClick={handleApproveForQuotation}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white shrink-0 shadow-sm gap-1.5 text-xs h-9"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground shrink-0 shadow-sm gap-1.5 text-xs h-9"
             >
               <Send className="h-3.5 w-3.5" />
               {t("requests:engineeringWorkspace.decisionApprove") || "Approve for Quotation"}
@@ -424,7 +424,7 @@ export default function RequestDetailsPage() {
             <Link href={`/projects/${linkedProject.id}`}>
               <Button
                 size="sm"
-                className="bg-indigo-600 hover:bg-indigo-700 text-white shrink-0 shadow-sm gap-1.5 text-xs h-9 font-semibold"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground shrink-0 shadow-sm gap-1.5 text-xs h-9 font-semibold"
               >
                 <Eye className="h-3.5 w-3.5" />
                 {t("requests:details.openWorkspace") || "Open Workspace"}
@@ -436,9 +436,9 @@ export default function RequestDetailsPage() {
 
       {/* MVP Payment and Billing Card - Clients Only */}
       {isClient && request.currentStage === "PAYMENT_CONFIRMED" && (
-        <Card className="border-indigo-600 bg-indigo-500/5 shadow-sm">
+        <Card className="border-primary bg-primary/5 shadow-sm">
           <CardHeader className="pb-2">
-            <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
+            <div className="flex items-center gap-2 text-primary">
               <CreditCard className="h-5 w-5" />
               <CardTitle className="text-base font-bold">{t("requests:details.billingTitle")}</CardTitle>
             </div>
@@ -448,7 +448,7 @@ export default function RequestDetailsPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             {!invoice ? (
-              <div className="p-3 border border-amber-500/30 bg-amber-500/10 text-amber-800 dark:text-amber-400 rounded-lg text-xs space-y-2">
+              <div className="p-3 border border-warning/30 bg-warning/10 text-warning rounded-lg text-xs space-y-2">
                 <p>
                   <strong>{t("common:warning") || "Warning"}:</strong> {t("requests:details.invoiceMissing")}
                 </p>
@@ -457,7 +457,7 @@ export default function RequestDetailsPage() {
                     <Button
                       size="sm"
                       onClick={handleRegenerateInvoice}
-                      className="bg-amber-600 hover:bg-amber-700 text-white font-semibold text-[10px] h-7 px-3"
+                      className="bg-warning hover:bg-warning/90 text-warning-foreground font-semibold text-[10px] h-7 px-3"
                     >
                       {t("requests:details.regenerateInvoice")}
                     </Button>
@@ -496,7 +496,7 @@ export default function RequestDetailsPage() {
                     <Button
                       onClick={handleConfirmMockPayment}
                       disabled={isProcessing}
-                      className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-4 py-2"
+                      className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs px-4 py-2"
                     >
                       {isProcessing ? t("requests:details.processingPayment") : t("requests:details.confirmPaymentBtn")}
                     </Button>
@@ -595,13 +595,13 @@ export default function RequestDetailsPage() {
                   <div className="flex items-center gap-2">
                     {doc.uploaded ? (
                       <div className="text-end mr-2">
-                        <span className="text-emerald-500 font-bold block text-[10px]">✓ {t("dashboard:uploaded_label")}</span>
+                        <span className="text-success font-bold block text-[10px]">✓ {t("dashboard:uploaded_label")}</span>
                         <span className="text-[9px] text-muted-foreground font-mono truncate max-w-[120px] block">
                           {doc.fileName}
                         </span>
                       </div>
                     ) : (
-                      <span className="text-amber-500 font-medium mr-2">{t("dashboard:pending_document")}</span>
+                      <span className="text-warning font-medium mr-2">{t("dashboard:pending_document")}</span>
                     )}
 
                     <div className="flex gap-1 shrink-0">
@@ -653,7 +653,7 @@ export default function RequestDetailsPage() {
               <Card className="border-border bg-card shadow-sm">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-xs font-bold text-foreground uppercase tracking-wide flex items-center gap-1.5">
-                    <Activity className="h-4 w-4 text-indigo-600" />
+                    <Activity className="h-4 w-4 text-primary" />
                     {t("dashboard:sales_project_title")}
                   </CardTitle>
                   <CardDescription className="text-[10px] text-muted-foreground">
@@ -674,9 +674,9 @@ export default function RequestDetailsPage() {
                 </CardContent>
               </Card>
             ) : (
-              <Card className="border-indigo-500/25 bg-indigo-500/5 shadow-sm">
+              <Card className="border-primary/25 bg-primary/5 shadow-sm">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wide flex items-center gap-1.5">
+                  <CardTitle className="text-xs font-bold text-primary uppercase tracking-wide flex items-center gap-1.5">
                     <Activity className="h-4 w-4" />
                     {t("projects:details.linkedProject") || "Linked Project Execution"}
                   </CardTitle>
@@ -699,7 +699,7 @@ export default function RequestDetailsPage() {
                     <>
                       <div className="space-y-1">
                         <span className="text-[9px] text-muted-foreground block uppercase">{t("projects:phases.title") || "Execution Phase"}</span>
-                        <span className="font-bold text-indigo-600 dark:text-indigo-400 capitalize">
+                        <span className="font-bold text-primary capitalize">
                           {getProjectExecutionPhaseLabel(linkedProject.executionPhase, t) || t("projects:phases.created")}
                         </span>
                       </div>
@@ -719,7 +719,7 @@ export default function RequestDetailsPage() {
                       if (isRole(user?.role, [USER_ROLES.OPERATIONS_OFFICER])) {
                         return (
                           <Link href={`/projects/${linkedProject.id}`}>
-                            <Button size="sm" className="w-full text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white gap-1.5 h-8">
+                            <Button size="sm" className="w-full text-xs font-bold bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 h-8">
                               {t("requests:details.openWorkspace")}
                             </Button>
                           </Link>
@@ -730,7 +730,7 @@ export default function RequestDetailsPage() {
                         if (kickoffVisit) {
                           return (
                             <Link href={`/site-visits`}>
-                              <Button size="sm" className="w-full text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white gap-1.5 h-8">
+                              <Button size="sm" className="w-full text-xs font-bold bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 h-8">
                                 {t("projects:tabs.viewSiteVisits") || "View Site Visits"}
                               </Button>
                             </Link>
@@ -745,7 +745,7 @@ export default function RequestDetailsPage() {
                       } else if (isRole(user?.role, [USER_ROLES.CLIENT])) {
                         return (
                           <Link href={`/projects/${linkedProject.id}`}>
-                            <Button size="sm" className="w-full text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white gap-1.5 h-8">
+                            <Button size="sm" className="w-full text-xs font-bold bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 h-8">
                               {t("requests:details.viewProject") || "View Project Progress"}
                             </Button>
                           </Link>
@@ -796,11 +796,11 @@ export default function RequestDetailsPage() {
                     <div key={stage} className="flex items-center gap-3 text-xs">
                       <div className="shrink-0">
                         {isCompleted ? (
-                          <div className="h-5 w-5 bg-emerald-500 text-white rounded-full flex items-center justify-center font-bold text-[10px]">
+                          <div className="h-5 w-5 bg-success text-success-foreground rounded-full flex items-center justify-center font-bold text-[10px]">
                             ✓
                           </div>
                         ) : isActive ? (
-                          <div className="h-5 w-5 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold text-[10px] animate-pulse">
+                          <div className="h-5 w-5 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold text-[10px] animate-pulse">
                             ●
                           </div>
                         ) : (
@@ -809,7 +809,7 @@ export default function RequestDetailsPage() {
                           </div>
                         )}
                       </div>
-                      <span className={`font-semibold ${isActive ? "text-indigo-600 dark:text-indigo-400 font-bold" : isCompleted ? "text-foreground" : "text-muted-foreground"}`}>
+                      <span className={`font-semibold ${isActive ? "text-primary font-bold" : isCompleted ? "text-foreground" : "text-muted-foreground"}`}>
                         {getWorkflowStageDisplayName(stage, t)}
                       </span>
                     </div>
@@ -829,7 +829,7 @@ export default function RequestDetailsPage() {
               <div className="relative border-s border-border ps-4 ms-2 space-y-6">
                 {request.timeline.map((event, idx) => (
                   <div key={idx} className="relative">
-                    <div className="absolute -start-[21px] mt-1 h-2.5 w-2.5 rounded-full bg-indigo-600 ring-4 ring-background" />
+                    <div className="absolute -start-[21px] mt-1 h-2.5 w-2.5 rounded-full bg-primary ring-4 ring-background" />
                     <div className="space-y-1 text-xs">
                       <div className="flex items-center justify-between">
                         <span className="font-bold text-foreground capitalize">
@@ -846,7 +846,7 @@ export default function RequestDetailsPage() {
           </Card>
 
           {/* V2 Expand message */}
-          <div className="p-4 rounded-xl border border-indigo-500/20 bg-indigo-500/5 text-indigo-700 dark:text-indigo-400 text-xs flex gap-2">
+          <div className="p-4 rounded-xl border border-primary/20 bg-primary/5 text-primary text-xs flex gap-2">
             <ShieldAlert className="h-4 w-4 shrink-0 mt-0.5" />
             <div>
               <p className="font-bold text-foreground">{t("dashboard:mvp_placeholder_node")}</p>

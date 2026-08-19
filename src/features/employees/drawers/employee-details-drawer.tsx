@@ -56,7 +56,7 @@ export function EmployeeDetailsDrawer({ employee, isOpen, onClose, onSave, canMa
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-slate-950/60 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm">
       {/* Backdrop area click to close */}
       <div className="absolute inset-0 -z-10" onClick={onClose} />
 
