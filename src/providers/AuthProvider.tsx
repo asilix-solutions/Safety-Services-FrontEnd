@@ -4,6 +4,8 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { UserRole } from "@/types/role";
 import { UserProfile } from "@/types/user";
 import { ROLE_PERMISSIONS } from "@/constants/permissions";
+import { applyTenantTheme } from "@/lib/theme-utils";
+import { getBranding } from "@/domains/settings";
 interface AuthContextType {
   user: UserProfile | null;
   isAuthenticated: boolean;
@@ -84,7 +86,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Initialize session from LocalStorage
+  // Initialize session from LocalStorage & hydrate tenant branding
   useEffect(() => {
     const savedProfile = localStorage.getItem(SESSION_STORAGE_KEY);
     if (savedProfile) {
@@ -94,6 +96,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.error("Failed to parse saved user profile", err);
       }
     }
+
+    try {
+      const branding = getBranding();
+      if (branding && branding.primaryColor) {
+        applyTenantTheme(branding.primaryColor, branding.secondaryColor, branding.accentColor);
+      }
+    } catch (err) {
+      console.error("Failed to hydrate tenant theme", err);
+    }
+
     setIsLoading(false);
   }, []);
 
@@ -110,6 +122,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     setUser(profile);
     localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(profile));
+
+    try {
+      const branding = getBranding();
+      if (branding && branding.primaryColor) {
+        applyTenantTheme(branding.primaryColor, branding.secondaryColor, branding.accentColor);
+      }
+    } catch (err) {
+      console.error("Failed to apply tenant theme on login", err);
+    }
+
     setIsLoading(false);
   };
 
@@ -162,6 +184,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     setUser(profile);
     localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(profile));
+
+    try {
+      const branding = getBranding();
+      if (branding && branding.primaryColor) {
+        applyTenantTheme(branding.primaryColor, branding.secondaryColor, branding.accentColor);
+      }
+    } catch (err) {
+      console.error("Failed to apply tenant theme on switchRole", err);
+    }
   };
   return (
     <AuthContext.Provider

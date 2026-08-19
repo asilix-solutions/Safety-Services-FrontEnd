@@ -30,6 +30,7 @@ import {
   validateNotifications,
   validateSecurity
 } from "@/domains/settings";
+import { applyTenantTheme } from "@/lib/theme-utils";
 
 export type SettingsTab = "company" | "branding" | "preferences" | "notifications" | "security" | "organization";
 
@@ -154,6 +155,7 @@ export function useSettings() {
         return;
       }
       saveBranding(brandingDraft);
+      applyTenantTheme(brandingDraft.primaryColor, brandingDraft.secondaryColor, brandingDraft.accentColor);
     } else if (activeTab === "preferences" && prefsDraft) {
       const res = validatePreferences(prefsDraft);
       if (!res.valid) {
@@ -203,7 +205,9 @@ export function useSettings() {
     if (activeTab === "company") {
       setCompanyDraft(resetCompanyProfile());
     } else if (activeTab === "branding") {
-      setBrandingDraft(resetBranding());
+      const defaultBranding = resetBranding();
+      setBrandingDraft(defaultBranding);
+      applyTenantTheme(defaultBranding.primaryColor, defaultBranding.secondaryColor, defaultBranding.accentColor);
     } else if (activeTab === "preferences") {
       setPrefsDraft(resetWorkspacePreferences());
     } else if (activeTab === "notifications") {
@@ -223,7 +227,9 @@ export function useSettings() {
     if (activeTab === "company") {
       setCompanyDraft(getCompanyProfile());
     } else if (activeTab === "branding") {
-      setBrandingDraft(getBranding());
+      const currentBranding = getBranding();
+      setBrandingDraft(currentBranding);
+      applyTenantTheme(currentBranding.primaryColor, currentBranding.secondaryColor, currentBranding.accentColor);
     } else if (activeTab === "preferences") {
       setPrefsDraft(getWorkspacePreferences());
     } else if (activeTab === "notifications") {
