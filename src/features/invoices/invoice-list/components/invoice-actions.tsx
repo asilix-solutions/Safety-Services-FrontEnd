@@ -39,7 +39,14 @@ export function InvoiceActions({
   const { t } = useTranslation();
   const { user } = useAuth();
 
-  if (!invoice) return null;
+  const [activeInvoice, setActiveInvoice] = React.useState<ClientInvoice | null>(invoice);
+
+  React.useEffect(() => {
+    if (invoice) setActiveInvoice(invoice);
+  }, [invoice]);
+
+  const currentInvoice = invoice || activeInvoice;
+  if (!currentInvoice) return null;
 
   const isClient = isRole(user?.role, [USER_ROLES.CLIENT]);
   const isConsultingEngineer = isRole(user?.role, [USER_ROLES.CONSULTING_ENGINEER]);
@@ -47,17 +54,17 @@ export function InvoiceActions({
 
   const getQuotationHref = () => {
     if (isConsultingEngineer) {
-      return `/quotations/${invoice.jobNumber}`;
+      return `/quotations/${currentInvoice.jobNumber}`;
     }
     if (isCompanyAdmin) {
-      return `/quotations/approvals/${invoice.jobNumber}`;
+      return `/quotations/approvals/${currentInvoice.jobNumber}`;
     }
     return "";
   };
 
   const quotationHref = getQuotationHref();
 
-  const isPaid = invoice.status === "paid";
+  const isPaid = currentInvoice.status === "paid";
 
   return (
     <Dialog open={!!invoice} onOpenChange={(open) => !open && onClose()}>
@@ -76,25 +83,25 @@ export function InvoiceActions({
           {/* 1. General Info & Status Badge */}
           <div className="space-y-3 bg-secondary/20 p-3 rounded-lg border border-border">
             <div className="flex justify-between items-center">
-              <span className="font-mono text-xs font-bold text-primary">{invoice.id}</span>
-              <Badge variant={getStatusBadgeVariant(invoice.status)} className="uppercase text-[9px]">
-                {getStatusLabel(invoice.status, t)}
+              <span className="font-mono text-xs font-bold text-primary">{currentInvoice.id}</span>
+              <Badge variant={getStatusBadgeVariant(currentInvoice.status)} className="uppercase text-[9px]">
+                {getStatusLabel(currentInvoice.status, t)}
               </Badge>
             </div>
 
             <div className="grid grid-cols-2 gap-3 pt-1">
               <div>
                 <span className="text-muted-foreground block mb-0.5">{t("invoices_dialog_issued")}</span>
-                <span className="font-semibold text-foreground">{formatDate(invoice.issuedAt)}</span>
+                <span className="font-semibold text-foreground">{formatDate(currentInvoice.issuedAt)}</span>
               </div>
               <div>
                 <span className="text-muted-foreground block mb-0.5">{t("invoices_dialog_due")}</span>
-                <span className="font-semibold text-foreground">{formatDate(invoice.dueDate)}</span>
+                <span className="font-semibold text-foreground">{formatDate(currentInvoice.dueDate)}</span>
               </div>
-              {isPaid && invoice.paidAt && (
+              {isPaid && currentInvoice.paidAt && (
                 <div className="col-span-2">
                   <span className="text-muted-foreground block mb-0.5">{t("invoices_dialog_paid")}</span>
-                  <span className="font-semibold text-foreground">{formatDate(invoice.paidAt)}</span>
+                  <span className="font-semibold text-foreground">{formatDate(currentInvoice.paidAt)}</span>
                 </div>
               )}
             </div>
@@ -104,15 +111,15 @@ export function InvoiceActions({
           <div className="p-3 bg-secondary/10 rounded-lg border border-border/50 space-y-2">
             <div className="flex justify-between">
               <span className="text-muted-foreground">{t("invoices_dialog_subtotal")}</span>
-              <span className="font-medium text-foreground">{formatCurrency(invoice.subtotal, invoice.currency)}</span>
+              <span className="font-medium text-foreground">{formatCurrency(currentInvoice.subtotal, currentInvoice.currency)}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">{t("invoices_dialog_vat")}</span>
-              <span className="font-medium text-foreground">{formatCurrency(invoice.vatAmount, invoice.currency)}</span>
+              <span className="font-medium text-foreground">{formatCurrency(currentInvoice.vatAmount, currentInvoice.currency)}</span>
             </div>
             <div className="border-t border-border pt-2 flex justify-between font-bold text-sm">
               <span className="text-foreground">{t("invoices_dialog_total")}</span>
-              <span className="text-primary">{formatCurrency(invoice.grandTotal, invoice.currency)}</span>
+              <span className="text-primary">{formatCurrency(currentInvoice.grandTotal, currentInvoice.currency)}</span>
             </div>
           </div>
 
@@ -129,7 +136,7 @@ export function InvoiceActions({
                 </div>
                 <div>
                   <p className="font-semibold text-foreground">{t("invoices_timeline_issued")}</p>
-                  <p className="text-[10px] text-muted-foreground">{formatDate(invoice.issuedAt)}</p>
+                  <p className="text-[10px] text-muted-foreground">{formatDate(currentInvoice.issuedAt)}</p>
                 </div>
               </div>
 
@@ -147,7 +154,7 @@ export function InvoiceActions({
                     {t("invoices_timeline_paid")}
                   </p>
                   <p className="text-[10px] text-muted-foreground">
-                    {isPaid && invoice.paidAt ? formatDate(invoice.paidAt) : t("certificates_milestone_not_reached")}
+                    {isPaid && currentInvoice.paidAt ? formatDate(currentInvoice.paidAt) : t("certificates_milestone_not_reached")}
                   </p>
                 </div>
               </div>
@@ -166,7 +173,7 @@ export function InvoiceActions({
                     {t("invoices_timeline_project")}
                   </p>
                   <p className="text-[10px] text-muted-foreground">
-                    {isPaid && invoice.paidAt ? formatDate(invoice.paidAt) : t("certificates_milestone_not_reached")}
+                    {isPaid && currentInvoice.paidAt ? formatDate(currentInvoice.paidAt) : t("certificates_milestone_not_reached")}
                   </p>
                 </div>
               </div>
@@ -183,7 +190,7 @@ export function InvoiceActions({
                 variant="outline"
                 size="sm"
                 className="w-full justify-between text-xs h-9 cursor-pointer"
-                onClick={() => onDownloadInvoice(invoice)}
+                onClick={() => onDownloadInvoice(currentInvoice)}
               >
                 <span className="flex items-center gap-2">
                   <Download className="h-4 w-4 text-muted-foreground" />
@@ -219,7 +226,7 @@ export function InvoiceActions({
               {hasLinkedProject && (
                 (() => {
                   const projectsList = getProjects();
-                  const linkedProj = projectsList.find((p) => p.jobNumber === invoice.jobNumber);
+                  const linkedProj = projectsList.find((p) => p.jobNumber === currentInvoice.jobNumber);
                   
                   if (isRole(user?.role, [USER_ROLES.CONSULTING_ENGINEER])) {
                     if (linkedProj) {
@@ -249,7 +256,7 @@ export function InvoiceActions({
                     );
                   }
 
-                  const href = linkedProj ? `/projects/${linkedProj.id}` : `/projects/${invoice.jobNumber}`;
+                  const href = linkedProj ? `/projects/${linkedProj.id}` : `/projects/${currentInvoice.jobNumber}`;
                   return (
                     <Link href={href} className="w-full">
                       <Button variant="ghost" size="sm" className="w-full justify-between text-xs h-9 text-muted-foreground hover:text-foreground cursor-pointer">

@@ -27,19 +27,22 @@ interface EmployeeDetailsDrawerProps {
 export function EmployeeDetailsDrawer({ employee, isOpen, onClose, onSave, canManage }: EmployeeDetailsDrawerProps) {
   const { t, dir } = useTranslation();
   const side = dir === "rtl" ? "right" : "left";
+  const [activeEmployee, setActiveEmployee] = useState<Employee | null>(employee);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState<Employee | null>(null);
   const [errors, setErrors] = useState<EmployeeValidationError>({});
 
   useEffect(() => {
     if (employee) {
+      setActiveEmployee(employee);
       setFormData({ ...employee });
       setIsEditing(false);
       setErrors({});
     }
   }, [employee]);
 
-  if (!employee || !formData) return null;
+  const currentEmployee = employee || activeEmployee;
+  if (!currentEmployee || !formData) return null;
 
   const handleSave = () => {
     const res = onSave(formData);
@@ -75,24 +78,24 @@ export function EmployeeDetailsDrawer({ employee, isOpen, onClose, onSave, canMa
                 </Badge>
               )}
             </div>
-            <SheetDescription className="text-xs text-muted-foreground font-mono mt-1">{employee.employeeNumber}</SheetDescription>
+            <SheetDescription className="text-xs text-muted-foreground font-mono mt-1">{currentEmployee.employeeNumber}</SheetDescription>
           </div>
 
           {/* Profile Card Header */}
           <div className="flex items-center gap-4 p-4 rounded-xl border border-border bg-secondary/15">
             <Avatar className="h-14 w-14 border-2 border-primary/10">
-              <AvatarImage src={employee.avatarUrl} alt={employee.fullName} />
-              <AvatarFallback>{employee.fullName.substring(0, 2).toUpperCase()}</AvatarFallback>
+              <AvatarImage src={currentEmployee.avatarUrl} alt={currentEmployee.fullName} />
+              <AvatarFallback>{currentEmployee.fullName.substring(0, 2).toUpperCase()}</AvatarFallback>
             </Avatar>
             <div className="space-y-1">
-              <h4 className="font-bold text-foreground text-sm">{employee.fullName}</h4>
-              <p className="text-xs text-muted-foreground">{t(`common:roles.${employee.role.toLowerCase().replace(" ", "_")}`)}</p>
+              <h4 className="font-bold text-foreground text-sm">{currentEmployee.fullName}</h4>
+              <p className="text-xs text-muted-foreground">{t(`common:roles.${currentEmployee.role.toLowerCase().replace(" ", "_")}`)}</p>
               <div className="flex flex-wrap gap-1.5 pt-1">
-                <Badge variant="outline" className={getAvailabilityBadgeClass(employee.availabilityStatus)}>
-                  {t(`common:employees.availability.${employee.availabilityStatus}`)}
+                <Badge variant="outline" className={getAvailabilityBadgeClass(currentEmployee.availabilityStatus)}>
+                  {t(`common:employees.availability.${currentEmployee.availabilityStatus}`)}
                 </Badge>
-                <Badge variant={employee.status === "Active" ? "default" : "secondary"}>
-                  {t(`common:status_${employee.status}`)}
+                <Badge variant={currentEmployee.status === "Active" ? "default" : "secondary"}>
+                  {t(`common:status_${currentEmployee.status}`)}
                 </Badge>
               </div>
             </div>
@@ -110,7 +113,7 @@ export function EmployeeDetailsDrawer({ employee, isOpen, onClose, onSave, canMa
                   className="h-9 text-xs"
                 />
               ) : (
-                <p className="text-sm font-medium text-foreground py-1.5">{employee.fullName}</p>
+                <p className="text-sm font-medium text-foreground py-1.5">{currentEmployee.fullName}</p>
               )}
               {errors.fullName && <p className="text-destructive text-[10px]">{t(`common:${errors.fullName}`)}</p>}
             </div>
@@ -126,7 +129,7 @@ export function EmployeeDetailsDrawer({ employee, isOpen, onClose, onSave, canMa
                   className="h-9 text-xs"
                 />
               ) : (
-                <p className="text-sm font-medium text-foreground py-1.5">{employee.email}</p>
+                <p className="text-sm font-medium text-foreground py-1.5">{currentEmployee.email}</p>
               )}
               {errors.email && <p className="text-destructive text-[10px]">{t(`common:${errors.email}`)}</p>}
             </div>
@@ -141,7 +144,7 @@ export function EmployeeDetailsDrawer({ employee, isOpen, onClose, onSave, canMa
                   className="h-9 text-xs"
                 />
               ) : (
-                <p className="text-sm font-medium text-foreground py-1.5">{employee.phone}</p>
+                <p className="text-sm font-medium text-foreground py-1.5">{currentEmployee.phone}</p>
               )}
               {errors.phone && <p className="text-destructive text-[10px]">{t(`common:${errors.phone}`)}</p>}
             </div>
@@ -162,7 +165,7 @@ export function EmployeeDetailsDrawer({ employee, isOpen, onClose, onSave, canMa
                     <option value="Sales Agent">{t("common:roles.sales_agent")}</option>
                   </Select>
                 ) : (
-                  <p className="text-sm font-medium text-foreground py-1.5">{t(`common:roles.${employee.role.toLowerCase().replace(" ", "_")}`)}</p>
+                  <p className="text-sm font-medium text-foreground py-1.5">{t(`common:roles.${currentEmployee.role.toLowerCase().replace(" ", "_")}`)}</p>
                 )}
               </div>
 
@@ -180,7 +183,7 @@ export function EmployeeDetailsDrawer({ employee, isOpen, onClose, onSave, canMa
                     <option value="Administration">{t("common:employees.departments.Administration")}</option>
                   </Select>
                 ) : (
-                  <p className="text-sm font-medium text-foreground py-1.5">{t(`common:employees.departments.${employee.department}`)}</p>
+                  <p className="text-sm font-medium text-foreground py-1.5">{t(`common:employees.departments.${currentEmployee.department}`)}</p>
                 )}
               </div>
             </div>
@@ -199,7 +202,7 @@ export function EmployeeDetailsDrawer({ employee, isOpen, onClose, onSave, canMa
                   <option value="Unavailable">{t("common:employees.availability.Unavailable")}</option>
                 </Select>
               ) : (
-                <p className="text-sm font-medium text-foreground py-1.5">{t(`common:employees.availability.${employee.availabilityStatus}`)}</p>
+                <p className="text-sm font-medium text-foreground py-1.5">{t(`common:employees.availability.${currentEmployee.availabilityStatus}`)}</p>
               )}
             </div>
 
@@ -207,11 +210,11 @@ export function EmployeeDetailsDrawer({ employee, isOpen, onClose, onSave, canMa
             <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border text-[10px] text-muted-foreground">
               <div>
                 <span>{t("common:employees.fields.created")}</span>
-                <span className="block font-medium mt-0.5">{new Date(employee.createdAt).toLocaleDateString()}</span>
+                <span className="block font-medium mt-0.5">{new Date(currentEmployee.createdAt).toLocaleDateString()}</span>
               </div>
               <div>
                 <span>{t("common:employees.fields.updated")}</span>
-                <span className="block font-medium mt-0.5">{new Date(employee.updatedAt).toLocaleDateString()}</span>
+                <span className="block font-medium mt-0.5">{new Date(currentEmployee.updatedAt).toLocaleDateString()}</span>
               </div>
             </div>
           </div>
@@ -223,7 +226,7 @@ export function EmployeeDetailsDrawer({ employee, isOpen, onClose, onSave, canMa
             <>
               {isEditing ? (
                 <>
-                  <Button variant="outline" size="sm" onClick={() => { setIsEditing(false); setFormData({ ...employee }); setErrors({}); }}>
+                  <Button variant="outline" size="sm" onClick={() => { setIsEditing(false); setFormData({ ...currentEmployee }); setErrors({}); }}>
                     {t("common:cancel")}
                   </Button>
                   <Button size="sm" onClick={handleSave}>

@@ -31,12 +31,19 @@ export function CertificateActions({
 }: CertificateActionsProps) {
   const { t, dir } = useTranslation();
   const side = dir === "rtl" ? "right" : "left";
-  if (!certificate) return null;
+  const [activeCertificate, setActiveCertificate] = React.useState<ClientCertificate | null>(certificate);
 
-  const displayStatus = deriveCertificateDisplayStatus(certificate.status, certificate.expiresAt);
-  const remainingDays = getRemainingValidityDays(certificate.expiresAt);
-  const warningLevel = getExpirationWarningLevel(certificate.expiresAt, certificate.status);
-  const badgeVariant = getCertificateStatusBadgeVariant(certificate.status, certificate.expiresAt);
+  React.useEffect(() => {
+    if (certificate) setActiveCertificate(certificate);
+  }, [certificate]);
+
+  const currentCertificate = certificate || activeCertificate;
+  if (!currentCertificate) return null;
+
+  const displayStatus = deriveCertificateDisplayStatus(currentCertificate.status, currentCertificate.expiresAt);
+  const remainingDays = getRemainingValidityDays(currentCertificate.expiresAt);
+  const warningLevel = getExpirationWarningLevel(currentCertificate.expiresAt, currentCertificate.status);
+  const badgeVariant = getCertificateStatusBadgeVariant(currentCertificate.status, currentCertificate.expiresAt);
 
   const formatDateTime = (dateStr?: string | null): string => {
     if (!dateStr) return t("common:certificates_milestone_not_reached") || "Not Reached";
@@ -47,8 +54,8 @@ export function CertificateActions({
     }
   };
 
-  const archivedDate = certificate.contractSnapshot?.archivedAt || null;
-  const isRevoked = certificate.status === "revoked" || certificate.status === "REVOKED";
+  const archivedDate = currentCertificate.contractSnapshot?.archivedAt || null;
+  const isRevoked = currentCertificate.status === "revoked" || currentCertificate.status === "REVOKED";
 
   return (
     <Sheet open={!!certificate} onOpenChange={(open) => !open && onClose()}>
@@ -62,14 +69,14 @@ export function CertificateActions({
                 {t("common:certificates_audit_title") || "Compliance Certificate Details"}
               </SheetTitle>
             </div>
-            <SheetDescription className="text-xs text-muted-foreground font-mono mt-1">{certificate.id}</SheetDescription>
+            <SheetDescription className="text-xs text-muted-foreground font-mono mt-1">{currentCertificate.id}</SheetDescription>
             <div className="flex gap-2 mt-2">
               <Badge variant={badgeVariant} className="uppercase text-[10px]">
                 {t(`common:certificates_tab_${displayStatus}`).toUpperCase()}
               </Badge>
               <Badge variant="outline" className="uppercase text-[10px]">
-                {certificate.type && ["safety", "installation", "maintenance"].includes(certificate.type)
-                  ? t(`common:certificateTypes.${certificate.type}`)
+                {currentCertificate.type && ["safety", "installation", "maintenance"].includes(currentCertificate.type)
+                  ? t(`common:certificateTypes.${currentCertificate.type}`)
                   : t("common:certificateTypes.safety")}
               </Badge>
             </div>
@@ -87,7 +94,7 @@ export function CertificateActions({
                   {t("common:certificateSummary.facilityName") || "Facility / Scope"}
                 </span>
                 <span className="font-semibold text-foreground">
-                  {certificate.facilitySnapshot?.facilityName || certificate.facilityName || "—"}
+                  {currentCertificate.facilitySnapshot?.facilityName || currentCertificate.facilityName || "—"}
                 </span>
               </div>
               <div>
@@ -95,7 +102,7 @@ export function CertificateActions({
                   {t("common:certificates_client_company") || "Customer Company"}
                 </span>
                 <span className="font-semibold text-foreground">
-                  {certificate.customerSnapshot?.companyName || certificate.clientId || "—"}
+                  {currentCertificate.customerSnapshot?.companyName || currentCertificate.clientId || "—"}
                 </span>
               </div>
               <div className="grid grid-cols-2 gap-2 pt-1">
@@ -104,14 +111,14 @@ export function CertificateActions({
                     {t("common:certificates_job_number") || "Job Number"}
                   </span>
                   <span className="font-mono text-foreground">
-                    {certificate.originatingSnapshot?.requestJobNumber || certificate.jobNumber || "—"}
+                    {currentCertificate.originatingSnapshot?.requestJobNumber || currentCertificate.jobNumber || "—"}
                   </span>
                 </div>
                 <div>
                   <span className="text-muted-foreground block text-[10px] uppercase font-semibold">
                     {t("common:certificates_project_id") || "Project ID"}
                   </span>
-                  <span className="font-mono text-foreground">{certificate.projectId || "—"}</span>
+                  <span className="font-mono text-foreground">{currentCertificate.projectId || "—"}</span>
                 </div>
               </div>
             </div>
@@ -128,19 +135,19 @@ export function CertificateActions({
                 <span className="text-muted-foreground block text-[10px] uppercase font-semibold">
                   {t("common:certificates_issued_at") || "Issued At"}
                 </span>
-                <span className="font-semibold text-foreground">{formatDateTime(certificate.issuedAt)}</span>
+                <span className="font-semibold text-foreground">{formatDateTime(currentCertificate.issuedAt)}</span>
               </div>
               <div>
                 <span className="text-muted-foreground block text-[10px] uppercase font-semibold">
                   {t("common:certificates_expires_at") || "Expires At"}
                 </span>
-                <span className="font-semibold text-foreground">{formatDateTime(certificate.expiresAt)}</span>
+                <span className="font-semibold text-foreground">{formatDateTime(currentCertificate.expiresAt)}</span>
               </div>
               <div>
                 <span className="text-muted-foreground block text-[10px] uppercase font-semibold">
                   {t("common:certificates_issued_by") || "Issued By"}
                 </span>
-                <span className="font-semibold text-foreground">{certificate.issuedBy}</span>
+                <span className="font-semibold text-foreground">{currentCertificate.issuedBy}</span>
               </div>
               <div>
                 <span className="text-muted-foreground block text-[10px] uppercase font-semibold">
@@ -161,7 +168,7 @@ export function CertificateActions({
               <div className="relative">
                 <span className="absolute -start-[15px] top-1 h-2.5 w-2.5 rounded-full bg-primary" />
                 <span className="font-semibold block">{t("common:certificates_milestone_issued") || "Certificate Issued"}</span>
-                <span className="text-[10px] text-muted-foreground">{formatDateTime(certificate.issuedAt)}</span>
+                <span className="text-[10px] text-muted-foreground">{formatDateTime(currentCertificate.issuedAt)}</span>
               </div>
               
               <div className="relative">
@@ -174,12 +181,12 @@ export function CertificateActions({
                 <div className="relative text-destructive">
                   <span className="absolute -start-[15px] top-1 h-2.5 w-2.5 rounded-full bg-destructive" />
                   <span className="font-bold block">{t("common:certificates_milestone_revoked") || "Certificate Revoked"}</span>
-                  <span className="text-[10px] block">{formatDateTime(certificate.revokedAt)}</span>
+                  <span className="text-[10px] block">{formatDateTime(currentCertificate.revokedAt)}</span>
                   <span className="text-[10px] block mt-0.5 text-muted-foreground">
-                    {t("common:certificates_revoked_by") || "By"}: {certificate.revokedBy || "—"}
+                    {t("common:certificates_revoked_by") || "By"}: {currentCertificate.revokedBy || "—"}
                   </span>
                   <span className="text-[10px] block mt-0.5 text-muted-foreground">
-                    {t("common:certificates_revocation_reason") || "Reason"}: {certificate.revokedReason || "—"}
+                    {t("common:certificates_revocation_reason") || "Reason"}: {currentCertificate.revokedReason || "—"}
                   </span>
                 </div>
               )}
@@ -192,7 +199,7 @@ export function CertificateActions({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => onDownloadCertificate(certificate)}
+            onClick={() => onDownloadCertificate(currentCertificate)}
             className="gap-1.5 text-xs cursor-pointer"
           >
             <Download className="h-4 w-4" />

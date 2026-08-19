@@ -52,9 +52,11 @@ export function CustomerList() {
   };
 
   const handleCloseDetails = () => {
-    setSelectedCustomer(null);
-    setDrawerEditMode(false);
     setIsDrawerOpen(false);
+    setTimeout(() => {
+      setSelectedCustomer(null);
+      setDrawerEditMode(false);
+    }, 300);
   };
 
   return (

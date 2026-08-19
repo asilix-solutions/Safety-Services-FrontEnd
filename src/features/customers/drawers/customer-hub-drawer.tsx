@@ -41,8 +41,11 @@ export function CustomerHubDrawer({ customer, isOpen, onClose, onSave, permissio
   const [formData, setFormData] = useState<Customer | null>(null);
   const [errors, setErrors] = useState<CustomerValidationError>({});
 
+  const [activeCustomer, setActiveCustomer] = useState<Customer | null>(customer);
+
   useEffect(() => {
     if (customer) {
+      setActiveCustomer(customer);
       setFormData({ ...customer });
       setIsEditing(initialEditMode);
       setErrors({});
@@ -50,7 +53,8 @@ export function CustomerHubDrawer({ customer, isOpen, onClose, onSave, permissio
     }
   }, [customer, initialEditMode, isOpen]);
 
-  if (!customer || !formData) return null;
+  const currentCustomer = customer || activeCustomer;
+  if (!currentCustomer || !formData) return null;
 
   const handleSave = () => {
     const res = onSave(formData);
@@ -63,11 +67,11 @@ export function CustomerHubDrawer({ customer, isOpen, onClose, onSave, permissio
   };
 
   // Linked records aggregation
-  const linkedRequests = getActiveRequests(tenantContext, undefined, customer.id);
-  const linkedProjects = getActiveProjects(tenantContext, undefined, customer.id);
-  const linkedInvoices = getInvoices().filter((i) => i.clientId === customer.id);
-  const linkedContracts = getScopedContracts(tenantContext).filter((c) => c.clientId === customer.id);
-  const linkedCertificates = getScopedCertificates(tenantContext).filter((c) => c.clientId === customer.id);
+  const linkedRequests = getActiveRequests(tenantContext, undefined, currentCustomer.id);
+  const linkedProjects = getActiveProjects(tenantContext, undefined, currentCustomer.id);
+  const linkedInvoices = getInvoices().filter((i) => i.clientId === currentCustomer.id);
+  const linkedContracts = getScopedContracts(tenantContext).filter((c) => c.clientId === currentCustomer.id);
+  const linkedCertificates = getScopedCertificates(tenantContext).filter((c) => c.clientId === currentCustomer.id);
 
   const tabs = [
     { id: "overview", label: t("common:customers.tabs.overview"), icon: Info },
@@ -90,7 +94,7 @@ export function CustomerHubDrawer({ customer, isOpen, onClose, onSave, permissio
                 </Badge>
               )}
             </div>
-            <SheetDescription className="text-xs text-muted-foreground font-mono mt-1">{customer.companyName}</SheetDescription>
+            <SheetDescription className="text-xs text-muted-foreground font-mono mt-1">{currentCustomer.companyName}</SheetDescription>
           </div>
 
           {/* Profile Header */}
@@ -99,11 +103,11 @@ export function CustomerHubDrawer({ customer, isOpen, onClose, onSave, permissio
               <Building className="h-6 w-6" />
             </div>
             <div className="space-y-1">
-              <h4 className="font-bold text-foreground text-sm">{customer.companyName}</h4>
-              <p className="text-xs text-muted-foreground">{customer.industry}</p>
+              <h4 className="font-bold text-foreground text-sm">{currentCustomer.companyName}</h4>
+              <p className="text-xs text-muted-foreground">{currentCustomer.industry}</p>
               <div className="flex flex-wrap gap-1.5 pt-1">
-                <Badge variant={customer.status === "Active" ? "default" : "secondary"}>
-                  {t(`common:customers.status.${customer.status}`)}
+                <Badge variant={currentCustomer.status === "Active" ? "default" : "secondary"}>
+                  {t(`common:customers.status.${currentCustomer.status}`)}
                 </Badge>
               </div>
             </div>
@@ -143,7 +147,7 @@ export function CustomerHubDrawer({ customer, isOpen, onClose, onSave, permissio
                       className="h-9 text-xs"
                     />
                   ) : (
-                    <p className="text-sm font-medium text-foreground py-1">{customer.companyName}</p>
+                    <p className="text-sm font-medium text-foreground py-1">{currentCustomer.companyName}</p>
                   )}
                   {errors.companyName && <p className="text-destructive text-[10px]">{t(`common:${errors.companyName}`)}</p>}
                 </div>
@@ -157,7 +161,7 @@ export function CustomerHubDrawer({ customer, isOpen, onClose, onSave, permissio
                       className="h-9 text-xs"
                     />
                   ) : (
-                    <p className="text-sm font-medium text-foreground py-1">{customer.commercialRegistration}</p>
+                    <p className="text-sm font-medium text-foreground py-1">{currentCustomer.commercialRegistration}</p>
                   )}
                   {errors.commercialRegistration && <p className="text-destructive text-[10px]">{t(`common:${errors.commercialRegistration}`)}</p>}
                 </div>
@@ -171,7 +175,7 @@ export function CustomerHubDrawer({ customer, isOpen, onClose, onSave, permissio
                       className="h-9 text-xs"
                     />
                   ) : (
-                    <p className="text-sm font-medium text-foreground py-1">{customer.industry}</p>
+                    <p className="text-sm font-medium text-foreground py-1">{currentCustomer.industry}</p>
                   )}
                 </div>
 
@@ -185,7 +189,7 @@ export function CustomerHubDrawer({ customer, isOpen, onClose, onSave, permissio
                         className="h-9 text-xs"
                       />
                     ) : (
-                      <p className="text-sm font-medium text-foreground py-1">{customer.primaryContactName}</p>
+                      <p className="text-sm font-medium text-foreground py-1">{currentCustomer.primaryContactName}</p>
                     )}
                     {errors.primaryContactName && <p className="text-destructive text-[10px]">{t(`common:${errors.primaryContactName}`)}</p>}
                   </div>
@@ -199,7 +203,7 @@ export function CustomerHubDrawer({ customer, isOpen, onClose, onSave, permissio
                         className="h-9 text-xs"
                       />
                     ) : (
-                      <p className="text-sm font-medium text-foreground py-1">{customer.city}</p>
+                      <p className="text-sm font-medium text-foreground py-1">{currentCustomer.city}</p>
                     )}
                     {errors.city && <p className="text-destructive text-[10px]">{t(`common:${errors.city}`)}</p>}
                   </div>
@@ -216,7 +220,7 @@ export function CustomerHubDrawer({ customer, isOpen, onClose, onSave, permissio
                         className="h-9 text-xs"
                       />
                     ) : (
-                      <p className="text-sm font-medium text-foreground py-1">{customer.primaryContactEmail}</p>
+                      <p className="text-sm font-medium text-foreground py-1">{currentCustomer.primaryContactEmail}</p>
                     )}
                     {errors.primaryContactEmail && <p className="text-destructive text-[10px]">{t(`common:${errors.primaryContactEmail}`)}</p>}
                   </div>
@@ -230,7 +234,7 @@ export function CustomerHubDrawer({ customer, isOpen, onClose, onSave, permissio
                         className="h-9 text-xs"
                       />
                     ) : (
-                      <p className="text-sm font-medium text-foreground py-1">{customer.primaryContactPhone}</p>
+                      <p className="text-sm font-medium text-foreground py-1">{currentCustomer.primaryContactPhone}</p>
                     )}
                     {errors.primaryContactPhone && <p className="text-destructive text-[10px]">{t(`common:${errors.primaryContactPhone}`)}</p>}
                   </div>
@@ -245,7 +249,7 @@ export function CustomerHubDrawer({ customer, isOpen, onClose, onSave, permissio
                       className="h-9 text-xs"
                     />
                   ) : (
-                    <p className="text-sm font-medium text-foreground py-1">{customer.address}</p>
+                    <p className="text-sm font-medium text-foreground py-1">{currentCustomer.address}</p>
                   )}
                   {errors.address && <p className="text-destructive text-[10px]">{t(`common:${errors.address}`)}</p>}
                 </div>
@@ -253,11 +257,11 @@ export function CustomerHubDrawer({ customer, isOpen, onClose, onSave, permissio
                 <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border text-[10px] text-muted-foreground">
                   <div>
                     <span>{t("common:customers.fields.created")}</span>
-                    <span className="block font-medium mt-0.5">{new Date(customer.createdAt).toLocaleDateString()}</span>
+                    <span className="block font-medium mt-0.5">{new Date(currentCustomer.createdAt).toLocaleDateString()}</span>
                   </div>
                   <div>
                     <span>{t("common:customers.fields.updated")}</span>
-                    <span className="block font-medium mt-0.5">{new Date(customer.updatedAt).toLocaleDateString()}</span>
+                    <span className="block font-medium mt-0.5">{new Date(currentCustomer.updatedAt).toLocaleDateString()}</span>
                   </div>
                 </div>
               </div>
@@ -265,7 +269,7 @@ export function CustomerHubDrawer({ customer, isOpen, onClose, onSave, permissio
 
             {activeTab === "representatives" && (
               <div className="space-y-3">
-                {customer.representatives.map((rep) => (
+                {currentCustomer.representatives.map((rep) => (
                   <div key={rep.id} className="p-3 bg-secondary/10 border border-border rounded-xl flex justify-between items-center">
                     <div>
                       <p className="font-bold text-foreground text-sm">{rep.name}</p>
@@ -282,44 +286,41 @@ export function CustomerHubDrawer({ customer, isOpen, onClose, onSave, permissio
 
             {activeTab === "records" && (
               <div className="space-y-4">
-                <div>
-                  <h4 className="font-bold text-sm text-foreground mb-2">Active Projects ({linkedProjects.length})</h4>
-                  {linkedProjects.length === 0 ? (
-                    <p className="text-muted-foreground py-2 text-center border border-dashed border-border rounded-lg">No active projects linked</p>
+                <div className="space-y-2">
+                  <h5 className="font-bold text-xs text-foreground uppercase tracking-wider">{t("common:customers.tabs.requests")}</h5>
+                  {linkedRequests.length === 0 ? (
+                    <p className="text-xs text-muted-foreground italic">{t("common:customers.no_requests")}</p>
                   ) : (
                     <div className="space-y-2">
-                      {linkedProjects.map((p) => {
-                        const phase = p.executionPhase ?? p.status ?? "UNKNOWN";
-                        return (
-                          <div key={p.id} className="p-3 bg-secondary/15 rounded-xl border border-border flex justify-between items-center">
-                            <div>
-                              <p className="font-semibold text-foreground">{p.name}</p>
-                              <p className="text-[10px] text-muted-foreground font-mono">{p.id} • {p.projectType}</p>
-                            </div>
-                            <Badge variant="outline" className="text-[10px]">
-                              {String(phase).replace(/_/g, " ")}
-                            </Badge>
+                      {linkedRequests.map((req) => (
+                        <div key={req.id} className="p-3 bg-secondary/10 border border-border rounded-xl flex justify-between items-center">
+                          <div>
+                            <p className="font-semibold text-foreground">{req.facilityName || req.requestType}</p>
+                            <p className="text-[10px] text-muted-foreground font-mono">{req.jobNumber}</p>
                           </div>
-                        );
-                      })}
+                          <Badge variant="outline" className="text-[10px]">
+                            {req.status}
+                          </Badge>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
 
-                <div>
-                  <h4 className="font-bold text-sm text-foreground mb-2">Licensing Requests ({linkedRequests.length})</h4>
-                  {linkedRequests.length === 0 ? (
-                    <p className="text-muted-foreground py-2 text-center border border-dashed border-border rounded-lg">No active requests found</p>
+                <div className="space-y-2 pt-2 border-t border-border">
+                  <h5 className="font-bold text-xs text-foreground uppercase tracking-wider">{t("common:customers.tabs.projects")}</h5>
+                  {linkedProjects.length === 0 ? (
+                    <p className="text-xs text-muted-foreground italic">{t("common:customers.no_projects")}</p>
                   ) : (
                     <div className="space-y-2">
-                      {linkedRequests.map((r) => (
-                        <div key={r.id} className="p-3 bg-secondary/15 rounded-xl border border-border flex justify-between items-center">
+                      {linkedProjects.map((proj) => (
+                        <div key={proj.id} className="p-3 bg-secondary/10 border border-border rounded-xl flex justify-between items-center">
                           <div>
-                            <p className="font-semibold text-foreground">{r.facilityName}</p>
-                            <p className="text-[10px] text-muted-foreground font-mono">{r.jobNumber} • {r.requestType}</p>
+                            <p className="font-semibold text-foreground">{proj.name}</p>
+                            <p className="text-[10px] text-muted-foreground font-mono">{proj.id}</p>
                           </div>
-                          <Badge variant="secondary" className="text-[10px]">
-                            {r.status}
+                          <Badge variant="outline" className="text-[10px]">
+                            {proj.status}
                           </Badge>
                         </div>
                       ))}
@@ -330,44 +331,21 @@ export function CustomerHubDrawer({ customer, isOpen, onClose, onSave, permissio
             )}
 
             {activeTab === "invoices" && (
-              <div className="space-y-2">
-                {linkedInvoices.length === 0 ? (
-                  <p className="text-muted-foreground py-4 text-center border border-dashed border-border rounded-lg">No invoices recorded for this client</p>
-                ) : (
-                  linkedInvoices.map((inv) => (
-                    <div key={inv.id} className="p-3 bg-secondary/15 rounded-xl border border-border flex justify-between items-center">
-                      <div>
-                        <p className="font-semibold text-foreground">Invoice #{inv.id}</p>
-                        <p className="text-[10px] text-muted-foreground">Due: {new Date(inv.dueDate).toLocaleDateString()}</p>
-                      </div>
-                      <div className="text-end">
-                        <p className="font-bold text-foreground">{inv.grandTotal} SAR</p>
-                        <Badge variant={inv.status === "paid" ? "default" : "destructive"} className="text-[9px] scale-90 origin-right">
-                          {inv.status.toUpperCase()}
-                        </Badge>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            )}
-
-            {activeTab === "documents" && (
               <div className="space-y-4">
-                <div>
-                  <h4 className="font-bold text-sm text-foreground mb-2">Contracts ({linkedContracts.length})</h4>
-                  {linkedContracts.length === 0 ? (
-                    <p className="text-muted-foreground py-2 text-center border border-dashed border-border rounded-lg">No contracts registered</p>
+                <div className="space-y-2">
+                  <h5 className="font-bold text-xs text-foreground uppercase tracking-wider">{t("common:customers.tabs.invoices")}</h5>
+                  {linkedInvoices.length === 0 ? (
+                    <p className="text-xs text-muted-foreground italic">{t("common:customers.no_invoices")}</p>
                   ) : (
                     <div className="space-y-2">
-                      {linkedContracts.map((c) => (
-                        <div key={c.id} className="p-3 bg-secondary/15 rounded-xl border border-border flex justify-between items-center">
+                      {linkedInvoices.map((inv) => (
+                        <div key={inv.id} className="p-3 bg-secondary/10 border border-border rounded-xl flex justify-between items-center">
                           <div>
-                            <p className="font-semibold text-foreground">Contract {c.id}</p>
-                            <p className="text-[10px] text-muted-foreground">Created: {new Date(c.createdAt).toLocaleDateString()}</p>
+                            <p className="font-semibold text-foreground">{inv.grandTotal} {inv.currency}</p>
+                            <p className="text-[10px] text-muted-foreground font-mono">{inv.id}</p>
                           </div>
-                          <Badge variant="outline" className="text-[10px]">
-                            {c.status.toUpperCase()}
+                          <Badge variant={inv.status === "paid" ? "default" : "secondary"} className="text-[10px]">
+                            {inv.status.toUpperCase()}
                           </Badge>
                         </div>
                       ))}
@@ -375,14 +353,39 @@ export function CustomerHubDrawer({ customer, isOpen, onClose, onSave, permissio
                   )}
                 </div>
 
-                <div>
-                  <h4 className="font-bold text-sm text-foreground mb-2">Safety Certificates ({linkedCertificates.length})</h4>
+                <div className="space-y-2 pt-2 border-t border-border">
+                  <h5 className="font-bold text-xs text-foreground uppercase tracking-wider">{t("common:customers.tabs.contracts")}</h5>
+                  {linkedContracts.length === 0 ? (
+                    <p className="text-xs text-muted-foreground italic">{t("common:customers.no_contracts")}</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {linkedContracts.map((con) => (
+                        <div key={con.id} className="p-3 bg-secondary/10 border border-border rounded-xl flex justify-between items-center">
+                          <div>
+                            <p className="font-semibold text-foreground">{con.title}</p>
+                            <p className="text-[10px] text-muted-foreground font-mono">{con.id}</p>
+                          </div>
+                          <Badge variant={con.status === "signed" ? "default" : "secondary"} className="text-[10px]">
+                            {con.status.toUpperCase()}
+                          </Badge>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {activeTab === "documents" && (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <h5 className="font-bold text-xs text-foreground uppercase tracking-wider">{t("common:customers.tabs.certificates")}</h5>
                   {linkedCertificates.length === 0 ? (
-                    <p className="text-muted-foreground py-2 text-center border border-dashed border-border rounded-lg">No compliance certificates issued</p>
+                    <p className="text-xs text-muted-foreground italic">{t("common:customers.no_certificates")}</p>
                   ) : (
                     <div className="space-y-2">
                       {linkedCertificates.map((cert) => (
-                        <div key={cert.id} className="p-3 bg-secondary/15 rounded-xl border border-border flex justify-between items-center">
+                        <div key={cert.id} className="p-3 bg-secondary/10 border border-border rounded-xl flex justify-between items-center">
                           <div>
                             <p className="font-semibold text-foreground">{cert.title}</p>
                             <p className="text-[10px] text-muted-foreground">{cert.facilityName}</p>
@@ -404,7 +407,7 @@ export function CustomerHubDrawer({ customer, isOpen, onClose, onSave, permissio
         <div className="pt-6 border-t border-border flex justify-end gap-2">
           {isEditing ? (
             <>
-              <Button variant="outline" size="sm" onClick={() => { setIsEditing(false); setFormData({ ...customer }); setErrors({}); }}>
+              <Button variant="outline" size="sm" onClick={() => { setIsEditing(false); setFormData({ ...currentCustomer }); setErrors({}); }}>
                 {t("common:cancel")}
               </Button>
               <Button size="sm" onClick={handleSave}>

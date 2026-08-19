@@ -8,6 +8,7 @@ import { I18nProvider } from "@/providers/i18n-provider";
 import { getNamespaceDictionaries } from "@/lib/i18n";
 import { Locale } from "@/types/i18n";
 import { Toaster } from "@/shared/ui/sonner";
+import { PointerEventsGuard } from "@/providers/pointer-events-guard";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -59,6 +60,7 @@ export default async function RootLayout({
                 {children}
               </AuthProvider>
               <Toaster />
+              <PointerEventsGuard />
             </ThemeProvider>
           </I18nProvider>
         </QueryProvider>

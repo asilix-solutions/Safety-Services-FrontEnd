@@ -26,7 +26,14 @@ export function ContractActions({
 }: ContractActionsProps) {
   const { t } = useTranslation();
 
-  if (!contract) return null;
+  const [activeContract, setActiveContract] = React.useState<ClientContract | null>(contract);
+
+  React.useEffect(() => {
+    if (contract) setActiveContract(contract);
+  }, [contract]);
+
+  const currentContract = contract || activeContract;
+  if (!currentContract) return null;
 
   return (
     <Dialog open={!!contract} onOpenChange={(open) => !open && onClose()}>
@@ -47,32 +54,32 @@ export function ContractActions({
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <span className="text-muted-foreground block mb-0.5">{t("common:contracts_id")}</span>
-                <span className="font-mono font-semibold text-foreground">{contract.id}</span>
+                <span className="font-mono font-semibold text-foreground">{currentContract.id}</span>
               </div>
               <div>
                 <span className="text-muted-foreground block mb-0.5">{t("common:contracts_project_id")}</span>
-                <span className="font-mono font-semibold text-foreground">{contract.projectId || "—"}</span>
+                <span className="font-mono font-semibold text-foreground">{currentContract.projectId || "—"}</span>
               </div>
               <div>
                 <span className="text-muted-foreground block mb-0.5">{t("common:contracts_job_number")}</span>
-                <span className="font-mono font-semibold text-foreground">{contract.jobNumber || "—"}</span>
+                <span className="font-mono font-semibold text-foreground">{currentContract.jobNumber || "—"}</span>
               </div>
               <div>
                 <span className="text-muted-foreground block mb-0.5">{t("common:contracts_client_company")}</span>
-                <span className="font-semibold text-foreground">{contract.clientId || "—"}</span>
+                <span className="font-semibold text-foreground">{currentContract.clientId || "—"}</span>
               </div>
               <div>
                 <span className="text-muted-foreground block mb-0.5">{t("common:contracts_tenant")}</span>
-                <span className="font-semibold text-foreground">{contract.tenantId || "—"}</span>
+                <span className="font-semibold text-foreground">{currentContract.tenantId || "—"}</span>
               </div>
               <div>
                 <span className="text-muted-foreground block mb-0.5">{t("common:contracts_value")}</span>
-                <span className="font-semibold text-foreground">{formatSARCurrency(contract.value)}</span>
+                <span className="font-semibold text-foreground">{formatSARCurrency(currentContract.value)}</span>
               </div>
               <div>
                 <span className="text-muted-foreground block mb-0.5">{t("common:contracts_current_status")}</span>
-                <Badge variant={getContractStatusBadgeVariant(contract.status)} className="uppercase text-[9px] mt-0.5">
-                  {t(`common:contract_status_${contract.status}`)}
+                <Badge variant={getContractStatusBadgeVariant(currentContract.status)} className="uppercase text-[9px] mt-0.5">
+                  {t(`common:contract_status_${currentContract.status}`)}
                 </Badge>
               </div>
             </div>
@@ -86,23 +93,23 @@ export function ContractActions({
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <span className="text-muted-foreground block mb-0.5">{t("common:contracts_created_at")}</span>
-                <span className="font-semibold text-foreground">{formatDateTime(contract.createdAt)}</span>
+                <span className="font-semibold text-foreground">{formatDateTime(currentContract.createdAt)}</span>
               </div>
               <div>
                 <span className="text-muted-foreground block mb-0.5">{t("common:contracts_signed_by")}</span>
-                <span className="font-semibold text-foreground">{contract.signedBy || "—"}</span>
+                <span className="font-semibold text-foreground">{currentContract.signedBy || "—"}</span>
               </div>
               <div>
                 <span className="text-muted-foreground block mb-0.5">{t("common:contracts_signed_at")}</span>
-                <span className="font-semibold text-foreground">{formatDateTime(contract.signedAt)}</span>
+                <span className="font-semibold text-foreground">{formatDateTime(currentContract.signedAt)}</span>
               </div>
               <div>
                 <span className="text-muted-foreground block mb-0.5">{t("common:contracts_archived_by")}</span>
-                <span className="font-semibold text-foreground">{contract.archivedBy || "—"}</span>
+                <span className="font-semibold text-foreground">{currentContract.archivedBy || "—"}</span>
               </div>
               <div>
                 <span className="text-muted-foreground block mb-0.5">{t("common:contracts_archived_at")}</span>
-                <span className="font-semibold text-foreground">{formatDateTime(contract.archivedAt)}</span>
+                <span className="font-semibold text-foreground">{formatDateTime(currentContract.archivedAt)}</span>
               </div>
             </div>
           </div>
@@ -114,7 +121,7 @@ export function ContractActions({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => onDownloadContract(contract)}
+              onClick={() => onDownloadContract(currentContract)}
               className="gap-1.5 h-8 text-xs cursor-pointer"
             >
               <Download className="h-3.5 w-3.5" />

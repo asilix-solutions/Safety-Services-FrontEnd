@@ -45,8 +45,18 @@ export function ReportDrawer({
   const side = dir === "rtl" ? "right" : "left";
   const [rejectReason, setRejectReason] = useState("");
   const [showRejectForm, setShowRejectForm] = useState(false);
+  const [activeReport, setActiveReport] = useState<Report | null>(report);
 
-  if (!report) return null;
+  React.useEffect(() => {
+    if (report) {
+      setActiveReport(report);
+      setShowRejectForm(false);
+      setRejectReason("");
+    }
+  }, [report]);
+
+  const currentReport = report || activeReport;
+  if (!currentReport) return null;
 
   // Permissions helpers
   const isAdmin = ["Super Admin", "Company Admin"].includes(userRole);
@@ -55,8 +65,8 @@ export function ReportDrawer({
   // Parse snapshot content safely
   let contentData: any = null;
   try {
-    if (report.contentSnapshot) {
-      contentData = JSON.parse(report.contentSnapshot);
+    if (currentReport.contentSnapshot) {
+      contentData = JSON.parse(currentReport.contentSnapshot);
     }
   } catch (e) {
     console.error("Failed to parse report snapshot content", e);
@@ -73,7 +83,7 @@ export function ReportDrawer({
   const handleRejectSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!rejectReason.trim()) return;
-    onReject(report, rejectReason);
+    onReject(currentReport, rejectReason);
     setShowRejectForm(false);
     setRejectReason("");
   };
@@ -91,14 +101,14 @@ export function ReportDrawer({
                   {t("reports:drawerTitle")}
                 </SheetTitle>
               </div>
-              <SheetDescription className="text-xs text-muted-foreground font-mono mt-1">{report.reportNumber}</SheetDescription>
-              <h4 className="text-sm font-bold text-foreground mt-2">{t(report.title) || report.title}</h4>
+              <SheetDescription className="text-xs text-muted-foreground font-mono mt-1">{currentReport.reportNumber}</SheetDescription>
+              <h4 className="text-sm font-bold text-foreground mt-2">{t(currentReport.title) || currentReport.title}</h4>
               <div className="flex gap-2 mt-2">
-                <Badge variant={getReportStatusBadgeVariant(report.status)} className="uppercase text-[10px]">
-                  {getReportStatusDisplayName(report.status, t)}
+                <Badge variant={getReportStatusBadgeVariant(currentReport.status)} className="uppercase text-[10px]">
+                  {getReportStatusDisplayName(currentReport.status, t)}
                 </Badge>
                 <Badge variant="outline" className="uppercase text-[10px]">
-                  {getReportTypeDisplayName(report.reportType, t)}
+                  {getReportTypeDisplayName(currentReport.reportType, t)}
                 </Badge>
               </div>
             </div>
@@ -112,24 +122,24 @@ export function ReportDrawer({
             <div className="space-y-2 text-xs font-mono">
               <div className="flex justify-between border-b border-border/40 pb-1">
                 <span className="text-muted-foreground">{t("reports:fieldClient")}:</span>
-                <span className="text-foreground text-end">{report.clientId}</span>
+                <span className="text-foreground text-end">{currentReport.clientId}</span>
               </div>
-              {report.jobNumber && (
+              {currentReport.jobNumber && (
                 <div className="flex justify-between border-b border-border/40 pb-1">
                   <span className="text-muted-foreground">{t("reports:fieldRequest")}:</span>
-                  <span className="text-foreground text-end">{report.jobNumber}</span>
+                  <span className="text-foreground text-end">{currentReport.jobNumber}</span>
                 </div>
               )}
-              {report.projectId && (
+              {currentReport.projectId && (
                 <div className="flex justify-between border-b border-border/40 pb-1">
                   <span className="text-muted-foreground">{t("reports:fieldProject")}:</span>
-                  <span className="text-foreground text-end">{report.projectId}</span>
+                  <span className="text-foreground text-end">{currentReport.projectId}</span>
                 </div>
               )}
-              {report.siteVisitId && (
+              {currentReport.siteVisitId && (
                 <div className="flex justify-between pb-1">
                   <span className="text-muted-foreground">{t("reports:fieldSiteVisit")}:</span>
-                  <span className="text-foreground text-end">{report.siteVisitId}</span>
+                  <span className="text-foreground text-end">{currentReport.siteVisitId}</span>
                 </div>
               )}
             </div>
@@ -149,7 +159,7 @@ export function ReportDrawer({
                       {t("reports:fieldSummary")}
                     </span>
                     <p className="mt-1 text-foreground leading-relaxed">
-                      {t(report.summary) || report.summary}
+                      {t(currentReport.summary) || currentReport.summary}
                     </p>
                   </div>
                 )}
@@ -203,7 +213,7 @@ export function ReportDrawer({
               {t("reports:timelineTitle")}
             </h4>
             <div className="space-y-3 text-xs ps-2 border-s-2 border-primary/20 ms-2">
-              {report.timeline.map((event) => (
+              {currentReport.timeline.map((event) => (
                 <div className="relative ps-3" key={event.id}>
                   <span className="absolute -start-[18px] top-1 h-2.5 w-2.5 rounded-full bg-primary" />
                   <span className="font-semibold block capitalize">{t(`reports:action_${event.action}`) || event.action}</span>
@@ -214,7 +224,7 @@ export function ReportDrawer({
             </div>
           </div>
 
-          {/* Rejection Form overlay overlay inline */}
+          {/* Rejection Form overlay inline */}
           {showRejectForm && (
             <form onSubmit={handleRejectSubmit} className="p-4 rounded-xl border border-destructive/20 bg-destructive/5 space-y-3">
               <span className="text-xs font-semibold text-destructive uppercase block">{t("reports:rejectReasonTitle") || "Provide Rejection Reason"}</span>
@@ -240,11 +250,11 @@ export function ReportDrawer({
         {/* Footer actions */}
         <div className="pt-6 border-t border-border flex flex-wrap justify-end gap-2">
           {/* Submit action for Consulting Engineer / Author */}
-          {report.status === "DRAFT" && isAuthor && !showRejectForm && (
+          {currentReport.status === "DRAFT" && isAuthor && !showRejectForm && (
             <Button
               variant="default"
               size="sm"
-              onClick={() => onSubmit(report)}
+              onClick={() => onSubmit(currentReport)}
               className="gap-1.5 text-xs cursor-pointer"
             >
               <Send className="h-4 w-4" />
@@ -253,11 +263,11 @@ export function ReportDrawer({
           )}
 
           {/* Approve/Reject actions for Admins */}
-          {report.status === "SUBMITTED" && isAdmin && !showRejectForm && (
+          {currentReport.status === "SUBMITTED" && isAdmin && !showRejectForm && (
             <>
               <Button
                 size="sm"
-                onClick={() => onApprove(report)}
+                onClick={() => onApprove(currentReport)}
                 className="gap-1.5 text-xs cursor-pointer bg-success hover:bg-success/90 text-success-foreground border-none"
               >
                 <Check className="h-4 w-4" />
@@ -276,11 +286,11 @@ export function ReportDrawer({
           )}
 
           {/* Archive action */}
-          {report.status === "APPROVED" && isAdmin && !showRejectForm && (
+          {currentReport.status === "APPROVED" && isAdmin && !showRejectForm && (
             <Button
               variant="outline"
               size="sm"
-              onClick={() => onArchive(report)}
+              onClick={() => onArchive(currentReport)}
               className="gap-1.5 text-xs cursor-pointer"
             >
               <Archive className="h-4 w-4" />
@@ -292,7 +302,7 @@ export function ReportDrawer({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => onDownload(report)}
+            onClick={() => onDownload(currentReport)}
             className="gap-1.5 text-xs cursor-pointer"
           >
             <Printer className="h-4 w-4" />
@@ -314,7 +324,7 @@ export function ReportDrawer({
       clip it to one viewport height — a report longer than a page would simply
       lose its later pages.
     */}
-    <ReportDocument report={report} branding={branding} company={company} t={t} />
+    {currentReport && <ReportDocument report={currentReport} branding={branding} company={company} t={t} />}
     </>
   );
 }

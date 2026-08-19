@@ -80,6 +80,9 @@ export function ActionMenu({
                   asChild
                   disabled={item.disabled}
                   className={itemClass}
+                  onSelect={() => {
+                    // Let link navigate cleanly
+                  }}
                 >
                   <Link href={item.href} className="w-full">
                     {content}
@@ -89,7 +92,14 @@ export function ActionMenu({
                 <DropdownMenuItem
                   key={item.id}
                   disabled={item.disabled}
-                  onClick={item.onClick}
+                  onSelect={(e) => {
+                    e.preventDefault();
+                    if (item.onClick) {
+                      setTimeout(() => {
+                        item.onClick?.();
+                      }, 0);
+                    }
+                  }}
                   className={itemClass}
                 >
                   {content}

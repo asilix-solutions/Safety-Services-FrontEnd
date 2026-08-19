@@ -49,8 +49,10 @@ export function EmployeeList() {
   };
 
   const handleCloseDetails = () => {
-    setSelectedEmployee(null);
     setIsDrawerOpen(false);
+    setTimeout(() => {
+      setSelectedEmployee(null);
+    }, 300);
   };
 
   return (
