@@ -2,22 +2,25 @@
  
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/providers/AuthProvider";
-import { MOCK_REQUESTS } from "@/mock/requests";
 import { LicensingRequest, RequestType } from "@/domains/requests/types";
 import { PageHeader } from "@/shared/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Button } from "@/shared/ui/button";
 import { Badge } from "@/shared/ui/badge";
-import { DataTable, ColumnDef } from "@/shared/components/data-table/data-table";
 import { Plus, Eye, Calendar } from "lucide-react";
 import Link from "next/link";
 import { useTranslation } from "@/providers/i18n-provider";
-import { getClassificationDisplayName, getRequestStatusDisplayName, getCanonicalRequestTypeDisplayName, getWorkflowStageDisplayName } from "@/domains/requests/workflow";
+import {
+  getClassificationDisplayName,
+  getCanonicalRequestTypeDisplayName,
+  getWorkflowStageDisplayName,
+} from "@/domains/requests/workflow";
 import { getScopedRequests } from "@/domains/requests/storage";
 import { useTenantContext } from "@/hooks/use-tenant-context";
 import { getProjects } from "@/domains/projects/storage";
 import { Project } from "@/types/project";
 import { isRole } from "@/constants/permissions";
+import { RequestsTable } from "@/features/requests/components/requests-table";
  
 export default function RequestsPage() {
   const { user } = useAuth();
@@ -159,77 +162,6 @@ export default function RequestsPage() {
     );
   }
 
-  // Admin / Operations internal dense table view
-  const columns: ColumnDef<LicensingRequest>[] = [
-    {
-      header: t("requests:list.columns.jobNumber"),
-      accessorKey: "jobNumber",
-      render: (row) => <span className="font-mono font-bold text-primary">{row.jobNumber}</span>,
-    },
-    {
-      header: t("requests:list.columns.facilityOwner"),
-      accessorKey: "facilityName",
-      render: (row) => (
-        <div>
-          <p className="font-semibold text-foreground">{row.facilityName}</p>
-          <p className="text-[10px] text-muted-foreground">{row.clientName}</p>
-        </div>
-      ),
-    },
-    {
-      header: t("requests:list.columns.requestType"),
-      accessorKey: "requestType",
-      render: (row) => <span>{getRequestTypeLabel(row.requestType)}</span>,
-    },
-    {
-      header: t("requests:list.columns.status"),
-      accessorKey: "status",
-      render: (row) => (
-        <Badge variant={getStatusBadgeVariant(row.status)} className="capitalize">
-          {getRequestStatusDisplayName(row.status, t)}
-        </Badge>
-      ),
-    },
-    {
-      header: t("requests:list.columns.actions"),
-      accessorKey: "id",
-      render: (row) => {
-        const queue = row.assignedQueue || (row.classification === "high_hazard_review" ? "HIGH_HAZARD" : row.classification === "engineering_project" ? "ENGINEERING" : row.classification === "maintenance_strategy" ? "MAINTENANCE" : "FAST_TRACK");
-        const isEngQueue = queue === "ENGINEERING" || queue === "HIGH_HAZARD";
-        const isConsultingEngineer = isRole(user.role, ["Consulting Engineer"]);
-        const linkedProject = projectsByJobNumber.get(row.jobNumber);
-
-        if (isConsultingEngineer && isEngQueue) {
-          if (linkedProject && (row.currentStage === "FINAL_INSPECTION" || row.currentStage === "COMPLETED")) {
-            return (
-              <Link href={`/projects/${linkedProject.id}`}>
-                <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs text-primary border-primary/20 hover:bg-primary/5 hover:text-primary font-semibold">
-                  <Eye className="h-3.5 w-3.5" /> {t("requests:details.openWorkspace") || "Open Workspace"}
-                </Button>
-              </Link>
-            );
-          }
-
-          return (
-            <Link href={`/blueprint-review/${row.jobNumber}`}>
-              <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs text-primary border-primary/20 hover:bg-primary/5 hover:text-primary">
-                <Eye className="h-3.5 w-3.5" /> {t("requests:list.actions.openReview")}
-              </Button>
-            </Link>
-          );
-        }
-
-        return (
-          <Link href={`/requests/${row.jobNumber}`}>
-            <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs">
-              <Eye className="h-3.5 w-3.5" /> {t("requests:list.actions.auditDetails")}
-            </Button>
-          </Link>
-        );
-      },
-    },
-  ];
-
   const isSalesAgent = isRole(user.role, ["Sales Agent"]);
 
   return (
@@ -239,24 +171,12 @@ export default function RequestsPage() {
         description={isSalesAgent ? t("dashboard:sales_requests_subtitle") : t("dashboard:verify_submitted_desc")}
       />
 
-      <Card className="border-border bg-card">
-        <CardHeader>
-          <CardTitle className="text-base font-semibold">
-            {isSalesAgent ? t("dashboard:sales_section_title") : t("dashboard:incoming_safety_certificates")}
-          </CardTitle>
-          <CardDescription className="text-muted-foreground">
-            {isSalesAgent ? t("dashboard:sales_section_desc") : t("dashboard:saas_compliance_desc")}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <DataTable
-            data={requests}
-            columns={columns}
-            searchKey="facilityName"
-            searchPlaceholder={t("dashboard:search_requests_placeholder")}
-          />
-        </CardContent>
-      </Card>
+      <RequestsTable
+        requests={requests}
+        projectsByJobNumber={projectsByJobNumber}
+        userRole={user.role}
+        isSalesAgent={isSalesAgent}
+      />
     </div>
   );
 }

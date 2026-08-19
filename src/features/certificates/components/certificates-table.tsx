@@ -264,11 +264,96 @@ export function CertificatesTable({
             icon={<Award className="h-6 w-6 text-muted-foreground" />}
           />
         ) : (
-          <DataTable
-            data={filteredCertificates}
-            columns={columns}
-            searchKey="title"
-          />
+          <>
+            {/* Mobile Card List View (< 768px) */}
+            <div className="md:hidden space-y-3">
+              {filteredCertificates.map((cert) => {
+                const displayStatus = deriveCertificateDisplayStatus(cert.status, cert.expiresAt);
+                const transKey = `certificates_tab_${displayStatus}`;
+                const variant = getCertificateStatusBadgeVariant(cert.status, cert.expiresAt);
+                const validityText = getRemainingValidityText(cert.expiresAt, cert.status, t);
+                const canRev = canRevokeCertificate(cert, userRole);
+
+                return (
+                  <Card key={cert.id} className="p-4 border-border bg-card space-y-3 shadow-sm">
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-xs font-bold text-primary">{cert.id}</span>
+                      <Badge variant={variant} className="uppercase text-[10px]">
+                        {t(`common:${transKey}`).toUpperCase()}
+                      </Badge>
+                    </div>
+
+                    <div className="space-y-1 text-sm">
+                      <p className="font-semibold text-foreground">
+                        {cert.facilityName || cert.title || "—"}
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="text-[10px] uppercase">
+                          {cert.type && ["safety", "installation", "maintenance"].includes(cert.type)
+                            ? t(`common:certificateTypes.${cert.type}`)
+                            : t("common:certificateTypes.safety")}
+                        </Badge>
+                        <span className="text-xs text-muted-foreground">
+                          {validityText}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between text-xs p-2.5 rounded-lg bg-secondary/20 border border-border/50">
+                      <div>
+                        <span className="block text-[10px] text-muted-foreground uppercase">{t("common:certificates_issued_at")}</span>
+                        <span className="font-medium text-foreground">{new Date(cert.issuedAt).toLocaleDateString()}</span>
+                      </div>
+                      <div className="text-end">
+                        <span className="block text-[10px] text-muted-foreground uppercase">{t("common:certificates_expires_at")}</span>
+                        <span className="font-medium text-foreground">{new Date(cert.expiresAt).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-border flex items-center justify-end gap-1.5">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onViewDetails(cert)}
+                        className="h-8 text-xs gap-1.5 cursor-pointer"
+                      >
+                        <Eye className="h-3.5 w-3.5" />
+                        {t("common:certificates_audit_details_btn") || "Details"}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onDownloadCertificate(cert)}
+                        className="h-8 text-xs gap-1.5 cursor-pointer"
+                      >
+                        <Download className="h-3.5 w-3.5" />
+                        {t("common:certificates_download_btn") || "PDF"}
+                      </Button>
+                      {canRev && (
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => onRevokeCertificate(cert.id)}
+                          className="h-8 text-xs gap-1.5 cursor-pointer"
+                        >
+                          <XCircle className="h-3.5 w-3.5" />
+                        </Button>
+                      )}
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+
+            {/* Desktop Table View (>= 768px) */}
+            <div className="hidden md:block">
+              <DataTable
+                data={filteredCertificates}
+                columns={columns}
+                searchKey="title"
+              />
+            </div>
+          </>
         )}
       </CardContent>
     </Card>

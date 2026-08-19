@@ -198,11 +198,97 @@ export function ContractTable({
             icon={<FileCheck2 className="h-6 w-6 text-muted-foreground" />}
           />
         ) : (
-          <DataTable
-            data={filteredContracts}
-            columns={contractColumns}
-            searchKey="title"
-          />
+          <>
+            {/* Mobile Card List View (< 768px) */}
+            <div className="md:hidden space-y-3">
+              {filteredContracts.map((c) => {
+                const canSign = canSignContract(c, userRole);
+                const canArchive = canArchiveContract(c, userRole);
+
+                return (
+                  <Card key={c.id} className="p-4 border-border bg-card space-y-3 shadow-sm">
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-xs font-bold text-primary">{c.id}</span>
+                      <Badge
+                        variant={getContractStatusBadgeVariant(c.status)}
+                        className="uppercase text-[10px]"
+                      >
+                        {t(`common:contract_status_${c.status}`)}
+                      </Badge>
+                    </div>
+
+                    <div className="space-y-1 text-sm">
+                      <p className="font-semibold text-foreground">{c.title || "—"}</p>
+                      {c.jobNumber && (
+                        <p className="text-xs text-muted-foreground font-mono">
+                          {c.jobNumber}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="flex items-center justify-between text-xs p-2.5 rounded-lg bg-secondary/20 border border-border/50">
+                      <span className="text-muted-foreground">{t("common:contracts_value")}:</span>
+                      <span className="font-bold text-foreground">{formatSARCurrency(c.value)}</span>
+                    </div>
+
+                    <div className="pt-2 border-t border-border flex items-center justify-between">
+                      <span className="text-[10px] text-muted-foreground">
+                        {new Date(c.createdAt).toLocaleDateString()}
+                      </span>
+                      <div className="flex items-center gap-1.5">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => onViewDetails(c)}
+                          className="h-8 text-xs gap-1.5 cursor-pointer"
+                        >
+                          <Eye className="h-3.5 w-3.5" />
+                          {t("common:contracts_audit_details_btn") || "Details"}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => onDownloadContract(c)}
+                          className="h-8 text-xs gap-1.5 cursor-pointer"
+                        >
+                          <Download className="h-3.5 w-3.5" />
+                        </Button>
+                        {canSign && (
+                          <Button
+                            size="sm"
+                            onClick={() => onSignContract(c.id)}
+                            className="h-8 text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer"
+                          >
+                            <FileSignature className="h-3.5 w-3.5" />
+                            {t("common:contracts_sign_approve")}
+                          </Button>
+                        )}
+                        {canArchive && (
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => onArchiveContract(c.id)}
+                            className="h-8 text-xs gap-1.5 cursor-pointer"
+                          >
+                            <Archive className="h-3.5 w-3.5" />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+
+            {/* Desktop Table View (>= 768px) */}
+            <div className="hidden md:block">
+              <DataTable
+                data={filteredContracts}
+                columns={contractColumns}
+                searchKey="title"
+              />
+            </div>
+          </>
         )}
       </CardContent>
     </Card>

@@ -2,6 +2,7 @@ import React from "react";
 import { ClientInvoice } from "@/domains/invoices/types";
 import { InvoiceWithFacility } from "../hooks/use-invoice-list";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
+import { Button } from "@/shared/ui/button";
 import { EmptyState } from "@/shared/components/empty-state";
 import { DataTable, ColumnDef } from "@/shared/tables/data-table";
 import { Badge } from "@/shared/ui/badge";
@@ -103,7 +104,7 @@ function InvoiceMobileCard({
 }) {
   const isPaid = invoice.status === "paid";
   return (
-    <div className="rounded-xl border border-border bg-card p-4 space-y-3 shadow-sm">
+    <Card className="p-4 border-border bg-card space-y-3 shadow-sm">
       <div className="flex items-start justify-between gap-2">
         <div>
           <p className="font-mono text-xs font-bold text-primary">{invoice.id}</p>
@@ -115,19 +116,19 @@ function InvoiceMobileCard({
       {invoice.facilityName && invoice.facilityName !== "—" && (
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
           <Building2 className="h-3.5 w-3.5 shrink-0" />
-          <span>{invoice.facilityName}</span>
+          <span className="font-medium text-foreground">{invoice.facilityName}</span>
         </div>
       )}
 
       <div className="flex items-center justify-between pt-1 border-t border-border">
         <div>
-          <p className="text-[10px] text-muted-foreground">{t("invoices_table_amount")}</p>
+          <p className="text-[10px] text-muted-foreground uppercase">{t("invoices_table_amount")}</p>
           <p className="text-sm font-bold text-foreground">
             {localFormatCurrency(invoice.grandTotal, locale, invoice.currency)}
           </p>
         </div>
         <div className="text-end">
-          <p className="text-[10px] text-muted-foreground">{t("invoices_table_due")}</p>
+          <p className="text-[10px] text-muted-foreground uppercase">{t("invoices_table_due")}</p>
           <p className="text-xs font-medium text-foreground">
             {localFormatDate(invoice.dueDate, locale, { dateStyle: "medium" })}
           </p>
@@ -135,33 +136,38 @@ function InvoiceMobileCard({
       </div>
 
       <div className="flex gap-2 pt-1">
-        <button
+        <Button
+          variant="outline"
+          size="sm"
           onClick={() => onViewDetails(invoice)}
-          className="flex-1 flex items-center justify-center gap-1.5 text-[11px] font-semibold border border-border rounded-lg py-1.5 text-muted-foreground hover:text-foreground hover:bg-secondary/30 transition-colors cursor-pointer"
+          className="flex-1 h-8 text-xs gap-1.5 cursor-pointer"
         >
           <Eye className="h-3.5 w-3.5" />
           {t("invoices_view_details")}
-        </button>
+        </Button>
         {!isPaid && canPay(invoice, userRole) && (
-          <button
+          <Button
+            size="sm"
             onClick={() => onPayInvoice(invoice)}
-            className="flex-1 flex items-center justify-center gap-1.5 text-[11px] font-semibold rounded-lg py-1.5 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors cursor-pointer"
+            className="flex-1 h-8 text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer"
           >
             <CreditCard className="h-3.5 w-3.5" />
             {t("invoices_pay_client")}
-          </button>
+          </Button>
         )}
         {isPaid && (
-          <button
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => onDownloadInvoice(invoice)}
-            className="flex-1 flex items-center justify-center gap-1.5 text-[11px] font-semibold border border-border rounded-lg py-1.5 text-muted-foreground hover:text-foreground hover:bg-secondary/30 transition-colors cursor-pointer"
+            className="flex-1 h-8 text-xs gap-1.5 cursor-pointer"
           >
             <Download className="h-3.5 w-3.5" />
             {t("invoices_download_invoice")}
-          </button>
+          </Button>
         )}
       </div>
-    </div>
+    </Card>
   );
 }
 
@@ -334,8 +340,8 @@ export function InvoiceTable({
         </CardHeader>
 
         <CardContent>
-          {/* Mobile card layout */}
-          <div className="sm:hidden space-y-3">
+          {/* Mobile card layout (< 768px) */}
+          <div className="md:hidden space-y-3">
             {filteredInvoices.length === 0 ? (
               <EmptyState
                 title={showEmptyUnpaid ? t("invoices_empty_unpaid") : t("invoices_empty_title")}
@@ -366,8 +372,8 @@ export function InvoiceTable({
             )}
           </div>
 
-          {/* Desktop table layout */}
-          <div className="hidden sm:block">
+          {/* Desktop table layout (>= 768px) */}
+          <div className="hidden md:block">
             {filteredInvoices.length === 0 ? (
               <EmptyState
                 title={showEmptyUnpaid ? t("invoices_empty_unpaid") : t("invoices_empty_title")}
