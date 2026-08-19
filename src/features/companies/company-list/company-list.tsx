@@ -31,7 +31,7 @@ export function CompanyList() {
         <div className="space-y-1">
           <h3 className="text-base font-bold text-foreground">{t("common:unauthorized")}</h3>
           <p className="text-xs text-muted-foreground max-w-xs">
-            {t("common:companies.unauthorized_desc")}
+            {t("companies:unauthorized_desc")}
           </p>
         </div>
       </div>
@@ -40,7 +40,7 @@ export function CompanyList() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title={t("common:companies.title")} description={t("common:companies.desc")} />
+      <PageHeader title={t("companies:title")} description={t("companies:desc")} />
 
       <CompanySummary summary={summary} />
 
