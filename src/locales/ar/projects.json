@@ -18,6 +18,7 @@
   "status.scheduled": "مجدول",
   "details.title": "مساحة عمل المشروع",
   "details.overview": "تفاصيل المشروع العامة",
+  "overview.actionRequired": "إجراء مطلوب",
   "details.id": "رقم المشروع المرجعي",
   "details.jobNumber": "رقم الطلب المرجعي",
   "details.facility": "تفاصيل المنشأة المستهدفة",

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/providers/AuthProvider";
-import { useTranslation } from "@/providers/i18n-provider";
+import { useTranslation, useNamespaceTranslations } from "@/providers/i18n-provider";
 
 import {
   SuperAdminOverview,
@@ -14,6 +14,7 @@ import { getCompanies } from "@/domains/organization/storage";
 export function SuperAdminDashboard() {
   const { user } = useAuth();
   const { t } = useTranslation();
+  useNamespaceTranslations(["common", "companies", "dashboard", "subscriptions"]);
 
   const [viewModel, setViewModel] = useState<SuperAdminOverviewViewModel | null>(null);
 

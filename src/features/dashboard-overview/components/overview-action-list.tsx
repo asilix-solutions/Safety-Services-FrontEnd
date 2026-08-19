@@ -32,7 +32,14 @@ export function OverviewActionList({
     }
   };
 
-  const title = titleKey && t(`common:${titleKey}`) !== `common:${titleKey}` ? t(`common:${titleKey}`) : titleFallback;
+  const resolveTx = (key?: string, fallback = "") => {
+    if (!key) return fallback;
+    const fullKey = key.includes(":") ? key : `common:${key}`;
+    const val = t(fullKey);
+    return val !== fullKey ? val : fallback;
+  };
+
+  const title = resolveTx(titleKey, titleFallback);
 
   return (
     <OverviewSection
@@ -66,7 +73,7 @@ export function OverviewActionList({
                 </div>
                 <div className="min-w-0">
                   <p className="text-xs font-bold text-foreground truncate">
-                    {t(`common:${item.titleKey}`) !== `common:${item.titleKey}` ? t(`common:${item.titleKey}`) : item.titleFallback}
+                    {resolveTx(item.titleKey, item.titleFallback)}
                   </p>
                   {item.referenceId && (
                     <p className="text-[10px] text-muted-foreground font-mono truncate">{item.referenceId}</p>
@@ -75,7 +82,7 @@ export function OverviewActionList({
               </div>
               <Button asChild size="sm" className="h-8 text-xs font-semibold shrink-0 cursor-pointer">
                 <Link href={item.href}>
-                  {t(`common:${item.actionLabelKey}`) !== `common:${item.actionLabelKey}` ? t(`common:${item.actionLabelKey}`) : item.actionLabelFallback}
+                  {resolveTx(item.actionLabelKey, item.actionLabelFallback)}
                 </Link>
               </Button>
             </div>

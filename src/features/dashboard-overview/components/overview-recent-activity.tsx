@@ -37,7 +37,14 @@ export function OverviewRecentActivity({
     }
   };
 
-  const title = titleKey && t(`common:${titleKey}`) !== `common:${titleKey}` ? t(`common:${titleKey}`) : titleFallback;
+  const resolveTx = (key?: string, fallback = "") => {
+    if (!key) return fallback;
+    const fullKey = key.includes(":") ? key : `common:${key}`;
+    const val = t(fullKey);
+    return val !== fullKey ? val : fallback;
+  };
+
+  const title = resolveTx(titleKey, titleFallback);
 
   return (
     <OverviewSection
@@ -64,9 +71,7 @@ export function OverviewRecentActivity({
               <div className="space-y-0.5 flex-1 min-w-0">
                 <div className="flex justify-between items-center text-xs gap-3">
                   <span className="font-bold text-foreground truncate">
-                    {t(`common:${event.titleKey}`) !== `common:${event.titleKey}` 
-                      ? t(`common:${event.titleKey}`) 
-                      : event.titleFallback}
+                    {resolveTx(event.titleKey, event.titleFallback)}
                   </span>
                   <span className="text-[10px] text-muted-foreground font-semibold shrink-0">
                     {formatOverviewDate(event.timestamp, t)}

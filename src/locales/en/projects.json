@@ -18,6 +18,7 @@
   "status.scheduled": "Scheduled",
   "details.title": "Project Workspace",
   "details.overview": "Project Overview",
+  "overview.actionRequired": "Action Required",
   "details.id": "Project Reference ID",
   "details.jobNumber": "Job Reference Number",
   "details.facility": "Facility Details",

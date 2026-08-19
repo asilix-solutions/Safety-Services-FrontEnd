@@ -29,8 +29,15 @@ export function OverviewEntityList({
 }: OverviewEntityListProps) {
   const { t } = useTranslation();
 
-  const title = titleKey && t(`common:${titleKey}`) !== `common:${titleKey}` ? t(`common:${titleKey}`) : titleFallback;
-  const viewAllLabel = viewAllKey && t(`common:${viewAllKey}`) !== `common:${viewAllKey}` ? t(`common:${viewAllKey}`) : viewAllFallback;
+  const resolveTx = (key?: string, fallback = "") => {
+    if (!key) return fallback;
+    const fullKey = key.includes(":") ? key : `common:${key}`;
+    const val = t(fullKey);
+    return val !== fullKey ? val : fallback;
+  };
+
+  const title = resolveTx(titleKey, titleFallback);
+  const viewAllLabel = resolveTx(viewAllKey, viewAllFallback);
 
   return (
     <OverviewSection
@@ -79,7 +86,7 @@ export function OverviewEntityList({
                 <div className="text-end shrink-0 space-y-0.5">
                   {item.statusKey && (
                     <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-secondary text-secondary-foreground">
-                      {t(`common:${item.statusKey}`) !== `common:${item.statusKey}` ? t(`common:${item.statusKey}`) : item.statusFallback}
+                      {resolveTx(item.statusKey, item.statusFallback)}
                     </span>
                   )}
                   {item.metaText && (
