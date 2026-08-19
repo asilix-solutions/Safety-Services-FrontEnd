@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { CardHeader, CardTitle, CardDescription } from "@/shared/ui/card";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetFooter,
+} from "@/shared/ui/sheet";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Select } from "@/shared/ui/select";
@@ -8,7 +15,6 @@ import { Badge } from "@/shared/ui/badge";
 import { useTranslation } from "@/providers/i18n-provider";
 import { Employee, EmployeeDepartment, EmployeeAvailability } from "@/domains/employees/types";
 import { EmployeeValidationError } from "@/domains/employees/validation";
-import { X } from "lucide-react";
 
 interface EmployeeDetailsDrawerProps {
   employee: Employee | null;
@@ -19,7 +25,8 @@ interface EmployeeDetailsDrawerProps {
 }
 
 export function EmployeeDetailsDrawer({ employee, isOpen, onClose, onSave, canManage }: EmployeeDetailsDrawerProps) {
-  const { t } = useTranslation();
+  const { t, dir } = useTranslation();
+  const side = dir === "rtl" ? "right" : "left";
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState<Employee | null>(null);
   const [errors, setErrors] = useState<EmployeeValidationError>({});
@@ -32,7 +39,7 @@ export function EmployeeDetailsDrawer({ employee, isOpen, onClose, onSave, canMa
     }
   }, [employee]);
 
-  if (!isOpen || !employee || !formData) return null;
+  if (!employee || !formData) return null;
 
   const handleSave = () => {
     const res = onSave(formData);
@@ -56,29 +63,19 @@ export function EmployeeDetailsDrawer({ employee, isOpen, onClose, onSave, canMa
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm">
-      {/* Backdrop area click to close */}
-      <div className="absolute inset-0 -z-10" onClick={onClose} />
-
-      <div className="w-full sm:max-w-md h-full bg-card border-s border-border shadow-2xl p-6 flex flex-col justify-between overflow-y-auto relative animate-in slide-in-from-right duration-200">
-        <button
-          onClick={onClose}
-          className="absolute end-4 top-4 text-muted-foreground hover:text-foreground cursor-pointer"
-        >
-          <X className="h-5 w-5" />
-        </button>
-
+    <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <SheetContent side={side} className="w-full sm:max-w-md h-full p-6 flex flex-col justify-between overflow-y-auto">
         <div className="space-y-6 flex-1">
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-lg font-bold text-foreground">{t("common:employees.details")}</h3>
+              <SheetTitle className="text-lg font-bold text-foreground">{t("common:employees.details")}</SheetTitle>
               {!canManage && (
                 <Badge variant="secondary" className="text-[10px] py-0.5 px-2 bg-muted text-muted-foreground border-border">
                   {t("common:read_only")}
                 </Badge>
               )}
             </div>
-            <p className="text-xs text-muted-foreground font-mono mt-1">{employee.employeeNumber}</p>
+            <SheetDescription className="text-xs text-muted-foreground font-mono mt-1">{employee.employeeNumber}</SheetDescription>
           </div>
 
           {/* Profile Card Header */}
@@ -244,7 +241,7 @@ export function EmployeeDetailsDrawer({ employee, isOpen, onClose, onSave, canMa
             {isEditing ? t("common:cancel") : t("common:close")}
           </Button>
         </div>
-      </div>
-    </div>
+      </SheetContent>
+    </Sheet>
   );
 }

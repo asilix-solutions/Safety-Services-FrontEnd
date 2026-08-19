@@ -3,6 +3,7 @@ import { Customer } from "./types";
 export interface CustomerValidationError {
   companyName?: string;
   commercialRegistration?: string;
+  industry?: string;
   primaryContactName?: string;
   primaryContactEmail?: string;
   primaryContactPhone?: string;

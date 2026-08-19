@@ -137,12 +137,74 @@ export function ReportsTable({
           </div>
         </div>
 
-        {/* Data Table */}
-        <DataTable
-          data={reports}
-          columns={columns}
-          searchKey="title"
-        />
+        {/* Desktop Data Table */}
+        <div className="hidden md:block">
+          <DataTable
+            data={reports}
+            columns={columns}
+            searchKey="title"
+          />
+        </div>
+
+        {/* Mobile Card List View */}
+        <div className="grid grid-cols-1 gap-3 md:hidden">
+          {reports.length === 0 ? (
+            <div className="text-center py-8 text-xs text-muted-foreground">
+              {t("common:no_records_found") || "No reports found"}
+            </div>
+          ) : (
+            reports.map((report) => (
+              <Card key={report.id} className="border-border bg-card shadow-sm p-4 space-y-3">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <span className="font-mono text-[10px] font-bold text-muted-foreground block">{report.reportNumber}</span>
+                    <h4 className="font-semibold text-foreground text-sm truncate mt-0.5">{t(report.title) || report.title}</h4>
+                    <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">{t(report.summary) || report.summary}</p>
+                  </div>
+                  <Badge variant={getReportStatusBadgeVariant(report.status)} className="uppercase text-[10px] shrink-0">
+                    {getReportStatusDisplayName(report.status, t)}
+                  </Badge>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-xs pt-2 border-t border-border">
+                  <div>
+                    <span className="text-muted-foreground block text-[10px] uppercase font-bold">{t("reports:type")}</span>
+                    <span className="text-xs text-foreground block mt-0.5">
+                      {getReportTypeDisplayName(report.reportType, t)}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground block text-[10px] uppercase font-bold">{t("reports:fieldAuthor")}</span>
+                    <span className="text-xs text-foreground block mt-0.5 truncate">
+                      {report.authorName}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground block text-[10px] uppercase font-bold">{t("reports:fieldDate")}</span>
+                    <span className="text-xs text-muted-foreground block mt-0.5">
+                      {new Date(report.createdAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="pt-3 border-t border-border flex items-center justify-end gap-2">
+                  <ActionButton
+                    label={t("reports:btnView") || t("common:view") || "View"}
+                    icon={Eye}
+                    onClick={() => onViewDetails(report)}
+                    className="h-9 px-3 text-xs cursor-pointer bg-secondary text-foreground hover:bg-secondary/80 border-none"
+                  />
+                  <ActionButton
+                    label=""
+                    icon={Download}
+                    onClick={() => onDownload(report)}
+                    className="h-9 w-9 p-0 cursor-pointer bg-primary/10 text-primary hover:bg-primary/20 border-none flex items-center justify-center"
+                  />
+                </div>
+              </Card>
+            ))
+          )}
+        </div>
       </CardContent>
     </Card>
   );

@@ -1,12 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { CardHeader, CardTitle, CardDescription } from "@/shared/ui/card";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetFooter,
+} from "@/shared/ui/sheet";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Badge } from "@/shared/ui/badge";
 import { useTranslation } from "@/providers/i18n-provider";
 import { Customer } from "@/domains/customers/types";
 import { CustomerValidationError } from "@/domains/customers/validation";
-import { X, Building, Info, Users, Briefcase, Receipt, FileText } from "lucide-react";
+import { Building, Info, Users, Briefcase, Receipt, FileText } from "lucide-react";
 import { getActiveRequests } from "@/domains/requests/storage";
 import { useTenantContext } from "@/hooks/use-tenant-context";
 import { getActiveProjects } from "@/domains/projects/storage";
@@ -26,7 +33,8 @@ interface CustomerHubDrawerProps {
 }
 
 export function CustomerHubDrawer({ customer, isOpen, onClose, onSave, permissions, initialEditMode = false }: CustomerHubDrawerProps) {
-  const { t } = useTranslation();
+  const { t, dir } = useTranslation();
+  const side = dir === "rtl" ? "right" : "left";
   const tenantContext = useTenantContext();
   const [activeTab, setActiveTab] = useState<"overview" | "representatives" | "records" | "invoices" | "documents">("overview");
   const [isEditing, setIsEditing] = useState(false);
@@ -42,7 +50,7 @@ export function CustomerHubDrawer({ customer, isOpen, onClose, onSave, permissio
     }
   }, [customer, initialEditMode, isOpen]);
 
-  if (!isOpen || !customer || !formData) return null;
+  if (!customer || !formData) return null;
 
   const handleSave = () => {
     const res = onSave(formData);
@@ -70,28 +78,19 @@ export function CustomerHubDrawer({ customer, isOpen, onClose, onSave, permissio
   ] as const;
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm">
-      <div className="absolute inset-0 -z-10" onClick={onClose} />
-
-      <div className="w-full sm:max-w-xl h-full bg-card border-s border-border shadow-2xl p-6 flex flex-col justify-between overflow-y-auto relative animate-in slide-in-from-right duration-200">
-        <button
-          onClick={onClose}
-          className="absolute end-4 top-4 text-muted-foreground hover:text-foreground cursor-pointer"
-        >
-          <X className="h-5 w-5" />
-        </button>
-
+    <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <SheetContent side={side} className="w-full sm:max-w-xl h-full p-6 flex flex-col justify-between overflow-y-auto">
         <div className="space-y-6 flex-1 flex flex-col min-h-0">
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-lg font-bold text-foreground">{t("common:customers.details")}</h3>
+              <SheetTitle className="text-lg font-bold text-foreground">{t("common:customers.details")}</SheetTitle>
               {!permissions.canManageCustomerProfile && (
                 <Badge variant="secondary" className="text-[10px] py-0.5 px-2 bg-muted text-muted-foreground border-border">
                   {t("common:read_only")}
                 </Badge>
               )}
             </div>
-            <p className="text-xs text-muted-foreground font-mono mt-1">{customer.companyName}</p>
+            <SheetDescription className="text-xs text-muted-foreground font-mono mt-1">{customer.companyName}</SheetDescription>
           </div>
 
           {/* Profile Header */}
@@ -425,7 +424,7 @@ export function CustomerHubDrawer({ customer, isOpen, onClose, onSave, permissio
             </>
           )}
         </div>
-      </div>
-    </div>
+      </SheetContent>
+    </Sheet>
   );
 }

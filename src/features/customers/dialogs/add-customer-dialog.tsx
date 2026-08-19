@@ -1,11 +1,18 @@
 import React, { useState } from "react";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/shared/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/shared/ui/dialog";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { useTranslation } from "@/providers/i18n-provider";
-import { Customer } from "@/domains/customers/types";
+import { Customer, CustomerStatus } from "@/domains/customers/types";
 import { CustomerValidationError } from "@/domains/customers/validation";
-import { X, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 
 interface AddCustomerDialogProps {
   onAdd: (data: Omit<Customer, "id" | "tenantId" | "createdAt" | "updatedAt" | "representatives">) => { success: boolean; errors?: CustomerValidationError };
@@ -15,11 +22,21 @@ interface AddCustomerDialogProps {
 export function AddCustomerDialog({ onAdd, trigger }: AddCustomerDialogProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    companyName: string;
+    commercialRegistration: string;
+    industry: string;
+    status: CustomerStatus;
+    primaryContactName: string;
+    primaryContactEmail: string;
+    primaryContactPhone: string;
+    city: string;
+    address: string;
+  }>({
     companyName: "",
     commercialRegistration: "",
     industry: "",
-    status: "Active" as const,
+    status: "Active",
     primaryContactName: "",
     primaryContactEmail: "",
     primaryContactPhone: "",
@@ -68,111 +85,122 @@ export function AddCustomerDialog({ onAdd, trigger }: AddCustomerDialogProps) {
         </Button>
       )}
 
-      {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <Card className="sm:max-w-[450px] w-full border-border bg-card shadow-2xl relative">
-            <button
-              onClick={() => handleOpenChange(false)}
-              className="absolute end-4 top-4 text-muted-foreground hover:text-foreground cursor-pointer"
-            >
-              <X className="h-4 w-4" />
-            </button>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
+        <DialogContent className="sm:max-w-[450px]">
+          <form onSubmit={handleSubmit}>
+            <DialogHeader>
+              <DialogTitle>{t("common:customers.add_btn")}</DialogTitle>
+              <DialogDescription>
+                Create a new client customer profile to associate safety projects and compliance records.
+              </DialogDescription>
+            </DialogHeader>
 
-            <form onSubmit={handleSubmit}>
-              <CardHeader>
-                <CardTitle className="text-sm font-bold">{t("common:customers.add_btn")}</CardTitle>
-                <CardDescription className="text-xs">
-                  Create a new client customer profile to associate safety projects and compliance records.
-                </CardDescription>
-              </CardHeader>
+            <div className="space-y-3 py-4 text-xs">
+              {/* Company Name */}
+              <div className="space-y-1">
+                <label className="font-semibold text-muted-foreground">{t("common:customers.fields.name")}</label>
+                <Input
+                  value={formData.companyName}
+                  onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
+                  placeholder="e.g. Acme Corporation"
+                  className="h-9 text-xs"
+                />
+                {errors.companyName && <p className="text-destructive text-[10px]">{t(`common:${errors.companyName}`)}</p>}
+              </div>
 
-              <CardContent className="space-y-3 py-2 text-xs max-h-[70vh] overflow-y-auto">
-                {/* Company Name */}
-                <div className="space-y-1">
-                  <label className="font-semibold text-muted-foreground">{t("common:customers.fields.name")}</label>
-                  <Input
-                    value={formData.companyName}
-                    onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
-                    placeholder="e.g. Acme Corporation"
-                    className="h-9 text-xs"
-                  />
-                  {errors.companyName && <p className="text-destructive text-[10px]">{t(`common:${errors.companyName}`)}</p>}
+              {/* CR Number */}
+              <div className="space-y-1">
+                <label className="font-semibold text-muted-foreground">{t("common:customers.fields.cr")}</label>
+                <Input
+                  value={formData.commercialRegistration}
+                  onChange={(e) => setFormData({ ...formData, commercialRegistration: e.target.value })}
+                  placeholder="e.g. CR-12345"
+                  className="h-9 text-xs"
+                />
+                {errors.commercialRegistration && <p className="text-destructive text-[10px]">{t(`common:${errors.commercialRegistration}`)}</p>}
+              </div>
+
+              {/* Industry */}
+              <div className="space-y-1">
+                <label className="font-semibold text-muted-foreground">{t("common:customers.fields.industry")}</label>
+                <Input
+                  value={formData.industry}
+                  onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
+                  placeholder="e.g. Construction / Contracting"
+                  className="h-9 text-xs"
+                />
+                {errors.industry && <p className="text-destructive text-[10px]">{t(`common:${errors.industry}`)}</p>}
+              </div>
+
+              <div className="pt-2 border-t border-border">
+                <h4 className="font-bold text-foreground text-xs mb-2">{t("common:customers.fields.contact_person")}</h4>
+                <div className="space-y-3">
+                  <div className="space-y-1">
+                    <label className="font-semibold text-muted-foreground">{t("common:customers.fields.contact_name")}</label>
+                    <Input
+                      value={formData.primaryContactName}
+                      onChange={(e) => setFormData({ ...formData, primaryContactName: e.target.value })}
+                      placeholder="e.g. Ahmed Ali"
+                      className="h-9 text-xs"
+                    />
+                    {errors.primaryContactName && <p className="text-destructive text-[10px]">{t(`common:${errors.primaryContactName}`)}</p>}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-1">
+                      <label className="font-semibold text-muted-foreground">{t("common:customers.fields.email")}</label>
+                      <Input
+                        type="email"
+                        value={formData.primaryContactEmail}
+                        onChange={(e) => setFormData({ ...formData, primaryContactEmail: e.target.value })}
+                        placeholder="e.g. ahmed@acme.com"
+                        className="h-9 text-xs"
+                      />
+                      {errors.primaryContactEmail && <p className="text-destructive text-[10px]">{t(`common:${errors.primaryContactEmail}`)}</p>}
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="font-semibold text-muted-foreground">{t("common:customers.fields.phone")}</label>
+                      <Input
+                        value={formData.primaryContactPhone}
+                        onChange={(e) => setFormData({ ...formData, primaryContactPhone: e.target.value })}
+                        placeholder="e.g. +966 50 000 0000"
+                        className="h-9 text-xs"
+                      />
+                      {errors.primaryContactPhone && <p className="text-destructive text-[10px]">{t(`common:${errors.primaryContactPhone}`)}</p>}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-border">
+                <h4 className="font-bold text-foreground text-xs mb-2">{t("common:customers.fields.location")}</h4>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="space-y-1">
+                    <label className="font-semibold text-muted-foreground">{t("common:customers.fields.city")}</label>
+                    <Input
+                      value={formData.city}
+                      onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                      placeholder="e.g. Riyadh"
+                      className="h-9 text-xs"
+                    />
+                    {errors.city && <p className="text-destructive text-[10px]">{t(`common:${errors.city}`)}</p>}
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-semibold text-muted-foreground">{t("common:customers.fields.status")}</label>
+                    <select
+                      value={formData.status}
+                      onChange={(e) => setFormData({ ...formData, status: e.target.value as "Active" | "Inactive" })}
+                      className="w-full h-9 rounded-md border border-border bg-background px-3 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                    >
+                      <option value="Active">{t("common:customers.status.Active")}</option>
+                      <option value="Inactive">{t("common:customers.status.Inactive")}</option>
+                    </select>
+                  </div>
                 </div>
 
-                {/* CR Number */}
-                <div className="space-y-1">
-                  <label className="font-semibold text-muted-foreground">{t("common:customers.fields.cr")}</label>
-                  <Input
-                    value={formData.commercialRegistration}
-                    onChange={(e) => setFormData({ ...formData, commercialRegistration: e.target.value })}
-                    placeholder="e.g. CR-12345"
-                    className="h-9 text-xs"
-                  />
-                  {errors.commercialRegistration && <p className="text-destructive text-[10px]">{t(`common:${errors.commercialRegistration}`)}</p>}
-                </div>
-
-                {/* Industry */}
-                <div className="space-y-1">
-                  <label className="font-semibold text-muted-foreground">{t("common:customers.fields.industry")}</label>
-                  <Input
-                    value={formData.industry}
-                    onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
-                    placeholder="e.g. Real Estate, Construction"
-                    className="h-9 text-xs"
-                  />
-                </div>
-
-                {/* Primary Contact Name */}
-                <div className="space-y-1">
-                  <label className="font-semibold text-muted-foreground">{t("common:customers.fields.primary_contact")}</label>
-                  <Input
-                    value={formData.primaryContactName}
-                    onChange={(e) => setFormData({ ...formData, primaryContactName: e.target.value })}
-                    placeholder="e.g. Khalid Al-Amri"
-                    className="h-9 text-xs"
-                  />
-                  {errors.primaryContactName && <p className="text-destructive text-[10px]">{t(`common:${errors.primaryContactName}`)}</p>}
-                </div>
-
-                {/* Contact Email */}
-                <div className="space-y-1">
-                  <label className="font-semibold text-muted-foreground">{t("common:customers.fields.email")}</label>
-                  <Input
-                    type="email"
-                    value={formData.primaryContactEmail}
-                    onChange={(e) => setFormData({ ...formData, primaryContactEmail: e.target.value })}
-                    placeholder="contact@company.com"
-                    className="h-9 text-xs"
-                  />
-                  {errors.primaryContactEmail && <p className="text-destructive text-[10px]">{t(`common:${errors.primaryContactEmail}`)}</p>}
-                </div>
-
-                {/* Contact Phone */}
-                <div className="space-y-1">
-                  <label className="font-semibold text-muted-foreground">{t("common:customers.fields.phone")}</label>
-                  <Input
-                    value={formData.primaryContactPhone}
-                    onChange={(e) => setFormData({ ...formData, primaryContactPhone: e.target.value })}
-                    placeholder="e.g. +966500000000"
-                    className="h-9 text-xs"
-                  />
-                  {errors.primaryContactPhone && <p className="text-destructive text-[10px]">{t(`common:${errors.primaryContactPhone}`)}</p>}
-                </div>
-
-                {/* City */}
-                <div className="space-y-1">
-                  <label className="font-semibold text-muted-foreground">{t("common:customers.fields.city")}</label>
-                  <Input
-                    value={formData.city}
-                    onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                    placeholder="e.g. Riyadh"
-                    className="h-9 text-xs"
-                  />
-                  {errors.city && <p className="text-destructive text-[10px]">{t(`common:${errors.city}`)}</p>}
-                </div>
-
-                {/* Address */}
-                <div className="space-y-1">
+                <div className="space-y-1 mt-2">
                   <label className="font-semibold text-muted-foreground">{t("common:customers.fields.address")}</label>
                   <Input
                     value={formData.address}
@@ -182,20 +210,20 @@ export function AddCustomerDialog({ onAdd, trigger }: AddCustomerDialogProps) {
                   />
                   {errors.address && <p className="text-destructive text-[10px]">{t(`common:${errors.address}`)}</p>}
                 </div>
-              </CardContent>
+              </div>
+            </div>
 
-              <CardFooter className="pt-4 border-t border-border flex justify-end gap-2">
-                <Button type="button" variant="outline" size="sm" onClick={() => handleOpenChange(false)}>
-                  {t("common:cancel")}
-                </Button>
-                <Button type="submit" size="sm">
-                  {t("common:save")}
-                </Button>
-              </CardFooter>
-            </form>
-          </Card>
-        </div>
-      )}
+            <DialogFooter>
+              <Button type="button" variant="outline" size="sm" onClick={() => handleOpenChange(false)}>
+                {t("common:cancel")}
+              </Button>
+              <Button type="submit" size="sm">
+                {t("common:save")}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

@@ -1,9 +1,15 @@
 import React from "react";
 import { ClientInvoice } from "@/domains/invoices/types";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/shared/ui/dialog";
 import { Button } from "@/shared/ui/button";
 import { Badge } from "@/shared/ui/badge";
-import { FileText, Download, X, ArrowRight, Layers, FileCheck, Landmark, ClipboardList } from "lucide-react";
+import { FileText, Download, ArrowRight, Layers, FileCheck, Landmark, ClipboardList } from "lucide-react";
 import Link from "next/link";
 import { useTranslation } from "@/providers/i18n-provider";
 import { useAuth } from "@/providers/AuthProvider";
@@ -54,26 +60,19 @@ export function InvoiceActions({
   const isPaid = invoice.status === "paid";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <Card className="max-w-md w-full border-border bg-card shadow-2xl overflow-hidden relative">
-        <button
-          onClick={onClose}
-          className="absolute end-4 top-4 text-muted-foreground hover:text-foreground cursor-pointer"
-        >
-          <X className="h-4 w-4" />
-        </button>
-
-        <CardHeader className="border-b border-border pb-4 pe-10">
-          <CardTitle className="text-sm font-bold flex items-center gap-2">
+    <Dialog open={!!invoice} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-md w-full p-6">
+        <DialogHeader className="border-b border-border pb-4">
+          <DialogTitle className="text-sm font-bold flex items-center gap-2">
             <FileText className="h-4.5 w-4.5 text-primary" />
             {t("invoices_dialog_title")}
-          </CardTitle>
-          <CardDescription className="text-xs">
+          </DialogTitle>
+          <DialogDescription className="text-xs">
             {t("invoices_dialog_desc")}
-          </CardDescription>
-        </CardHeader>
+          </DialogDescription>
+        </DialogHeader>
 
-        <CardContent className="space-y-4 pt-4 text-xs max-h-[75vh] overflow-y-auto">
+        <div className="space-y-4 pt-4 text-xs max-h-[75vh] overflow-y-auto">
           {/* 1. General Info & Status Badge */}
           <div className="space-y-3 bg-secondary/20 p-3 rounded-lg border border-border">
             <div className="flex justify-between items-center">
@@ -278,9 +277,9 @@ export function InvoiceActions({
               )}
             </div>
           </div>
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 export default InvoiceActions;

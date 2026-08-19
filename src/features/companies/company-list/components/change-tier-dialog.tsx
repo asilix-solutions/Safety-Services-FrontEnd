@@ -7,6 +7,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogBody,
+  DialogFooter,
   DialogTitle,
   DialogDescription,
 } from "@/shared/ui/dialog";
@@ -102,14 +103,14 @@ export function ChangeTierDialog({ company, onConfirm, onClose }: ChangeTierDial
                 </div>
               )}
 
-              <div className="flex gap-2 pt-1">
+              <DialogFooter className="pt-2">
                 <Button variant="outline" size="sm" className="flex-1 h-9 text-xs" onClick={onClose}>
                   {t("companies:dialog.cancel_btn")}
                 </Button>
                 <Button size="sm" className="flex-1 h-9 text-xs" onClick={handleConfirm}>
                   {t("companies:dialog.confirm_btn")}
                 </Button>
-              </div>
+              </DialogFooter>
             </DialogBody>
           </>
         )}

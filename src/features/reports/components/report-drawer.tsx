@@ -1,10 +1,17 @@
 import React, { useState } from "react";
 import { Report } from "@/domains/reports/types";
+import {
+  Sheet,
+  SheetContent,
+  SheetTitle,
+  SheetDescription,
+} from "@/shared/ui/sheet";
 import { Button } from "@/shared/ui/button";
 import { Badge } from "@/shared/ui/badge";
-import { X, Award, Printer, History, Calendar, FileText, Link, Check, AlertTriangle, Archive, Send } from "lucide-react";
+import { Award, Printer, History, FileText, Link, Check, AlertTriangle, Archive, Send } from "lucide-react";
 import { getReportStatusBadgeVariant, getReportStatusDisplayName, getReportTypeDisplayName } from "@/domains/reports/helpers";
 import { BrandingSettings, CompanyProfileSettings } from "@/domains/settings/types";
+import { useTranslation } from "@/providers/i18n-provider";
 import { ReportDocument } from "../report-document";
 
 interface ReportDrawerProps {
@@ -34,6 +41,8 @@ export function ReportDrawer({
   userRole,
   t,
 }: ReportDrawerProps) {
+  const { dir } = useTranslation();
+  const side = dir === "rtl" ? "right" : "left";
   const [rejectReason, setRejectReason] = useState("");
   const [showRejectForm, setShowRejectForm] = useState(false);
 
@@ -71,38 +80,28 @@ export function ReportDrawer({
 
   return (
     <>
-    <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm">
-      {/* Backdrop click to close */}
-      <div className="absolute inset-0 -z-10" onClick={onClose} />
-
-      <div className="w-full sm:max-w-md h-full bg-card border-s border-border shadow-2xl p-6 flex flex-col justify-between overflow-y-auto relative animate-in slide-in-from-right duration-200">
-        <button
-          onClick={onClose}
-          className="absolute end-4 top-4 text-muted-foreground hover:text-foreground cursor-pointer"
-        >
-          <X className="h-5 w-5" />
-        </button>
-
-        <div className="space-y-6 flex-1">
-          {/* Header */}
-          <div>
-            <div className="flex items-center gap-2">
-              <Award className="h-5 w-5 text-primary" />
-              <h3 className="text-lg font-bold text-foreground">
-                {t("reports:drawerTitle")}
-              </h3>
+      <Sheet open={!!report} onOpenChange={(open) => !open && onClose()}>
+        <SheetContent side={side} className="w-full sm:max-w-md h-full p-6 flex flex-col justify-between overflow-y-auto">
+          <div className="space-y-6 flex-1">
+            {/* Header */}
+            <div>
+              <div className="flex items-center gap-2">
+                <Award className="h-5 w-5 text-primary" />
+                <SheetTitle className="text-lg font-bold text-foreground">
+                  {t("reports:drawerTitle")}
+                </SheetTitle>
+              </div>
+              <SheetDescription className="text-xs text-muted-foreground font-mono mt-1">{report.reportNumber}</SheetDescription>
+              <h4 className="text-sm font-bold text-foreground mt-2">{t(report.title) || report.title}</h4>
+              <div className="flex gap-2 mt-2">
+                <Badge variant={getReportStatusBadgeVariant(report.status)} className="uppercase text-[10px]">
+                  {getReportStatusDisplayName(report.status, t)}
+                </Badge>
+                <Badge variant="outline" className="uppercase text-[10px]">
+                  {getReportTypeDisplayName(report.reportType, t)}
+                </Badge>
+              </div>
             </div>
-            <p className="text-xs text-muted-foreground font-mono mt-1">{report.reportNumber}</p>
-            <h4 className="text-sm font-bold text-foreground mt-2">{t(report.title) || report.title}</h4>
-            <div className="flex gap-2 mt-2">
-              <Badge variant={getReportStatusBadgeVariant(report.status)} className="uppercase text-[10px]">
-                {getReportStatusDisplayName(report.status, t)}
-              </Badge>
-              <Badge variant="outline" className="uppercase text-[10px]">
-                {getReportTypeDisplayName(report.reportType, t)}
-              </Badge>
-            </div>
-          </div>
 
           {/* Section 1: Relationship Tracing */}
           <div className="space-y-3 p-4 rounded-xl border border-border bg-secondary/15">
@@ -304,8 +303,8 @@ export function ReportDrawer({
             {t("common:close")}
           </Button>
         </div>
-      </div>
-    </div>
+      </SheetContent>
+    </Sheet>
 
     {/*
       The printable artifact for the report currently open.

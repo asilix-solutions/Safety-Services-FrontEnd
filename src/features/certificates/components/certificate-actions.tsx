@@ -1,13 +1,19 @@
 import React from "react";
 import { ClientCertificate } from "@/domains/certificates/types";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/shared/ui/sheet";
 import { Button } from "@/shared/ui/button";
 import { Badge } from "@/shared/ui/badge";
-import { Award, Download, ArrowDown, X, ShieldCheck, History, Calendar, FileText } from "lucide-react";
+import { Award, Download, History, Calendar, FileText } from "lucide-react";
 import {
   deriveCertificateDisplayStatus,
   getRemainingValidityDays,
   getExpirationWarningLevel,
-  getRemainingValidityText,
   getCertificateStatusBadgeVariant,
 } from "../helpers/formatters";
 import { useTranslation } from "@/providers/i18n-provider";
@@ -23,7 +29,8 @@ export function CertificateActions({
   onClose,
   onDownloadCertificate,
 }: CertificateActionsProps) {
-  const { t } = useTranslation();
+  const { t, dir } = useTranslation();
+  const side = dir === "rtl" ? "right" : "left";
   if (!certificate) return null;
 
   const displayStatus = deriveCertificateDisplayStatus(certificate.status, certificate.expiresAt);
@@ -44,28 +51,18 @@ export function CertificateActions({
   const isRevoked = certificate.status === "revoked" || certificate.status === "REVOKED";
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm">
-      {/* Backdrop click to close */}
-      <div className="absolute inset-0 -z-10" onClick={onClose} />
-
-      <div className="w-full sm:max-w-md h-full bg-card border-s border-border shadow-2xl p-6 flex flex-col justify-between overflow-y-auto relative animate-in slide-in-from-right duration-200">
-        <button
-          onClick={onClose}
-          className="absolute end-4 top-4 text-muted-foreground hover:text-foreground cursor-pointer"
-        >
-          <X className="h-5 w-5" />
-        </button>
-
+    <Sheet open={!!certificate} onOpenChange={(open) => !open && onClose()}>
+      <SheetContent side={side} className="w-full sm:max-w-md h-full p-6 flex flex-col justify-between overflow-y-auto">
         <div className="space-y-6 flex-1">
           {/* Header */}
           <div>
             <div className="flex items-center gap-2">
               <Award className="h-5 w-5 text-primary" />
-              <h3 className="text-lg font-bold text-foreground">
+              <SheetTitle className="text-lg font-bold text-foreground">
                 {t("common:certificates_audit_title") || "Compliance Certificate Details"}
-              </h3>
+              </SheetTitle>
             </div>
-            <p className="text-xs text-muted-foreground font-mono mt-1">{certificate.id}</p>
+            <SheetDescription className="text-xs text-muted-foreground font-mono mt-1">{certificate.id}</SheetDescription>
             <div className="flex gap-2 mt-2">
               <Badge variant={badgeVariant} className="uppercase text-[10px]">
                 {t(`common:certificates_tab_${displayStatus}`).toUpperCase()}
@@ -205,8 +202,8 @@ export function CertificateActions({
             {t("common:close")}
           </Button>
         </div>
-      </div>
-    </div>
+      </SheetContent>
+    </Sheet>
   );
 }
 export default CertificateActions;

@@ -10,6 +10,7 @@ import * as Icons from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { AppHeader } from "@/shared/layouts/app-header";
+import { MobileNavDrawer } from "@/shared/layouts/mobile-nav-drawer";
 
 function NavIcon({ name, className }: { name: string; className?: string }) {
   const IconComponent = (Icons as unknown as Record<string, React.ComponentType<{ className?: string }>>)[name];
@@ -21,6 +22,7 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth();
   const pathname = usePathname();
   const { t } = useTranslation();
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
   if (!user) return null;
 
@@ -103,12 +105,20 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
 
       {/* Main Container */}
       <div className="flex-1 flex flex-col min-w-0">
-        <AppHeader />
+        <AppHeader onMenuToggle={() => setMobileMenuOpen(true)} />
         {/* Soft, clean spacing for client portal */}
         <main className="flex-1 p-6 overflow-y-auto space-y-6 max-w-7xl w-full mx-auto">
           {children}
         </main>
       </div>
+
+      {/* Mobile Navigation Drawer */}
+      <MobileNavDrawer
+        open={mobileMenuOpen}
+        onOpenChange={setMobileMenuOpen}
+        portalTitle="Client Hub"
+        portalIcon={<Icons.Building className="h-5 w-5" />}
+      />
     </div>
   );
 }

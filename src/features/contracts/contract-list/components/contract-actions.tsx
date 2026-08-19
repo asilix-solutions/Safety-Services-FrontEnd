@@ -1,6 +1,12 @@
 import React from "react";
 import { ClientContract } from "@/domains/contracts/types";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/shared/ui/dialog";
 import { Button } from "@/shared/ui/button";
 import { Badge } from "@/shared/ui/badge";
 import { FileCheck2, Download } from "lucide-react";
@@ -23,18 +29,18 @@ export function ContractActions({
   if (!contract) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <Card className="max-w-md w-full border-border bg-card shadow-2xl overflow-hidden">
-        <CardHeader className="border-b border-border pb-4">
-          <CardTitle className="text-sm font-bold flex items-center gap-2">
+    <Dialog open={!!contract} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-md w-full p-6">
+        <DialogHeader className="border-b border-border pb-4">
+          <DialogTitle className="text-sm font-bold flex items-center gap-2">
             <FileCheck2 className="h-4.5 w-4.5 text-primary" />
             {t("common:contracts_dialog_title")}
-          </CardTitle>
-          <CardDescription className="text-xs">
+          </DialogTitle>
+          <DialogDescription className="text-xs">
             {t("common:contracts_dialog_desc")}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4 pt-4 text-xs max-h-[75vh] overflow-y-auto">
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4 pt-4 text-xs max-h-[75vh] overflow-y-auto">
           {/* General Information Section */}
           <div className="space-y-3">
             <h4 className="font-semibold text-[10px] text-muted-foreground tracking-wider uppercase">{t("common:contracts_general_info")}</h4>
@@ -122,9 +128,9 @@ export function ContractActions({
               {t("common:contracts_close")}
             </Button>
           </div>
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 export default ContractActions;

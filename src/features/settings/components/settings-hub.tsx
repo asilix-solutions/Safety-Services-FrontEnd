@@ -1,6 +1,16 @@
 import React from "react";
 import { PageHeader } from "@/shared/components/page-header";
 import { Button } from "@/shared/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/shared/ui/alert-dialog";
 import { OverviewCards } from "./overview-cards";
 import { StickySettingsFooter } from "./sticky-settings-footer";
 import { CompanyTab } from "./tabs/company-tab";
@@ -177,35 +187,30 @@ export function SettingsHub() {
         t={t}
       />
 
-      {/* Restore Defaults Confirmation Dialog overlay */}
-      {showResetConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <div className="bg-card border border-border shadow-2xl rounded-2xl max-w-md w-full p-6 space-y-4">
-            <h3 className="text-base font-bold text-foreground">
+      {/* Restore Defaults Confirmation Dialog */}
+      <AlertDialog open={showResetConfirm} onOpenChange={setShowResetConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
               {t("settings:resetConfirmTitle") || "Restore default settings?"}
-            </h3>
-            <p className="text-xs text-muted-foreground leading-relaxed">
+            </AlertDialogTitle>
+            <AlertDialogDescription>
               {t("settings:resetConfirmDesc") || "This action will reset the current tab to default MVP values."}
-            </p>
-            <div className="flex justify-end gap-3 pt-2">
-              <Button
-                variant="ghost"
-                onClick={() => setShowResetConfirm(false)}
-                className="text-xs cursor-pointer"
-              >
-                {t("settings:btnCancel") || "Cancel"}
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={handleConfirmReset}
-                className="text-xs cursor-pointer bg-destructive text-white hover:bg-destructive/95"
-              >
-                {t("settings:btnConfirmReset") || "Restore Defaults"}
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>
+              {t("settings:btnCancel") || "Cancel"}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmReset}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {t("settings:btnConfirmReset") || "Restore Defaults"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

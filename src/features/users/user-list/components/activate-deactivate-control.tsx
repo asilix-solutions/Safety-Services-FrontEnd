@@ -45,7 +45,7 @@ export function ActivateDeactivateControl({
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <>
       <Button
         size="sm"
         variant={willActivate ? "outline" : "destructive"}
@@ -53,29 +53,32 @@ export function ActivateDeactivateControl({
       >
         {t(willActivate ? "users:action.activate" : "users:action.deactivate")}
       </Button>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>
-            {t(willActivate ? "users:confirm.activate_title" : "users:confirm.deactivate_title")}
-          </DialogTitle>
-          <DialogDescription>
-            {t(willActivate ? "users:confirm.activate_desc" : "users:confirm.deactivate_desc")}
-          </DialogDescription>
-        </DialogHeader>
-        <DialogBody className="flex justify-end gap-2">
-          <Button variant="outline" size="sm" onClick={() => setOpen(false)}>
-            {t("users:confirm.cancel")}
-          </Button>
-          <Button
-            size="sm"
-            variant={willActivate ? "default" : "destructive"}
-            onClick={handleConfirm}
-            isLoading={isBusy}
-          >
-            {t("users:confirm.confirm")}
-          </Button>
-        </DialogBody>
-      </DialogContent>
-    </Dialog>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {t(willActivate ? "users:confirm.activate_title" : "users:confirm.deactivate_title")}
+            </DialogTitle>
+            <DialogDescription>
+              {t(willActivate ? "users:confirm.activate_desc" : "users:confirm.deactivate_desc")}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogBody className="flex justify-end gap-2">
+            <Button variant="outline" size="sm" onClick={() => setOpen(false)}>
+              {t("users:confirm.cancel")}
+            </Button>
+            <Button
+              size="sm"
+              variant={willActivate ? "default" : "destructive"}
+              onClick={handleConfirm}
+              isLoading={isBusy}
+            >
+              {t("users:confirm.confirm")}
+            </Button>
+          </DialogBody>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
