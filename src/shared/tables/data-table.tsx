@@ -110,7 +110,7 @@ export function DataTable<T extends Record<string, any>>({
       <div className="overflow-x-auto rounded-xl border border-border/80 bg-card">
         <table className="w-full border-collapse text-start text-sm text-foreground">
           <thead>
-            <tr className="border-b border-border bg-secondary/50 text-muted-foreground font-medium">
+            <tr className="border-b border-border bg-muted/50 text-muted-foreground font-medium">
               {columns.map((col, idx) => (
                 <th
                   key={idx}
@@ -138,7 +138,7 @@ export function DataTable<T extends Record<string, any>>({
               paginatedData.map((row, rIdx) => (
                 <tr
                   key={rIdx}
-                  className="border-b border-border/70 hover:bg-secondary/20 transition-colors last:border-0"
+                  className="border-b border-border/70 hover:bg-muted/40 transition-colors last:border-0"
                 >
                   {columns.map((col, cIdx) => {
                     const value = col.accessorKey ? row[col.accessorKey] : undefined;

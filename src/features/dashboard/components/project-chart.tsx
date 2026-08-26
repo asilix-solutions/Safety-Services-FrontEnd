@@ -37,7 +37,7 @@ export function ProjectChart() {
                   color: "var(--popover-foreground)",
                 }}
               />
-              <Bar dataKey="value" fill="hsl(var(--chart-1))" radius={[4, 4, 0, 0]} name="Inspection Count" />
+              <Bar dataKey="value" fill="var(--chart-1)" radius={[4, 4, 0, 0]} name="Inspection Count" />
             </BarChart>
           </ResponsiveContainer>
         ) : (

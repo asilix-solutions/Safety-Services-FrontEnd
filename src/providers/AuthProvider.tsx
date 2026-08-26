@@ -89,18 +89,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Initialize session from LocalStorage & hydrate tenant branding
   useEffect(() => {
     const savedProfile = localStorage.getItem(SESSION_STORAGE_KEY);
+    let activeTenantId: string | undefined;
     if (savedProfile) {
       try {
-        setUser(JSON.parse(savedProfile));
+        const parsed = JSON.parse(savedProfile);
+        setUser(parsed);
+        activeTenantId = parsed.tenantId;
       } catch (err) {
         console.error("Failed to parse saved user profile", err);
       }
     }
 
     try {
-      const branding = getBranding();
+      const branding = getBranding(activeTenantId);
       if (branding && branding.primaryColor) {
-        applyTenantTheme(branding.primaryColor, branding.secondaryColor, branding.accentColor);
+        applyTenantTheme({
+          primaryHex: branding.primaryColor,
+          primaryForegroundHex: branding.primaryForeground,
+          secondaryHex: branding.secondaryColor,
+          accentHex: branding.accentColor,
+          darkModeOverrides: branding.darkModeOverrides,
+        });
       }
     } catch (err) {
       console.error("Failed to hydrate tenant theme", err);
@@ -108,6 +117,48 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     setIsLoading(false);
   }, []);
+
+  // Reactively re-hydrate theme tokens when dark/light mode toggles or user tenant changes
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const syncTheme = () => {
+      try {
+        const branding = getBranding(user?.tenantId);
+        if (branding && branding.primaryColor) {
+          applyTenantTheme({
+            primaryHex: branding.primaryColor,
+            primaryForegroundHex: branding.primaryForeground,
+            secondaryHex: branding.secondaryColor,
+            accentHex: branding.accentColor,
+            darkModeOverrides: branding.darkModeOverrides,
+            isDark: document.documentElement.classList.contains("dark"),
+          });
+        }
+      } catch (err) {
+        console.error("Failed to sync tenant theme", err);
+      }
+    };
+
+    // Initial sync for current user
+    syncTheme();
+
+    // Listen for dark mode class toggles on <html>
+    const observer = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        if (mutation.attributeName === "class") {
+          syncTheme();
+        }
+      }
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+
+    return () => observer.disconnect();
+  }, [user?.tenantId]);
 
   const login = async (role: UserRole) => {
     setIsLoading(true);
@@ -124,9 +175,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(profile));
 
     try {
-      const branding = getBranding();
+      const branding = getBranding(profile.tenantId);
       if (branding && branding.primaryColor) {
-        applyTenantTheme(branding.primaryColor, branding.secondaryColor, branding.accentColor);
+        applyTenantTheme({
+          primaryHex: branding.primaryColor,
+          primaryForegroundHex: branding.primaryForeground,
+          secondaryHex: branding.secondaryColor,
+          accentHex: branding.accentColor,
+          darkModeOverrides: branding.darkModeOverrides,
+        });
       }
     } catch (err) {
       console.error("Failed to apply tenant theme on login", err);
@@ -171,24 +228,59 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     // Switching the tenant itself — the only way to observe isolation in the UI.
-    if (role === "Company Admin" && scopeId === "COMP-002") {
-      profile = {
-        ...profile,
-        id: "u-8",
-        name: "Layla Haddad",
-        email: "layla.h@safetyshield.com",
-        tenantId: "COMP-002",
-        avatarUrl: "https://api.dicebear.com/7.x/adventurer/svg?seed=Layla",
-      };
+    if (role === "Company Admin") {
+      if (scopeId === "COMP-002") {
+        profile = {
+          ...profile,
+          id: "u-8",
+          name: "Layla Haddad",
+          email: "layla.h@safetyshield.com",
+          tenantId: "COMP-002",
+          avatarUrl: "https://api.dicebear.com/7.x/adventurer/svg?seed=Layla",
+        };
+      } else if (scopeId === "COMP-003") {
+        profile = {
+          ...profile,
+          id: "u-9",
+          name: "Khalid Issa",
+          email: "khalid@gulffire.com",
+          tenantId: "COMP-003",
+          avatarUrl: "https://api.dicebear.com/7.x/adventurer/svg?seed=Khalid",
+        };
+      } else if (scopeId === "COMP-004") {
+        profile = {
+          ...profile,
+          id: "u-10",
+          name: "Ahmed Jamil",
+          email: "ahmed@redseacompliance.com",
+          tenantId: "COMP-004",
+          avatarUrl: "https://api.dicebear.com/7.x/adventurer/svg?seed=Ahmed",
+        };
+      } else {
+        profile = {
+          ...profile,
+          id: "u-2",
+          name: "Sarah Jenkins",
+          email: "sarah.j@vertexindustrial.com",
+          tenantId: "COMP-001",
+          avatarUrl: "https://api.dicebear.com/7.x/adventurer/svg?seed=Sarah",
+        };
+      }
     }
     
     setUser(profile);
     localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(profile));
 
     try {
-      const branding = getBranding();
+      const branding = getBranding(profile.tenantId);
       if (branding && branding.primaryColor) {
-        applyTenantTheme(branding.primaryColor, branding.secondaryColor, branding.accentColor);
+        applyTenantTheme({
+          primaryHex: branding.primaryColor,
+          primaryForegroundHex: branding.primaryForeground,
+          secondaryHex: branding.secondaryColor,
+          accentHex: branding.accentColor,
+          darkModeOverrides: branding.darkModeOverrides,
+        });
       }
     } catch (err) {
       console.error("Failed to apply tenant theme on switchRole", err);

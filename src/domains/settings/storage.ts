@@ -6,6 +6,10 @@ import {
   SecuritySettings,
   DerivedOrganizationInfo
 } from "./types";
+import {
+  getDefaultPresetForTenant,
+  DEFAULT_THEME_PRESET_ID
+} from "@/constants/themes";
 
 const DEFAULT_PROFILE: CompanyProfileSettings = {
   companyName: "Vertex Industrial Safety Solutions",
@@ -24,14 +28,6 @@ const DEFAULT_PROFILE: CompanyProfileSettings = {
   supportPhone: "+966 11 4455668",
   website: "https://vertexindustrial.com",
   description: "SSLM enterprise safety execution node."
-};
-
-const DEFAULT_BRANDING: BrandingSettings = {
-  logoUrl: "https://api.dicebear.com/7.x/identicon/svg?seed=VertexLogo",
-  logoDarkUrl: "https://api.dicebear.com/7.x/identicon/svg?seed=VertexLogoDark",
-  primaryColor: "#4f46e5",
-  secondaryColor: "#0f172a",
-  accentColor: "#f59e0b"
 };
 
 const DEFAULT_PREFERENCES: WorkspacePreferenceSettings = {
@@ -59,6 +55,28 @@ const DEFAULT_SECURITY: SecuritySettings = {
   enableTwoFactorMock: false
 };
 
+export function getTenantBrandingKey(tenantId?: string): string {
+  if (!tenantId) return "SSLM_BRANDING_SYSTEM";
+  return `SSLM_BRANDING_${tenantId.toUpperCase()}`;
+}
+
+export function getDefaultBranding(tenantId?: string): BrandingSettings {
+  const preset = getDefaultPresetForTenant(tenantId);
+  return {
+    logoUrl: `https://api.dicebear.com/7.x/identicon/svg?seed=${tenantId || "VertexLogo"}`,
+    logoDarkUrl: `https://api.dicebear.com/7.x/identicon/svg?seed=${tenantId || "VertexLogoDark"}Dark`,
+    primaryColor: preset.colors.primary,
+    primaryForeground: preset.colors.primaryForeground || "#ffffff",
+    secondaryColor: preset.colors.secondary,
+    accentColor: preset.colors.accent,
+    presetId: preset.id,
+    isCustom: false,
+    darkModeOverrides: preset.darkModeOverrides
+  };
+}
+
+const DEFAULT_BRANDING: BrandingSettings = getDefaultBranding("COMP-001");
+
 // Company Profile Storage
 export function getCompanyProfile(): CompanyProfileSettings {
   if (typeof window === "undefined") return DEFAULT_PROFILE;
@@ -75,19 +93,47 @@ export function saveCompanyProfile(profile: CompanyProfileSettings): void {
   localStorage.setItem("SSLM_COMPANY_PROFILE_V2", JSON.stringify(profile));
 }
 
-// Branding Storage
-export function getBranding(): BrandingSettings {
-  if (typeof window === "undefined") return DEFAULT_BRANDING;
+// Branding Storage (Tenant-Scoped)
+export function getBranding(tenantId?: string): BrandingSettings {
+  const fallback = getDefaultBranding(tenantId);
+  if (typeof window === "undefined") return fallback;
   try {
-    const raw = localStorage.getItem("SSLM_BRANDING_V2");
-    return raw ? JSON.parse(raw) : DEFAULT_BRANDING;
+    const key = getTenantBrandingKey(tenantId);
+    const raw = localStorage.getItem(key);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      return { ...fallback, ...parsed };
+    }
+
+    // Migration check from legacy single key SSLM_BRANDING_V2
+    const legacyRaw = localStorage.getItem("SSLM_BRANDING_V2");
+    if (legacyRaw && (!tenantId || tenantId === "COMP-001")) {
+      try {
+        const legacyParsed = JSON.parse(legacyRaw);
+        const migrated: BrandingSettings = {
+          ...fallback,
+          ...legacyParsed,
+          presetId: legacyParsed.presetId || DEFAULT_THEME_PRESET_ID,
+          isCustom: legacyParsed.isCustom ?? true
+        };
+        localStorage.setItem(key, JSON.stringify(migrated));
+        return migrated;
+      } catch {
+        return fallback;
+      }
+    }
+
+    return fallback;
   } catch {
-    return DEFAULT_BRANDING;
+    return fallback;
   }
 }
 
-export function saveBranding(branding: BrandingSettings): void {
+export function saveBranding(branding: BrandingSettings, tenantId?: string): void {
   if (typeof window === "undefined") return;
+  const key = getTenantBrandingKey(tenantId);
+  localStorage.setItem(key, JSON.stringify(branding));
+  // Keep legacy key updated as fallback
   localStorage.setItem("SSLM_BRANDING_V2", JSON.stringify(branding));
 }
 
@@ -157,9 +203,10 @@ export function resetCompanyProfile(): CompanyProfileSettings {
   return DEFAULT_PROFILE;
 }
 
-export function resetBranding(): BrandingSettings {
-  saveBranding(DEFAULT_BRANDING);
-  return DEFAULT_BRANDING;
+export function resetBranding(tenantId?: string): BrandingSettings {
+  const defaultBranding = getDefaultBranding(tenantId);
+  saveBranding(defaultBranding, tenantId);
+  return defaultBranding;
 }
 
 export function resetWorkspacePreferences(): WorkspacePreferenceSettings {

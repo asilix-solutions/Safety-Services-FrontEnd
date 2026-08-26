@@ -86,7 +86,7 @@ export function MobileNavDrawer({
         <div className="p-6 border-b border-border">
           <SheetHeader>
             <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground shadow-md shadow-primary/20">
+              <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground shadow-sm">
                 {portalIcon || <Icons.ShieldCheck className="h-5 w-5" />}
               </div>
               <div>
@@ -112,8 +112,8 @@ export function MobileNavDrawer({
                 onClick={handleLinkClick}
                 className={`flex items-center gap-3.5 px-4 py-3 min-h-[44px] text-sm font-medium rounded-xl transition-all ${
                   isActive
-                    ? "bg-primary text-primary-foreground shadow-sm shadow-primary/20 font-semibold"
-                    : "text-muted-foreground hover:bg-secondary hover:text-foreground active:bg-secondary/80"
+                    ? "bg-primary text-primary-foreground shadow-sm font-medium"
+                    : "text-muted-foreground hover:bg-muted/60 hover:text-foreground active:bg-muted/80"
                 }`}
               >
                 <NavIcon name={item.iconName} className="h-5 w-5 shrink-0" />
@@ -142,7 +142,7 @@ export function MobileNavDrawer({
           <Button
             variant="outline"
             size="sm"
-            className="w-full min-h-[40px] text-xs flex items-center justify-center gap-2 border-border text-muted-foreground hover:bg-secondary hover:text-foreground cursor-pointer"
+            className="w-full min-h-[40px] text-xs flex items-center justify-center gap-2 border-border text-muted-foreground hover:bg-muted hover:text-foreground cursor-pointer"
             onClick={() => {
               onOpenChange(false);
               logout();

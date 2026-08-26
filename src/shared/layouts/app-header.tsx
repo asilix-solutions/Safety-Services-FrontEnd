@@ -34,7 +34,9 @@ export function AppHeader({ onMenuToggle }: AppHeaderProps) {
         </Button>
         <div className="hidden sm:flex items-center gap-2">
           <span className="text-xs text-muted-foreground">{t("dashboard:activeContext")}</span>
-          <Badge variant="success">{t(getRoleTranslationKey(user.role))}</Badge>
+          <Badge variant="outline" className="bg-muted/80 text-muted-foreground border-border/50 font-medium">
+            {t(getRoleTranslationKey(user.role))}
+          </Badge>
         </div>
       </div>
 

@@ -1,6 +1,5 @@
 import React from "react";
 import { PageHeader } from "@/shared/components/page-header";
-import { Button } from "@/shared/ui/button";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -97,21 +96,26 @@ export function SettingsHub() {
 
       {/* Tabs Layout */}
       <div className="space-y-4">
-        <div className="bg-muted p-1 rounded-xl flex gap-1 overflow-x-auto w-full md:w-auto">
+        <div className="bg-muted/50 p-1 rounded-xl flex gap-1 overflow-x-auto w-full md:w-auto border border-border/40">
           {visibleTabs.map((tab) => {
-            const labelText = activeTab === tab.value && isDirty 
+            const isSelected = activeTab === tab.value;
+            const labelText = isSelected && isDirty 
               ? `${tab.label} *`
               : tab.label;
 
             return (
-              <Button
+              <button
                 key={tab.value}
-                variant={activeTab === tab.value ? "default" : "ghost"}
+                type="button"
                 onClick={() => setActiveTab(tab.value)}
-                className="text-xs px-3 py-1.5 rounded-lg font-medium cursor-pointer h-auto"
+                className={`text-xs px-3.5 py-1.5 rounded-lg font-medium transition-all cursor-pointer select-none shrink-0 ${
+                  isSelected
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "bg-transparent text-muted-foreground hover:bg-muted hover:text-foreground"
+                }`}
               >
                 {labelText}
-              </Button>
+              </button>
             );
           })}
         </div>

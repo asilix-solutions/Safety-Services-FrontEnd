@@ -59,9 +59,9 @@ export function BarChart({
                 }}
               />
               <Legend verticalAlign="top" height={36} fontSize={12} />
-              <Bar dataKey={yKey} fill="hsl(var(--chart-1))" radius={[4, 4, 0, 0]} name={barName} />
+              <Bar dataKey={yKey} fill="var(--chart-1)" radius={[4, 4, 0, 0]} name={barName} />
               {yKeySecondary && (
-                <Bar dataKey={yKeySecondary} fill="hsl(var(--chart-2))" radius={[4, 4, 0, 0]} name={barNameSecondary} />
+                <Bar dataKey={yKeySecondary} fill="var(--chart-2)" radius={[4, 4, 0, 0]} name={barNameSecondary} />
               )}
             </RechartsBarChart>
           </ResponsiveContainer>

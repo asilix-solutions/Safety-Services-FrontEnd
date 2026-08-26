@@ -19,7 +19,7 @@ interface StatusBadgeProps {
 export function StatusBadge({ status, type, className }: StatusBadgeProps) {
   const { t } = useTranslation();
   
-  let metadata: { label: string; badgeVariant: "default" | "secondary" | "success" | "warning" | "destructive" | "outline" } = {
+  let metadata: { label: string; badgeVariant: "default" | "secondary" | "success" | "warning" | "destructive" | "info" | "outline" } = {
     label: status,
     badgeVariant: "secondary",
   };

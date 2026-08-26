@@ -13,7 +13,7 @@ export function formatDateTime(dateStr?: string | null): string {
   }
 }
 
-export function getContractStatusBadgeVariant(status: string): "success" | "secondary" | "warning" | "default" | "destructive" | "outline" {
+export function getContractStatusBadgeVariant(status: string): "success" | "secondary" | "warning" | "destructive" | "info" | "outline" | "default" {
   switch (status) {
     case "signed":
       return "success";
@@ -22,7 +22,7 @@ export function getContractStatusBadgeVariant(status: string): "success" | "seco
     case "generated":
       return "warning";
     default:
-      return "default";
+      return "secondary";
   }
 }
 

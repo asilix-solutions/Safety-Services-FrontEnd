@@ -40,7 +40,7 @@ export function UsersTable({ rows, canManage, onActivate, onDeactivate, isBusy }
           </thead>
           <tbody className="divide-y divide-border">
             {rows.map((row) => (
-              <tr key={row.id} className="hover:bg-secondary/10 transition-colors">
+              <tr key={row.id} className="hover:bg-muted/40 transition-colors">
                 <td className="p-4 flex items-center gap-3">
                   <Avatar className="h-8 w-8">
                     <AvatarFallback>{row.name.substring(0, 2).toUpperCase()}</AvatarFallback>

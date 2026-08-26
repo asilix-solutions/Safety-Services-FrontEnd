@@ -43,6 +43,7 @@ export function RequestsTable({
       case "draft":
         return "secondary";
       case "submitted":
+        return "info";
       case "under_review":
         return "warning";
       case "approved":
@@ -193,7 +194,7 @@ export function RequestsTable({
                     )}
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2 text-[11px] text-muted-foreground p-2 rounded-lg bg-secondary/20 border border-border/50">
+                  <div className="grid grid-cols-2 gap-2 text-[11px] text-muted-foreground p-2 rounded-lg bg-muted/40 border border-border/50">
                     <div>
                       <span className="block text-[10px] text-muted-foreground uppercase">{t("requests:list.columns.requestType")}</span>
                       <span className="font-medium text-foreground">{getRequestTypeLabel(req.requestType)}</span>

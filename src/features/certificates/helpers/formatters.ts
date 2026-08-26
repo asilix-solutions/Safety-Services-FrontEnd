@@ -43,7 +43,7 @@ export function getCertificateStatusBadgeVariant(
     case "revoked":
       return "warning";
     default:
-      return "default";
+      return "secondary";
   }
 }
 

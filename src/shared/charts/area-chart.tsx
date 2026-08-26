@@ -45,13 +45,13 @@ export function AreaChart({
             <RechartsAreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="areaGrad1" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(var(--chart-1))" stopOpacity={0.4} />
-                  <stop offset="95%" stopColor="hsl(var(--chart-1))" stopOpacity={0} />
+                  <stop offset="5%" stopColor="var(--chart-1)" stopOpacity={0.4} />
+                  <stop offset="95%" stopColor="var(--chart-1)" stopOpacity={0} />
                 </linearGradient>
                 {yKeySecondary && (
                   <linearGradient id="areaGrad2" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(var(--chart-2))" stopOpacity={0.4} />
-                    <stop offset="95%" stopColor="hsl(var(--chart-2))" stopOpacity={0} />
+                    <stop offset="5%" stopColor="var(--chart-2)" stopOpacity={0.4} />
+                    <stop offset="95%" stopColor="var(--chart-2)" stopOpacity={0} />
                   </linearGradient>
                 )}
               </defs>
@@ -75,7 +75,7 @@ export function AreaChart({
                 type="monotone"
                 dataKey={yKey}
                 name={areaName}
-                stroke="hsl(var(--chart-1))"
+                stroke="var(--chart-1)"
                 strokeWidth={2.5}
                 fillOpacity={1}
                 fill="url(#areaGrad1)"
@@ -85,7 +85,7 @@ export function AreaChart({
                   type="monotone"
                   dataKey={yKeySecondary}
                   name={areaNameSecondary}
-                  stroke="hsl(var(--chart-2))"
+                  stroke="var(--chart-2)"
                   strokeWidth={2}
                   fillOpacity={1}
                   fill="url(#areaGrad2)"

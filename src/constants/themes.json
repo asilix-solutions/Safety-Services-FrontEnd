@@ -1,0 +1,92 @@
+[
+  {
+    "id": "royal-indigo",
+    "name": "Royal Indigo",
+    "description": "SSLM standard, engineering consultancies, and executive dashboards.",
+    "industry": "SaaS Platform & Consulting",
+    "colors": {
+      "primary": "#4F46E5",
+      "primaryForeground": "#ffffff",
+      "secondary": "#1E1B4B",
+      "accent": "#F59E0B"
+    },
+    "darkModeOverrides": {
+      "primary": "#818CF8",
+      "primaryForeground": "#ffffff",
+      "secondary": "#0F172A",
+      "accent": "#FBBF24"
+    }
+  },
+  {
+    "id": "safety-amber",
+    "name": "Safety Amber",
+    "description": "High-hazard industrial safety, construction, and plant operations.",
+    "industry": "Industrial Safety & Plant Ops",
+    "colors": {
+      "primary": "#D97706",
+      "primaryForeground": "#ffffff",
+      "secondary": "#1E293B",
+      "accent": "#EA580C"
+    },
+    "darkModeOverrides": {
+      "primary": "#FBBF24",
+      "primaryForeground": "#ffffff",
+      "secondary": "#0F172A",
+      "accent": "#FB923C"
+    }
+  },
+  {
+    "id": "corporate-navy",
+    "name": "Corporate Navy",
+    "description": "Enterprise compliance, civil defense certification, and marine engineering.",
+    "industry": "Enterprise & Marine",
+    "colors": {
+      "primary": "#1D4ED8",
+      "primaryForeground": "#ffffff",
+      "secondary": "#0F172A",
+      "accent": "#0284C7"
+    },
+    "darkModeOverrides": {
+      "primary": "#60A5FA",
+      "primaryForeground": "#ffffff",
+      "secondary": "#020617",
+      "accent": "#38BDF8"
+    }
+  },
+  {
+    "id": "emerald-compliance",
+    "name": "Emerald Compliance",
+    "description": "ESG auditing, environmental hazard protocols, and green building certs.",
+    "industry": "ESG, Audits & Environment",
+    "colors": {
+      "primary": "#059669",
+      "primaryForeground": "#ffffff",
+      "secondary": "#064E3B",
+      "accent": "#0D9488"
+    },
+    "darkModeOverrides": {
+      "primary": "#34D399",
+      "primaryForeground": "#ffffff",
+      "secondary": "#022C22",
+      "accent": "#2DD4BF"
+    }
+  },
+  {
+    "id": "slate-steel",
+    "name": "Slate Steel",
+    "description": "Defense engineering, precision fabrication, and critical infrastructure.",
+    "industry": "Defense & Heavy Fabrication",
+    "colors": {
+      "primary": "#475569",
+      "primaryForeground": "#ffffff",
+      "secondary": "#0F172A",
+      "accent": "#2563EB"
+    },
+    "darkModeOverrides": {
+      "primary": "#94A3B8",
+      "primaryForeground": "#ffffff",
+      "secondary": "#020617",
+      "accent": "#60A5FA"
+    }
+  }
+]

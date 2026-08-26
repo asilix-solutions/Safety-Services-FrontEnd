@@ -52,7 +52,7 @@ export function useReportsHub() {
   // Letterhead identity for the printed sheet (FR-CON-05). Read after mount
   // alongside the reports: both come from localStorage, which does not exist
   // during the server render.
-  const [branding, setBranding] = useState<BrandingSettings>(() => getBranding());
+  const [branding, setBranding] = useState<BrandingSettings>(() => getBranding(tenantContext.tenantId));
   const [company, setCompany] = useState<CompanyProfileSettings>(() => getCompanyProfile());
 
   // `reports` never holds a foreign tenant's row: the boundary is enforced at the
@@ -60,7 +60,7 @@ export function useReportsHub() {
   // reintroduce a record the caller may not see.
   useEffect(() => {
     setReports(getScopedReports(tenantContext));
-    setBranding(getBranding());
+    setBranding(getBranding(tenantContext.tenantId));
     setCompany(getCompanyProfile());
   }, [tenantContext]);
 

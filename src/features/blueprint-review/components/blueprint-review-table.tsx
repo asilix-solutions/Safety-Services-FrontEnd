@@ -17,16 +17,16 @@ export function BlueprintReviewTable({ requests }: BlueprintReviewTableProps) {
   const getStatusBadge = (status: BlueprintReviewViewModel["reviewStatus"]) => {
     switch (status) {
       case "APPROVED":
-        return <Badge className="bg-success/10 text-success hover:bg-success/20 border-none">{t(`requests:blueprintReview.status.${status}`)}</Badge>;
+        return <Badge variant="success">{t(`requests:blueprintReview.status.${status}`)}</Badge>;
       case "MODIFICATION_REQUIRED":
-        return <Badge className="bg-destructive/10 text-destructive hover:bg-destructive/20 border-none">{t(`requests:blueprintReview.status.${status}`)}</Badge>;
+        return <Badge variant="destructive">{t(`requests:blueprintReview.status.${status}`)}</Badge>;
       case "MISSING_DOCUMENTS":
-        return <Badge className="bg-warning/10 text-warning hover:bg-warning/20 border-none">{t(`requests:blueprintReview.status.${status}`)}</Badge>;
+        return <Badge variant="warning">{t(`requests:blueprintReview.status.${status}`)}</Badge>;
       case "IN_REVIEW":
-        return <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-none">{t(`requests:blueprintReview.status.${status}`)}</Badge>;
+        return <Badge variant="info">{t(`requests:blueprintReview.status.${status}`)}</Badge>;
       case "PENDING":
       default:
-        return <Badge className="bg-secondary text-muted-foreground border-none">{t(`requests:blueprintReview.status.PENDING`)}</Badge>;
+        return <Badge variant="secondary">{t(`requests:blueprintReview.status.PENDING`)}</Badge>;
     }
   };
 
@@ -34,7 +34,7 @@ export function BlueprintReviewTable({ requests }: BlueprintReviewTableProps) {
     <div className="w-full overflow-x-auto rounded-xl border border-border bg-card">
       <table className="w-full text-sm text-start border-collapse">
         <thead>
-          <tr className="border-b border-border bg-secondary/20">
+          <tr className="border-b border-border bg-muted/50">
             <th className="p-4 text-start font-semibold text-muted-foreground">{t("requests:blueprintReview.queue.cols.jobNumber")}</th>
             <th className="p-4 text-start font-semibold text-muted-foreground">{t("requests:blueprintReview.queue.cols.client")}</th>
             <th className="p-4 text-start font-semibold text-muted-foreground">{t("requests:blueprintReview.queue.cols.area")}</th>
@@ -48,7 +48,7 @@ export function BlueprintReviewTable({ requests }: BlueprintReviewTableProps) {
         </thead>
         <tbody className="divide-y divide-border">
           {requests.map((req) => (
-            <tr key={req.id} className="hover:bg-secondary/15 transition-colors">
+            <tr key={req.id} className="hover:bg-muted/40 transition-colors">
               <td className="p-4 font-mono font-bold text-foreground">{req.jobNumber}</td>
               <td className="p-4">
                 <div className="space-y-0.5">

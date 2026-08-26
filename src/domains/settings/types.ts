@@ -21,8 +21,23 @@ export interface BrandingSettings {
   logoUrl?: string;
   logoDarkUrl?: string;
   primaryColor: string;
+  primaryForeground?: string;
   secondaryColor: string;
   accentColor: string;
+  presetId?: string;
+  isCustom?: boolean;
+  darkModeOverrides?: {
+    primary?: string;
+    primaryForeground?: string;
+    secondary?: string;
+    accent?: string;
+  };
+}
+
+export interface TenantBrandingConfig extends BrandingSettings {
+  tenantId?: string;
+  updatedAt?: string;
+  version?: number;
 }
 
 export interface WorkspacePreferenceSettings {

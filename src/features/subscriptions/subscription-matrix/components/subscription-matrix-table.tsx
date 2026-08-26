@@ -48,7 +48,7 @@ export function SubscriptionMatrixTable({ rows }: SubscriptionMatrixTableProps) 
                 ? `${company.personnelCount} / ${limits.maxPersonnel}`
                 : `${company.personnelCount} / ${t("subscriptions:limit_unlimited")}`;
               return (
-                <tr key={company.id} className="hover:bg-secondary/10 transition-colors">
+                <tr key={company.id} className="hover:bg-muted/40 transition-colors">
                   <td className="p-4 flex items-center gap-3">
                     <Avatar className="h-8 w-8">
                       <AvatarFallback>{company.name.substring(0, 2).toUpperCase()}</AvatarFallback>

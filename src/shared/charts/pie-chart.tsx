@@ -12,11 +12,11 @@ interface PieChartProps {
 }
 
 const COLORS = [
-  "hsl(var(--chart-1))",
-  "hsl(var(--chart-2))",
-  "hsl(var(--chart-3))",
-  "hsl(var(--chart-4))",
-  "hsl(var(--chart-5))",
+  "var(--chart-1)",
+  "var(--chart-2)",
+  "var(--chart-3)",
+  "var(--chart-4)",
+  "var(--chart-5)",
 ];
 
 export function PieChart({ title, description, data, height = 300 }: PieChartProps) {
@@ -42,7 +42,7 @@ export function PieChart({ title, description, data, height = 300 }: PieChartPro
                 cy="50%"
                 labelLine={false}
                 outerRadius={80}
-                fill="hsl(var(--chart-1))"
+                fill="var(--chart-1)"
                 dataKey="value"
               >
                 {data.map((_, index) => (

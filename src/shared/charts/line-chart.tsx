@@ -63,7 +63,7 @@ export function LineChart({
                 type="monotone"
                 dataKey={yKey}
                 name={lineName}
-                stroke="hsl(var(--chart-1))"
+                stroke="var(--chart-1)"
                 strokeWidth={2.5}
                 activeDot={{ r: 6 }}
               />
@@ -72,7 +72,7 @@ export function LineChart({
                   type="monotone"
                   dataKey={yKeySecondary}
                   name={lineNameSecondary}
-                  stroke="hsl(var(--chart-2))"
+                  stroke="var(--chart-2)"
                   strokeWidth={2}
                 />
               )}

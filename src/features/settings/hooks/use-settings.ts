@@ -97,7 +97,7 @@ export function useSettings() {
   // Initial load
   useEffect(() => {
     setCompanyDraft(getCompanyProfile());
-    setBrandingDraft(getBranding());
+    setBrandingDraft(getBranding(user?.tenantId));
     setPrefsDraft(getWorkspacePreferences());
     setNotifsDraft(getNotificationSettings());
     setSecurityDraft(getSecuritySettings());
@@ -118,7 +118,7 @@ export function useSettings() {
       return JSON.stringify(companyDraft) !== JSON.stringify(getCompanyProfile());
     }
     if (activeTab === "branding") {
-      return JSON.stringify(brandingDraft) !== JSON.stringify(getBranding());
+      return JSON.stringify(brandingDraft) !== JSON.stringify(getBranding(user?.tenantId));
     }
     if (activeTab === "preferences") {
       return JSON.stringify(prefsDraft) !== JSON.stringify(getWorkspacePreferences());
@@ -130,7 +130,7 @@ export function useSettings() {
       return JSON.stringify(securityDraft) !== JSON.stringify(getSecuritySettings());
     }
     return false;
-  }, [activeTab, companyDraft, brandingDraft, prefsDraft, notifsDraft, securityDraft]);
+  }, [activeTab, companyDraft, brandingDraft, prefsDraft, notifsDraft, securityDraft, user?.tenantId]);
 
   // Save current active tab changes
   const handleSaveActiveTab = () => {
@@ -154,8 +154,14 @@ export function useSettings() {
         setAlertMsg({ text: t("settings:saveErrorValidation"), type: "error" });
         return;
       }
-      saveBranding(brandingDraft);
-      applyTenantTheme(brandingDraft.primaryColor, brandingDraft.secondaryColor, brandingDraft.accentColor);
+      saveBranding(brandingDraft, user?.tenantId);
+      applyTenantTheme({
+        primaryHex: brandingDraft.primaryColor,
+        primaryForegroundHex: brandingDraft.primaryForeground,
+        secondaryHex: brandingDraft.secondaryColor,
+        accentHex: brandingDraft.accentColor,
+        darkModeOverrides: brandingDraft.darkModeOverrides,
+      });
     } else if (activeTab === "preferences" && prefsDraft) {
       const res = validatePreferences(prefsDraft);
       if (!res.valid) {
@@ -205,9 +211,15 @@ export function useSettings() {
     if (activeTab === "company") {
       setCompanyDraft(resetCompanyProfile());
     } else if (activeTab === "branding") {
-      const defaultBranding = resetBranding();
+      const defaultBranding = resetBranding(user?.tenantId);
       setBrandingDraft(defaultBranding);
-      applyTenantTheme(defaultBranding.primaryColor, defaultBranding.secondaryColor, defaultBranding.accentColor);
+      applyTenantTheme({
+        primaryHex: defaultBranding.primaryColor,
+        primaryForegroundHex: defaultBranding.primaryForeground,
+        secondaryHex: defaultBranding.secondaryColor,
+        accentHex: defaultBranding.accentColor,
+        darkModeOverrides: defaultBranding.darkModeOverrides,
+      });
     } else if (activeTab === "preferences") {
       setPrefsDraft(resetWorkspacePreferences());
     } else if (activeTab === "notifications") {
@@ -227,9 +239,15 @@ export function useSettings() {
     if (activeTab === "company") {
       setCompanyDraft(getCompanyProfile());
     } else if (activeTab === "branding") {
-      const currentBranding = getBranding();
+      const currentBranding = getBranding(user?.tenantId);
       setBrandingDraft(currentBranding);
-      applyTenantTheme(currentBranding.primaryColor, currentBranding.secondaryColor, currentBranding.accentColor);
+      applyTenantTheme({
+        primaryHex: currentBranding.primaryColor,
+        primaryForegroundHex: currentBranding.primaryForeground,
+        secondaryHex: currentBranding.secondaryColor,
+        accentHex: currentBranding.accentColor,
+        darkModeOverrides: currentBranding.darkModeOverrides,
+      });
     } else if (activeTab === "preferences") {
       setPrefsDraft(getWorkspacePreferences());
     } else if (activeTab === "notifications") {
