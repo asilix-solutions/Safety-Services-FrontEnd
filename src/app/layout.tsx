@@ -9,6 +9,7 @@ import { getNamespaceDictionaries } from "@/lib/i18n";
 import { Locale } from "@/types/i18n";
 import { Toaster } from "@/shared/ui/sonner";
 import { PointerEventsGuard } from "@/providers/pointer-events-guard";
+import { TenantThemeInjector } from "@/components/theming/tenant-theme-injector";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -41,10 +42,14 @@ export default async function RootLayout({
     "validation",
     "dashboard",
     "requests",
+    "marketing",
   ]);
 
   return (
     <html lang={locale} dir={dir} suppressHydrationWarning>
+      <head>
+        <TenantThemeInjector />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans min-h-screen bg-background text-foreground transition-colors duration-200`}
       >

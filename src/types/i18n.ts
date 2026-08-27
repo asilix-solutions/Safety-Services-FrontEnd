@@ -18,7 +18,8 @@ export type Namespace =
   | "subscriptions"
   | "users"
   | "notifications"
-  | "companies";
+  | "companies"
+  | "marketing";
 
 export interface Translations {
   common: typeof import("@/locales/en/common.json");
@@ -39,6 +40,7 @@ export interface Translations {
   users: typeof import("@/locales/en/users.json");
   notifications: typeof import("@/locales/en/notifications.json");
   companies: typeof import("@/locales/en/companies.json");
+  marketing: typeof import("@/locales/en/marketing.json");
 }
 
 export type TxKey =
@@ -59,4 +61,5 @@ export type TxKey =
   | `subscriptions:${keyof Translations["subscriptions"]}`
   | `users:${keyof Translations["users"]}`
   | `notifications:${keyof Translations["notifications"]}`
-  | `companies:${keyof Translations["companies"]}`;
+  | `companies:${keyof Translations["companies"]}`
+  | `marketing:${keyof Translations["marketing"]}`;

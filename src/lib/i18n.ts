@@ -41,6 +41,8 @@ import arNotifications from "@/locales/ar/notifications.json";
 import enNotifications from "@/locales/en/notifications.json";
 import arCompanies from "@/locales/ar/companies.json";
 import enCompanies from "@/locales/en/companies.json";
+import arMarketing from "@/locales/ar/marketing.json";
+import enMarketing from "@/locales/en/marketing.json";
 
 // Mapping dictionary registry
 export const DICTIONARIES: Record<Locale, Record<Namespace, Record<string, string>>> = {
@@ -63,6 +65,7 @@ export const DICTIONARIES: Record<Locale, Record<Namespace, Record<string, strin
     users: arUsers,
     notifications: arNotifications,
     companies: arCompanies,
+    marketing: arMarketing,
   },
   en: {
     common: enCommon,
@@ -83,6 +86,7 @@ export const DICTIONARIES: Record<Locale, Record<Namespace, Record<string, strin
     users: enUsers,
     notifications: enNotifications,
     companies: enCompanies,
+    marketing: enMarketing,
   },
 };
 

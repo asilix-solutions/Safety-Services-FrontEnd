@@ -31,26 +31,24 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     if (isLoading || !isAuthenticated || !user) return;
 
     const ROLE_DEFAULT_ROUTE: Record<string, string> = {
-      "Super Admin": "/",
-      "Company Admin": "/",
-      "Sales Agent": "/",
-      "Consulting Engineer": "/",
-      "Operations Officer": "/",
-      "Client": "/",
+      "Super Admin": "/dashboard",
+      "Company Admin": "/dashboard",
+      "Sales Agent": "/dashboard",
+      "Consulting Engineer": "/dashboard",
+      "Operations Officer": "/dashboard",
+      "Client": "/dashboard",
     };
 
     const navItems = ROLE_NAVIGATION[user.role] || [];
     const allowedPaths = navItems.map((item: any) => item.path);
-    const defaultRoute = ROLE_DEFAULT_ROUTE[user.role] || "/";
+    const defaultRoute = ROLE_DEFAULT_ROUTE[user.role] || "/dashboard";
 
     const isAllowed = allowedPaths.some((path: string) => {
-      if (path === "/") {
-        return pathname === "/" || pathname === "/overview";
+      if (path === "/dashboard") {
+        return pathname === "/dashboard" || pathname === "/overview";
       }
       return pathname === path || pathname.startsWith(path + "/");
     });
-
-
 
     if (!isAllowed) {
       router.push(defaultRoute);

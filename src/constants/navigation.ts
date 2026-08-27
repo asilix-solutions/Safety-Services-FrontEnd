@@ -19,7 +19,7 @@ function projectsNavItem(iconName: string): NavigationItem {
  */
 export const ROLE_NAVIGATION: Record<UserRole, NavigationItem[]> = {
   "Super Admin": [
-    { label: "Dashboard", path: "/", iconName: "LayoutDashboard" },
+    { label: "Dashboard", path: "/dashboard", iconName: "LayoutDashboard" },
     { label: "Companies", path: "/companies", iconName: "Building2" },
     { label: "Subscriptions", path: "/subscriptions", iconName: "CreditCard" },
     { label: "Users", path: "/users", iconName: "Users" },
@@ -28,7 +28,7 @@ export const ROLE_NAVIGATION: Record<UserRole, NavigationItem[]> = {
     { label: "Settings", path: "/settings", iconName: "Settings" },
   ],
   "Company Admin": [
-    { label: "Dashboard", path: "/", iconName: "LayoutDashboard" },
+    { label: "Dashboard", path: "/dashboard", iconName: "LayoutDashboard" },
     { label: "Requests", path: "/requests", iconName: "FileSignature" },
     { label: "Quotation Approvals", path: "/quotations/approvals", iconName: "ClipboardCheck" },
     ...(canAccessProjectWorkspace("Company Admin") ? [projectsNavItem("FolderKanban")] : []),
@@ -41,7 +41,7 @@ export const ROLE_NAVIGATION: Record<UserRole, NavigationItem[]> = {
     { label: "Settings", path: "/settings", iconName: "Settings2" },
   ],
   "Consulting Engineer": [
-    { label: "Dashboard", path: "/", iconName: "LayoutDashboard" },
+    { label: "Dashboard", path: "/dashboard", iconName: "LayoutDashboard" },
     { label: "Requests", path: "/requests", iconName: "Inbox" },
     { label: "Blueprint Review", path: "/blueprint-review", iconName: "FileCheck" },
     ...(canAccessProjectWorkspace("Consulting Engineer") ? [projectsNavItem("FolderKanban")] : []),
@@ -52,7 +52,7 @@ export const ROLE_NAVIGATION: Record<UserRole, NavigationItem[]> = {
     { label: "Site Visits", path: "/site-visits", iconName: "MapPin" },
   ],
   "Operations Officer": [
-    { label: "Dashboard", path: "/", iconName: "LayoutDashboard" },
+    { label: "Dashboard", path: "/dashboard", iconName: "LayoutDashboard" },
     { label: "Requests", path: "/requests", iconName: "Inbox" },
     ...(canAccessProjectWorkspace("Operations Officer") ? [projectsNavItem("Kanban")] : []),
     { label: "Employees", path: "/employees", iconName: "Users2" },
@@ -60,13 +60,13 @@ export const ROLE_NAVIGATION: Record<UserRole, NavigationItem[]> = {
     { label: "Site Visits", path: "/site-visits", iconName: "MapPin" },
   ],
   "Sales Agent": [
-    { label: "Dashboard", path: "/", iconName: "LayoutDashboard" },
+    { label: "Dashboard", path: "/dashboard", iconName: "LayoutDashboard" },
     { label: "Customers", path: "/customers", iconName: "Contact" },
     { label: "Requests", path: "/requests", iconName: "FileQuestion" },
     ...(canAccessProjectWorkspace("Sales Agent") ? [projectsNavItem("FolderKanban")] : []),
   ],
   Client: [
-    { label: "Home", path: "/", iconName: "Home" },
+    { label: "Home", path: "/dashboard", iconName: "Home" },
     { label: "My Requests", path: "/requests", iconName: "FileQuestion" },
     ...(canAccessProjectWorkspace("Client") ? [projectsNavItem("Layers")] : []),
     { label: "Contracts", path: "/contracts", iconName: "FileCheck2" },
