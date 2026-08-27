@@ -88,5 +88,23 @@
       "secondary": "#020617",
       "accent": "#60A5FA"
     }
+  },
+  {
+    "id": "crimson-guard",
+    "name": "Crimson Guard",
+    "description": "Emergency response, fire protection systems, and high-hazard alerts.",
+    "industry": "Fire Safety & Emergency Response",
+    "colors": {
+      "primary": "#E11D48",
+      "primaryForeground": "#ffffff",
+      "secondary": "#881337",
+      "accent": "#F43F5E"
+    },
+    "darkModeOverrides": {
+      "primary": "#FB7185",
+      "primaryForeground": "#ffffff",
+      "secondary": "#4C0519",
+      "accent": "#FDA4AF"
+    }
   }
 ]

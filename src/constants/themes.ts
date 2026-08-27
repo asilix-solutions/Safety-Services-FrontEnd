@@ -5,7 +5,8 @@ export type PresetThemeId =
   | "safety-amber"
   | "corporate-navy"
   | "emerald-compliance"
-  | "slate-steel";
+  | "slate-steel"
+  | "crimson-guard";
 
 export interface ThemePreset {
   id: PresetThemeId;

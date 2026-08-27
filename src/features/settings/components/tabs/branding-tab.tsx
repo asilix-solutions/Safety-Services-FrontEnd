@@ -5,6 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/sha
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
 import { Badge } from "@/shared/ui/badge";
+import { Button } from "@/shared/ui/button";
+import { ThemePickerModal } from "@/shared/components/theme-picker-modal";
 import { BrandingSettings } from "@/domains/settings/types";
 import { THEME_PRESETS, ThemePreset } from "@/constants/themes";
 import { evaluateWcagCompliance, getContrastForeground } from "@/lib/theme-utils";
@@ -27,6 +29,7 @@ export function BrandingTab({
   companyShortName,
   t
 }: BrandingTabProps) {
+  const [isThemePickerOpen, setIsThemePickerOpen] = useState(false);
   const [activeMode, setActiveMode] = useState<"presets" | "custom">(() => {
     return draft?.isCustom ? "custom" : "presets";
   });
@@ -132,16 +135,27 @@ export function BrandingTab({
           {/* Section 1: Curated Presets Cards */}
           {activeMode === "presets" && (
             <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                  Enterprise Safety Presets (5 Curated Palettes)
-                </Label>
-                <span className="text-[11px] text-muted-foreground">
-                  Tested for full WCAG 2.1 AA/AAA compliance in Light & Dark modes
-                </span>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">
+                    Enterprise Safety Presets (6 Curated Palettes)
+                  </Label>
+                  <span className="text-[11px] text-muted-foreground">
+                    Tested for full WCAG 2.1 AA/AAA compliance in Light & Dark modes
+                  </span>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsThemePickerOpen(true)}
+                  className="text-xs gap-1.5 cursor-pointer self-start sm:self-auto"
+                >
+                  <Palette className="h-3.5 w-3.5 text-primary" />
+                  <span>Browse Presets Modal</span>
+                </Button>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
                 {THEME_PRESETS.map((preset) => {
                   const isSelected = draft.presetId === preset.id && !draft.isCustom;
                   return (
@@ -454,6 +468,14 @@ export function BrandingTab({
           </div>
         </CardContent>
       </Card>
+
+      {/* Standalone Theme Presets Picker Modal */}
+      <ThemePickerModal
+        isOpen={isThemePickerOpen}
+        onClose={() => setIsThemePickerOpen(false)}
+        onSelect={(theme) => handleSelectPreset(theme)}
+        currentThemeId={draft?.presetId}
+      />
     </div>
   );
 }
