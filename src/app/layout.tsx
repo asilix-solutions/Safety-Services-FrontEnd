@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { IBM_Plex_Sans_Arabic, Geist_Mono } from "next/font/google";
 import { cookies } from "next/headers";
 import { AuthProvider } from "@/providers/AuthProvider";
 import { QueryProvider } from "@/providers/QueryProvider";
@@ -12,9 +12,11 @@ import { PointerEventsGuard } from "@/providers/pointer-events-guard";
 import { TenantThemeInjector } from "@/components/theming/tenant-theme-injector";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+const ibmPlexArabic = IBM_Plex_Sans_Arabic({
+  subsets: ["arabic", "latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-sans",
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
@@ -51,7 +53,7 @@ export default async function RootLayout({
         <TenantThemeInjector />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans min-h-screen bg-background text-foreground transition-colors duration-200`}
+        className={`${ibmPlexArabic.variable} ${geistMono.variable} antialiased font-sans min-h-screen bg-background text-foreground transition-colors duration-200`}
       >
         <QueryProvider>
           <I18nProvider initialLocale={locale} initialTranslations={initialTranslations}>
