@@ -2,6 +2,8 @@ export const ROUTES = {
   AUTH: {
     LOGIN: "/login",
     FORGOT_PASSWORD: "/forgot-password",
+    RESET_PASSWORD: "/reset-password",
+    REGISTER_COMPANY: "/register-company",
   },
   DASHBOARD: "/",
   PROJECTS: "/projects",
@@ -10,7 +12,19 @@ export const ROUTES = {
   REPORTS: "/reports",
   MAINTENANCE: "/maintenance",
   ANALYTICS: "/analytics",
-  SETTINGS: "/settings",
+  COMPANY_ADMIN: {
+    ROOT: "/company-admin",
+    OVERVIEW: "/company-admin/overview",
+    STAFF: "/company-admin/staff",
+  },
+  SETTINGS: {
+    ROOT: "/settings",
+    GENERAL: "/settings/general",
+    SEO: "/settings/seo",
+    COMMUNICATION: "/settings/communication",
+    POLICIES: "/settings/policies",
+    SYSTEM: "/settings/system",
+  },
   COMPANIES: "/companies",
   SUBSCRIPTIONS: "/subscriptions",
   USERS: "/users",
@@ -30,3 +44,4 @@ export const ROUTES = {
   MESSAGES: "/messages",
   PROFILE: "/profile",
 } as const;
+

@@ -2,6 +2,29 @@ export const QUERY_KEYS = {
   AUTH: {
     SESSION: ["auth", "session"] as const,
     PROFILE: ["auth", "profile"] as const,
+    ME: ["auth", "me"] as const,
+    PERMISSIONS: ["auth", "permissions"] as const,
+  },
+  TENANTS: {
+    CURRENT: (tenantId?: string) => ["tenants", "current", tenantId] as const,
+    AVAILABILITY: (subdomain: string) => ["tenants", "availability", subdomain] as const,
+  },
+  STAFF: {
+    LIST: (tenantId?: string, params?: Record<string, unknown>) =>
+      ["staff", tenantId, params] as const,
+    DETAIL: (id: string) => ["staff", "detail", id] as const,
+    SUPERVISORS: (tenantId?: string) => ["staff", "supervisors", tenantId] as const,
+  },
+  COMPANY_ADMIN: {
+    ANALYTICS: (tenantId?: string) => ["company-admin", "analytics", tenantId] as const,
+    OVERVIEW: (tenantId?: string) => ["company-admin", "overview", tenantId] as const,
+  },
+  SETTINGS: {
+    GENERAL: (tenantId?: string) => ["settings", "general", tenantId] as const,
+    SEO: (tenantId?: string) => ["settings", "seo", tenantId] as const,
+    COMMUNICATION: (tenantId?: string) => ["settings", "communication", tenantId] as const,
+    POLICIES: (tenantId?: string) => ["settings", "policies", tenantId] as const,
+    SYSTEM: (tenantId?: string) => ["settings", "system", tenantId] as const,
   },
   USERS: {
     LIST: ["users"] as const,
@@ -62,3 +85,4 @@ export const QUERY_KEYS = {
   },
 } as const;
 export type QueryKeysType = typeof QUERY_KEYS;
+

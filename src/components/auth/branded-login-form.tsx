@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -232,6 +233,15 @@ export function BrandedLoginForm({ tenant }: BrandedLoginFormProps) {
               )}
             </div>
 
+            <div className="flex justify-end pt-1">
+              <Link
+                href="/forgot-password"
+                className="text-xs font-semibold text-primary hover:underline transition-colors"
+              >
+                {t("auth:forgotPasswordLink")}
+              </Link>
+            </div>
+
             <Button
               type="submit"
               className="w-full mt-4 flex items-center justify-center gap-2 font-bold shadow-lg shadow-primary/25 h-11"
@@ -244,7 +254,13 @@ export function BrandedLoginForm({ tenant }: BrandedLoginFormProps) {
         )}
       </CardContent>
 
-      <CardFooter className="justify-center border-t border-border/30 pt-4 text-center">
+      <CardFooter className="flex flex-col gap-2 justify-center border-t border-border/30 pt-4 text-center">
+        <Link
+          href="/register-company"
+          className="text-xs font-bold text-primary hover:underline flex items-center gap-1"
+        >
+          <span>{t("auth:registerCompanyLink")}</span>
+        </Link>
         <p className="text-[11px] text-muted-foreground">
           {t("auth:footerNotice")}
         </p>
@@ -252,3 +268,4 @@ export function BrandedLoginForm({ tenant }: BrandedLoginFormProps) {
     </Card>
   );
 }
+

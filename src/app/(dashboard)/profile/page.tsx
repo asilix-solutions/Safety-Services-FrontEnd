@@ -1,5 +1,9 @@
-import { notFound } from "next/navigation";
+"use client";
 
-export default function Page() {
-  notFound();
+import React from "react";
+import { ProfileView } from "@/features/profile";
+
+export default function ProfilePage() {
+  return <ProfileView />;
 }
+

@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import { getScopedRequestByJobNumber, upsertRequest } from "@/domains/requests/storage";
