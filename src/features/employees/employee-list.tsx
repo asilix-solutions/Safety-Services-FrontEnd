@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { PageHeader } from "@/shared/components/page-header";
 import { useTranslation } from "@/providers/i18n-provider";
 import { EmployeeSummary } from "./components/employee-summary";
 import { EmployeeFiltersComponent } from "./components/employee-filters";
@@ -57,14 +56,21 @@ export function EmployeeList() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <PageHeader
-          title={t("common:employees.title")}
-          description={t("common:employees.desc")}
-        />
-        {permissions.canManage && (
-          <InviteEmployeeDialog onInvite={handleInviteEmployee} />
-        )}
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-border/40 mb-6">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+            {t("common:employees.title")}
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            {t("common:employees.desc")}
+          </p>
+        </div>
+        <div>
+          {permissions.canManage && (
+            <InviteEmployeeDialog onInvite={handleInviteEmployee} />
+          )}
+        </div>
       </div>
 
       {/* KPI stats */}

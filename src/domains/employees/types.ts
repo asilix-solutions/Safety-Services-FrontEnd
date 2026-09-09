@@ -2,6 +2,8 @@ export type EmployeeDepartment = "Engineering" | "Operations" | "Sales" | "Admin
 export type EmployeeStatus = "Active" | "Inactive";
 export type EmployeeAvailability = "Available" | "Busy" | "Unavailable";
 
+export type EmployeeRole = "Company Admin" | "Consulting Engineer" | "Operations Officer" | "Sales Agent";
+
 export interface Employee {
   id: string;
   tenantId: string;
@@ -10,7 +12,7 @@ export interface Employee {
   fullName: string;
   email: string;
   phone: string;
-  role: "Company Admin" | "Consulting Engineer" | "Operations Officer" | "Sales Agent";
+  role: EmployeeRole;
   department: EmployeeDepartment;
   status: EmployeeStatus;
   availabilityStatus: EmployeeAvailability;

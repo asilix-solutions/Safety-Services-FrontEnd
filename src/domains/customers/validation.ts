@@ -23,6 +23,8 @@ export function validateCustomer(customer: Partial<Customer>): {
 
   if (!customer.commercialRegistration || customer.commercialRegistration.trim().length === 0) {
     errors.commercialRegistration = "customers.validation.cr_required";
+  } else if (!/^\d{10}$/.test(customer.commercialRegistration.trim())) {
+    errors.commercialRegistration = "customers.validation.cr_invalid";
   }
 
   if (!customer.primaryContactName || customer.primaryContactName.trim().length === 0) {
@@ -44,7 +46,10 @@ export function validateCustomer(customer: Partial<Customer>): {
   }
 
   if (!customer.address || customer.address.trim().length === 0) {
-    errors.address = "customers.validation.address_required";
+    // If address is not explicitly provided, allow fallback to city
+    if (!customer.city) {
+      errors.address = "customers.validation.address_required";
+    }
   }
 
   return {

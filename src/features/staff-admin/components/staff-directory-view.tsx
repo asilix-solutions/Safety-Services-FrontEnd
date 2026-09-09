@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { PageHeader } from "@/shared/components/page-header";
 import { Users, UserCheck, Wrench, Activity } from "lucide-react";
 import { Card, CardContent } from "@/shared/ui/card";
 import { useStaffDirectory } from "../hooks/use-staff-directory";
@@ -33,12 +32,18 @@ export function StaffDirectoryView() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <PageHeader
-          title="دليل الكادر الإداري والهندسي (Staff Administration)"
-          description="إدارة حسابات منسوبي الشركة، تعيين الصلاحيات، وإرسال دعوات الانضمام للمهندسين."
-        />
-        {canManage && <InviteStaffModal onInvite={handleInviteStaff} />}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-border/40 mb-6">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+            دليل الكادر الإداري والهندسي (Staff Administration)
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            إدارة حسابات منسوبي الشركة، تعيين الصلاحيات، وإرسال دعوات الانضمام للمهندسين.
+          </p>
+        </div>
+        <div>
+          {canManage && <InviteStaffModal onInvite={handleInviteStaff} />}
+        </div>
       </div>
 
       {/* KPI Cards Grid */}

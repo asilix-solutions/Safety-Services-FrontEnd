@@ -20,6 +20,7 @@ import { getActiveProjects } from "@/domains/projects/storage";
 import { getInvoices } from "@/domains/invoices/storage";
 import { getScopedContracts } from "@/domains/contracts/storage";
 import { getScopedCertificates } from "@/domains/certificates/storage";
+import { formatCity, formatSector } from "@/domains/customers/helpers";
 
 interface CustomerHubDrawerProps {
   customer: Customer | null;
@@ -104,9 +105,12 @@ export function CustomerHubDrawer({ customer, isOpen, onClose, onSave, permissio
             </div>
             <div className="space-y-1">
               <h4 className="font-bold text-foreground text-sm">{currentCustomer.companyName}</h4>
-              <p className="text-xs text-muted-foreground">{currentCustomer.industry}</p>
+              <p className="text-xs text-muted-foreground">{formatSector(currentCustomer.industry)}</p>
               <div className="flex flex-wrap gap-1.5 pt-1">
-                <Badge variant={currentCustomer.status === "Active" ? "default" : "secondary"}>
+                <Badge
+                  variant={currentCustomer.status === "Active" ? "success" : "secondary"}
+                  className={currentCustomer.status === "Active" ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/25" : ""}
+                >
                   {t(`common:customers.status.${currentCustomer.status}`)}
                 </Badge>
               </div>
@@ -175,7 +179,7 @@ export function CustomerHubDrawer({ customer, isOpen, onClose, onSave, permissio
                       className="h-9 text-xs"
                     />
                   ) : (
-                    <p className="text-sm font-medium text-foreground py-1">{currentCustomer.industry}</p>
+                    <p className="text-sm font-medium text-foreground py-1">{formatSector(currentCustomer.industry)}</p>
                   )}
                 </div>
 
@@ -203,7 +207,7 @@ export function CustomerHubDrawer({ customer, isOpen, onClose, onSave, permissio
                         className="h-9 text-xs"
                       />
                     ) : (
-                      <p className="text-sm font-medium text-foreground py-1">{currentCustomer.city}</p>
+                      <p className="text-sm font-medium text-foreground py-1">{formatCity(currentCustomer.city)}</p>
                     )}
                     {errors.city && <p className="text-destructive text-[10px]">{t(`common:${errors.city}`)}</p>}
                   </div>
@@ -229,12 +233,17 @@ export function CustomerHubDrawer({ customer, isOpen, onClose, onSave, permissio
                     <label className="font-semibold text-muted-foreground">{t("common:customers.fields.phone")}</label>
                     {isEditing ? (
                       <Input
+                        dir="ltr"
                         value={formData.primaryContactPhone}
                         onChange={(e) => setFormData({ ...formData, primaryContactPhone: e.target.value })}
-                        className="h-9 text-xs"
+                        className="h-9 text-xs font-mono text-left"
                       />
                     ) : (
-                      <p className="text-sm font-medium text-foreground py-1">{currentCustomer.primaryContactPhone}</p>
+                      <p className="text-sm font-medium text-foreground py-1">
+                        <span dir="ltr" className="inline-block font-mono">
+                          {currentCustomer.primaryContactPhone}
+                        </span>
+                      </p>
                     )}
                     {errors.primaryContactPhone && <p className="text-destructive text-[10px]">{t(`common:${errors.primaryContactPhone}`)}</p>}
                   </div>
@@ -277,7 +286,11 @@ export function CustomerHubDrawer({ customer, isOpen, onClose, onSave, permissio
                     </div>
                     <div className="text-end text-[10px] text-muted-foreground">
                       <p>{rep.email}</p>
-                      <p>{rep.phone}</p>
+                      <p>
+                        <span dir="ltr" className="inline-block font-mono">
+                          {rep.phone}
+                        </span>
+                      </p>
                     </div>
                   </div>
                 ))}

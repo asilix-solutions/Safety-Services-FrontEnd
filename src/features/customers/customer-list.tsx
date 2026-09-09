@@ -1,10 +1,9 @@
 import React, { useState } from "react";
-import { PageHeader } from "@/shared/components/page-header";
 import { useTranslation } from "@/providers/i18n-provider";
 import { CustomerSummary } from "./components/customer-summary";
 import { CustomerFiltersComponent } from "./components/customer-filters";
 import { CustomerTable } from "./components/customer-table";
-import { AddCustomerDialog } from "./dialogs/add-customer-dialog";
+import { CreateCustomerModal } from "./dialogs/create-customer-modal";
 import { CustomerHubDrawer } from "./drawers/customer-hub-drawer";
 import { useCustomerList } from "./hooks/use-customer-list";
 import { Customer } from "@/domains/customers/types";
@@ -61,14 +60,21 @@ export function CustomerList() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <PageHeader
-          title={t("common:customers.title")}
-          description={t("common:customers.desc")}
-        />
-        {permissions.canManageCustomerProfile && (
-          <AddCustomerDialog onAdd={handleAddCustomer} />
-        )}
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+            {t("common:customers.title")}
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            {t("common:customers.desc")}
+          </p>
+        </div>
+        <div>
+          {permissions.canManageCustomerProfile && (
+            <CreateCustomerModal onAdd={handleAddCustomer} />
+          )}
+        </div>
       </div>
 
       {/* KPI stats */}
