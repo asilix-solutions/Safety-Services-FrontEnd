@@ -154,19 +154,15 @@ export function InviteEmployeeDialog({ onInvite, trigger }: InviteEmployeeDialog
 
       <DialogContent className="sm:max-w-[620px] p-0 overflow-hidden bg-card border-border shadow-2xl rounded-2xl">
         <DialogHeader className="px-6 py-5 border-b border-border bg-muted/20 pe-12">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 shrink-0">
-              <UserPlus className="h-5 w-5" />
+          <DialogTitle className="text-base font-bold flex items-center gap-2.5 text-foreground">
+            <div className="p-2 rounded-lg bg-primary/10 text-primary border border-primary/20">
+              <UserPlus className="h-5 w-5 shrink-0" />
             </div>
-            <div>
-              <DialogTitle className="text-base font-bold text-foreground">
-                {t("common:employees.invite")}
-              </DialogTitle>
-              <DialogDescription className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                {t("common:employees.invite_desc")}
-              </DialogDescription>
-            </div>
-          </div>
+            <span>{t("common:employees.modal.title")}</span>
+          </DialogTitle>
+          <DialogDescription className="text-xs text-muted-foreground mt-1.5 leading-relaxed">
+            {t("common:employees.modal.desc")}
+          </DialogDescription>
         </DialogHeader>
 
         {serverError && (
@@ -180,7 +176,9 @@ export function InviteEmployeeDialog({ onInvite, trigger }: InviteEmployeeDialog
             {/* Section 1: Personal & Contact Information */}
             <div className="space-y-4">
               <div className="flex items-center gap-2 pb-1 border-b border-border/50">
-                <span className="text-xs font-bold text-foreground">بيانات الموظف والاتصال</span>
+                <span className="text-xs font-bold text-foreground">
+                  {t("common:employees.sections.personal_info")}
+                </span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -193,15 +191,13 @@ export function InviteEmployeeDialog({ onInvite, trigger }: InviteEmployeeDialog
                   <div className="relative">
                     <User className="absolute start-3 top-3 h-4 w-4 text-muted-foreground pointer-events-none" />
                     <Input
-                      placeholder="مثال: م. عبدالله المنصور"
+                      placeholder="مثال: م. فهد بن سلطان العتيبي"
                       {...register("fullName")}
                       className="ps-9 h-10 text-xs bg-background/50 border-border"
                     />
                   </div>
                   {errors.fullName && (
-                    <p className="text-[11px] text-destructive mt-1 font-medium">
-                      {errors.fullName.message}
-                    </p>
+                    <p className="text-[11px] text-destructive mt-1">{errors.fullName.message}</p>
                   )}
                 </div>
 
@@ -216,15 +212,13 @@ export function InviteEmployeeDialog({ onInvite, trigger }: InviteEmployeeDialog
                     <Input
                       type="email"
                       dir="ltr"
-                      placeholder="name@company.sa"
+                      placeholder="employee@company.sa"
                       {...register("email")}
                       className="ps-9 h-10 text-xs font-mono text-start bg-background/50 border-border"
                     />
                   </div>
                   {errors.email && (
-                    <p className="text-[11px] text-destructive mt-1 font-medium">
-                      {errors.email.message}
-                    </p>
+                    <p className="text-[11px] text-destructive mt-1">{errors.email.message}</p>
                   )}
                 </div>
 
@@ -237,16 +231,14 @@ export function InviteEmployeeDialog({ onInvite, trigger }: InviteEmployeeDialog
                   <div className="relative">
                     <Phone className="absolute start-3 top-3 h-4 w-4 text-muted-foreground pointer-events-none" />
                     <Input
-                      placeholder="05XXXXXXXX"
+                      placeholder="+966 5X XXX XXXX"
                       dir="ltr"
                       {...register("phone")}
                       className="ps-9 h-10 text-xs font-mono text-start bg-background/50 border-border"
                     />
                   </div>
                   {errors.phone && (
-                    <p className="text-[11px] text-destructive mt-1 font-medium">
-                      {errors.phone.message}
-                    </p>
+                    <p className="text-[11px] text-destructive mt-1">{errors.phone.message}</p>
                   )}
                 </div>
               </div>
@@ -255,7 +247,9 @@ export function InviteEmployeeDialog({ onInvite, trigger }: InviteEmployeeDialog
             {/* Section 2: Operational Assignment & Role */}
             <div className="space-y-4 pt-2">
               <div className="flex items-center gap-2 pb-1 border-b border-border/50">
-                <span className="text-xs font-bold text-foreground">التكليف والصلاحيات التشغيلية</span>
+                <span className="text-xs font-bold text-foreground">
+                  {t("common:employees.sections.role_assignment")}
+                </span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -273,15 +267,13 @@ export function InviteEmployeeDialog({ onInvite, trigger }: InviteEmployeeDialog
                     >
                       {SAUDI_ROLES.map((role) => (
                         <option key={role.value} value={role.value}>
-                          {role.labelAr}
+                          {t(`common:employees.roles.${role.value}`) || role.labelAr}
                         </option>
                       ))}
                     </select>
                   </div>
                   {errors.role && (
-                    <p className="text-[11px] text-destructive mt-1 font-medium">
-                      {errors.role.message}
-                    </p>
+                    <p className="text-[11px] text-destructive mt-1">{errors.role.message}</p>
                   )}
                 </div>
 
@@ -299,15 +291,13 @@ export function InviteEmployeeDialog({ onInvite, trigger }: InviteEmployeeDialog
                     >
                       {SAUDI_DEPARTMENTS.map((dept) => (
                         <option key={dept.value} value={dept.value}>
-                          {dept.labelAr}
+                          {t(`common:employees.departments.${dept.value}`) || dept.labelAr}
                         </option>
                       ))}
                     </select>
                   </div>
                   {errors.department && (
-                    <p className="text-[11px] text-destructive mt-1 font-medium">
-                      {errors.department.message}
-                    </p>
+                    <p className="text-[11px] text-destructive mt-1">{errors.department.message}</p>
                   )}
                 </div>
 
@@ -315,6 +305,7 @@ export function InviteEmployeeDialog({ onInvite, trigger }: InviteEmployeeDialog
                 <div className="space-y-1.5 sm:col-span-2">
                   <label className="text-xs font-semibold text-foreground flex items-center justify-between">
                     <span>{t("common:employees.fields.availability")}</span>
+                    <span className="text-[10px] text-muted-foreground font-mono">{t("common:optional")}</span>
                   </label>
                   <div className="relative">
                     <Activity className="absolute start-3 top-3 h-4 w-4 text-muted-foreground pointer-events-none" />
@@ -340,7 +331,7 @@ export function InviteEmployeeDialog({ onInvite, trigger }: InviteEmployeeDialog
               onClick={() => handleOpenChange(false)}
               className="cursor-pointer px-4"
             >
-              {t("common:cancel")}
+              {t("common:employees.modal.cancel")}
             </Button>
             <Button
               type="submit"
@@ -348,7 +339,7 @@ export function InviteEmployeeDialog({ onInvite, trigger }: InviteEmployeeDialog
               disabled={isSubmitting}
               className="font-bold gap-2 cursor-pointer shadow-md shadow-primary/20 px-5"
             >
-              <span>{t("common:employees.invite")}</span>
+              <span>{t("common:employees.modal.submit")}</span>
               <ArrowRight className="h-4 w-4 rtl:rotate-180" />
             </Button>
           </DialogFooter>
