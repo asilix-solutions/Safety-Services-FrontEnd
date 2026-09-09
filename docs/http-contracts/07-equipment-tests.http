@@ -1,0 +1,297 @@
+﻿@baseUrl = http://localhost:5128
+@HostAddress = {{baseUrl}}
+@tenantManagerEmail = admin@al-salamah.com
+@tenantManagerPassword = User@123456
+
+### =====================================================================
+### 07. EQUIPMENT ASSETS & SMART LIFECYCLE TRANSITION TEST SUITE (COMPLETE)
+### =====================================================================
+### Token extraction: Login returns 'Token' field
+
+### =====================================================================
+### 7.1 AUTHENTICATION & SETUP
+### =====================================================================
+
+### 7.1.1 Login as Tenant Manager (English) - Expect 200 OK
+# @name tenantManagerLogin
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+X-Tenant-Domain: al-salamah
+
+{
+  "email": "{{tenantManagerEmail}}",
+  "password": "{{tenantManagerPassword}}"
+}
+
+@tenantManagerToken = {{tenantManagerLogin.response.body.data.Token}}
+
+### =====================================================================
+### 7.2 CREATE EQUIPMENT ASSETS
+### =====================================================================
+
+### 7.2.1 Create CompanyOwned Asset (CostRate: $0.00, OwnershipType: 0) - Expect 201 Created
+# @name createOwnedEquipment
+POST {{HostAddress}}/api/v1/equipment
+Authorization: Bearer {{tenantManagerToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "name": "Heavy Scaffolding System",
+  "serialNumber": "SCF-9988-SA",
+  "category": "Scaffolding",
+  "ownershipType": 0,
+  "costRate": 0.00,
+  "costUnit": 1
+}
+
+@ownedEquipmentId = {{createOwnedEquipment.response.body.data}}
+
+### 7.2.2 Create Rented Equipment Asset (CostRate: $450/Day, OwnershipType: 1) - Expect 201 Created
+# @name createRentedEquipment
+POST {{HostAddress}}/api/v1/equipment
+Authorization: Bearer {{tenantManagerToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "name": "100 Ton Hydraulic Crane",
+  "serialNumber": "CRN-100-HYD",
+  "category": "Heavy Machinery",
+  "ownershipType": 1,
+  "costRate": 450.00,
+  "costUnit": 1
+}
+
+@rentedEquipmentId = {{createRentedEquipment.response.body.data}}
+
+### 7.2.3 Create NewlyPurchased Equipment (PurchasePrice: $12,500, OwnershipType: 2) - Expect 201 Created
+# @name createPurchasedEquipment
+POST {{HostAddress}}/api/v1/equipment
+Authorization: Bearer {{tenantManagerToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "name": "Laser Calibration System",
+  "serialNumber": "LSR-CAL-2026",
+  "category": "Testing Tools",
+  "ownershipType": 2,
+  "costRate": 12500.00,
+  "costUnit": 2
+}
+
+@purchasedEquipmentId = {{createPurchasedEquipment.response.body.data}}
+
+### =====================================================================
+### 7.3 LIST & FILTER EQUIPMENT
+### =====================================================================
+
+### 7.3.1 List Equipment Assets (Default) - Expect 200 OK
+# @name getEquipment
+GET {{HostAddress}}/api/v1/equipment?pageNumber=1&pageSize=10
+Authorization: Bearer {{tenantManagerToken}}
+Accept: application/json
+Accept-Language: ar
+
+### 7.3.2 List Equipment (Page 2) - Expect 200 OK
+# @name getEquipmentPage2
+GET {{HostAddress}}/api/v1/equipment?pageNumber=2&pageSize=10
+Authorization: Bearer {{tenantManagerToken}}
+Accept: application/json
+Accept-Language: en
+
+### 7.3.3 List Equipment with Search Term - Expect 200 OK
+# @name getEquipmentWithSearch
+GET {{HostAddress}}/api/v1/equipment?pageNumber=1&pageSize=10&searchTerm=Crane
+Authorization: Bearer {{tenantManagerToken}}
+Accept: application/json
+Accept-Language: ar
+
+### 7.3.4 List Equipment with Ownership Type Filter - Expect 200 OK
+# @name getCompanyOwnedEquipment
+GET {{HostAddress}}/api/v1/equipment?pageNumber=1&pageSize=10&ownershipType=0
+Authorization: Bearer {{tenantManagerToken}}
+Accept: application/json
+Accept-Language: en
+
+### =====================================================================
+### 7.4 COST CALCULATION - EQUIPMENT COSTING
+### =====================================================================
+
+### 7.4.1 Calculate CompanyOwned Equipment Cost (Rule: $0.00) - Expect 200 OK
+# @name calculateCostOwned
+POST {{HostAddress}}/api/v1/equipment/calculate-cost
+Authorization: Bearer {{tenantManagerToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "equipmentId": "{{ownedEquipmentId}}",
+  "durationOrUnits": 10.0
+}
+
+### 7.4.2 Calculate Rented Equipment Cost (450 * 5 Days = $2,250) - Expect 200 OK
+# @name calculateCostRented
+POST {{HostAddress}}/api/v1/equipment/calculate-cost
+Authorization: Bearer {{tenantManagerToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "equipmentId": "{{rentedEquipmentId}}",
+  "durationOrUnits": 5.0
+}
+
+### 7.4.3 Calculate NewlyPurchased Equipment Cost (Full Purchase Price = $12,500) - Expect 200 OK
+# @name calculateCostPurchased
+POST {{HostAddress}}/api/v1/equipment/calculate-cost
+Authorization: Bearer {{tenantManagerToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "equipmentId": "{{purchasedEquipmentId}}",
+  "durationOrUnits": 1.0
+}
+
+### =====================================================================
+### 7.5 SMART ASSET LIFECYCLE TRANSITION
+### =====================================================================
+
+### 7.5.1 Execute Smart Transition: Convert NewlyPurchased → CompanyOwned - Expect 200 OK
+# @name transitionEquipment
+POST {{HostAddress}}/api/v1/equipment/{{purchasedEquipmentId}}/transition-to-company-owned
+Authorization: Bearer {{tenantManagerToken}}
+Accept: application/json
+Accept-Language: ar
+
+### 7.5.2 Post-Transition Cost Recalculation (Verify Cost now $0.00) - Expect 200 OK
+# @name calculateCostPostTransition
+POST {{HostAddress}}/api/v1/equipment/calculate-cost
+Authorization: Bearer {{tenantManagerToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "equipmentId": "{{purchasedEquipmentId}}",
+  "durationOrUnits": 30.0
+}
+
+### =====================================================================
+### 7.6 NEGATIVE & EDGE CASE TESTS
+### =====================================================================
+
+### 7.6.1 Create Equipment - Empty Name - Expect 400 Bad Request
+# @name createEquipmentEmptyName
+POST {{HostAddress}}/api/v1/equipment
+Authorization: Bearer {{tenantManagerToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "name": "",
+  "serialNumber": "TEST-001",
+  "category": "Test",
+  "ownershipType": 0,
+  "costRate": 0.00,
+  "costUnit": 1
+}
+
+### 7.6.2 Create Equipment - Negative Cost Rate - Expect 400 Bad Request
+# @name createEquipmentNegativeCost
+POST {{HostAddress}}/api/v1/equipment
+Authorization: Bearer {{tenantManagerToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "name": "Negative Cost Equipment",
+  "serialNumber": "TEST-003",
+  "category": "Test",
+  "ownershipType": 1,
+  "costRate": -100.00,
+  "costUnit": 1
+}
+
+### 7.6.3 Calculate Cost - Non-Existent Equipment - Expect 404 Not Found
+# @name calculateCostNotFound
+POST {{HostAddress}}/api/v1/equipment/calculate-cost
+Authorization: Bearer {{tenantManagerToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "equipmentId": "00000000-0000-0000-0000-000000000000",
+  "durationOrUnits": 10.0
+}
+
+### 7.6.4 Calculate Cost - Negative Duration - Expect 400 Bad Request
+# @name calculateCostNegativeDuration
+POST {{HostAddress}}/api/v1/equipment/calculate-cost
+Authorization: Bearer {{tenantManagerToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "equipmentId": "{{rentedEquipmentId}}",
+  "durationOrUnits": -5.0
+}
+
+### 7.6.5 Transition Non-Existent Equipment - Expect 404 Not Found
+# @name transitionNotFound
+POST {{HostAddress}}/api/v1/equipment/00000000-0000-0000-0000-000000000000/transition-to-company-owned
+Authorization: Bearer {{tenantManagerToken}}
+Accept: application/json
+Accept-Language: ar
+
+### =====================================================================
+### 7.7 AUTHORIZATION TESTS
+### =====================================================================
+
+### 7.7.1 Get Equipment Without Token - Expect 401 Unauthorized
+# @name getEquipmentNoToken
+GET {{HostAddress}}/api/v1/equipment?pageNumber=1&pageSize=10
+Accept: application/json
+Accept-Language: en
+
+### 7.7.2 Create Equipment Without Token - Expect 401 Unauthorized
+# @name createEquipmentNoToken
+POST {{HostAddress}}/api/v1/equipment
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "name": "Test",
+  "serialNumber": "TEST-999",
+  "category": "Test",
+  "ownershipType": 0,
+  "costRate": 0.00,
+  "costUnit": 1
+}
+
+### 7.7.3 Calculate Equipment Cost Without Token - Expect 401 Unauthorized
+# @name calculateCostNoToken
+POST {{HostAddress}}/api/v1/equipment/calculate-cost
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "equipmentId": "00000000-0000-0000-0000-000000000000",
+  "durationOrUnits": 10.0
+}

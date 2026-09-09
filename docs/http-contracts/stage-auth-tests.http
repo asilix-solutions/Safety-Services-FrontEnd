@@ -1,0 +1,77 @@
+﻿#@HostAddress = https://localhost:7062
+@HostAddress = https://amainix-001-site1.ltempurl.com
+
+### =====================================================================
+### 1. PLATFORM LEVEL SCENARIOS (SuperAdmin)
+### =====================================================================
+
+### 1.1. Successful Platform SuperAdmin Login (Arabic Language Header)
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept-Language: ar
+
+{
+  "email": "admin@amanix.com",
+  "password": "Admin@123456"
+}
+
+### 1.2. Successful Platform SuperAdmin Login (English Language Header)
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept-Language: en
+
+{
+  "email": "admin@amanix.com",
+  "password": "Admin@123456"
+}
+
+
+### =====================================================================
+### 2. TENANT LEVEL SCENARIOS (Tenant Manager / Demo Company)
+### =====================================================================
+
+### 2.1. Successful Tenant Manager Login with Subdomain Header (X-Tenant-Domain)
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept-Language: ar
+X-Tenant-Domain: demo
+
+{
+  "email": "admin@demo.com",
+  "password": "User@123456"
+}
+
+
+### =====================================================================
+### 3. ERROR & VALIDATION FAILURE SCENARIOS
+### =====================================================================
+
+### 3.1. Invalid Password (Expect 400 Bad Request / Failure Response)
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept-Language: ar
+
+{
+  "email": "admin@amanix.com",
+  "password": "WrongPassword123"
+}
+
+### 3.2. Validation Failure - Empty Fields (Expect 400 Bad Request)
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept-Language: ar
+
+{
+  "email": "",
+  "password": ""
+}
+
+### 3.3. Validation Failure - Short Password (Expect 400 Bad Request)
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept-Language: ar
+
+{
+  "email": "test@amanix.com",
+  "password": "123"
+}

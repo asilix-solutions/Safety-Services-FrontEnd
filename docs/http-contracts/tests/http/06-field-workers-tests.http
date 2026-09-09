@@ -1,0 +1,295 @@
+﻿@baseUrl = http://localhost:5128
+@HostAddress = {{baseUrl}}
+@tenantManagerEmail = admin@al-salamah.com
+@tenantManagerPassword = User@123456
+
+### =====================================================================
+### 06. FIELD WORKERS & JOB COSTING ENGINE TEST SUITE (COMPLETE)
+### =====================================================================
+### Token extraction: Login returns 'Token' field
+
+### =====================================================================
+### 6.1 AUTHENTICATION & SETUP
+### =====================================================================
+
+### 6.1.1 Login as Tenant Manager (English) - Expect 200 OK
+# @name tenantManagerLogin
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+X-Tenant-Domain: al-salamah
+
+{
+  "email": "{{tenantManagerEmail}}",
+  "password": "{{tenantManagerPassword}}"
+}
+
+@tenantManagerToken = {{tenantManagerLogin.response.body.data.Token}}
+
+### =====================================================================
+### 6.2 CREATE FIELD WORKERS
+### =====================================================================
+
+### 6.2.1 Create Internal Salaried Field Worker (Type: Internal=0, CostUnit: PerHour=0) - Expect 201 Created
+# @name createInternalWorker
+POST {{HostAddress}}/api/v1/field-workers
+Authorization: Bearer {{tenantManagerToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "fullName": "Sami Al-Otaibi",
+  "phoneNumber": "+966501122334",
+  "specialty": "Fire Alarm Technician",
+  "type": 0,
+  "baseCost": 0.00,
+  "costUnit": 0
+}
+
+@internalWorkerId = {{createInternalWorker.response.body.data}}
+
+### 6.2.2 Create External Contractor Field Worker (Type: External=1, CostUnit: PerDay=1) - Expect 201 Created
+# @name createExternalWorker
+POST {{HostAddress}}/api/v1/field-workers
+Authorization: Bearer {{tenantManagerToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "fullName": "Khaled Al-Ghamdi",
+  "phoneNumber": "+966504455667",
+  "specialty": "HVAC Specialist",
+  "type": 1,
+  "baseCost": 250.00,
+  "costUnit": 1
+}
+
+@externalWorkerId = {{createExternalWorker.response.body.data}}
+
+### =====================================================================
+### 6.3 LIST & FILTER FIELD WORKERS
+### =====================================================================
+
+### 6.3.1 List Field Workers in Tenant Directory (Default) - Expect 200 OK
+# @name getWorkers
+GET {{HostAddress}}/api/v1/field-workers?pageNumber=1&pageSize=10
+Authorization: Bearer {{tenantManagerToken}}
+Accept: application/json
+Accept-Language: ar
+
+### 6.3.2 List Field Workers (Page 2) - Expect 200 OK
+# @name getWorkersPage2
+GET {{HostAddress}}/api/v1/field-workers?pageNumber=2&pageSize=10
+Authorization: Bearer {{tenantManagerToken}}
+Accept: application/json
+Accept-Language: en
+
+### 6.3.3 List Field Workers with Search Term - Expect 200 OK
+# @name getWorkersWithSearch
+GET {{HostAddress}}/api/v1/field-workers?pageNumber=1&pageSize=10&searchTerm=Sami
+Authorization: Bearer {{tenantManagerToken}}
+Accept: application/json
+Accept-Language: ar
+
+### 6.3.4 List Field Workers with Type Filter (Internal) - Expect 200 OK
+# @name getInternalWorkers
+GET {{HostAddress}}/api/v1/field-workers?pageNumber=1&pageSize=10&type=0
+Authorization: Bearer {{tenantManagerToken}}
+Accept: application/json
+Accept-Language: en
+
+### 6.3.5 List Field Workers with Status Filter (Active) - Expect 200 OK
+# @name getActiveWorkers
+GET {{HostAddress}}/api/v1/field-workers?pageNumber=1&pageSize=10&status=0
+Authorization: Bearer {{tenantManagerToken}}
+Accept: application/json
+Accept-Language: ar
+
+### =====================================================================
+### 6.4 COST CALCULATION - JOB COSTING ENGINE
+### =====================================================================
+
+### 6.4.1 Calculate Internal Salaried Labor Cost (Always $0.00) - Expect 200 OK
+# @name calculateCostInternal
+POST {{HostAddress}}/api/v1/field-workers/calculate-cost
+Authorization: Bearer {{tenantManagerToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "workerId": "{{internalWorkerId}}",
+  "durationOrUnits": 40.0
+}
+
+### 6.4.2 Calculate External Contractor Cost (250 * 5 Days = 1,250.00) - Expect 200 OK
+# @name calculateCostExternal
+POST {{HostAddress}}/api/v1/field-workers/calculate-cost
+Authorization: Bearer {{tenantManagerToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "workerId": "{{externalWorkerId}}",
+  "durationOrUnits": 5.0
+}
+
+### 6.4.3 Calculate Cost for Single Day External - Expect 200 OK
+# @name calculateCostExternalSingleDay
+POST {{HostAddress}}/api/v1/field-workers/calculate-cost
+Authorization: Bearer {{tenantManagerToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "workerId": "{{externalWorkerId}}",
+  "durationOrUnits": 1.0
+}
+
+### =====================================================================
+### 6.5 RESOURCE APPROVALS
+### =====================================================================
+
+### 6.5.1 View Pending Resource Approval Requests - Expect 200 OK
+# @name getResourceApprovals
+GET {{HostAddress}}/api/v1/resource-approvals
+Authorization: Bearer {{tenantManagerToken}}
+Accept: application/json
+Accept-Language: ar
+
+### =====================================================================
+### 6.6 NEGATIVE & EDGE CASE TESTS
+### =====================================================================
+
+### 6.6.1 Create Field Worker - Missing Full Name - Expect 400 Bad Request
+# @name createWorkerMissingName
+POST {{HostAddress}}/api/v1/field-workers
+Authorization: Bearer {{tenantManagerToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "fullName": "",
+  "phoneNumber": "+966501122334",
+  "specialty": "Test",
+  "type": 0,
+  "baseCost": 0.00,
+  "costUnit": 0
+}
+
+### 6.6.2 Create Field Worker - Invalid Phone Number - Expect 400 Bad Request
+# @name createWorkerInvalidPhone
+POST {{HostAddress}}/api/v1/field-workers
+Authorization: Bearer {{tenantManagerToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "fullName": "Test Worker",
+  "phoneNumber": "invalid-phone",
+  "specialty": "Test",
+  "type": 0,
+  "baseCost": 0.00,
+  "costUnit": 0
+}
+
+### 6.6.3 Create Field Worker - Negative Base Cost - Expect 400 Bad Request
+# @name createWorkerNegativeCost
+POST {{HostAddress}}/api/v1/field-workers
+Authorization: Bearer {{tenantManagerToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "fullName": "Test Worker",
+  "phoneNumber": "+966501122334",
+  "specialty": "Test",
+  "type": 1,
+  "baseCost": -100.00,
+  "costUnit": 1
+}
+
+### 6.6.4 Calculate Worker Cost - Non-Existent Worker - Expect 404 Not Found
+# @name calculateCostNotFound
+POST {{HostAddress}}/api/v1/field-workers/calculate-cost
+Authorization: Bearer {{tenantManagerToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "workerId": "00000000-0000-0000-0000-000000000000",
+  "durationOrUnits": 10.0
+}
+
+### 6.6.5 Calculate Cost - Zero Duration - Expect 200 OK or validation
+# @name calculateCostZeroDuration
+POST {{HostAddress}}/api/v1/field-workers/calculate-cost
+Authorization: Bearer {{tenantManagerToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "workerId": "{{externalWorkerId}}",
+  "durationOrUnits": 0.0
+}
+
+### 6.6.6 Calculate Cost - Negative Duration - Expect 400 Bad Request
+# @name calculateCostNegativeDuration
+POST {{HostAddress}}/api/v1/field-workers/calculate-cost
+Authorization: Bearer {{tenantManagerToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "workerId": "{{externalWorkerId}}",
+  "durationOrUnits": -5.0
+}
+
+### =====================================================================
+### 6.7 AUTHORIZATION TESTS
+### =====================================================================
+
+### 6.7.1 Get Workers Without Token - Expect 401 Unauthorized
+# @name getWorkersNoToken
+GET {{HostAddress}}/api/v1/field-workers?pageNumber=1&pageSize=10
+Accept: application/json
+Accept-Language: en
+
+### 6.7.2 Create Worker Without Token - Expect 401 Unauthorized
+# @name createWorkerNoToken
+POST {{HostAddress}}/api/v1/field-workers
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "fullName": "Test",
+  "phoneNumber": "+966500000000",
+  "specialty": "Test",
+  "type": 0,
+  "baseCost": 0.00,
+  "costUnit": 0
+}
+
+### 6.7.3 Calculate Cost Without Token - Expect 401 Unauthorized
+# @name calculateCostNoToken
+POST {{HostAddress}}/api/v1/field-workers/calculate-cost
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "workerId": "00000000-0000-0000-0000-000000000000",
+  "durationOrUnits": 10.0
+}

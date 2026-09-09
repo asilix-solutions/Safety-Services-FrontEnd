@@ -1,0 +1,307 @@
+﻿@baseUrl = http://localhost:5128
+@HostAddress = {{baseUrl}}
+@companyAdminEmail = admin@al-salamah.com
+@companyAdminPassword = User@123456
+@deputyAdminEmail = deputy@al-salamah.com
+@deputyAdminPassword = User@123456
+
+### =====================================================================
+### 09. TENANT FINANCIAL POLICY, COMPANY PROFILE & BRANDING ASSETS TEST SUITE
+### =====================================================================
+### Covers the sovereign tenant-management endpoints added on top of TenantSettingsController:
+### financial policy (VAT/margin/commission/spending ceiling), company profile
+### (trade names, CR, National 700 number), and IStorageService-backed branding asset upload.
+### All write endpoints are CompanyAdmin/SystemSuperAdmin-only — DeputyAdmin must get 403.
+
+### =====================================================================
+### 9.1 AUTHENTICATION & SETUP
+### =====================================================================
+
+### 9.1.1 Login as Company Admin - Expect 200 OK
+# @name companyAdminLogin
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+X-Tenant-Domain: al-salamah
+
+{
+  "email": "{{companyAdminEmail}}",
+  "password": "{{companyAdminPassword}}"
+}
+
+@companyAdminToken = {{companyAdminLogin.response.body.data.Token}}
+
+### 9.1.2 Login as Deputy Admin (for boundary tests) - Expect 200 OK
+# @name deputyAdminLogin
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+X-Tenant-Domain: al-salamah
+
+{
+  "email": "{{deputyAdminEmail}}",
+  "password": "{{deputyAdminPassword}}"
+}
+
+@deputyAdminToken = {{deputyAdminLogin.response.body.data.Token}}
+
+### =====================================================================
+### 9.2 FINANCIAL POLICY MANAGEMENT
+### =====================================================================
+
+### 9.2.1 Get Financial Policy (CompanyAdmin) - Expect 200 OK, seeded Al-Salamah defaults
+# @name getFinancialPolicy
+GET {{HostAddress}}/api/v1/tenants/settings/financial-policy
+Authorization: Bearer {{companyAdminToken}}
+Accept: application/json
+Accept-Language: ar
+
+### 9.2.2 Get Financial Policy (DeputyAdmin, read allowed) - Expect 200 OK
+# @name getFinancialPolicyAsDeputy
+GET {{HostAddress}}/api/v1/tenants/settings/financial-policy
+Authorization: Bearer {{deputyAdminToken}}
+Accept: application/json
+Accept-Language: en
+
+### 9.2.3 Update Financial Policy (CompanyAdmin) - Expect 200 OK
+# @name updateFinancialPolicy
+PUT {{HostAddress}}/api/v1/tenants/settings/financial-policy
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "vatPercentage": 15.00,
+  "targetMinimumMarginPercentage": 27.50,
+  "salesCommissionPercentage": 5.50,
+  "defaultSpendingCeilingCap": 6500.00,
+  "currencyCode": "SAR"
+}
+
+### 9.2.4 Update Financial Policy (DeputyAdmin) - Expect 403 Forbidden [SOVEREIGN BOUNDARY]
+# @name updateFinancialPolicyAsDeputyBlocked
+PUT {{HostAddress}}/api/v1/tenants/settings/financial-policy
+Authorization: Bearer {{deputyAdminToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "vatPercentage": 15.00,
+  "targetMinimumMarginPercentage": 10.00,
+  "salesCommissionPercentage": 20.00,
+  "defaultSpendingCeilingCap": 999999.00,
+  "currencyCode": "SAR"
+}
+
+### 9.2.5 Update Financial Policy - VAT Out of Range (>100) - Expect 400 Bad Request
+# @name updateFinancialPolicyInvalidVat
+PUT {{HostAddress}}/api/v1/tenants/settings/financial-policy
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "vatPercentage": 150.00,
+  "targetMinimumMarginPercentage": 25.00,
+  "salesCommissionPercentage": 5.00,
+  "defaultSpendingCeilingCap": 5000.00,
+  "currencyCode": "SAR"
+}
+
+### 9.2.6 Update Financial Policy - Commission Out of Range (>50) - Expect 400 Bad Request
+# @name updateFinancialPolicyInvalidCommission
+PUT {{HostAddress}}/api/v1/tenants/settings/financial-policy
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "vatPercentage": 15.00,
+  "targetMinimumMarginPercentage": 25.00,
+  "salesCommissionPercentage": 75.00,
+  "defaultSpendingCeilingCap": 5000.00,
+  "currencyCode": "SAR"
+}
+
+### 9.2.7 Update Financial Policy - Negative Spending Ceiling - Expect 400 Bad Request
+# @name updateFinancialPolicyNegativeCeiling
+PUT {{HostAddress}}/api/v1/tenants/settings/financial-policy
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "vatPercentage": 15.00,
+  "targetMinimumMarginPercentage": 25.00,
+  "salesCommissionPercentage": 5.00,
+  "defaultSpendingCeilingCap": -100.00,
+  "currencyCode": "SAR"
+}
+
+### 9.2.8 Get Financial Policy Without Token - Expect 401 Unauthorized
+# @name getFinancialPolicyNoToken
+GET {{HostAddress}}/api/v1/tenants/settings/financial-policy
+Accept: application/json
+Accept-Language: en
+
+### =====================================================================
+### 9.3 COMPANY PROFILE MANAGEMENT
+### =====================================================================
+
+### 9.3.1 Update Company Profile (CompanyAdmin) - Expect 200 OK
+# @name updateCompanyProfile
+PUT {{HostAddress}}/api/v1/tenants/settings/company-profile
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "companyNameAr": "شركة السلامة لحماية الحرائق المحدودة",
+  "companyNameEn": "Al-Salamah Fire Protection Co. Ltd.",
+  "commercialRegistrationNumber": "1012345678",
+  "nationalUnifiedNumber700": "7012345678"
+}
+
+### 9.3.2 Update Company Profile (DeputyAdmin) - Expect 403 Forbidden [SOVEREIGN BOUNDARY]
+# @name updateCompanyProfileAsDeputyBlocked
+PUT {{HostAddress}}/api/v1/tenants/settings/company-profile
+Authorization: Bearer {{deputyAdminToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "companyNameAr": "محاولة تعديل غير مصرح بها",
+  "companyNameEn": "Unauthorized Edit Attempt",
+  "commercialRegistrationNumber": "1099999999",
+  "nationalUnifiedNumber700": "7099999999"
+}
+
+### 9.3.3 Update Company Profile - Invalid CR Format (not 10 digits) - Expect 400 Bad Request
+# @name updateCompanyProfileInvalidCr
+PUT {{HostAddress}}/api/v1/tenants/settings/company-profile
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "companyNameAr": "شركة السلامة لحماية الحرائق",
+  "companyNameEn": "Al-Salamah Fire Protection Co.",
+  "commercialRegistrationNumber": "123",
+  "nationalUnifiedNumber700": "7012345678"
+}
+
+### 9.3.4 Update Company Profile - Missing Arabic Name - Expect 400 Bad Request
+# @name updateCompanyProfileMissingNameAr
+PUT {{HostAddress}}/api/v1/tenants/settings/company-profile
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "companyNameAr": "",
+  "companyNameEn": "Al-Salamah Fire Protection Co.",
+  "commercialRegistrationNumber": "1012345678",
+  "nationalUnifiedNumber700": "7012345678"
+}
+
+### =====================================================================
+### 9.4 BRANDING ASSET UPLOAD (IStorageService: Local disk / AWS S3)
+### =====================================================================
+
+### 9.4.1 Upload Logo Asset (CompanyAdmin) - Expect 200 OK, returns AssetUrl
+# @name uploadLogoAsset
+POST {{HostAddress}}/api/v1/tenants/settings/branding/asset
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: multipart/form-data; boundary=----AmanixBoundary
+
+------AmanixBoundary
+Content-Disposition: form-data; name="assetType"
+
+1
+------AmanixBoundary
+Content-Disposition: form-data; name="asset"; filename="logo.txt"
+Content-Type: text/plain
+
+Mock logo binary content for testing purposes.
+------AmanixBoundary--
+
+### 9.4.2 Upload Favicon Asset (CompanyAdmin) - Expect 200 OK
+# @name uploadFaviconAsset
+POST {{HostAddress}}/api/v1/tenants/settings/branding/asset
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: multipart/form-data; boundary=----AmanixBoundary
+
+------AmanixBoundary
+Content-Disposition: form-data; name="assetType"
+
+2
+------AmanixBoundary
+Content-Disposition: form-data; name="asset"; filename="favicon.txt"
+Content-Type: text/plain
+
+Mock favicon binary content for testing purposes.
+------AmanixBoundary--
+
+### 9.4.3 Apply Uploaded Logo URL to Branding - Expect 200 OK
+# @name applyUploadedLogo
+PUT {{HostAddress}}/api/v1/tenants/settings/branding
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "logoUrl": "{{uploadLogoAsset.response.body.data.assetUrl}}",
+  "faviconUrl": "{{uploadFaviconAsset.response.body.data.assetUrl}}",
+  "themeColors": { "primary": "#FF5722", "secondary": "#1976D2", "accent": "#1976D2" },
+  "socialLinks": {},
+  "welcomeMessage": "مرحباً بكم في شركة السلامة"
+}
+
+### 9.4.4 Fetch the Uploaded Logo via Secured Files Endpoint (Local provider only) - Expect 200 OK
+GET {{HostAddress}}{{uploadLogoAsset.response.body.data.assetUrl}}
+Authorization: Bearer {{companyAdminToken}}
+Accept: application/octet-stream
+
+### 9.4.5 Upload Branding Asset (DeputyAdmin) - Expect 403 Forbidden [SOVEREIGN BOUNDARY]
+# @name uploadAssetAsDeputyBlocked
+POST {{HostAddress}}/api/v1/tenants/settings/branding/asset
+Authorization: Bearer {{deputyAdminToken}}
+Content-Type: multipart/form-data; boundary=----AmanixBoundary
+
+------AmanixBoundary
+Content-Disposition: form-data; name="assetType"
+
+1
+------AmanixBoundary
+Content-Disposition: form-data; name="asset"; filename="blocked.txt"
+Content-Type: text/plain
+
+Should be rejected - DeputyAdmin cannot upload branding assets.
+------AmanixBoundary--
+
+### 9.4.6 Upload Branding Asset Without Token - Expect 401 Unauthorized
+POST {{HostAddress}}/api/v1/tenants/settings/branding/asset
+Content-Type: multipart/form-data; boundary=----AmanixBoundary
+
+------AmanixBoundary
+Content-Disposition: form-data; name="assetType"
+
+1
+------AmanixBoundary
+Content-Disposition: form-data; name="asset"; filename="unauth.txt"
+Content-Type: text/plain
+
+Should be rejected - no auth token.
+------AmanixBoundary--

@@ -1,0 +1,236 @@
+﻿@baseUrl = http://localhost:5128
+@HostAddress = {{baseUrl}}
+
+### =====================================================================
+### 01. PUBLIC TENANT & SYSTEM DIAGNOSTICS TEST SUITE (COMPLETE COVERAGE)
+### =====================================================================
+### This suite tests public diagnostics, health checks, subdomain validation,
+### and public tenant branding retrieval endpoints.
+
+### =====================================================================
+### 1.1 DIAGNOSTICS & HEALTH CHECKS (Public, Anonymous)
+### =====================================================================
+
+### 1.1.1 API Heartbeat Ping (English) - Expect 200 OK
+# @name pingHeartbeatEn
+GET {{HostAddress}}/api/v1/diagnostics/ping
+Accept: application/json
+Accept-Language: en
+
+### 1.1.2 API Heartbeat Ping (Arabic) - Expect 200 OK
+# @name pingHeartbeatAr
+GET {{HostAddress}}/api/v1/diagnostics/ping
+Accept: application/json
+Accept-Language: ar
+
+### 1.1.3 Full System Health Diagnostics (English) - Expect 200 OK (if healthy) or 503 Service Unavailable
+# @name healthDiagnosticsEn
+GET {{HostAddress}}/api/v1/diagnostics/health
+Accept: application/json
+Accept-Language: en
+
+### 1.1.4 Full System Health Diagnostics (Arabic) - Expect 200 OK (if healthy) or 503 Service Unavailable
+# @name healthDiagnosticsAr
+GET {{HostAddress}}/api/v1/diagnostics/health
+Accept: application/json
+Accept-Language: ar
+
+### =====================================================================
+### 1.2 SUBDOMAIN AVAILABILITY VALIDATION
+### =====================================================================
+
+### 1.2.1 Subdomain Availability Check - Available Subdomain (Fresh) - Expect 200 OK with Data = true
+# @name checkAvailableSubdomain
+GET {{HostAddress}}/api/v1/tenants/subdomains/freshcompany2024/availability
+Accept: application/json
+Accept-Language: en
+
+### 1.2.2 Subdomain Availability Check - Available Subdomain (Arabic Language) - Expect 200 OK with Data = true
+# @name checkAvailableSubdomainAr
+GET {{HostAddress}}/api/v1/tenants/subdomains/newbusiness999/availability
+Accept: application/json
+Accept-Language: ar
+
+### 1.2.3 Subdomain Availability Check - Existing/Taken Subdomain (al-salamah) - Expect 200 OK with Data = false
+# @name checkExistingSubdomain
+GET {{HostAddress}}/api/v1/tenants/subdomains/al-salamah/availability
+Accept: application/json
+Accept-Language: ar
+
+### 1.2.4 Subdomain Availability Check - System Tenant (admin) - Expect 200 OK with Data = false
+# @name checkSystemSubdomain
+GET {{HostAddress}}/api/v1/tenants/subdomains/admin/availability
+Accept: application/json
+Accept-Language: en
+
+### 1.2.5 Subdomain Availability Check - Very Short Subdomain - Expect 200 OK or 400 Bad Request
+# @name checkShortSubdomain
+GET {{HostAddress}}/api/v1/tenants/subdomains/ab/availability
+Accept: application/json
+Accept-Language: ar
+
+### 1.2.6 Subdomain Availability Check - Very Long Subdomain - Expect 200 OK or 400 Bad Request
+# @name checkLongSubdomain
+GET {{HostAddress}}/api/v1/tenants/subdomains/thisisaverylongsubdomainnamethatmayexceedmaximumlengthallowed/availability
+Accept: application/json
+Accept-Language: en
+
+### 1.2.7 Subdomain Availability Check - With Numbers and Hyphens - Expect 200 OK
+# @name checkAlphanumericSubdomain
+GET {{HostAddress}}/api/v1/tenants/subdomains/company-123-safe/availability
+Accept: application/json
+Accept-Language: ar
+
+### 1.2.8 Subdomain Availability Check - With Only Numbers - Expect 200 OK
+# @name checkNumbersOnlySubdomain
+GET {{HostAddress}}/api/v1/tenants/subdomains/123456789/availability
+Accept: application/json
+Accept-Language: en
+
+### 1.2.9 Subdomain Availability Check - Reserved Keyword (auth) - Expect 200 OK with Data = false
+# @name checkReservedAuthSubdomain
+GET {{HostAddress}}/api/v1/tenants/subdomains/auth/availability
+Accept: application/json
+Accept-Language: en
+
+### 1.2.10 Subdomain Availability Check - Reserved Keyword (system) - Expect 200 OK with Data = false
+# @name checkReservedSystemSubdomain
+GET {{HostAddress}}/api/v1/tenants/subdomains/system/availability
+Accept: application/json
+Accept-Language: ar
+
+### =====================================================================
+### 1.3 PUBLIC TENANT BRANDING & SETTINGS LOOKUP
+### =====================================================================
+
+### 1.3.1 Public Tenant Branding Lookup - Al-Salamah Tenant (English) - Expect 200 OK
+# @name getPublicBrandingEn
+GET {{HostAddress}}/api/v1/tenants/settings/public-branding
+Accept: application/json
+Accept-Language: en
+X-Tenant-Domain: al-salamah
+
+### 1.3.2 Public Tenant Branding Lookup - Al-Salamah Tenant (Arabic) - Expect 200 OK
+# @name getPublicBrandingAr
+GET {{HostAddress}}/api/v1/tenants/settings/public-branding
+Accept: application/json
+Accept-Language: ar
+X-Tenant-Domain: al-salamah
+
+### 1.3.3 Public Tenant Branding via /branding Endpoint (Backwards Compatibility) - Expect 200 OK
+# @name getPublicBrandingCompat
+GET {{HostAddress}}/api/v1/tenants/settings/branding
+Accept: application/json
+Accept-Language: en
+X-Tenant-Domain: al-salamah
+
+### 1.3.4 Public Tenant Branding for Case-Insensitive Subdomain - Expect 200 OK or 400 Bad Request
+# @name getPublicBrandingCaseInsensitive
+GET {{HostAddress}}/api/v1/tenants/settings/public-branding
+Accept: application/json
+Accept-Language: en
+X-Tenant-Domain: AL-SALAMAH
+
+### =====================================================================
+### 1.4 NEGATIVE TEST CASES - MISSING/INVALID HEADERS
+### =====================================================================
+
+### 1.4.1 Get Public Branding WITHOUT Required X-Tenant-Domain Header (Expect 400 Bad Request)
+# @name getPublicBrandingMissingHeader
+GET {{HostAddress}}/api/v1/tenants/settings/public-branding
+Accept: application/json
+Accept-Language: ar
+
+### 1.4.2 Get Public Branding via /branding WITHOUT Header (Expect 400 Bad Request)
+# @name getPublicBrandingCompatMissingHeader
+GET {{HostAddress}}/api/v1/tenants/settings/branding
+Accept: application/json
+Accept-Language: en
+
+### 1.4.3 Public Tenant Branding with Empty X-Tenant-Domain Header (Expect 400 Bad Request)
+# @name getPublicBrandingEmptyHeader
+GET {{HostAddress}}/api/v1/tenants/settings/public-branding
+Accept: application/json
+Accept-Language: ar
+X-Tenant-Domain: 
+
+### 1.4.4 Public Tenant Branding with Whitespace X-Tenant-Domain Header (Expect 400 Bad Request)
+# @name getPublicBrandingWhitespaceHeader
+GET {{HostAddress}}/api/v1/tenants/settings/public-branding
+Accept: application/json
+Accept-Language: en
+X-Tenant-Domain:    
+
+### =====================================================================
+### 1.5 EDGE CASES & INVALID TENANT DOMAINS
+### =====================================================================
+
+### 1.5.1 Public Branding Lookup - Non-Existent Domain (Expect 400 Bad Request)
+# @name getPublicBrandingInvalidDomain
+GET {{HostAddress}}/api/v1/tenants/settings/public-branding
+Accept: application/json
+Accept-Language: en
+X-Tenant-Domain: non-existent-company-domain-999
+
+### 1.5.2 Public Branding Lookup - Suspended/Inactive Tenant (If Such Domain Exists - Expect 400 or Filtered Response)
+# @name getPublicBrandingInactiveTenant
+GET {{HostAddress}}/api/v1/tenants/settings/public-branding
+Accept: application/json
+Accept-Language: ar
+X-Tenant-Domain: suspended-tenant-001
+
+### 1.5.3 Public Branding Lookup - SQL Injection Attempt in Domain Header (Expect 400 Bad Request)
+# @name getPublicBrandingSqlInjection
+GET {{HostAddress}}/api/v1/tenants/settings/public-branding
+Accept: application/json
+Accept-Language: en
+X-Tenant-Domain: al-salamah'; DROP TABLE tenants; --
+
+### 1.5.4 Public Branding Lookup - XSS Attempt in Domain Header (Expect 400 Bad Request)
+# @name getPublicBrandingXssAttempt
+GET {{HostAddress}}/api/v1/tenants/settings/public-branding
+Accept: application/json
+Accept-Language: ar
+X-Tenant-Domain: <script>alert('xss')</script>
+
+### 1.5.5 Public Branding Lookup - Unicode Characters in Domain (Expect 400 Bad Request)
+# @name getPublicBrandingUnicodeDomain
+GET {{HostAddress}}/api/v1/tenants/settings/public-branding
+Accept: application/json
+Accept-Language: ar
+X-Tenant-Domain: شركة-عربية
+
+### 1.5.6 Public Branding Lookup - Very Long Domain String (Expect 400 Bad Request)
+# @name getPublicBrandingLongDomain
+GET {{HostAddress}}/api/v1/tenants/settings/public-branding
+Accept: application/json
+Accept-Language: en
+X-Tenant-Domain: thisisterribleverylongdomainnamethatexceedsmaximumlengthallowedforsubdomainregistrationinourapplication
+
+### 1.5.7 Public Branding with Missing Accept Header (Expect 200 OK - Optional)
+# @name getPublicBrandingNoAcceptHeader
+GET {{HostAddress}}/api/v1/tenants/settings/public-branding
+Accept-Language: en
+X-Tenant-Domain: al-salamah
+
+### 1.5.8 Subdomain Check - Special Characters (Expect 400 Bad Request)
+# @name checkSpecialCharSubdomain
+GET {{HostAddress}}/api/v1/tenants/subdomains/invalid!@#$%/availability
+Accept: application/json
+Accept-Language: ar
+
+### =====================================================================
+### 1.6 PERFORMANCE & LOAD TESTING (Light Testing)
+### =====================================================================
+
+### 1.6.1 Rapid Health Check Requests (First of multiple) - Test Load Balancing
+# @name healthLoadTest1
+GET {{HostAddress}}/api/v1/diagnostics/health
+Accept: application/json
+Accept-Language: en
+
+### 1.6.2 Rapid Ping Requests for Performance - Test Response Time
+# @name pingLoadTest1
+GET {{HostAddress}}/api/v1/diagnostics/ping
+Accept: application/json
+Accept-Language: ar

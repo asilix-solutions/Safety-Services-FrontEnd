@@ -1,0 +1,400 @@
+﻿@baseUrl = http://localhost:5128
+@HostAddress = {{baseUrl}}
+@companyAdminEmail = admin@al-salamah.com
+@companyAdminPassword = User@123456
+@deputyAdminEmail = deputy@al-salamah.com
+@deputyAdminPassword = User@123456
+
+### =====================================================================
+### 05. TENANT USER MANAGEMENT & RBAC TEST SUITE (COMPLETE)
+### =====================================================================
+### Token extraction fix: Login returns 'Token' field
+### Role numeric ids: CompanyAdmin=200, DeputyAdmin=201, ConsultingEngineer=202,
+### OperationsOfficer=203, FieldWorker=204, MaintenanceManager=205,
+### SalesRepresentative=206, Client=207, MaintenanceWorker=208
+
+### =====================================================================
+### 5.1 AUTHENTICATION & SETUP
+### =====================================================================
+
+### 5.1.1 Login as Company Admin (English) - Expect 200 OK
+# @name companyAdminLogin
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+X-Tenant-Domain: al-salamah
+
+{
+  "email": "{{companyAdminEmail}}",
+  "password": "{{companyAdminPassword}}"
+}
+
+@companyAdminToken = {{companyAdminLogin.response.body.data.Token}}
+
+### 5.1.2 Login as Company Admin (Arabic) - Expect 200 OK
+# @name companyAdminLoginAr
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+X-Tenant-Domain: al-salamah
+
+{
+  "email": "{{companyAdminEmail}}",
+  "password": "{{companyAdminPassword}}"
+}
+
+### 5.1.3 Login as Deputy Admin (For Permission Boundary Tests) - Expect 200 OK
+# @name deputyAdminLogin
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+X-Tenant-Domain: al-salamah
+
+{
+  "email": "{{deputyAdminEmail}}",
+  "password": "{{deputyAdminPassword}}"
+}
+
+@deputyAdminToken = {{deputyAdminLogin.response.body.data.Token}}
+
+### =====================================================================
+### 5.2 LIST STAFF USERS WITHIN TENANT BOUNDARY
+### =====================================================================
+
+### 5.2.1 Get Users (Default Pagination) - Expect 200 OK
+# @name getUsers
+GET {{HostAddress}}/api/v1/tenant-users?pageNumber=1&pageSize=10
+Authorization: Bearer {{companyAdminToken}}
+Accept: application/json
+Accept-Language: ar
+
+### 5.2.2 Get Users (Page 2) - Expect 200 OK
+# @name getUsersPage2
+GET {{HostAddress}}/api/v1/tenant-users?pageNumber=2&pageSize=10
+Authorization: Bearer {{companyAdminToken}}
+Accept: application/json
+Accept-Language: en
+
+### 5.2.3 Get Users with Search Term - Expect 200 OK
+# @name getUsersWithSearch
+GET {{HostAddress}}/api/v1/tenant-users?pageNumber=1&pageSize=10&searchTerm=engineer
+Authorization: Bearer {{companyAdminToken}}
+Accept: application/json
+Accept-Language: ar
+
+### 5.2.4 Get Users with Role Filter (ConsultingEngineer = 202) - Expect 200 OK
+# @name getUsersWithRoleFilter
+GET {{HostAddress}}/api/v1/tenant-users?pageNumber=1&pageSize=10&role=202
+Authorization: Bearer {{companyAdminToken}}
+Accept: application/json
+Accept-Language: en
+
+### 5.2.5 Get Users with Active Filter - Expect 200 OK
+# @name getUsersActiveOnly
+GET {{HostAddress}}/api/v1/tenant-users?pageNumber=1&pageSize=10&isActive=true
+Authorization: Bearer {{companyAdminToken}}
+Accept: application/json
+Accept-Language: ar
+
+### =====================================================================
+### 5.3 CREATE NEW USER ACCOUNTS (assignable roles catalog)
+### =====================================================================
+
+### 5.3.1 Create New Consulting Engineer Account (role=202) - Expect 201 Created
+# @name createUser
+POST {{HostAddress}}/api/v1/tenant-users
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "fullName": "Eng. Faisal Al-Harbi",
+  "email": "faisal.engineer@al-salamah.com",
+  "password": "User@123456",
+  "phoneNumber": "+966559988776",
+  "role": 202,
+  "preferredLanguage": "ar"
+}
+
+@newUserId = {{createUser.response.body.data}}
+
+### 5.3.2 Create Field Worker Account (role=204, Operations Stream) - Expect 201 Created
+# @name createFieldWorker
+POST {{HostAddress}}/api/v1/tenant-users
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "fullName": "Mohammed Al-Otaibi",
+  "email": "mohammed.field@al-salamah.com",
+  "password": "User@123456",
+  "phoneNumber": "+966501122334",
+  "role": 204,
+  "preferredLanguage": "ar"
+}
+
+### 5.3.3 Create Maintenance Worker Account (role=208, Maintenance Stream) - Expect 201 Created
+# @name createMaintenanceWorker
+POST {{HostAddress}}/api/v1/tenant-users
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "fullName": "Nasser Al-Qahtani",
+  "email": "nasser.maintenance@al-salamah.com",
+  "password": "User@123456",
+  "phoneNumber": "+966501122335",
+  "role": 208,
+  "preferredLanguage": "ar"
+}
+
+### 5.3.4 Create Deputy Admin Account (role=201, allowed - not the root CompanyAdmin) - Expect 201 Created
+# @name createDeputyAdmin
+POST {{HostAddress}}/api/v1/tenant-users
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "fullName": "Sara Al-Fahad",
+  "email": "sara.deputy@al-salamah.com",
+  "password": "User@123456",
+  "phoneNumber": "+966501122336",
+  "role": 201,
+  "preferredLanguage": "ar"
+}
+
+### 5.3.5 Attempt to Create Another CompanyAdmin (role=200, blocked by validator) - Expect 400 Bad Request
+# @name createUserBlockedCompanyAdmin
+POST {{HostAddress}}/api/v1/tenant-users
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "fullName": "Rogue Admin",
+  "email": "rogue.admin@al-salamah.com",
+  "password": "User@123456",
+  "phoneNumber": "+966501122337",
+  "role": 200,
+  "preferredLanguage": "ar"
+}
+
+### =====================================================================
+### 5.4 USER STATUS MANAGEMENT
+### =====================================================================
+
+### 5.4.1 Toggle User Status (Activate/Deactivate) - Expect 200 OK
+# @name toggleUserStatus
+PATCH {{HostAddress}}/api/v1/tenant-users/{{newUserId}}/toggle-status
+Authorization: Bearer {{companyAdminToken}}
+Accept: application/json
+Accept-Language: ar
+
+### =====================================================================
+### 5.5 PERMISSIONS MANAGEMENT & RBAC
+### =====================================================================
+
+### 5.5.1 Retrieve System Permissions Catalog (Assignable Roles) - Expect 200 OK
+# @name getCatalog
+GET {{HostAddress}}/api/v1/tenant-users/permissions-catalog
+Authorization: Bearer {{companyAdminToken}}
+Accept: application/json
+Accept-Language: en
+
+### 5.5.2 Get Specific User Inherited & Direct Permissions - Expect 200 OK
+# @name getUserPermissions
+GET {{HostAddress}}/api/v1/tenant-users/{{newUserId}}/permissions
+Authorization: Bearer {{companyAdminToken}}
+Accept: application/json
+Accept-Language: ar
+
+### 5.5.3 Update Direct User Permission Overrides - Expect 200 OK
+# @name updateUserPermissions
+PUT {{HostAddress}}/api/v1/tenant-users/{{newUserId}}/permissions
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+[
+  "{{getCatalog.response.body.data.permissionCategories[0].permissions[0].id}}"
+]
+
+### =====================================================================
+### 5.6 DEPUTY ADMIN PERMISSION BOUNDARY (Operational clearance, NOT sovereign management)
+### =====================================================================
+
+### 5.6.1 DeputyAdmin CANNOT list/manage tenant users - Expect 403 Forbidden
+# @name deputyAdminBlockedFromUserList
+GET {{HostAddress}}/api/v1/tenant-users?pageNumber=1&pageSize=10
+Authorization: Bearer {{deputyAdminToken}}
+Accept: application/json
+Accept-Language: en
+
+### 5.6.2 DeputyAdmin CANNOT create tenant users - Expect 403 Forbidden
+# @name deputyAdminBlockedFromCreateUser
+POST {{HostAddress}}/api/v1/tenant-users
+Authorization: Bearer {{deputyAdminToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "fullName": "Blocked Attempt",
+  "email": "blocked.attempt@al-salamah.com",
+  "password": "User@123456",
+  "phoneNumber": "+966501122338",
+  "role": 202,
+  "preferredLanguage": "ar"
+}
+
+### 5.6.3 DeputyAdmin CAN view audit logs (operational transparency retained) - Expect 200 OK
+# @name deputyAdminAllowedAuditLogs
+GET {{HostAddress}}/api/v1/audit-logs?pageNumber=1&pageSize=10
+Authorization: Bearer {{deputyAdminToken}}
+Accept: application/json
+Accept-Language: en
+
+### 5.6.4 DeputyAdmin CAN view pending resource approvals (operational clearance) - Expect 200 OK
+# @name deputyAdminAllowedResourceApprovals
+GET {{HostAddress}}/api/v1/resource-approvals
+Authorization: Bearer {{deputyAdminToken}}
+Accept: application/json
+Accept-Language: ar
+
+### =====================================================================
+### 5.7 NEGATIVE & EDGE CASE TESTS
+### =====================================================================
+
+### 5.7.1 Create User - Duplicate Email - Expect 400 Bad Request
+# @name createUserDuplicateEmail
+POST {{HostAddress}}/api/v1/tenant-users
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "fullName": "Duplicate User",
+  "email": "admin@al-salamah.com",
+  "password": "User@123456",
+  "phoneNumber": "+966559988999",
+  "role": 202,
+  "preferredLanguage": "ar"
+}
+
+### 5.7.2 Create User - Weak Password - Expect 400 Bad Request
+# @name createUserWeakPassword
+POST {{HostAddress}}/api/v1/tenant-users
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "fullName": "Weak Pass User",
+  "email": "weakpass@al-salamah.com",
+  "password": "123",
+  "phoneNumber": "+966559988888",
+  "role": 202,
+  "preferredLanguage": "ar"
+}
+
+### 5.7.3 Create User - Invalid Email Format - Expect 400 Bad Request
+# @name createUserInvalidEmail
+POST {{HostAddress}}/api/v1/tenant-users
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "fullName": "Invalid Email User",
+  "email": "notanemail",
+  "password": "User@123456",
+  "phoneNumber": "+966559988777",
+  "role": 202,
+  "preferredLanguage": "ar"
+}
+
+### 5.7.4 Create User - Missing Required Fields - Expect 400 Bad Request
+# @name createUserMissingFields
+POST {{HostAddress}}/api/v1/tenant-users
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "fullName": "",
+  "email": "test@al-salamah.com",
+  "password": "User@123456"
+}
+
+### 5.7.5 Toggle Status Non-Existent User - Expect 404 Not Found
+# @name toggleStatusNotFound
+PATCH {{HostAddress}}/api/v1/tenant-users/00000000-0000-0000-0000-000000000000/toggle-status
+Authorization: Bearer {{companyAdminToken}}
+Accept: application/json
+Accept-Language: ar
+
+### 5.7.6 Get Permissions Non-Existent User - Expect 404 Not Found
+# @name getPermissionsNotFound
+GET {{HostAddress}}/api/v1/tenant-users/00000000-0000-0000-0000-000000000000/permissions
+Authorization: Bearer {{companyAdminToken}}
+Accept: application/json
+Accept-Language: en
+
+### 5.7.7 Update Permissions Non-Existent User - Expect 404 Not Found
+# @name updatePermissionsNotFound
+PUT {{HostAddress}}/api/v1/tenant-users/00000000-0000-0000-0000-000000000000/permissions
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+["00000000-0000-0000-0000-000000000000"]
+
+### =====================================================================
+### 5.8 AUTHORIZATION TESTS
+### =====================================================================
+
+### 5.8.1 Get Users Without Token - Expect 401 Unauthorized
+# @name getUsersNoToken
+GET {{HostAddress}}/api/v1/tenant-users?pageNumber=1&pageSize=10
+Accept: application/json
+Accept-Language: en
+
+### 5.8.2 Create User Without Token - Expect 401 Unauthorized
+# @name createUserNoToken
+POST {{HostAddress}}/api/v1/tenant-users
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "fullName": "Test",
+  "email": "test@al-salamah.com",
+  "password": "User@123456",
+  "phoneNumber": "+966500000000",
+  "role": 202,
+  "preferredLanguage": "ar"
+}
+
+### 5.8.3 Get Users With Invalid Token - Expect 401 Unauthorized
+# @name getUsersInvalidToken
+GET {{HostAddress}}/api/v1/tenant-users?pageNumber=1&pageSize=10
+Authorization: Bearer invalid.token.here
+Accept: application/json
+Accept-Language: ar

@@ -1,0 +1,305 @@
+﻿@baseUrl = http://localhost:5128
+@HostAddress = {{baseUrl}}
+@superAdminEmail = admin@amanix.com
+@superAdminPassword = Admin@123456
+
+### =====================================================================
+### 08. TENANT SUBSCRIPTION ACTIVATION PATHWAYS TEST SUITE
+### =====================================================================
+### Covers all 3 activation pathways: ManualPlatformApproval(1), ElectronicPayment(2),
+### BankTransferReceipt(3) — plus the secured local file-serving endpoint (FilesController)
+### and the Platform HQ governance review screen (PlatformTenantsController).
+### Requires FeatureToggles:IsOtpReturnInsideTheResponse=true and
+### PaymentSettings:BypassInDevelopment=true (both default true in Development).
+
+### =====================================================================
+### 8.1 PLATFORM STAFF LOGIN (for review/approval endpoints)
+### =====================================================================
+
+### 8.1.1 Login as Platform SystemSuperAdmin - Expect 200 OK
+# @name superAdminLogin
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "email": "{{superAdminEmail}}",
+  "password": "{{superAdminPassword}}"
+}
+
+@superAdminToken = {{superAdminLogin.response.body.data.Token}}
+
+### =====================================================================
+### 8.2 PATHWAY 1: ELECTRONIC PAYMENT (Moyasar, Development Mock Bypass)
+### =====================================================================
+
+### 8.2.1 Register Tenant with ActivationMethod=2 (ElectronicPayment) - Expect 200 OK
+# @name registerPayment
+POST {{HostAddress}}/api/v1/tenants/register
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "companyName": "Riyadh Fire Protection Co.",
+  "subdomain": "riyadh-fire-pay",
+  "commercialRecord": "7001000001",
+  "adminFullName": "Omar Al-Salem",
+  "adminEmail": "omar@riyadh-fire-pay.com",
+  "adminPhoneNumber": "+966501000001",
+  "password": "SecureAdmin@123456",
+  "activationMethod": 2
+}
+
+@paymentTenantId = {{registerPayment.response.body.data.tenantId}}
+@paymentAdminUserId = {{registerPayment.response.body.data.adminUserId}}
+@paymentOtp = {{registerPayment.response.body.data.devOnlyOtp}}
+
+### 8.2.2 Verify OTP - Expect 200 OK, ActivationStatus = PendingPaymentConfirmation (3)
+# @name verifyPaymentOtp
+POST {{HostAddress}}/api/v1/tenants/verify-otp
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "userId": "{{paymentAdminUserId}}",
+  "otpCode": "{{paymentOtp}}"
+}
+
+### 8.2.3 Confirm Electronic Payment (Mock Bypass auto-confirms) - Expect 200 OK, Tenant fully Activated
+# @name confirmPayment
+POST {{HostAddress}}/api/v1/tenants/{{paymentTenantId}}/activation/confirm-payment
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "paymentReferenceId": "MOCK-TEST-REFERENCE-001"
+}
+
+### 8.2.4 Confirm Payment Again (Already Activated, Wrong State) - Expect 400 Bad Request
+# @name confirmPaymentAlreadyActivated
+POST {{HostAddress}}/api/v1/tenants/{{paymentTenantId}}/activation/confirm-payment
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "paymentReferenceId": "MOCK-TEST-REFERENCE-002"
+}
+
+### =====================================================================
+### 8.3 PATHWAY 2: BANK TRANSFER RECEIPT (Platform Staff Review)
+### =====================================================================
+
+### 8.3.1 Register Tenant with ActivationMethod=3 (BankTransferReceipt) - Expect 200 OK
+# @name registerBankTransfer
+POST {{HostAddress}}/api/v1/tenants/register
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "companyName": "Jeddah Safety Contractors",
+  "subdomain": "jeddah-safety-bt",
+  "commercialRecord": "7001000002",
+  "adminFullName": "Layla Al-Otaibi",
+  "adminEmail": "layla@jeddah-safety-bt.com",
+  "adminPhoneNumber": "+966501000002",
+  "password": "SecureAdmin@123456",
+  "activationMethod": 3
+}
+
+@bankTenantId = {{registerBankTransfer.response.body.data.tenantId}}
+@bankAdminUserId = {{registerBankTransfer.response.body.data.adminUserId}}
+@bankOtp = {{registerBankTransfer.response.body.data.devOnlyOtp}}
+
+### 8.3.2 Verify OTP - Expect 200 OK, ActivationStatus = PendingReceiptReview (4)
+# @name verifyBankOtp
+POST {{HostAddress}}/api/v1/tenants/verify-otp
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "userId": "{{bankAdminUserId}}",
+  "otpCode": "{{bankOtp}}"
+}
+
+@bankAuthToken = {{verifyBankOtp.response.body.data.Token}}
+
+### 8.3.3 Upload Bank Transfer Receipt (multipart/form-data) - Expect 200 OK
+# @name uploadReceipt
+POST {{HostAddress}}/api/v1/tenants/{{bankTenantId}}/activation/bank-transfer-receipt
+Content-Type: multipart/form-data; boundary=----AmanixBoundary
+
+------AmanixBoundary
+Content-Disposition: form-data; name="receipt"; filename="transfer-receipt.txt"
+Content-Type: text/plain
+
+Mock bank transfer receipt content — SAR 4,500 transferred on 2026-08-17.
+------AmanixBoundary
+Content-Disposition: form-data; name="transactionReference"
+
+TRX-SNB-2026-88123
+------AmanixBoundary--
+
+### 8.3.4 Platform Admin Lists Tenants Pending Review - Expect 200 OK, includes jeddah-safety-bt
+# @name getPendingActivations
+GET {{HostAddress}}/api/v1/platform/tenants/pending-activation
+Authorization: Bearer {{superAdminToken}}
+Accept: application/json
+Accept-Language: en
+
+### 8.3.5 Platform Admin Approves the Bank Transfer Receipt - Expect 200 OK, Tenant Activated
+# @name approveBankTransfer
+POST {{HostAddress}}/api/v1/platform/tenants/{{bankTenantId}}/approve-activation
+Authorization: Bearer {{superAdminToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "approve": true,
+  "rejectionReason": null
+}
+
+### 8.3.6 Fetch the Uploaded Receipt via Secured Files Endpoint (Tenant Admin, own tenant) - Expect 200 OK
+GET {{HostAddress}}{{uploadReceipt.response.body.data.receiptUrl}}
+Authorization: Bearer {{bankAuthToken}}
+Accept: application/octet-stream
+
+### 8.3.7 Fetch the Same Receipt as Platform SystemSuperAdmin (cross-tenant review) - Expect 200 OK
+GET {{HostAddress}}{{uploadReceipt.response.body.data.receiptUrl}}
+Authorization: Bearer {{superAdminToken}}
+Accept: application/octet-stream
+
+### =====================================================================
+### 8.4 PATHWAY 3: MANUAL PLATFORM APPROVAL + REJECTION FLOW
+### =====================================================================
+
+### 8.4.1 Register Tenant with ActivationMethod=1 (ManualPlatformApproval) - Expect 200 OK
+# @name registerManual
+POST {{HostAddress}}/api/v1/tenants/register
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "companyName": "Dammam Industrial Safety",
+  "subdomain": "dammam-safety-manual",
+  "commercialRecord": "7001000003",
+  "adminFullName": "Khalid Al-Dosari",
+  "adminEmail": "khalid@dammam-safety-manual.com",
+  "adminPhoneNumber": "+966501000003",
+  "password": "SecureAdmin@123456",
+  "activationMethod": 1
+}
+
+@manualTenantId = {{registerManual.response.body.data.tenantId}}
+@manualAdminUserId = {{registerManual.response.body.data.adminUserId}}
+@manualOtp = {{registerManual.response.body.data.devOnlyOtp}}
+
+### 8.4.2 Verify OTP - Expect 200 OK, ActivationStatus = PendingManualApproval (2)
+# @name verifyManualOtp
+POST {{HostAddress}}/api/v1/tenants/verify-otp
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "userId": "{{manualAdminUserId}}",
+  "otpCode": "{{manualOtp}}"
+}
+
+### 8.4.3 Platform Admin Rejects Activation (Missing Reason) - Expect 400 Bad Request
+# @name rejectManualMissingReason
+POST {{HostAddress}}/api/v1/platform/tenants/{{manualTenantId}}/approve-activation
+Authorization: Bearer {{superAdminToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "approve": false,
+  "rejectionReason": null
+}
+
+### 8.4.4 Platform Admin Rejects Activation (With Reason) - Expect 200 OK, Status = Rejected
+# @name rejectManual
+POST {{HostAddress}}/api/v1/platform/tenants/{{manualTenantId}}/approve-activation
+Authorization: Bearer {{superAdminToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "approve": false,
+  "rejectionReason": "Commercial Registration could not be verified against the Ministry of Commerce registry."
+}
+
+### =====================================================================
+### 8.5 NEGATIVE & CROSS-PATHWAY TESTS
+### =====================================================================
+
+### 8.5.1 Upload Bank Transfer Receipt on a ManualPlatformApproval Tenant (Wrong Pathway) - Expect 400 Bad Request
+# @name uploadReceiptWrongPathway
+POST {{HostAddress}}/api/v1/tenants/{{manualTenantId}}/activation/bank-transfer-receipt
+Content-Type: multipart/form-data; boundary=----AmanixBoundary
+
+------AmanixBoundary
+Content-Disposition: form-data; name="receipt"; filename="receipt.txt"
+Content-Type: text/plain
+
+Should be rejected - wrong pathway.
+------AmanixBoundary
+Content-Disposition: form-data; name="transactionReference"
+
+TRX-WRONG-PATHWAY
+------AmanixBoundary--
+
+### 8.5.2 Confirm Payment on a BankTransferReceipt Tenant (Wrong Pathway) - Expect 400 Bad Request
+# @name confirmPaymentWrongPathway
+POST {{HostAddress}}/api/v1/tenants/{{bankTenantId}}/activation/confirm-payment
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "paymentReferenceId": "SHOULD-FAIL"
+}
+
+### 8.5.3 Non-Existent Tenant Approval Attempt - Expect 404 Not Found
+# @name approveNonExistentTenant
+POST {{HostAddress}}/api/v1/platform/tenants/00000000-0000-0000-0000-000000000000/approve-activation
+Authorization: Bearer {{superAdminToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "approve": true,
+  "rejectionReason": null
+}
+
+### 8.5.4 Pending Activations List WITHOUT Token - Expect 401 Unauthorized
+# @name getPendingActivationsNoToken
+GET {{HostAddress}}/api/v1/platform/tenants/pending-activation
+Accept: application/json
+Accept-Language: en
+
+### 8.5.5 Pending Activations List as a Non-Platform Role (Tenant Admin) - Expect 403 Forbidden
+# @name getPendingActivationsForbidden
+GET {{HostAddress}}/api/v1/platform/tenants/pending-activation
+Authorization: Bearer {{bankAuthToken}}
+Accept: application/json
+Accept-Language: en
+
+### 8.5.6 Fetch a Tenant's Receipt as an UNRELATED Tenant Admin - Expect 403 Forbidden
+### bankAuthToken belongs to the BankTransferReceipt tenant admin; the path below is scoped
+### to a DIFFERENT tenant folder (paymentTenantId), so cross-tenant access must be denied.
+GET {{HostAddress}}/api/v1/files/uploads/tenants/{{paymentTenantId}}/activation-receipts/does-not-matter.txt
+Authorization: Bearer {{bankAuthToken}}
+Accept: application/octet-stream

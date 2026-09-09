@@ -1,12 +1,16 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 
 export interface ApiErrorResponse {
+  isSuccess?: boolean;
   message: string;
+  title?: string;
   code?: string;
+  errors?: string[] | Record<string, string[]>;
   details?: Record<string, string[]>;
 }
 
-export const BASE_API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.safety-licensing.com/v1";
+export const BASE_API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "https://amainix-001-site1.ltempurl.com/api/v1";
 
 // Instantiate the global Axios service configuration
 export const apiClient = axios.create({
@@ -78,13 +82,28 @@ function clearSessionAndRedirect() {
   }
 }
 
-// Request Interceptor to inject JWT Auth Tokens
+// Request Interceptor to inject JWT Auth Tokens, Tenant Subdomain, and Language Headers
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = getStoredAccessToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    if (typeof window !== "undefined") {
+      // Injects client preferred response language ('ar' or 'en')
+      const lang = document.documentElement.lang || "ar";
+      if (!config.headers["Accept-Language"]) {
+        config.headers["Accept-Language"] = lang;
+      }
+
+      // Injects active tenant subdomain header when present
+      const tenantDomain = localStorage.getItem("sslm_tenant_domain");
+      if (tenantDomain && !config.headers["X-Tenant-Domain"]) {
+        config.headers["X-Tenant-Domain"] = tenantDomain;
+      }
+    }
+
     return config;
   },
   (error) => Promise.reject(error)
@@ -103,15 +122,28 @@ apiClient.interceptors.response.use(
 
     if (error.response) {
       const data = error.response.data;
+      const rawErrors = data?.errors;
+      const details =
+        data?.details ||
+        (rawErrors && typeof rawErrors === "object" && !Array.isArray(rawErrors)
+          ? (rawErrors as Record<string, string[]>)
+          : undefined);
+      const errors = Array.isArray(rawErrors) ? rawErrors : undefined;
+
       formattedError = {
-        message: data?.message || `Request failed with status ${error.response.status}`,
+        message:
+          data?.message ||
+          data?.title ||
+          `Request failed with status ${error.response.status}`,
         code: data?.code || String(error.response.status),
-        details: data?.details,
+        details,
+        errors,
       };
 
       // Check if the error is 401 Unauthorized and not already retried
       const isAuthEndpoint =
         originalRequest.url?.includes("/auth/login") ||
+        originalRequest.url?.includes("/auth/refresh-token") ||
         originalRequest.url?.includes("/auth/refresh") ||
         originalRequest.url?.includes("/auth/forgot-password") ||
         originalRequest.url?.includes("/auth/reset-password");
@@ -139,13 +171,26 @@ apiClient.interceptors.response.use(
           return Promise.reject(formattedError);
         }
 
-        try {
-          // Call silent token refresh endpoint
-          const refreshResponse = await axios.post(`${BASE_API_URL}/auth/refresh`, {
-            refreshToken,
-          });
+        const currentAccessToken = getStoredAccessToken();
 
-          const { accessToken, refreshToken: newRefreshToken } = refreshResponse.data?.data || refreshResponse.data || {};
+        try {
+          // Call silent token refresh endpoint adhering to backend contract
+          const refreshResponse = await axios.post(
+            `${BASE_API_URL}/auth/refresh-token`,
+            {
+              accessToken: currentAccessToken || "",
+              refreshToken,
+            },
+            {
+              headers: {
+                "Content-Type": "application/json",
+                "Accept-Language": typeof window !== "undefined" ? document.documentElement.lang || "ar" : "ar",
+              },
+            }
+          );
+
+          const { accessToken, refreshToken: newRefreshToken } =
+            refreshResponse.data?.data || refreshResponse.data || {};
           const newToken = accessToken || "mock-refreshed-jwt-token";
 
           setStoredTokens(newToken, newRefreshToken);

@@ -1,0 +1,183 @@
+﻿@baseUrl = http://localhost:5128
+@HostAddress = {{baseUrl}}
+@superAdminEmail = admin@amanix.com
+@superAdminPassword = Admin@123456
+@tenantManagerEmail = admin@al-salamah.com
+@tenantManagerPassword = User@123456
+
+### =====================================================================
+### 04. PLATFORM SUPERADMIN & SYSTEM GOVERNANCE TEST SUITE (COMPLETE)
+### =====================================================================
+### Token extraction fix: Login returns 'Token' field (not 'accessToken')
+
+### =====================================================================
+### 4.1 AUTHENTICATION - LOGIN AS ROLES
+### =====================================================================
+
+### 4.1.1 Login as SuperAdmin (English) - Expect 200 OK
+# @name superAdminLogin
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "email": "{{superAdminEmail}}",
+  "password": "{{superAdminPassword}}"
+}
+
+@superAdminToken = {{superAdminLogin.response.body.data.Token}}
+
+### 4.1.2 Login as SuperAdmin (Arabic) - Expect 200 OK
+# @name superAdminLoginAr
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "email": "{{superAdminEmail}}",
+  "password": "{{superAdminPassword}}"
+}
+
+### 4.1.3 Login as Tenant Manager (For Authorization Tests) - Expect 200 OK
+# @name tenantManagerLogin
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+X-Tenant-Domain: al-salamah
+
+{
+  "email": "{{tenantManagerEmail}}",
+  "password": "{{tenantManagerPassword}}"
+}
+
+@tenantManagerToken = {{tenantManagerLogin.response.body.data.Token}}
+
+### =====================================================================
+### 4.2 PERMISSIONS & ACCESS CONTROL
+### =====================================================================
+
+### 4.2.1 SuperAdmin Permissions Discovery - Expect 200 OK
+# @name getSuperAdminPermissions
+GET {{HostAddress}}/api/v1/auth/permissions/me
+Authorization: Bearer {{superAdminToken}}
+Accept: application/json
+Accept-Language: en
+
+### 4.2.2 Tenant Manager Permissions - Expect 200 OK
+# @name getTenantManagerPermissions
+GET {{HostAddress}}/api/v1/auth/permissions/me
+Authorization: Bearer {{tenantManagerToken}}
+Accept: application/json
+Accept-Language: ar
+
+### =====================================================================
+### 4.3 AUDIT LOGS - QUERY & FILTERING
+### =====================================================================
+
+### 4.3.1 Get Audit Logs (Default Pagination) - Expect 200 OK
+# @name getAuditLogs
+GET {{HostAddress}}/api/v1/audit-logs?pageNumber=1&pageSize=10
+Authorization: Bearer {{superAdminToken}}
+Accept: application/json
+Accept-Language: en
+
+### 4.3.2 Get Audit Logs (Page 2) - Expect 200 OK
+# @name getAuditLogsPage2
+GET {{HostAddress}}/api/v1/audit-logs?pageNumber=2&pageSize=10
+Authorization: Bearer {{superAdminToken}}
+Accept: application/json
+Accept-Language: ar
+
+### 4.3.3 Get Audit Logs (Large Page Size) - Expect 200 OK
+# @name getAuditLogsLargePageSize
+GET {{HostAddress}}/api/v1/audit-logs?pageNumber=1&pageSize=100
+Authorization: Bearer {{superAdminToken}}
+Accept: application/json
+Accept-Language: en
+
+### 4.3.4 Get Audit Logs with Date Filter (Start Date) - Expect 200 OK
+# @name getAuditLogsWithDateFilter
+GET {{HostAddress}}/api/v1/audit-logs?pageNumber=1&pageSize=10&startDate=2024-01-01T00:00:00Z
+Authorization: Bearer {{superAdminToken}}
+Accept: application/json
+Accept-Language: ar
+
+### 4.3.5 Get Audit Logs with Search Term - Expect 200 OK
+# @name getAuditLogsWithSearchTerm
+GET {{HostAddress}}/api/v1/audit-logs?pageNumber=1&pageSize=10&searchTerm=login
+Authorization: Bearer {{superAdminToken}}
+Accept: application/json
+Accept-Language: en
+
+### 4.3.6 Get Audit Log Record Details By ID - Expect 200 OK
+# @name getAuditLogById
+GET {{HostAddress}}/api/v1/audit-logs/{{getAuditLogs.response.body.data.items[0].id}}
+Authorization: Bearer {{superAdminToken}}
+Accept: application/json
+Accept-Language: ar
+
+### =====================================================================
+### 4.4 AUTHORIZATION & SECURITY ENFORCEMENT
+### =====================================================================
+
+### 4.4.1 Access Audit Logs WITHOUT Bearer Token - Expect 401 Unauthorized
+# @name auditLogsNoToken
+GET {{HostAddress}}/api/v1/audit-logs
+Accept: application/json
+Accept-Language: en
+
+### 4.4.2 Access Audit Logs with INVALID Token - Expect 401 Unauthorized
+# @name auditLogsInvalidToken
+GET {{HostAddress}}/api/v1/audit-logs
+Authorization: Bearer invalid.token.format
+Accept: application/json
+Accept-Language: ar
+
+### 4.4.3 Access Audit Logs with Non-Admin Token (TenantManager) - Expect 403 Forbidden or 401
+# @name auditLogsForbiddenRole
+GET {{HostAddress}}/api/v1/audit-logs
+Authorization: Bearer {{tenantManagerToken}}
+Accept: application/json
+Accept-Language: en
+
+### 4.4.4 Get Non-Existent Audit Log ID - Expect 404 Not Found
+# @name auditLogNotFound
+GET {{HostAddress}}/api/v1/audit-logs/00000000-0000-0000-0000-000000000000
+Authorization: Bearer {{superAdminToken}}
+Accept: application/json
+Accept-Language: ar
+
+### =====================================================================
+### 4.5 EDGE CASES & INVALID QUERIES
+### =====================================================================
+
+### 4.5.1 Get Audit Logs with Invalid Page Number (0) - Expect 400 Bad Request
+# @name auditLogsInvalidPageNumber
+GET {{HostAddress}}/api/v1/audit-logs?pageNumber=0&pageSize=10
+Authorization: Bearer {{superAdminToken}}
+Accept: application/json
+Accept-Language: en
+
+### 4.5.2 Get Audit Logs with Negative Page Size - Expect 400 Bad Request
+# @name auditLogsNegativePageSize
+GET {{HostAddress}}/api/v1/audit-logs?pageNumber=1&pageSize=-5
+Authorization: Bearer {{superAdminToken}}
+Accept: application/json
+Accept-Language: ar
+
+### 4.5.3 Get Audit Logs with Invalid Date Format - Expect 400 Bad Request
+# @name auditLogsInvalidDateFormat
+GET {{HostAddress}}/api/v1/audit-logs?pageNumber=1&pageSize=10&startDate=invalid-date
+Authorization: Bearer {{superAdminToken}}
+Accept: application/json
+Accept-Language: en
+
+### 4.5.4 Get Audit Logs with Invalid UUID - Expect 400 Bad Request
+# @name auditLogInvalidUuid
+GET {{HostAddress}}/api/v1/audit-logs/not-a-uuid
+Authorization: Bearer {{superAdminToken}}
+Accept: application/json
+Accept-Language: ar
