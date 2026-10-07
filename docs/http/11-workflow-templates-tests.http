@@ -1,0 +1,393 @@
+@baseUrl = http://localhost:5128
+@HostAddress = {{baseUrl}}
+@companyAdminEmail = admin@al-salamah.com
+@companyAdminPassword = User@123456
+@deputyAdminEmail = deputy@al-salamah.com
+@deputyAdminPassword = User@123456
+
+### =====================================================================
+### 11. DYNAMIC WORKFLOW TEMPLATE DESIGNER TEST SUITE (FR-WKF-01)
+### =====================================================================
+### Covers the workflow engine's template designer: the five standard Saudi service templates
+### seeded for every tenant, full designer CRUD, the one-default-per-category rule, the archive
+### guards, and the sovereign/operational authorization boundary.
+###
+### Authorization model under test:
+###   Workflows.View   -> CompanyAdmin + DeputyAdmin, ConsultingEngineer, OperationsOfficer,
+###                       MaintenanceManager, SalesRepresentative  (read the pipeline they work in)
+###   Workflows.Manage -> CompanyAdmin only (redesigning a template changes how every future job
+###                       in that category is processed — a sovereign capability, like branding
+###                       and financial policy)
+###
+### Field casing is camelCase, verified against a running instance. See tech-debt item D-8 —
+### the older suites in this folder read PascalCase paths that do not match the wire format.
+
+### =====================================================================
+### 11.1 AUTHENTICATION & SETUP
+### =====================================================================
+
+### 11.1.1 Login as Company Admin - Expect 200 OK
+# @name companyAdminLogin
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "email": "{{companyAdminEmail}}",
+  "password": "{{companyAdminPassword}}"
+}
+
+?? status == 200
+
+@companyAdminToken = {{companyAdminLogin.data.token}}
+
+### 11.1.2 Login as Deputy Admin - Expect 200 OK
+# @name deputyAdminLogin
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "email": "{{deputyAdminEmail}}",
+  "password": "{{deputyAdminPassword}}"
+}
+
+?? status == 200
+
+@deputyAdminToken = {{deputyAdminLogin.data.token}}
+
+### =====================================================================
+### 11.2 STANDARD SEEDED TEMPLATES
+### =====================================================================
+
+### 11.2.1 Every tenant is provisioned with the five standard service templates - Expect 200 OK
+### MAINTENANCE_CONTRACT, TECHNICAL_REPORT, FIRE_EQUIPMENT_INVOICE,
+### NEW_PROJECT_EXECUTION, SAFETY_DESIGN_DRAWINGS
+# @name listTemplates
+GET {{HostAddress}}/api/v1/workflow-templates?pageSize=20
+Authorization: Bearer {{companyAdminToken}}
+Accept: application/json
+Accept-Language: en
+
+?? status == 200
+
+### 11.2.2 Filter by service category - Expect 200 OK
+GET {{HostAddress}}/api/v1/workflow-templates?serviceCategory=1&pageSize=20
+Authorization: Bearer {{companyAdminToken}}
+Accept: application/json
+Accept-Language: en
+
+?? status == 200
+
+### 11.2.3 Unknown template identifier - Expect 404 Not Found
+GET {{HostAddress}}/api/v1/workflow-templates/00000000-0000-0000-0000-000000000000
+Authorization: Bearer {{companyAdminToken}}
+Accept: application/json
+Accept-Language: en
+
+?? status == 404
+
+### 11.2.4 Unauthenticated access - Expect 401 Unauthorized
+GET {{HostAddress}}/api/v1/workflow-templates
+Accept: application/json
+Accept-Language: en
+
+?? status == 401
+
+### =====================================================================
+### 11.3 TEMPLATE DESIGNER — CREATE
+### =====================================================================
+
+### 11.3.1 Create a custom template with ordered steps - Expect 201 Created
+### Step order is taken from the position in the array; no explicit index is sent.
+# @name createTemplate
+POST {{HostAddress}}/api/v1/workflow-templates
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "nameAr": "مسار اختبار مخصص",
+  "nameEn": "HTTP Suite Custom Pipeline",
+  "serviceCategory": 1,
+  "isDefault": false,
+  "steps": [
+    {
+      "stepCode": "INTAKE",
+      "displayTitleAr": "استلام الطلب",
+      "displayTitleEn": "Request Intake",
+      "targetRole": 206,
+      "defaultSlaHours": 24,
+      "requiresManagerialSignOff": false,
+      "formSchemaJson": "{\"fields\":[]}"
+    },
+    {
+      "stepCode": "ENG_REVIEW",
+      "displayTitleAr": "المراجعة الهندسية",
+      "displayTitleEn": "Engineering Review",
+      "targetRole": 202,
+      "defaultSlaHours": 72,
+      "requiresManagerialSignOff": true,
+      "formSchemaJson": null
+    }
+  ]
+}
+
+?? status == 201
+
+@createdTemplateId = {{createTemplate.data}}
+
+### 11.3.2 Read the created template back with its ordered steps - Expect 200 OK
+GET {{HostAddress}}/api/v1/workflow-templates/{{createdTemplateId}}
+Authorization: Bearer {{companyAdminToken}}
+Accept: application/json
+Accept-Language: en
+
+?? status == 200
+
+### =====================================================================
+### 11.4 VALIDATION RULES
+### =====================================================================
+
+### 11.4.1 Duplicate step codes must be rejected - Expect 400 Bad Request
+### Case-insensitive: two stages named INTAKE make stage-based reporting ambiguous.
+POST {{HostAddress}}/api/v1/workflow-templates
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "nameAr": "مكرر", "nameEn": "Duplicate Codes", "serviceCategory": 1, "isDefault": false,
+  "steps": [
+    {"stepCode":"INTAKE","displayTitleAr":"أ","targetRole":206,"defaultSlaHours":1,"requiresManagerialSignOff":false},
+    {"stepCode":"intake","displayTitleAr":"ب","targetRole":206,"defaultSlaHours":1,"requiresManagerialSignOff":false}
+  ]
+}
+
+?? status == 400
+
+### 11.4.2 A platform-level role cannot own a tenant workflow step - Expect 400 Bad Request
+### Role 100 is SystemSuperAdmin: assigning it would create a step nobody in the company can action.
+POST {{HostAddress}}/api/v1/workflow-templates
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "nameAr": "منصة", "nameEn": "Platform Role", "serviceCategory": 1, "isDefault": false,
+  "steps": [
+    {"stepCode":"INTAKE","displayTitleAr":"أ","targetRole":100,"defaultSlaHours":1,"requiresManagerialSignOff":false}
+  ]
+}
+
+?? status == 400
+
+### 11.4.3 Malformed form schema JSON must be rejected at design time - Expect 400 Bad Request
+### Storing invalid JSON would fail later during intake, with an error the designer cannot connect
+### to what they saved.
+POST {{HostAddress}}/api/v1/workflow-templates
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "nameAr": "جيسون", "nameEn": "Bad Schema", "serviceCategory": 1, "isDefault": false,
+  "steps": [
+    {"stepCode":"INTAKE","displayTitleAr":"أ","targetRole":206,"defaultSlaHours":1,"requiresManagerialSignOff":false,"formSchemaJson":"{not valid json"}
+  ]
+}
+
+?? status == 400
+
+### 11.4.4 A template with no steps must be rejected - Expect 400 Bad Request
+POST {{HostAddress}}/api/v1/workflow-templates
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "nameAr": "فارغ", "nameEn": "No Steps", "serviceCategory": 1, "isDefault": false, "steps": []
+}
+
+?? status == 400
+
+### 11.4.5 A negative SLA window must be rejected - Expect 400 Bad Request
+POST {{HostAddress}}/api/v1/workflow-templates
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "nameAr": "سالب", "nameEn": "Negative SLA", "serviceCategory": 1, "isDefault": false,
+  "steps": [
+    {"stepCode":"INTAKE","displayTitleAr":"أ","targetRole":206,"defaultSlaHours":-5,"requiresManagerialSignOff":false}
+  ]
+}
+
+?? status == 400
+
+### =====================================================================
+### 11.5 TEMPLATE DESIGNER — UPDATE, CLONE, DEFAULT, ARCHIVE
+### =====================================================================
+
+### 11.5.1 Update replaces the step sequence wholesale - Expect 200 OK
+### Previous steps are retired rather than deleted: jobs already running reference them by id.
+PUT {{HostAddress}}/api/v1/workflow-templates/{{createdTemplateId}}
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "id": "{{createdTemplateId}}",
+  "nameAr": "مسار محدث",
+  "nameEn": "HTTP Suite Updated Pipeline",
+  "serviceCategory": 1,
+  "steps": [
+    {"stepCode":"STAGE_A","displayTitleAr":"أ","displayTitleEn":"Stage A","targetRole":206,"defaultSlaHours":12,"requiresManagerialSignOff":false},
+    {"stepCode":"STAGE_B","displayTitleAr":"ب","displayTitleEn":"Stage B","targetRole":203,"defaultSlaHours":36,"requiresManagerialSignOff":true},
+    {"stepCode":"STAGE_C","displayTitleAr":"ج","displayTitleEn":"Stage C","targetRole":200,"defaultSlaHours":8,"requiresManagerialSignOff":true}
+  ]
+}
+
+?? status == 200
+
+### 11.5.2 Clone copies the steps but never the default flag - Expect 201 Created
+# @name cloneTemplate
+POST {{HostAddress}}/api/v1/workflow-templates/{{createdTemplateId}}/clone
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "nameAr": "نسخة من المسار",
+  "nameEn": "HTTP Suite Cloned Pipeline"
+}
+
+?? status == 201
+
+@clonedTemplateId = {{cloneTemplate.data}}
+
+### 11.5.3 Promoting a template demotes the previous default in its category - Expect 200 OK
+POST {{HostAddress}}/api/v1/workflow-templates/{{createdTemplateId}}/set-default
+Authorization: Bearer {{companyAdminToken}}
+Accept: application/json
+Accept-Language: en
+
+?? status == 200
+
+### 11.5.4 The category's default cannot be archived - Expect 400 Bad Request
+### A category left with no default would give new requests no pipeline to follow. The tenant must
+### nominate a successor first rather than have one promoted arbitrarily on their behalf.
+DELETE {{HostAddress}}/api/v1/workflow-templates/{{createdTemplateId}}
+Authorization: Bearer {{companyAdminToken}}
+Accept: application/json
+Accept-Language: en
+
+?? status == 400
+
+### 11.5.5 A non-default template can be archived - Expect 200 OK
+DELETE {{HostAddress}}/api/v1/workflow-templates/{{clonedTemplateId}}
+Authorization: Bearer {{companyAdminToken}}
+Accept: application/json
+Accept-Language: en
+
+?? status == 200
+
+### 11.5.6 An archived template cannot become the default - Expect 400 Bad Request
+POST {{HostAddress}}/api/v1/workflow-templates/{{clonedTemplateId}}/set-default
+Authorization: Bearer {{companyAdminToken}}
+Accept: application/json
+Accept-Language: en
+
+?? status == 400
+
+### =====================================================================
+### 11.6 SOVEREIGN / OPERATIONAL AUTHORIZATION BOUNDARY
+### =====================================================================
+### DeputyAdmin reads the pipeline they work in, but cannot redesign the process itself —
+### the same split already enforced for branding, SEO, and financial policy.
+
+### 11.6.1 DeputyAdmin CAN list templates - Expect 200 OK
+GET {{HostAddress}}/api/v1/workflow-templates
+Authorization: Bearer {{deputyAdminToken}}
+Accept: application/json
+Accept-Language: en
+
+?? status == 200
+
+### 11.6.2 DeputyAdmin CAN read a single template - Expect 200 OK
+GET {{HostAddress}}/api/v1/workflow-templates/{{createdTemplateId}}
+Authorization: Bearer {{deputyAdminToken}}
+Accept: application/json
+Accept-Language: en
+
+?? status == 200
+
+### 11.6.3 DeputyAdmin CANNOT create a template - Expect 403 Forbidden
+POST {{HostAddress}}/api/v1/workflow-templates
+Authorization: Bearer {{deputyAdminToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "nameAr": "ممنوع", "nameEn": "Forbidden", "serviceCategory": 1, "isDefault": false,
+  "steps": [
+    {"stepCode":"INTAKE","displayTitleAr":"أ","targetRole":206,"defaultSlaHours":1,"requiresManagerialSignOff":false}
+  ]
+}
+
+?? status == 403
+
+### 11.6.4 DeputyAdmin CANNOT update a template - Expect 403 Forbidden
+PUT {{HostAddress}}/api/v1/workflow-templates/{{createdTemplateId}}
+Authorization: Bearer {{deputyAdminToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "id": "{{createdTemplateId}}", "nameAr": "ممنوع", "serviceCategory": 1,
+  "steps": [
+    {"stepCode":"INTAKE","displayTitleAr":"أ","targetRole":206,"defaultSlaHours":1,"requiresManagerialSignOff":false}
+  ]
+}
+
+?? status == 403
+
+### 11.6.5 DeputyAdmin CANNOT clone a template - Expect 403 Forbidden
+POST {{HostAddress}}/api/v1/workflow-templates/{{createdTemplateId}}/clone
+Authorization: Bearer {{deputyAdminToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{ "nameAr": "ممنوع", "nameEn": "Forbidden Clone" }
+
+?? status == 403
+
+### 11.6.6 DeputyAdmin CANNOT change the default template - Expect 403 Forbidden
+POST {{HostAddress}}/api/v1/workflow-templates/{{createdTemplateId}}/set-default
+Authorization: Bearer {{deputyAdminToken}}
+Accept: application/json
+Accept-Language: en
+
+?? status == 403
+
+### 11.6.7 DeputyAdmin CANNOT archive a template - Expect 403 Forbidden
+DELETE {{HostAddress}}/api/v1/workflow-templates/{{createdTemplateId}}
+Authorization: Bearer {{deputyAdminToken}}
+Accept: application/json
+Accept-Language: en
+
+?? status == 403

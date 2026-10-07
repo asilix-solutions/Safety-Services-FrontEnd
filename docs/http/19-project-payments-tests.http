@@ -1,0 +1,230 @@
+@baseUrl = http://localhost:5128
+@HostAddress = {{baseUrl}}
+@companyAdminEmail = admin@al-salamah.com
+@companyAdminPassword = User@123456
+@missingJob = 3f9a1c22-7b44-4e18-9d05-6c2e8a5f1b70
+@missingPayment = 6b2e8a5f-1b70-4e18-9d05-3f9a1c227b44
+
+### =====================================================================
+### 19. CLIENT PAYMENT ON A PROJECT (G-1)
+### =====================================================================
+### Until this shipped, accepting a quotation moved a job straight into execution with no
+### financial trace: no entity, no endpoint, no stage. A company put a crew on site without a
+### record of what it had received, and "how much is still owed on this job?" had no answer.
+###
+### Three routes, the same three a company uses to pay the platform, pointed the other way:
+### a card through the gateway, a bank transfer evidenced by an uploaded receipt, and cash
+### recorded by staff who are holding it. Only a CONFIRMED payment counts against the balance —
+### an uploaded receipt is a claim until somebody at the company has seen the bank.
+###
+### Confirming enough of it releases the project into execution in the same call. There is no
+### separate "start work" button, because that is a button somebody forgets, and the failure is
+### silent in the worst direction: a client has paid and their project sits in a queue.
+###
+### The arithmetic — outstanding, required deposit, overpayment, the halala tolerance — is
+### covered by ProjectPaymentTests (xUnit). This suite is a smoke test of the surface with
+### explicit assertions. Field casing is camelCase (D-8).
+
+### 19.1 Company Admin login
+# @name companyAdminLogin
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept-Language: en
+
+{ "email": "{{companyAdminEmail}}", "password": "{{companyAdminPassword}}" }
+
+?? status == 200
+
+@companyAdminToken = {{companyAdminLogin.data.token}}
+
+### ---------------------------------------------------------------------
+### Authentication
+### ---------------------------------------------------------------------
+
+### 19.2 Unauthenticated statement -> 401
+GET {{HostAddress}}/api/v1/workflow-instances/{{missingJob}}/payments
+
+?? status == 401
+
+### 19.3 Unauthenticated cash entry -> 401
+POST {{HostAddress}}/api/v1/workflow-instances/{{missingJob}}/payments/cash
+Content-Type: application/json
+
+{ "amount": 1000 }
+
+?? status == 401
+
+### 19.4 Unauthenticated review -> 401
+POST {{HostAddress}}/api/v1/workflow-instances/{{missingJob}}/payments/{{missingPayment}}/review
+Content-Type: application/json
+
+{ "confirm": true }
+
+?? status == 401
+
+### 19.5 A client's own statement is unauthenticated too -> 401
+GET {{HostAddress}}/api/v1/my-requests/{{missingJob}}/payments
+
+?? status == 401
+
+### ---------------------------------------------------------------------
+### Not found — a valid request against a job that is not there
+### ---------------------------------------------------------------------
+
+### 19.6 Statement for a job that does not exist -> 404
+GET {{HostAddress}}/api/v1/workflow-instances/{{missingJob}}/payments
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+
+?? status == 404
+
+### 19.7 Cash against a job that does not exist -> 404
+POST {{HostAddress}}/api/v1/workflow-instances/{{missingJob}}/payments/cash
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{ "amount": 1000 }
+
+?? status == 404
+
+### 19.8 Reviewing a payment on a job that does not exist -> 404
+POST {{HostAddress}}/api/v1/workflow-instances/{{missingJob}}/payments/{{missingPayment}}/review
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{ "confirm": true }
+
+?? status == 404
+
+### ---------------------------------------------------------------------
+### Validation — what the shape check refuses before any money is looked at
+### ---------------------------------------------------------------------
+
+### 19.9 A payment of nothing -> 400
+POST {{HostAddress}}/api/v1/workflow-instances/{{missingJob}}/payments/cash
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{ "amount": 0 }
+
+?? status == 400
+
+### 19.10 A negative payment -> 400
+POST {{HostAddress}}/api/v1/workflow-instances/{{missingJob}}/payments/cash
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{ "amount": -2500 }
+
+?? status == 400
+
+### 19.11 A refusal with no reason -> 400
+### The client reads this verbatim; "rejected" on its own is not something anyone can act on.
+POST {{HostAddress}}/api/v1/workflow-instances/{{missingJob}}/payments/{{missingPayment}}/review
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{ "confirm": false }
+
+?? status == 400
+
+### 19.12 A one-word refusal -> 400
+POST {{HostAddress}}/api/v1/workflow-instances/{{missingJob}}/payments/{{missingPayment}}/review
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{ "confirm": false, "note": "no" }
+
+?? status == 400
+
+### ---------------------------------------------------------------------
+### Authorization — reading a balance is a wider grant than deciding on it
+### ---------------------------------------------------------------------
+
+### 19.13 Register a client of this suite's own
+### Deliberately self-contained rather than borrowing suite 10's client: the seeded staff
+### accounts other than admin@ and deputy@ get Bogus-generated e-mail addresses, so there is no
+### deterministic client to log in as, and depending on another suite having run first is how
+### one timeout takes four suites down with it.
+# @name registerPaymentsClient
+POST {{HostAddress}}/api/v1/auth/register-client
+Content-Type: application/json
+Accept-Language: en
+X-Tenant-Domain: al-salamah
+
+{
+  "fullName": "Payments Suite Client",
+  "email": "payments.suite.client@example.com",
+  "phoneNumber": "+966501234577",
+  "password": "ClientSecure@123"
+}
+
+?? status == 200
+
+@paymentsClientId = {{registerPaymentsClient.data.userId}}
+@paymentsClientOtp = {{registerPaymentsClient.data.devOnlyOtp}}
+
+### 19.13a Verify the OTP so the account can sign in
+POST {{HostAddress}}/api/v1/auth/verify-client-otp
+Content-Type: application/json
+Accept-Language: en
+
+{ "userId": "{{paymentsClientId}}", "otp": "{{paymentsClientOtp}}" }
+
+?? status == 200
+
+### 19.13b Client signs in
+# @name clientLogin
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept-Language: en
+X-Tenant-Domain: al-salamah
+
+{ "email": "payments.suite.client@example.com", "password": "ClientSecure@123" }
+
+?? status == 200
+
+@clientToken = {{clientLogin.data.token}}
+
+### 19.14 Client against the staff panel -> 403
+GET {{HostAddress}}/api/v1/workflow-instances/{{missingJob}}/payments
+Authorization: Bearer {{clientToken}}
+Accept-Language: en
+
+?? status == 403
+
+### 19.15 Client confirming their own payment -> 403
+### The whole point of the pending state: a client cannot declare their own transfer received.
+POST {{HostAddress}}/api/v1/workflow-instances/{{missingJob}}/payments/{{missingPayment}}/review
+Authorization: Bearer {{clientToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{ "confirm": true }
+
+?? status == 403
+
+### 19.16 Client recording cash -> 403
+### Cash is confirmed as it is written, so recording it is the same authority as confirming it.
+POST {{HostAddress}}/api/v1/workflow-instances/{{missingJob}}/payments/cash
+Authorization: Bearer {{clientToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{ "amount": 5000 }
+
+?? status == 403
+
+### 19.17 A client's own statement for a job that is not theirs -> 404
+### Not 403: another client's project is indistinguishable from one that does not exist.
+GET {{HostAddress}}/api/v1/my-requests/{{missingJob}}/payments
+Authorization: Bearer {{clientToken}}
+Accept-Language: en
+
+?? status == 404

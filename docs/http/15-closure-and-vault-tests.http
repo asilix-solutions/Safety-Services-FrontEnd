@@ -1,0 +1,312 @@
+@baseUrl = http://localhost:5128
+@HostAddress = {{baseUrl}}
+@companyAdminEmail = admin@al-salamah.com
+@companyAdminPassword = User@123456
+@missingId = 4b8d2f16-5c73-4a90-b1e2-8f3c6d05a721
+@signature = data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==AAAAAAAAAAAAAAAAAAAA
+
+### =====================================================================
+### 15. PROJECT LEDGER, LEGAL CLOSURE & IMMUTABILITY VAULT (FR-FIN, FR-CLS)
+### =====================================================================
+### The last mile: what a project cost, whether it made money, and the ceremony that turns its
+### work records into a legal document nobody can change afterwards.
+###
+### The ledger splits VAT because VAT behaves in two ways — reclaimable input VAT passes through
+### the company, non-deductible VAT is a real cost — and splits labour because a salaried
+### technician's day is overhead the company pays regardless while a subcontractor's day is a
+### cheque written for this job (FR-FIN-03). An expense that takes cumulative spend past the
+### tenant's ceiling is held for management clearance: held, not hidden, because the money was
+### already spent (FR-FIN-05).
+###
+### Closure is gated three ways — every field task signed off, a punch list that exists and has no
+### open or failed line, and no expense still awaiting clearance — then dual-signed, client first
+### and company second, then sealed. Sealing stamps the final margin, compiles the master archive,
+### converts project-funded equipment to company assets (FR-FIN-04), and sets a write-lock enforced
+### by a SaveChanges interceptor rather than by handler checks, so it holds for tables that do not
+### exist yet.
+###
+### The full lifecycle — ledger arithmetic, the ceiling, both signatures in the wrong and right
+### order, sealing, and the write-lock proven against seven distinct entity types — is covered by
+### ClosureAndVaultLifecycleTests and ProjectMarginTests (xUnit) plus a 53-check scripted live run
+### that drives one job from intake to a sealed record. This suite is a smoke test of the surface
+### with explicit assertions. Field casing is camelCase (D-8).
+
+### 15.1 Company Admin login
+# @name companyAdminLogin
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept-Language: en
+
+{ "email": "{{companyAdminEmail}}", "password": "{{companyAdminPassword}}" }
+
+?? status == 200
+
+@companyAdminToken = {{companyAdminLogin.data.token}}
+
+### ---------------------------------------------------------------------
+### The cost ledger (FR-FIN-02/03/06)
+### ---------------------------------------------------------------------
+
+### 15.2 The ledger for a job that does not exist -> 404
+GET {{HostAddress}}/api/v1/workflow-instances/{{missingId}}/ledger
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+
+?? status == 404
+
+### 15.3 A malformed ZATCA VAT number -> 400
+### A registration number is exactly 15 digits. Accepting a malformed one produces a tax return
+### the authority rejects, long after anyone remembers this invoice.
+POST {{HostAddress}}/api/v1/workflow-instances/{{missingId}}/ledger/expenses
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{
+  "vendorName": "Al-Faisal Supplies",
+  "vendorTaxNumber": "12345",
+  "invoiceReferenceNumber": "INV-1001",
+  "description": "Smoke detectors",
+  "subtotalAmount": 2000,
+  "vatAmount": 300
+}
+
+?? status == 400
+
+### 15.4 VAT larger than the goods -> 400
+### Arithmetically possible only as a data-entry error, almost always the gross total typed into
+### the VAT box.
+POST {{HostAddress}}/api/v1/workflow-instances/{{missingId}}/ledger/expenses
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{
+  "vendorName": "Al-Faisal Supplies",
+  "vendorTaxNumber": "300012345600003",
+  "invoiceReferenceNumber": "INV-1001",
+  "description": "Smoke detectors",
+  "subtotalAmount": 2000,
+  "vatAmount": 3000
+}
+
+?? status == 400
+
+### 15.5 An expense with no base amount -> 400
+POST {{HostAddress}}/api/v1/workflow-instances/{{missingId}}/ledger/expenses
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{
+  "vendorName": "Al-Faisal Supplies",
+  "invoiceReferenceNumber": "INV-1002",
+  "description": "Smoke detectors",
+  "subtotalAmount": 0,
+  "vatAmount": 0
+}
+
+?? status == 400
+
+### 15.6 A well-formed expense on a job that does not exist -> 404
+POST {{HostAddress}}/api/v1/workflow-instances/{{missingId}}/ledger/expenses
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{
+  "vendorName": "Al-Faisal Supplies",
+  "vendorTaxNumber": "300012345600003",
+  "invoiceReferenceNumber": "INV-1003",
+  "description": "Smoke detectors",
+  "subtotalAmount": 2000,
+  "vatAmount": 300,
+  "isVatDeductible": true
+}
+
+?? status == 404
+
+### 15.7 Booking zero time -> 400
+POST {{HostAddress}}/api/v1/workflow-instances/{{missingId}}/ledger/labor
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{ "fieldWorkerId": "{{missingId}}", "units": 0, "workedOnUtc": "2026-09-20T08:00:00Z" }
+
+?? status == 400
+
+### 15.8 Booking time on a job that does not exist -> 404
+POST {{HostAddress}}/api/v1/workflow-instances/{{missingId}}/ledger/labor
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{ "fieldWorkerId": "{{missingId}}", "units": 3, "workedOnUtc": "2026-09-20T08:00:00Z" }
+
+?? status == 404
+
+### ---------------------------------------------------------------------
+### The spending ceiling (FR-FIN-05)
+### ---------------------------------------------------------------------
+
+### 15.9 Rejecting an overspend with no reason -> 400
+### The vendor will ask why. A bare rejection answers nothing.
+POST {{HostAddress}}/api/v1/project-expenses/{{missingId}}/clearance
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{ "approve": false }
+
+?? status == 400
+
+### 15.10 Clearing an expense that does not exist -> 404
+POST {{HostAddress}}/api/v1/project-expenses/{{missingId}}/clearance
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{ "approve": true, "notes": "Emergency pump replacement authorised on site." }
+
+?? status == 404
+
+### ---------------------------------------------------------------------
+### The pre-closure inspection (FR-CLS-01)
+### ---------------------------------------------------------------------
+
+### 15.11 Closure readiness for a job that does not exist -> 404
+GET {{HostAddress}}/api/v1/workflow-instances/{{missingId}}/closure/readiness
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+
+?? status == 404
+
+### 15.12 The punch list for a job that does not exist -> 404
+GET {{HostAddress}}/api/v1/workflow-instances/{{missingId}}/closure/punch-list
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+
+?? status == 404
+
+### 15.13 A punch-list line with no description -> 400
+PUT {{HostAddress}}/api/v1/workflow-instances/{{missingId}}/closure/punch-list
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{ "description": "" }
+
+?? status == 400
+
+### 15.14 Applying the standard checklist to a job that does not exist -> 404
+POST {{HostAddress}}/api/v1/workflow-instances/{{missingId}}/closure/punch-list/apply-standard
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+
+?? status == 404
+
+### 15.15 A bare failure verdict -> 400
+### This is the line an inspector defends if the building later fails, and a one-word failure
+### defends nothing.
+POST {{HostAddress}}/api/v1/punch-list-items/{{missingId}}/inspect
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{ "verdict": 3, "notes": "bad" }
+
+?? status == 400
+
+### 15.16 Inspecting a line that does not exist -> 404
+POST {{HostAddress}}/api/v1/punch-list-items/{{missingId}}/inspect
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{ "verdict": 2, "notes": "Verified on site; annunciates correctly at the panel." }
+
+?? status == 404
+
+### ---------------------------------------------------------------------
+### The closure ceremony (FR-CLS-02)
+### ---------------------------------------------------------------------
+
+### 15.17 Opening a certificate for a job that does not exist -> 404
+POST {{HostAddress}}/api/v1/workflow-instances/{{missingId}}/closure/certificate
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+
+?? status == 404
+
+### 15.18 Reading a certificate that has not been opened -> 404
+GET {{HostAddress}}/api/v1/workflow-instances/{{missingId}}/closure/certificate
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+
+?? status == 404
+
+### 15.19 An empty signature pad -> 400
+### A canvas signature is an encoded image; a few characters is an untouched pad or a stray dot.
+POST {{HostAddress}}/api/v1/workflow-instances/{{missingId}}/closure/sign/client
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{ "signatureBase64": "x", "representativeName": "Eng. Faisal Al-Harbi" }
+
+?? status == 400
+
+### 15.20 A client signature with nobody named -> 400
+### The company must be able to say who signed, by name and title.
+POST {{HostAddress}}/api/v1/workflow-instances/{{missingId}}/closure/sign/client
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{ "signatureBase64": "{{signature}}", "representativeName": "" }
+
+?? status == 400
+
+### 15.21 A well-formed client signature on a job that does not exist -> 404
+POST {{HostAddress}}/api/v1/workflow-instances/{{missingId}}/closure/sign/client
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{ "signatureBase64": "{{signature}}", "representativeName": "Eng. Faisal Al-Harbi" }
+
+?? status == 404
+
+### 15.22 A manager countersignature on a job with no certificate -> 404
+POST {{HostAddress}}/api/v1/workflow-instances/{{missingId}}/closure/sign/manager
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{ "signatureBase64": "{{signature}}" }
+
+?? status == 404
+
+### 15.23 Sealing a job that does not exist -> 404
+POST {{HostAddress}}/api/v1/workflow-instances/{{missingId}}/closure/seal
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+
+?? status == 404
+
+### ---------------------------------------------------------------------
+### Authentication
+### ---------------------------------------------------------------------
+
+### 15.24 Unauthenticated access to the ledger -> 401
+GET {{HostAddress}}/api/v1/workflow-instances/{{missingId}}/ledger
+Accept-Language: en
+
+?? status == 401
+
+### 15.25 Unauthenticated sealing -> 401
+POST {{HostAddress}}/api/v1/workflow-instances/{{missingId}}/closure/seal
+Accept-Language: en
+
+?? status == 401

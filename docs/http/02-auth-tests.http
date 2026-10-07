@@ -1,0 +1,877 @@
+@baseUrl = http://localhost:5128
+@HostAddress = {{baseUrl}}
+@superAdminEmail = admin@amanix.com
+@superAdminPassword = Admin@123456
+@superAdminEmailWrong = admin.wrong@amanix.com
+@tenantManagerEmail = admin@al-salamah.com
+@tenantManagerPassword = User@123456
+@tenantManagerEmailWrong = admin.wrong@al-salamah.com
+@newPassword = NewSecurePassword@123456
+
+### =====================================================================
+### 02. AUTHENTICATION & IAM SECURITY TEST SUITE (COMPLETE COVERAGE)
+### =====================================================================
+### This suite tests all authentication flows, token management, and security scenarios.
+### Token extraction fix: LoginResponse uses 'Token' field (not 'accessToken')
+### RefreshTokenResponse serialises as 'accessToken' and 'refreshToken' (camelCase, like every response)
+
+### =====================================================================
+### 2.1 HAPPY PATH - SUCCESSFUL AUTHENTICATION SCENARIOS
+### =====================================================================
+
+### 2.1.1 Platform SuperAdmin Login (Arabic Language Header) - Expect 200 OK
+# @name superAdminLoginAr
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "email": "{{superAdminEmail}}",
+  "password": "{{superAdminPassword}}"
+}
+
+### 2.1.2 Platform SuperAdmin Login (English Language Header) - Expect 200 OK
+# @name superAdminLoginEn
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "email": "{{superAdminEmail}}",
+  "password": "{{superAdminPassword}}"
+}
+
+@superAdminToken = {{superAdminLoginEn.data.token}}
+
+### 2.1.3 Tenant Manager Login (with Subdomain Header) - Expect 200 OK
+# @name tenantManagerLogin
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+X-Tenant-Domain: al-salamah
+
+{
+  "email": "{{tenantManagerEmail}}",
+  "password": "{{tenantManagerPassword}}"
+}
+
+@tenantManagerToken = {{tenantManagerLogin.data.token}}
+
+### 2.1.4 Tenant Manager Login (English) - Expect 200 OK
+# @name tenantManagerLoginEn
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+X-Tenant-Domain: al-salamah
+
+{
+  "email": "{{tenantManagerEmail}}",
+  "password": "{{tenantManagerPassword}}"
+}
+
+### 2.2 GET AUTHENTICATED USER PROFILE & PERMISSIONS
+### =====================================================================
+
+### 2.2.1 Get Authenticated User Profile (GET /api/v1/me) - Expect 200 OK
+# @name getMyProfile
+GET {{HostAddress}}/api/v1/me
+Authorization: Bearer {{tenantManagerToken}}
+Accept: application/json
+Accept-Language: ar
+
+### 2.2.2 Get SuperAdmin User Profile - Expect 200 OK
+# @name getSuperAdminProfile
+GET {{HostAddress}}/api/v1/me
+Authorization: Bearer {{superAdminToken}}
+Accept: application/json
+Accept-Language: en
+
+### 2.2.3 Get User Permissions Claims - Expect 200 OK
+# @name getUserPermissions
+GET {{HostAddress}}/api/v1/auth/permissions/me
+Authorization: Bearer {{tenantManagerToken}}
+Accept: application/json
+Accept-Language: ar
+
+### 2.2.4 Get SuperAdmin Permissions Claims - Expect 200 OK
+# @name getSuperAdminPermissions
+GET {{HostAddress}}/api/v1/auth/permissions/me
+Authorization: Bearer {{superAdminToken}}
+Accept: application/json
+Accept-Language: en
+
+### 2.3 CHANGE USER PASSWORD
+### =====================================================================
+
+### 2.3.1 Change Authenticated User Password (Happy Path) - Expect 200 OK
+# @name changePassword
+PUT {{HostAddress}}/api/v1/me/change-password
+Authorization: Bearer {{tenantManagerToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "currentPassword": "{{tenantManagerPassword}}",
+  "newPassword": "{{newPassword}}"
+}
+
+### 2.3.2 Change SuperAdmin Password - Expect 200 OK
+# @name changeSuperAdminPassword
+PUT {{HostAddress}}/api/v1/me/change-password
+Authorization: Bearer {{superAdminToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "currentPassword": "{{superAdminPassword}}",
+  "newPassword": "{{newPassword}}"
+}
+
+### 2.3.3 [CLEANUP] Restore the tenant manager password so later sections and suites start from the seed
+### Every suite after this one logs in with the seeded credentials. A password left changed here
+### turns into a wall of 401s three files later, with nothing pointing back at the cause.
+# @name restoreTenantManagerAfterChangeLogin
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "email": "{{tenantManagerEmail}}",
+  "password": "NewSecurePassword@123456"
+}
+
+?? status == 200
+
+###
+PUT {{HostAddress}}/api/v1/me/change-password
+Authorization: Bearer {{restoreTenantManagerAfterChangeLogin.data.token}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "currentPassword": "NewSecurePassword@123456",
+  "newPassword": "{{tenantManagerPassword}}"
+}
+
+?? status == 200
+
+### 2.3.4 [CLEANUP] Restore the super admin password so later sections and suites start from the seed
+### Every suite after this one logs in with the seeded credentials. A password left changed here
+### turns into a wall of 401s three files later, with nothing pointing back at the cause.
+# @name restoreSuperAdminAfterChangeLogin
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "email": "{{superAdminEmail}}",
+  "password": "NewSecurePassword@123456"
+}
+
+?? status == 200
+
+###
+PUT {{HostAddress}}/api/v1/me/change-password
+Authorization: Bearer {{restoreSuperAdminAfterChangeLogin.data.token}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "currentPassword": "NewSecurePassword@123456",
+  "newPassword": "{{superAdminPassword}}"
+}
+
+?? status == 200
+
+### 2.4 TOKEN REFRESH & ROTATION (Silent background auth)
+### =====================================================================
+
+### 2.4.1 Token Refresh with SuperAdmin Tokens - Expect 200 OK
+# @name refreshTokenSuperAdmin
+POST {{HostAddress}}/api/v1/auth/refresh-token
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "accessToken": "{{superAdminLoginEn.data.token}}",
+  "refreshToken": "{{superAdminLoginEn.data.refreshToken}}"
+}
+
+@refreshedSuperAdminToken = {{refreshTokenSuperAdmin.data.accessToken}}
+
+### 2.4.2 Token Refresh with TenantManager Tokens - Expect 200 OK
+# @name refreshTokenTenantManager
+POST {{HostAddress}}/api/v1/auth/refresh-token
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "accessToken": "{{tenantManagerLoginEn.data.token}}",
+  "refreshToken": "{{tenantManagerLoginEn.data.refreshToken}}"
+}
+
+@refreshedTenantManagerToken = {{refreshTokenTenantManager.data.accessToken}}
+
+### 2.5 PASSWORD RECOVERY FLOW (Forgot Password & Reset)
+### =====================================================================
+
+### 2.5.1 Forgot Password OTP Generation (SuperAdmin Email) - Expect 200 OK
+### DevOnlyOtp is populated only when FeatureToggles:IsOtpReturnInsideTheResponse=true (Development)
+# @name forgotPasswordSuperAdmin
+POST {{HostAddress}}/api/v1/auth/forgot-password
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "email": "{{superAdminEmail}}"
+}
+
+@superAdminResetOtp = {{forgotPasswordSuperAdmin.data.devOnlyOtp}}
+
+### 2.5.2 Forgot Password OTP Generation (TenantManager Email) - Expect 200 OK
+# @name forgotPasswordTenantManager
+POST {{HostAddress}}/api/v1/auth/forgot-password
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "email": "{{tenantManagerEmail}}"
+}
+
+@tenantManagerResetOtp = {{forgotPasswordTenantManager.data.devOnlyOtp}}
+
+### 2.5.3 Reset Password with OTP Code (SuperAdmin) - Expect 200 OK
+# @name resetPasswordSuperAdmin
+POST {{HostAddress}}/api/v1/auth/reset-password
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "email": "{{superAdminEmail}}",
+  "otp": "{{superAdminResetOtp}}",
+  "newPassword": "ResetSecure@123456"
+}
+
+### 2.5.4 Reset Password with OTP Code (TenantManager) - Expect 200 OK
+# @name resetPasswordTenantManager
+POST {{HostAddress}}/api/v1/auth/reset-password
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "email": "{{tenantManagerEmail}}",
+  "otp": "{{tenantManagerResetOtp}}",
+  "newPassword": "ResetSecure@123456"
+}
+
+### 2.5.4a [CLEANUP] Restore the tenant manager password so later sections and suites start from the seed
+### Every suite after this one logs in with the seeded credentials. A password left changed here
+### turns into a wall of 401s three files later, with nothing pointing back at the cause.
+# @name restoreTenantManagerAfterResetLogin
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "email": "{{tenantManagerEmail}}",
+  "password": "ResetSecure@123456"
+}
+
+?? status == 200
+
+###
+PUT {{HostAddress}}/api/v1/me/change-password
+Authorization: Bearer {{restoreTenantManagerAfterResetLogin.data.token}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "currentPassword": "ResetSecure@123456",
+  "newPassword": "{{tenantManagerPassword}}"
+}
+
+?? status == 200
+
+### 2.5.4b [CLEANUP] Restore the super admin password so later sections and suites start from the seed
+### Every suite after this one logs in with the seeded credentials. A password left changed here
+### turns into a wall of 401s three files later, with nothing pointing back at the cause.
+# @name restoreSuperAdminAfterResetLogin
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "email": "{{superAdminEmail}}",
+  "password": "ResetSecure@123456"
+}
+
+?? status == 200
+
+###
+PUT {{HostAddress}}/api/v1/me/change-password
+Authorization: Bearer {{restoreSuperAdminAfterResetLogin.data.token}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "currentPassword": "ResetSecure@123456",
+  "newPassword": "{{superAdminPassword}}"
+}
+
+?? status == 200
+
+### 2.5.5 Reset Password - Exceed Max 3 Verification Attempts (OtpRequest.AttemptCount lockout)
+# @name resetPasswordAttempt1
+POST {{HostAddress}}/api/v1/auth/reset-password
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "email": "{{superAdminEmail}}",
+  "otp": "000001",
+  "newPassword": "ResetSecure@123456"
+}
+
+### 2.5.6 Reset Password Attempt 2 of 3 - Expect 400 Bad Request
+# @name resetPasswordAttempt2
+POST {{HostAddress}}/api/v1/auth/reset-password
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "email": "{{superAdminEmail}}",
+  "otp": "000002",
+  "newPassword": "ResetSecure@123456"
+}
+
+### 2.5.7 Reset Password Attempt 3 of 3 (Locks Out the OTP) - Expect 400 Bad Request
+# @name resetPasswordAttempt3
+POST {{HostAddress}}/api/v1/auth/reset-password
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "email": "{{superAdminEmail}}",
+  "otp": "000003",
+  "newPassword": "ResetSecure@123456"
+}
+
+### 2.5.8 Reset Password with the CORRECT OTP after lockout - Expect 400 Bad Request (max attempts exceeded)
+# @name resetPasswordAfterLockout
+POST {{HostAddress}}/api/v1/auth/reset-password
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "email": "{{superAdminEmail}}",
+  "otp": "{{superAdminResetOtp}}",
+  "newPassword": "ResetSecure@123456"
+}
+
+### =====================================================================
+### 2.6 NEGATIVE TEST CASES - INVALID CREDENTIALS & VALIDATION FAILURES
+### =====================================================================
+
+### 2.6.1 Login Invalid Credentials - Wrong Password (Expect 400 Bad Request)
+# @name loginWrongPassword
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "email": "{{superAdminEmail}}",
+  "password": "WrongPassword999"
+}
+
+### 2.6.2 Login Invalid Credentials - Non-existent Email (Expect 400 Bad Request)
+# @name loginNonexistentEmail
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "email": "nonexistent@amanix.com",
+  "password": "SomePassword@123456"
+}
+
+### 2.6.3 Login with Empty Email (Expect 400 Bad Request)
+# @name loginEmptyEmail
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "email": "",
+  "password": "{{superAdminPassword}}"
+}
+
+### 2.6.4 Login with Empty Password (Expect 400 Bad Request)
+# @name loginEmptyPassword
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "email": "{{superAdminEmail}}",
+  "password": ""
+}
+
+### 2.6.5 Login with Both Empty Email and Password (Expect 400 Bad Request)
+# @name loginEmptyPayload
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "email": "",
+  "password": ""
+}
+
+### 2.6.6 Change Password with Wrong Current Password (Expect 400 Bad Request)
+# @name changePasswordWrongCurrent
+PUT {{HostAddress}}/api/v1/me/change-password
+Authorization: Bearer {{tenantManagerToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "currentPassword": "WrongCurrentPassword@123456",
+  "newPassword": "{{newPassword}}"
+}
+
+### 2.6.7 Change Password with Weak New Password (Expect 400 Bad Request)
+# @name changePasswordWeakPassword
+PUT {{HostAddress}}/api/v1/me/change-password
+Authorization: Bearer {{tenantManagerToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "currentPassword": "{{tenantManagerPassword}}",
+  "newPassword": "weak"
+}
+
+### 2.6.8 Change Password with Same Current & New Password (Expect 400 Bad Request)
+# @name changePasswordSamePassword
+PUT {{HostAddress}}/api/v1/me/change-password
+Authorization: Bearer {{tenantManagerToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "currentPassword": "{{tenantManagerPassword}}",
+  "newPassword": "{{tenantManagerPassword}}"
+}
+
+### 2.6.9 Refresh Token with Invalid AccessToken (Expect 400 Bad Request)
+# @name refreshTokenInvalidAccess
+POST {{HostAddress}}/api/v1/auth/refresh-token
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "accessToken": "invalid.token.here",
+  "refreshToken": "{{superAdminLoginEn.data.refreshToken}}"
+}
+
+### 2.6.10 Refresh Token with Invalid RefreshToken (Expect 400 Bad Request)
+# @name refreshTokenInvalidRefresh
+POST {{HostAddress}}/api/v1/auth/refresh-token
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "accessToken": "{{superAdminLoginEn.data.token}}",
+  "refreshToken": "invalid.refresh.token"
+}
+
+### 2.6.11 Reset Password with Invalid OTP (Expect 400 Bad Request)
+# @name resetPasswordInvalidOtp
+POST {{HostAddress}}/api/v1/auth/reset-password
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "email": "{{superAdminEmail}}",
+  "otp": "000000",
+  "newPassword": "{{newPassword}}"
+}
+
+### 2.6.12 Reset Password with Non-existent Email (Expect 400 Bad Request)
+# @name resetPasswordNonexistentEmail
+POST {{HostAddress}}/api/v1/auth/reset-password
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "email": "nonexistent@amanix.com",
+  "otp": "123456",
+  "newPassword": "{{newPassword}}"
+}
+
+### 2.6.13 Forgot Password with Non-existent Email - User Enumeration Prevention (Expect 200 OK - Privacy)
+# @name forgotPasswordNonexistent
+POST {{HostAddress}}/api/v1/auth/forgot-password
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "email": "nonexistent@amanix.com"
+}
+
+### =====================================================================
+### 2.7 AUTHORIZATION & SECURITY TESTS (Missing/Invalid Tokens)
+### =====================================================================
+
+### 2.7.1 Access Me Profile WITHOUT Token (Expect 401 Unauthorized)
+# @name getMyProfileUnauthenticated
+GET {{HostAddress}}/api/v1/me
+Accept: application/json
+Accept-Language: en
+
+### 2.7.2 Access Me Profile with Invalid Token Format (Expect 401 Unauthorized)
+# @name getMyProfileInvalidToken
+GET {{HostAddress}}/api/v1/me
+Authorization: Bearer invalidtoken123
+Accept: application/json
+Accept-Language: ar
+
+### 2.7.3 Access Me Profile with Malformed Bearer Header (Expect 401 Unauthorized)
+# @name getMyProfileMalformedBearer
+GET {{HostAddress}}/api/v1/me
+Authorization: InvalidBearerFormat
+Accept: application/json
+Accept-Language: en
+
+### 2.7.4 Get Permissions WITHOUT Token (Expect 401 Unauthorized)
+# @name getPermissionsUnauthenticated
+GET {{HostAddress}}/api/v1/auth/permissions/me
+Accept: application/json
+Accept-Language: ar
+
+### 2.7.5 Change Password WITHOUT Token (Expect 401 Unauthorized)
+# @name changePasswordUnauthenticated
+PUT {{HostAddress}}/api/v1/me/change-password
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "currentPassword": "{{tenantManagerPassword}}",
+  "newPassword": "{{newPassword}}"
+}
+
+### =====================================================================
+### 2.8 EDGE CASES & BOUNDARY TESTS
+### =====================================================================
+
+### 2.8.1 Login with Very Long Email Field (SQL Injection attempt) - Expect 400 Bad Request
+# @name loginSqlInjectionEmail
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "email": "admin' OR '1'='1'; --@amanix.com",
+  "password": "{{superAdminPassword}}"
+}
+
+### 2.8.2 Login with Special Characters in Password (XSS attempt) - Expect 400 Bad Request
+# @name loginXssPassword
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "email": "{{superAdminEmail}}",
+  "password": "<script>alert('xss')</script>"
+}
+
+### 2.8.3 Login with Unicode Characters - Expect 400 Bad Request or 200 OK (if supported)
+# @name loginUnicodePassword
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "email": "{{superAdminEmail}}",
+  "password": "الكلمةالسرية123"
+}
+
+### 2.8.4 Refresh Token with Empty Strings (Expect 400 Bad Request)
+# @name refreshTokenEmptyStrings
+POST {{HostAddress}}/api/v1/auth/refresh-token
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "accessToken": "",
+  "refreshToken": ""
+}
+
+### 2.8.5 Change Password with a 147-character New Password (Expect 400 Bad Request)
+### The password policy caps passwords at 128 characters (PasswordRules). Before the cap this
+### returned 200 and left the account on the long password, breaking every later suite's login.
+# @name changePasswordExtremelyLong
+PUT {{HostAddress}}/api/v1/me/change-password
+Authorization: Bearer {{tenantManagerToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "currentPassword": "{{tenantManagerPassword}}",
+  "newPassword": "VeryLongPassword123VeryLongPassword123VeryLongPassword123VeryLongPassword123VeryLongPassword123VeryLongPassword123VeryLongPassword123VeryLongPassword123@"
+}
+
+?? status == 400
+
+### 2.8.6 Login Attempt Multiple Times Rapidly (Rate Limiting Test) - Expect 429 Too Many Requests after threshold
+# @name loginRateLimitTest1
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "email": "{{superAdminEmail}}",
+  "password": "WrongPassword1"
+}
+
+### 2.8.7 Forgot Password with Email in Different Case - Expect 200 OK (Case-insensitive)
+# @name forgotPasswordDifferentCase
+POST {{HostAddress}}/api/v1/auth/forgot-password
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "email": "ADMIN@AMANIX.COM"
+}
+
+### =====================================================================
+### 2.9 PHASE 0 REGRESSION SUITE (P0-1 / P0-2)
+### =====================================================================
+### Unlike the sections above, these requests carry explicit `?? status` assertions. A request with
+### no assertion cannot fail a `--bail` run, so this section exists to fail loudly if either defect
+### is reintroduced.
+###
+### P0-1: ChangePasswordCommandHandler called Verify(hash, plainText) against a
+###       Verify(plainText, hash) signature, so every password change silently failed.
+### P0-2: LoginCommandHandler never issued a refresh token, so /auth/refresh-token could never
+###       succeed for a freshly logged-in user.
+### See Docs/ai/12_ENGINEERING_BACKLOG_AND_TECH_DEBT.md
+###
+### NOTE ON FIELD CASING: the API serializes camelCase (no JsonSerializerOptions naming policy is
+### configured, so ASP.NET Core's default applies). Verified against a running instance:
+###   {"isSuccess":true,"message":"...","data":{"token":"...","refreshToken":"...", ...}}
+### This section therefore reads `data.token` / `data.refreshToken`, NOT the PascalCase paths used
+### elsewhere in these suites — see tech-debt item D-8.
+###
+### Self-contained and state-restoring: changes a password and changes it back, so it can run in
+### any order without breaking the suites that follow.
+
+@p0TempPassword = P0Regression@2026
+
+### 2.9.1 [P0-2] Login must return BOTH an access token and a refresh token
+# @name p0Login
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "email": "{{superAdminEmail}}",
+  "password": "{{superAdminPassword}}"
+}
+
+?? status == 200
+
+@p0AccessToken = {{p0Login.data.token}}
+@p0RefreshToken = {{p0Login.data.refreshToken}}
+
+### 2.9.2 [P0-2] The refresh token issued at login must be redeemable (proves it was persisted)
+# @name p0Refresh
+POST {{HostAddress}}/api/v1/auth/refresh-token
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "accessToken": "{{p0AccessToken}}",
+  "refreshToken": "{{p0RefreshToken}}"
+}
+
+?? status == 200
+
+### 2.9.3 [P0-2] Replaying the now-superseded refresh token must be rejected (rotation enforced)
+POST {{HostAddress}}/api/v1/auth/refresh-token
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "accessToken": "{{p0AccessToken}}",
+  "refreshToken": "{{p0RefreshToken}}"
+}
+
+?? status == 400
+
+### 2.9.4 [P0-1] Change password with the WRONG current password must be rejected
+PUT {{HostAddress}}/api/v1/me/change-password
+Authorization: Bearer {{p0AccessToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "currentPassword": "ThisIsNotTheCurrentPassword@9",
+  "newPassword": "{{p0TempPassword}}"
+}
+
+?? status == 400
+
+### 2.9.5 [P0-1] Change password with the CORRECT current password must succeed
+PUT {{HostAddress}}/api/v1/me/change-password
+Authorization: Bearer {{p0AccessToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "currentPassword": "{{superAdminPassword}}",
+  "newPassword": "{{p0TempPassword}}"
+}
+
+?? status == 200
+
+### 2.9.6 [P0-1] The NEW password must now authenticate — proves the change actually took effect
+# @name p0LoginWithNewPassword
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "email": "{{superAdminEmail}}",
+  "password": "{{p0TempPassword}}"
+}
+
+?? status == 200
+
+@p0NewAccessToken = {{p0LoginWithNewPassword.data.token}}
+
+### 2.9.7 [P0-1] The OLD password must no longer authenticate
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "email": "{{superAdminEmail}}",
+  "password": "{{superAdminPassword}}"
+}
+
+?? status == 400
+
+### 2.9.8 [CLEANUP] Restore the original password so this section is order-independent
+PUT {{HostAddress}}/api/v1/me/change-password
+Authorization: Bearer {{p0NewAccessToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "currentPassword": "{{p0TempPassword}}",
+  "newPassword": "{{superAdminPassword}}"
+}
+
+?? status == 200
+
+### =====================================================================
+### 2.10 LOGOUT — ENDING THE SESSION ON THE SERVER
+### =====================================================================
+### Signing out has to revoke the refresh token. Otherwise a token copied from a shared machine
+### keeps working for its full lifetime after the user believes they have signed out.
+
+### 2.10.1 Sign in to get a session to end
+# @name logoutFlowLogin
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept-Language: en
+
+{ "email": "{{tenantManagerEmail}}", "password": "{{tenantManagerPassword}}" }
+
+?? status == 200
+
+@logoutFlowAccessToken = {{logoutFlowLogin.data.token}}
+@logoutFlowRefreshToken = {{logoutFlowLogin.data.refreshToken}}
+
+### 2.10.2 Log out -> 200
+POST {{HostAddress}}/api/v1/auth/logout
+Authorization: Bearer {{logoutFlowAccessToken}}
+Accept-Language: en
+
+?? status == 200
+
+### 2.10.3 The refresh token no longer works -> 400
+POST {{HostAddress}}/api/v1/auth/refresh-token
+Content-Type: application/json
+Accept-Language: en
+
+{ "accessToken": "{{logoutFlowAccessToken}}", "refreshToken": "{{logoutFlowRefreshToken}}" }
+
+?? status == 400
+
+### 2.10.4 Logging out again is still a success (idempotent)
+POST {{HostAddress}}/api/v1/auth/logout
+Authorization: Bearer {{logoutFlowAccessToken}}
+Accept-Language: en
+
+?? status == 200
+
+### 2.10.5 Logging out without a token -> 401
+POST {{HostAddress}}/api/v1/auth/logout
+
+?? status == 401

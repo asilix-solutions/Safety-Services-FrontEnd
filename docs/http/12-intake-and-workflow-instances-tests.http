@@ -1,0 +1,121 @@
+@baseUrl = http://localhost:5128
+@HostAddress = {{baseUrl}}
+@companyAdminEmail = admin@al-salamah.com
+@companyAdminPassword = User@123456
+@deputyAdminEmail = deputy@al-salamah.com
+@deputyAdminPassword = User@123456
+
+### =====================================================================
+### 12. SMART INTAKE, TRIAGE DESK & ROLE-SHAPED JOB VIEWS (FR-WKF-02/03/04/05, FR-NOT-01)
+### =====================================================================
+### The service transaction lifecycle: a request is opened as a draft, filled against the step's
+### dynamic form, submitted (which issues AMX-YYYY-NNNNN and starts the SLA clock), then accepted or
+### rejected at the management triage desk. Staff see a job through turn-based visibility; clients
+### see their own requests through the client projection.
+###
+### The full lifecycle and the client-vs-staff isolation are covered exhaustively by the live
+### end-to-end suites (IntakeLifecycleTests + the scripted run over six real accounts). This .http
+### suite is a smoke test of the surface with explicit assertions. Field casing is camelCase (D-8).
+
+### 12.1 Company Admin login
+# @name companyAdminLogin
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept-Language: en
+
+{ "email": "{{companyAdminEmail}}", "password": "{{companyAdminPassword}}" }
+
+?? status == 200
+
+@companyAdminToken = {{companyAdminLogin.data.token}}
+
+### 12.2 A default template exists for the Licensing category (needed to open a draft)
+GET {{HostAddress}}/api/v1/workflow-templates?serviceCategory=1&pageSize=20
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+
+?? status == 200
+
+### 12.3 Staff open a draft without naming a client -> 400
+POST {{HostAddress}}/api/v1/intake
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{ "serviceCategory": 1 }
+
+?? status == 400
+
+### 12.4 Submitting a non-existent request -> 404
+POST {{HostAddress}}/api/v1/intake/3f9a1c22-7b44-4e18-9d05-6c2e8a5f1b70/submit
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+
+?? status == 404
+
+### 12.5 Uploading to a non-existent request -> 404
+### A real file is attached: without one, binding refuses the request (400, "file is required")
+### before the request is ever looked up, and the test would be checking the wrong thing.
+POST {{HostAddress}}/api/v1/intake/3f9a1c22-7b44-4e18-9d05-6c2e8a5f1b70/documents
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+Content-Type: multipart/form-data; boundary=AmanixUploadBoundary
+
+--AmanixUploadBoundary
+Content-Disposition: form-data; name="file"; filename="site-plan.pdf"
+Content-Type: application/pdf
+
+%PDF-1.4
+%%EOF
+--AmanixUploadBoundary--
+
+?? status == 404
+
+### 12.5b Uploading with no file at all -> 400, in the standard ApiResponse envelope
+### Binding failures used to answer in ASP.NET's ProblemDetails shape; they now use the same
+### envelope as every other error, so a client needs one error parser, not two.
+POST {{HostAddress}}/api/v1/intake/3f9a1c22-7b44-4e18-9d05-6c2e8a5f1b70/documents
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+
+?? status == 400
+?? body isSuccess == false
+
+### 12.6 Staff list of jobs (staff view) -> 200
+GET {{HostAddress}}/api/v1/workflow-instances?pageSize=10
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+
+?? status == 200
+
+### 12.7 The triage desk queue -> 200
+GET {{HostAddress}}/api/v1/workflow-instances?awaitingTriage=true&pageSize=50
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+
+?? status == 200
+
+### 12.8 A non-existent job in the staff view -> 404
+GET {{HostAddress}}/api/v1/workflow-instances/00000000-0000-0000-0000-000000000000
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+
+?? status == 404
+
+### 12.9 CompanyAdmin is not a Client, so the client portal refuses them -> 403
+### ClientRequests.View is granted to the Client role only; a staff member holding
+### WorkflowInstances.View still cannot reach /my-requests.
+GET {{HostAddress}}/api/v1/my-requests
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+
+?? status == 403
+
+### 12.10 Unauthenticated access to the intake surface -> 401
+POST {{HostAddress}}/api/v1/intake
+Content-Type: application/json
+Accept-Language: en
+
+{ "serviceCategory": 1 }
+
+?? status == 401

@@ -1,0 +1,323 @@
+@baseUrl = http://localhost:5128
+@HostAddress = {{baseUrl}}
+@superAdminEmail = admin@amanix.com
+@superAdminPassword = Admin@123456
+@companyAdminEmail = admin@al-salamah.com
+@companyAdminPassword = User@123456
+@missingTenant = 3f9a1c22-7b44-4e18-9d05-6c2e8a5f1b70
+@missingPlan = 6b2e8a5f-1b70-4e18-9d05-3f9a1c227b44
+
+### =====================================================================
+### 17. SUBSCRIPTION TIERS, QUOTAS AND EXPIRY (FR-SUB)
+### =====================================================================
+### Plans are data: platform staff create and reprice them, and a company's limits are read
+### through the plan it is linked to rather than copied onto it. A quota left null is unlimited.
+###
+### A company's standing is derived, never stored: Active → GracePeriod → ReadOnly, computed
+### from the expiry date and the plan's grace days. Grace still writes; ReadOnly refuses writes
+### with 402 while every read, export and sign-in keeps working.
+###
+### A company with no plan on file is UNGOVERNED — unlimited and never expiring. That is what
+### made this feature safe to deploy onto a platform that already had live customers.
+###
+### The state machine, the quota arithmetic, the seat-counting rules and the middleware's
+### exemptions are covered by SubscriptionGovernanceTests and
+### SubscriptionEnforcementMiddlewareTests (xUnit). This suite is a smoke test of the surface
+### with explicit assertions. Field casing is camelCase (D-8).
+
+### 17.1 Platform SuperAdmin login
+# @name superAdminLogin
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept-Language: en
+
+{ "email": "{{superAdminEmail}}", "password": "{{superAdminPassword}}" }
+
+?? status == 200
+
+@superAdminToken = {{superAdminLogin.data.token}}
+
+### 17.2 Company Admin login
+# @name companyAdminLogin
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept-Language: en
+
+{ "email": "{{companyAdminEmail}}", "password": "{{companyAdminPassword}}" }
+
+?? status == 200
+
+@companyAdminToken = {{companyAdminLogin.data.token}}
+
+### ---------------------------------------------------------------------
+### The public price list
+### ---------------------------------------------------------------------
+
+### 17.3 Anonymous pricing page -> 200, and the seeded catalogue is there
+### Public because the sign-up page needs it before anyone has an account.
+# @name publicPlans
+GET {{HostAddress}}/api/v1/subscription-plans
+Accept-Language: en
+
+?? status == 200
+?? js response.parsedBody.data.length > 3
+
+### 17.4 Enterprise sells unlimited, and says so with null rather than a large number
+GET {{HostAddress}}/api/v1/subscription-plans
+Accept-Language: en
+
+?? status == 200
+?? js response.parsedBody.data.filter(p => p.code.startsWith('ENTERPRISE') && p.maxStaffUsers != null).length < 1
+?? js response.parsedBody.data.filter(p => p.code.startsWith('STARTER') && p.maxStaffUsers > 9).length > 0
+
+### ---------------------------------------------------------------------
+### Authentication and authorization
+### ---------------------------------------------------------------------
+
+### 17.5 Unauthenticated read of one's own subscription -> 401
+GET {{HostAddress}}/api/v1/tenants/subscription
+
+?? status == 401
+
+### 17.6 Unauthenticated platform catalogue -> 401
+GET {{HostAddress}}/api/v1/platform/subscription-plans
+
+?? status == 401
+
+### 17.7 A company admin cannot reach the platform catalogue -> 403
+### Raising your own limits is not a tenant capability.
+GET {{HostAddress}}/api/v1/platform/subscription-plans
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+
+?? status == 403
+
+### 17.8 A company admin cannot assign itself a plan -> 403
+PUT {{HostAddress}}/api/v1/platform/tenants/{{missingTenant}}/subscription
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{ "planCode": "ENTERPRISE", "termMonths": 120 }
+
+?? status == 403
+
+### ---------------------------------------------------------------------
+### The company's own view
+### ---------------------------------------------------------------------
+
+### 17.9 A company admin reads its own subscription -> 200, with every quota listed
+### The seeded companies are on no plan, so this is the ungoverned shape a frontend must handle.
+# @name mySubscription
+GET {{HostAddress}}/api/v1/tenants/subscription
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+
+?? status == 200
+?? body data.writesPermitted == true
+?? js response.parsedBody.data.quotas.length > 2
+?? js response.parsedBody.data.quotas.filter(q => q.limit != null).length < 1
+
+### ---------------------------------------------------------------------
+### Plan administration
+### ---------------------------------------------------------------------
+
+### 17.10 The platform catalogue includes retired plans -> 200
+GET {{HostAddress}}/api/v1/platform/subscription-plans
+Authorization: Bearer {{superAdminToken}}
+Accept-Language: en
+
+?? status == 200
+?? js response.parsedBody.data.length > 3
+
+### 17.11 A plan code that is already taken -> 409
+POST {{HostAddress}}/api/v1/platform/subscription-plans
+Authorization: Bearer {{superAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{
+  "code": "STARTER",
+  "nameAr": "مكرر",
+  "nameEn": "Duplicate",
+  "monthlyPriceSar": 100,
+  "annualPriceSar": 1000,
+  "trialDays": 0,
+  "graceDays": 7,
+  "displayOrder": 9
+}
+
+?? status == 409
+
+### 17.12 A quota of zero -> 400
+### Unlimited is expressed by omitting the field; 0 would be a plan that permits nothing.
+POST {{HostAddress}}/api/v1/platform/subscription-plans
+Authorization: Bearer {{superAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{
+  "code": "ZERO-SEATS",
+  "nameAr": "صفر",
+  "nameEn": "Zero",
+  "monthlyPriceSar": 100,
+  "annualPriceSar": 1000,
+  "maxStaffUsers": 0,
+  "trialDays": 0,
+  "graceDays": 7,
+  "displayOrder": 9
+}
+
+?? status == 400
+
+### 17.13 A grace period longer than the sanity ceiling -> 400
+POST {{HostAddress}}/api/v1/platform/subscription-plans
+Authorization: Bearer {{superAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{
+  "code": "FOREVER-GRACE",
+  "nameAr": "مهلة",
+  "nameEn": "Grace",
+  "monthlyPriceSar": 100,
+  "annualPriceSar": 1000,
+  "trialDays": 0,
+  "graceDays": 9999,
+  "displayOrder": 9
+}
+
+?? status == 400
+
+### 17.14 A plan code with spaces in it -> 400
+POST {{HostAddress}}/api/v1/platform/subscription-plans
+Authorization: Bearer {{superAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{
+  "code": "not a code",
+  "nameAr": "رمز",
+  "nameEn": "Code",
+  "monthlyPriceSar": 100,
+  "annualPriceSar": 1000,
+  "trialDays": 0,
+  "graceDays": 7,
+  "displayOrder": 9
+}
+
+?? status == 400
+
+### 17.15 Editing a plan that does not exist -> 404
+PUT {{HostAddress}}/api/v1/platform/subscription-plans/{{missingPlan}}
+Authorization: Bearer {{superAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{
+  "code": "GHOST",
+  "nameAr": "غير موجود",
+  "nameEn": "Ghost",
+  "monthlyPriceSar": 100,
+  "annualPriceSar": 1000,
+  "trialDays": 0,
+  "graceDays": 7,
+  "displayOrder": 9
+}
+
+?? status == 404
+
+### 17.16 Retiring a plan that does not exist -> 404
+PATCH {{HostAddress}}/api/v1/platform/subscription-plans/{{missingPlan}}/status
+Authorization: Bearer {{superAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{ "isActive": false }
+
+?? status == 404
+
+### ---------------------------------------------------------------------
+### Assigning a company to a plan
+### ---------------------------------------------------------------------
+
+### 17.17 The renewal worklist -> 200
+### Ungoverned companies first: a company nobody put on a tier is invisible everywhere else,
+### precisely because nothing refuses it anything.
+GET {{HostAddress}}/api/v1/platform/subscriptions
+Authorization: Bearer {{superAdminToken}}
+Accept-Language: en
+
+?? status == 200
+
+### 17.18 Only the companies on no plan -> 200
+GET {{HostAddress}}/api/v1/platform/subscriptions?ungovernedOnly=true
+Authorization: Bearer {{superAdminToken}}
+Accept-Language: en
+
+?? status == 200
+?? js response.parsedBody.data.filter(t => t.planId != null).length < 1
+
+### 17.19 Reading a company that does not exist -> 404
+GET {{HostAddress}}/api/v1/platform/tenants/{{missingTenant}}/subscription
+Authorization: Bearer {{superAdminToken}}
+Accept-Language: en
+
+?? status == 404
+
+### 17.20 Assigning a plan that does not exist -> 404
+PUT {{HostAddress}}/api/v1/platform/tenants/{{missingTenant}}/subscription
+Authorization: Bearer {{superAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{ "planCode": "NO-SUCH-PLAN", "termMonths": 12 }
+
+?? status == 404
+
+### 17.21 Both a term and an end date -> 400
+### Two ways of saying when the term ends is an instruction the server would have to guess at.
+PUT {{HostAddress}}/api/v1/platform/tenants/{{missingTenant}}/subscription
+Authorization: Bearer {{superAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{ "planCode": "STARTER", "termMonths": 12, "expiresAtUtc": "2027-01-01T00:00:00Z" }
+
+?? status == 400
+
+### 17.22 A trial with a term attached -> 400
+### A trial takes its length from the plan, so a term alongside it means the caller believes
+### one thing and the system would do another.
+PUT {{HostAddress}}/api/v1/platform/tenants/{{missingTenant}}/subscription
+Authorization: Bearer {{superAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{ "planCode": "STARTER", "termMonths": 12, "startTrial": true }
+
+?? status == 400
+
+### 17.23 A term longer than the ten-year ceiling -> 400
+PUT {{HostAddress}}/api/v1/platform/tenants/{{missingTenant}}/subscription
+Authorization: Bearer {{superAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{ "planCode": "STARTER", "termMonths": 600 }
+
+?? status == 400
+
+### 17.24 A trial on a company that does not exist -> 404
+### The plan resolves, the company does not, and "there is no such company" is the more useful
+### answer than anything about the trial. That ENTERPRISE offers no trial at all is asserted by
+### SubscriptionGovernanceTests.StartingATrialOnAPlanThatHasNone_IsRefused, which can set up a
+### real company to prove it.
+PUT {{HostAddress}}/api/v1/platform/tenants/{{missingTenant}}/subscription
+Authorization: Bearer {{superAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{ "planCode": "ENTERPRISE", "startTrial": true }
+
+?? status == 404

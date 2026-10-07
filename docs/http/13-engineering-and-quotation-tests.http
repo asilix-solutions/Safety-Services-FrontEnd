@@ -1,0 +1,391 @@
+@baseUrl = http://localhost:5128
+@HostAddress = {{baseUrl}}
+@companyAdminEmail = admin@al-salamah.com
+@companyAdminPassword = User@123456
+@missingJob = 3f9a1c22-7b44-4e18-9d05-6c2e8a5f1b70
+
+### =====================================================================
+### 13. ENGINEERING REVIEW & QUOTATION ENGINE (FR-ENG-01..06)
+### =====================================================================
+### The commercial half of a job: the consulting engineer's SBC 801 evaluation either clears it to
+### pricing or hands the intake back to the client for correction, and the quotation engine then
+### prices it — computing subtotal, segregated VAT and grand total server-side from the lines, and
+### gating a thin-margin quote behind a written management clearance (FR-ENG-05).
+###
+### The full lifecycle — both engineering outcomes, the revision loop, margin-floor clearance, the
+### client's accept/decline decision, and the client-vs-staff split of the same quotation — is
+### covered exhaustively by EngineeringAndQuotationLifecycleTests (xUnit) and by a scripted live run
+### over six real accounts against SQL Server. This suite is a smoke test of the surface with
+### explicit assertions. Field casing is camelCase (D-8).
+
+### 13.1 Company Admin login
+# @name companyAdminLogin
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept-Language: en
+
+{ "email": "{{companyAdminEmail}}", "password": "{{companyAdminPassword}}" }
+
+?? status == 200
+
+@companyAdminToken = {{companyAdminLogin.data.token}}
+
+### ---------------------------------------------------------------------
+### Engineering review (FR-ENG-01/02)
+### ---------------------------------------------------------------------
+
+### 13.2 Even a CompanyAdmin cannot record an engineering verdict -> 403
+### Engineering.Review is granted to ConsultingEngineer alone. Management owns triage and
+### commercial authorization, not the SBC 801 judgement — a company owner cannot sign off their own
+### building's compliance. Authorization runs ahead of validation and lookup, so this is 403 rather
+### than the 404 the non-existent job would otherwise produce.
+###
+### The verdict paths themselves — compliant, non-compliant, mandatory remarks, hazard-class range
+### — need an engineer's token and are covered by EngineeringAndQuotationLifecycleTests and the
+### scripted live run.
+POST {{HostAddress}}/api/v1/workflow-instances/{{missingJob}}/engineering-review
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{
+  "occupancyHazardClass": 3,
+  "isolatedCompartmentAreaM2": 2300,
+  "requiredSprinklerDensity": 0.2,
+  "pumpHeadRatingMeters": 75,
+  "smokeVentilationAirChangesPerHour": 6,
+  "complianceStatus": 1,
+  "technicalRemarks": "Compliant with SBC 801."
+}
+
+?? status == 403
+
+### 13.3 The engineering trail for a job that does not exist -> 404
+### Reading the trail is WorkflowInstances.View, which management does hold — so this reaches the
+### handler and 404s on the job. An empty list here would be indistinguishable from a real job
+### nobody has reviewed yet.
+GET {{HostAddress}}/api/v1/workflow-instances/{{missingJob}}/engineering-review
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+
+?? status == 404
+
+### 13.4 Resubmitting a corrected intake that does not exist -> 404
+POST {{HostAddress}}/api/v1/intake/{{missingJob}}/resubmit
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+
+?? status == 404
+
+### ---------------------------------------------------------------------
+### Quotation (FR-ENG-03/04/05)
+### ---------------------------------------------------------------------
+
+### 13.5 Pricing a job that does not exist -> 404
+PUT {{HostAddress}}/api/v1/workflow-instances/{{missingJob}}/quotation
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{
+  "lines": [
+    { "description": "FM-200 cylinders", "unitOfMeasurement": "each", "quantity": 4, "unitRate": 3250, "unitCost": 2100 }
+  ]
+}
+
+?? status == 404
+
+### 13.6 A quotation with no priced lines -> 400
+### An empty quotation is not a zero-value offer, it is an unfinished document.
+PUT {{HostAddress}}/api/v1/workflow-instances/{{missingJob}}/quotation
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{ "lines": [] }
+
+?? status == 400
+
+### 13.7 A negative quantity -> 400
+PUT {{HostAddress}}/api/v1/workflow-instances/{{missingJob}}/quotation
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{
+  "lines": [
+    { "description": "Detector loop", "unitOfMeasurement": "m", "quantity": -5, "unitRate": 18.75, "unitCost": 11.4 }
+  ]
+}
+
+?? status == 400
+
+### 13.8 Reading the staff quotation of a job that does not exist -> 404
+GET {{HostAddress}}/api/v1/workflow-instances/{{missingJob}}/quotation
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+
+?? status == 404
+
+### 13.9 Authorizing a quotation that does not exist -> 404
+POST {{HostAddress}}/api/v1/workflow-instances/{{missingJob}}/quotation/authorize
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{}
+
+?? status == 404
+
+### ---------------------------------------------------------------------
+### The client side of a quotation (FR-ENG-06)
+### ---------------------------------------------------------------------
+
+### 13.10 CompanyAdmin is not a Client, so the client quotation view refuses them -> 403
+### Quotations.Prepare and Quotations.Authorize do not imply ClientRequests.View: management reads a
+### quotation through the staff endpoint, which carries cost and margin. The client projection is a
+### different document for a different audience, not a permission tier.
+GET {{HostAddress}}/api/v1/my-requests/{{missingJob}}/quotation
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+
+?? status == 403
+
+### 13.11 Likewise for recording a client's decision -> 403
+POST {{HostAddress}}/api/v1/my-requests/{{missingJob}}/quotation/respond
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{ "accept": true }
+
+?? status == 403
+
+### ---------------------------------------------------------------------
+### Authentication
+### ---------------------------------------------------------------------
+
+### 13.12 Unauthenticated engineering review -> 401
+POST {{HostAddress}}/api/v1/workflow-instances/{{missingJob}}/engineering-review
+Content-Type: application/json
+Accept-Language: en
+
+{ "occupancyHazardClass": 3, "isolatedCompartmentAreaM2": 100, "requiredSprinklerDensity": 0.2, "complianceStatus": 1 }
+
+?? status == 401
+
+### 13.13 Unauthenticated pricing -> 401
+PUT {{HostAddress}}/api/v1/workflow-instances/{{missingJob}}/quotation
+Content-Type: application/json
+Accept-Language: en
+
+{ "lines": [] }
+
+?? status == 401
+
+### ---------------------------------------------------------------------
+### Engineering attachments (FR-ENG-01)
+### ---------------------------------------------------------------------
+### The engineer's own output — a stamped drawing, a hydraulic calculation sheet, a deficiency
+### report — as opposed to the client's blueprints, which arrive at intake. Until this shipped an
+### engineer could record an SBC 801 verdict and could not attach the calculation justifying it.
+###
+### The ordering underneath is the interesting part and is covered by EngineeringAttachmentTests
+### (xUnit): evidence is uploaded while the job is UnderReview and is unclaimed, and recording the
+### verdict stamps every unclaimed attachment on that job with the review it just created. A
+### re-review after a revision cycle sweeps up only its own round, because the previous round's
+### attachments already carry the previous verdict and the entity refuses to reassign them.
+
+### 13.14 Unauthenticated upload -> 401
+POST {{HostAddress}}/api/v1/workflow-instances/{{missingJob}}/engineering-review/attachments
+Content-Type: multipart/form-data; boundary=AmanixEngBoundary
+
+--AmanixEngBoundary
+Content-Disposition: form-data; name="file"; filename="calc.pdf"
+Content-Type: application/pdf
+
+%PDF-1.4
+%%EOF
+--AmanixEngBoundary--
+
+?? status == 401
+
+### 13.15 Unauthenticated listing -> 401
+GET {{HostAddress}}/api/v1/workflow-instances/{{missingJob}}/engineering-review/attachments
+
+?? status == 401
+
+### 13.16 Even a CompanyAdmin cannot attach engineering evidence -> 403
+### The same segregation of duties as 13.2, extended to the evidence. Engineering.Review belongs
+### to the ConsultingEngineer alone: management owns triage and pricing, the engineer owns the
+### verdict — and the calculation behind a verdict is part of the verdict, not a general document
+### any manager may file against the job.
+###
+### Asserted with a job id that does not exist, and the answer is still 403 rather than 404. That
+### ordering is the second guarantee here: the permission is checked before the job is resolved,
+### so a caller without it cannot use this endpoint to discover which job ids are real.
+POST {{HostAddress}}/api/v1/workflow-instances/{{missingJob}}/engineering-review/attachments
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+Content-Type: multipart/form-data; boundary=AmanixEngBoundary
+
+--AmanixEngBoundary
+Content-Disposition: form-data; name="file"; filename="calc.pdf"
+Content-Type: application/pdf
+
+%PDF-1.4
+%%EOF
+--AmanixEngBoundary--
+
+?? status == 403
+
+### 13.17 Listing the evidence needs only WorkflowInstances.View -> 404 for a missing job
+### Reading is not recording. Everyone who works a job can see what the engineer attached —
+### management, operations, sales — because the drawing and the calculation are what the next
+### stage prices and builds from. Only writing is restricted.
+###
+### 404 rather than 403 proves CompanyAdmin genuinely holds this one: the request got past the
+### permission filter and failed on the job id.
+GET {{HostAddress}}/api/v1/workflow-instances/{{missingJob}}/engineering-review/attachments
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+
+?? status == 404
+
+### 13.18 The permission gate runs before the request body is read -> 403
+### No file part at all, which would otherwise be a 400 binding failure. The 403 proves the
+### unauthorized caller's upload was never parsed — a 400 here would mean the server processed a
+### multipart body on behalf of someone with no right to submit one.
+POST {{HostAddress}}/api/v1/workflow-instances/{{missingJob}}/engineering-review/attachments
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+Content-Type: multipart/form-data; boundary=AmanixEngBoundary
+
+--AmanixEngBoundary
+Content-Disposition: form-data; name="description"
+
+a note with no file
+--AmanixEngBoundary--
+
+?? status == 403
+
+### 13.19 And before the bytes are examined -> 403
+### "MZ" is the two-byte signature every Windows executable starts with, renamed to .pdf. Uploads
+### are typed by sniffing the leading bytes rather than by the extension or the declared content
+### type — the classic upload vulnerability, closed by IntakeFileRules and proven by
+### IntakeFileRulesTests (xUnit) and over the wire by suite 12.
+###
+### What this asserts is that the check is never reached for a caller who may not upload at all.
+### Authorization first, then the job, then the bytes.
+POST {{HostAddress}}/api/v1/workflow-instances/{{missingJob}}/engineering-review/attachments
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+Content-Type: multipart/form-data; boundary=AmanixEngBoundary
+
+--AmanixEngBoundary
+Content-Disposition: form-data; name="file"; filename="drawing.pdf"
+Content-Type: application/pdf
+
+MZ
+--AmanixEngBoundary--
+
+?? status == 403
+
+### ---------------------------------------------------------------------
+### The other side of the split: the engineer
+### ---------------------------------------------------------------------
+### Everything above asserts who is refused. These assert who is granted, which is the half that
+### was missing until the demo seeder gained a predictable account per role. Before that only
+### admin@ and deputy@ had fixed addresses and the other seven roles got Bogus-generated ones, so
+### no suite could sign in as the person who actually does the work — and the coverage for those
+### roles quietly consisted of 403 assertions alone.
+
+### 13.20 Consulting Engineer login
+# @name engineerLogin
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept-Language: en
+
+{ "email": "engineer@al-salamah.com", "password": "User@123456" }
+
+?? status == 200
+
+@engineerToken = {{engineerLogin.data.token}}
+
+### 13.21 The engineer holds Engineering.Review -> 404, not 403
+### The complement of 13.16, and the assertion that gives that one its meaning. A 403 on both
+### sides would prove only that the endpoint is hard to reach; the pair proves the permission is
+### split where it was designed to be split.
+POST {{HostAddress}}/api/v1/workflow-instances/{{missingJob}}/engineering-review/attachments
+Authorization: Bearer {{engineerToken}}
+Accept-Language: en
+Content-Type: multipart/form-data; boundary=AmanixEngBoundary
+
+--AmanixEngBoundary
+Content-Disposition: form-data; name="file"; filename="calc.pdf"
+Content-Type: application/pdf
+
+%PDF-1.4
+%%EOF
+--AmanixEngBoundary--
+
+?? status == 404
+
+### 13.22 The engineer may record a verdict too -> 404, not 403
+POST {{HostAddress}}/api/v1/workflow-instances/{{missingJob}}/engineering-review
+Authorization: Bearer {{engineerToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{ "occupancyHazardClass": 3, "isolatedCompartmentAreaM2": 100, "requiredSprinklerDensity": 0.2, "complianceStatus": 1 }
+
+?? status == 404
+
+### 13.23 An engineer may read the evidence -> 404 for a missing job
+GET {{HostAddress}}/api/v1/workflow-instances/{{missingJob}}/engineering-review/attachments
+Authorization: Bearer {{engineerToken}}
+Accept-Language: en
+
+?? status == 404
+
+### 13.24 The engineer may PRICE the job -> 400, not 403
+### Quotations.Prepare is held by the ConsultingEngineer and the SalesRepresentative, which is
+### deliberate and easy to get backwards: the person who knows the technical scope is the person
+### who can cost it. Pricing is not the privileged act here.
+###
+### The body is deliberately invalid — a quotation with no lines — and 400 is what proves the
+### point. Validation runs after authorization and before the job is looked up, so reaching a
+### validation error means the engineer passed the permission filter. A 403 would have come first
+### and the request would never have been read. Asserting the permission through the error that
+### comes *after* it needs no knowledge of the line schema, so this stays true when that schema
+### changes.
+PUT {{HostAddress}}/api/v1/workflow-instances/{{missingJob}}/quotation
+Authorization: Bearer {{engineerToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{ "lines": [] }
+
+?? status == 400
+?? body isSuccess == false
+
+### 13.25 ...but may not ISSUE it to the client -> 403
+### This is where the split actually falls. Quotations.Authorize belongs to CompanyAdmin and
+### DeputyAdmin alone (BR-05, equal authority), because issuing is the commitment: it is what
+### clears a thin-margin quote against the floor and puts a number in front of the client. The
+### engineer prepares, management commits.
+POST {{HostAddress}}/api/v1/workflow-instances/{{missingJob}}/quotation/authorize
+Authorization: Bearer {{engineerToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{ "belowFloorJustification": null }
+
+?? status == 403
+
+### 13.26 An engineer is not a client -> 403 on the client portal
+GET {{HostAddress}}/api/v1/my-requests
+Authorization: Bearer {{engineerToken}}
+Accept-Language: en
+
+?? status == 403

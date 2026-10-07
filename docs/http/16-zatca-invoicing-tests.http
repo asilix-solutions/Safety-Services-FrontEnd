@@ -1,0 +1,166 @@
+@baseUrl = http://localhost:5128
+@HostAddress = {{baseUrl}}
+@companyAdminEmail = admin@al-salamah.com
+@companyAdminPassword = User@123456
+@missingJob = 3f9a1c22-7b44-4e18-9d05-6c2e8a5f1b70
+
+### =====================================================================
+### 16. ZATCA TAX INVOICING (FR-ZAT, analysis/07 §4.1)
+### =====================================================================
+### A tax invoice bills the quotation the client accepted — every figure comes from it, and the
+### seller's identity from the company profile. Issuing allocates an INV-{YYYY}-{00000} number,
+### links the invoice into the company's SHA-256 chain, and builds the five-tag TLV QR payload,
+### all in one transaction. An issued invoice can be voided but never edited or deleted; a voided
+### one stays in the chain and a corrected invoice may then be raised.
+###
+### The lifecycle — issue on a sealed project, double-billing refusal, cancel-and-reissue, a real
+### two-request race, out-of-band tampering caught by chain verification — is covered by
+### ZatcaInvoicingTests (xUnit) and by a scripted live run against SQL Server. This suite is a
+### smoke test of the surface with explicit assertions. Field casing is camelCase (D-8).
+###
+### NOT covered here: submission to ZATCA (clearance / reporting). That needs UBL 2.1 XML and an
+### ECDSA stamp from a ZATCA-issued certificate, which require onboarding the company with ZATCA.
+
+### 16.1 Company Admin login
+# @name companyAdminLogin
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept-Language: en
+
+{ "email": "{{companyAdminEmail}}", "password": "{{companyAdminPassword}}" }
+
+?? status == 200
+
+@companyAdminToken = {{companyAdminLogin.data.token}}
+
+### ---------------------------------------------------------------------
+### Authentication
+### ---------------------------------------------------------------------
+
+### 16.2 Unauthenticated issue -> 401
+POST {{HostAddress}}/api/v1/workflow-instances/{{missingJob}}/invoice
+Content-Type: application/json
+
+{}
+
+?? status == 401
+
+### 16.3 Unauthenticated ledger -> 401
+GET {{HostAddress}}/api/v1/invoices
+
+?? status == 401
+
+### ---------------------------------------------------------------------
+### Validation (runs ahead of lookup, so a missing job still reports the bad field)
+### ---------------------------------------------------------------------
+
+### 16.4 A buyer VAT number that is not 15 digits -> 400
+### Optional, but a malformed one is a document ZATCA rejects — so it is refused here instead.
+POST {{HostAddress}}/api/v1/workflow-instances/{{missingJob}}/invoice
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{ "buyerVatNumber": "12345" }
+
+?? status == 400
+
+### 16.5 A one-word void reason -> 400
+### The reason stays on the permanent record; "cancelled" is not an explanation.
+POST {{HostAddress}}/api/v1/workflow-instances/{{missingJob}}/invoice/void
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{ "reason": "no" }
+
+?? status == 400
+
+### 16.6 A VAT summary whose end is before its start -> 400
+GET {{HostAddress}}/api/v1/invoices/vat-summary?fromUtc=2026-10-01T00:00:00Z&toUtc=2026-07-01T00:00:00Z
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+
+?? status == 400
+
+### ---------------------------------------------------------------------
+### Not found
+### ---------------------------------------------------------------------
+
+### 16.7 Invoicing a job that does not exist -> 404
+POST {{HostAddress}}/api/v1/workflow-instances/{{missingJob}}/invoice
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{}
+
+?? status == 404
+
+### 16.8 Reading the invoice of a job that does not exist -> 404
+GET {{HostAddress}}/api/v1/workflow-instances/{{missingJob}}/invoice
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+
+?? status == 404
+
+### 16.9 Voiding an invoice that does not exist -> 404
+POST {{HostAddress}}/api/v1/workflow-instances/{{missingJob}}/invoice/void
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{ "reason": "Raised against the wrong purchase order." }
+
+?? status == 404
+
+### ---------------------------------------------------------------------
+### The ledger, the chain and the VAT position
+### ---------------------------------------------------------------------
+
+### 16.10 The company's invoice ledger -> 200
+GET {{HostAddress}}/api/v1/invoices
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+
+?? status == 200
+
+### 16.11 Chain verification -> 200, and the chain holds
+### Re-derives every invoice's hash from its stored fields and checks each link. A tampered
+### invoice fails its own hash; a removed one breaks its successor's link.
+GET {{HostAddress}}/api/v1/invoices/chain-verification
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+
+?? status == 200
+?? body data.isIntact == true
+
+### 16.12 VAT summary for Q3 2026 -> 200
+### Output VAT from issued invoices, less voids made in the period; input VAT split into
+### reclaimable, non-reclaimable, and unsupported (deductible but no vendor VAT number on file).
+GET {{HostAddress}}/api/v1/invoices/vat-summary?fromUtc=2026-07-01T00:00:00Z&toUtc=2026-10-01T00:00:00Z
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+
+?? status == 200
+
+### ---------------------------------------------------------------------
+### Company profile — where the seller VAT registration comes from
+### ---------------------------------------------------------------------
+
+### 16.13 A seller VAT registration that is not 15 digits -> 400
+### Distinct from the 10-digit CR and 700 numbers, and not interchangeable with either.
+PUT {{HostAddress}}/api/v1/tenants/settings/company-profile
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{
+  "companyNameAr": "شركة السلامة لحماية الحرائق",
+  "companyNameEn": "Al-Salamah Fire Protection Co.",
+  "commercialRegistrationNumber": "7003385404",
+  "nationalUnifiedNumber700": "7001234567",
+  "vatRegistrationNumber": "12345"
+}
+
+?? status == 400

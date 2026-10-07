@@ -1,0 +1,493 @@
+@baseUrl = http://localhost:5128
+@HostAddress = {{baseUrl}}
+@superAdminEmail = admin@amanix.com
+@superAdminPassword = Admin@123456
+@companyAdminEmail = admin@al-salamah.com
+@companyAdminPassword = User@123456
+@deputyAdminEmail = deputy@al-salamah.com
+@deputyAdminPassword = User@123456
+
+### =====================================================================
+### 10. USER LIFECYCLE, INVITATION GATEWAYS & CLIENT SELF-REGISTRATION
+### =====================================================================
+### Covers all 3 provisioning pathways added in this pass:
+### - Platform HQ staff invitation (SystemSuperAdmin -> PlatformSupport/PlatformFinance)
+### - Tenant staff invitation (CompanyAdmin -> DeputyAdmin/ConsultingEngineer/.../MaintenanceWorker)
+### - Client self-registration on a branded subdomain (OTP-verified)
+### DevOnlyInvitationToken/DevOnlyAcceptanceUrl and DevOnlyOtp are only populated when
+### FeatureToggles:IsInvitationTokenReturnInsideTheResponse / IsOtpReturnInsideTheResponse
+### are true (Development only) — both default true in appsettings.Development.json.
+
+### =====================================================================
+### 10.1 AUTHENTICATION & SETUP
+### =====================================================================
+
+### 10.1.1 Login as Platform SystemSuperAdmin - Expect 200 OK
+# @name superAdminLogin
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "email": "{{superAdminEmail}}",
+  "password": "{{superAdminPassword}}"
+}
+
+@superAdminToken = {{superAdminLogin.data.token}}
+
+### 10.1.2 Login as Company Admin - Expect 200 OK
+# @name companyAdminLogin
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+X-Tenant-Domain: al-salamah
+
+{
+  "email": "{{companyAdminEmail}}",
+  "password": "{{companyAdminPassword}}"
+}
+
+@companyAdminToken = {{companyAdminLogin.data.token}}
+
+### 10.1.3 Login as Deputy Admin (for negative/boundary tests) - Expect 200 OK
+# @name deputyAdminLogin
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+X-Tenant-Domain: al-salamah
+
+{
+  "email": "{{deputyAdminEmail}}",
+  "password": "{{deputyAdminPassword}}"
+}
+
+@deputyAdminToken = {{deputyAdminLogin.data.token}}
+
+### =====================================================================
+### 10.2 FLOW 1 — PLATFORM HQ: SuperAdmin invites PlatformSupport -> accepts -> logs in
+### =====================================================================
+
+### 10.2.1 SuperAdmin Invites a PlatformSupport Staff Member - Expect 201 Created
+# @name invitePlatformSupport
+POST {{HostAddress}}/api/v1/platform/staff
+Authorization: Bearer {{superAdminToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "fullName": "Yousef Al-Amri",
+  "email": "yousef.support@amanix.com",
+  "phoneNumber": "+966501234561",
+  "role": 101,
+  "preferredLanguage": "ar"
+}
+
+@platformSupportUserId = {{invitePlatformSupport.data.userId}}
+@platformSupportInvitationToken = {{invitePlatformSupport.data.devOnlyInvitationToken}}
+
+### 10.2.2 Invited PlatformSupport Accepts the Invitation - Expect 200 OK with JWT
+# @name acceptPlatformInvitation
+POST {{HostAddress}}/api/v1/auth/accept-platform-invitation
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "userId": "{{platformSupportUserId}}",
+  "invitationToken": "{{platformSupportInvitationToken}}",
+  "newPassword": "SupportSecure@123",
+  "confirmPassword": "SupportSecure@123"
+}
+
+@platformSupportToken = {{acceptPlatformInvitation.data.accessToken}}
+
+### 10.2.3 New PlatformSupport Logs In With Their Chosen Password - Expect 200 OK
+# @name platformSupportLogin
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "email": "yousef.support@amanix.com",
+  "password": "SupportSecure@123"
+}
+
+### 10.2.4 SuperAdmin Invites a PlatformFinance Staff Member - Expect 201 Created
+# @name invitePlatformFinance
+POST {{HostAddress}}/api/v1/platform/staff
+Authorization: Bearer {{superAdminToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "fullName": "Nourah Al-Fahad",
+  "email": "nourah.finance@amanix.com",
+  "phoneNumber": "+966501234562",
+  "role": 102,
+  "preferredLanguage": "ar"
+}
+
+@platformFinanceUserId = {{invitePlatformFinance.data.userId}}
+@platformFinanceInvitationToken = {{invitePlatformFinance.data.devOnlyInvitationToken}}
+
+### 10.2.5 Invited PlatformFinance Accepts the Invitation - Expect 200 OK with JWT
+# @name acceptPlatformFinanceInvitation
+POST {{HostAddress}}/api/v1/auth/accept-platform-invitation
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "userId": "{{platformFinanceUserId}}",
+  "invitationToken": "{{platformFinanceInvitationToken}}",
+  "newPassword": "FinanceSecure@123",
+  "confirmPassword": "FinanceSecure@123"
+}
+
+### =====================================================================
+### 10.3 FLOW 2 — TENANT: CompanyAdmin invites staff -> accepts -> logs in
+### =====================================================================
+
+### 10.3.1 CompanyAdmin Invites a Consulting Engineer (role=202) - Expect 201 Created
+# @name inviteConsultingEngineer
+POST {{HostAddress}}/api/v1/tenant-users
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "fullName": "Eng. Mansour Al-Qahtani",
+  "email": "mansour.engineer@al-salamah.com",
+  "phoneNumber": "+966501234563",
+  "role": 202,
+  "preferredLanguage": "ar"
+}
+
+@engineerUserId = {{inviteConsultingEngineer.data.userId}}
+@engineerInvitationToken = {{inviteConsultingEngineer.data.devOnlyInvitationToken}}
+
+### 10.3.2 Invited Consulting Engineer Accepts the Invitation - Expect 200 OK with JWT
+# @name acceptEngineerInvitation
+POST {{HostAddress}}/api/v1/auth/accept-tenant-invitation
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "userId": "{{engineerUserId}}",
+  "invitationToken": "{{engineerInvitationToken}}",
+  "newPassword": "EngineerSecure@123",
+  "confirmPassword": "EngineerSecure@123"
+}
+
+### 10.3.3 CompanyAdmin Invites a Second Deputy Admin (role=201) - Expect 201 Created
+# @name inviteDeputyAdmin
+POST {{HostAddress}}/api/v1/tenant-users
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "fullName": "Reem Al-Otaibi",
+  "email": "reem.deputy@al-salamah.com",
+  "phoneNumber": "+966501234564",
+  "role": 201,
+  "preferredLanguage": "ar"
+}
+
+@newDeputyUserId = {{inviteDeputyAdmin.data.userId}}
+@newDeputyInvitationToken = {{inviteDeputyAdmin.data.devOnlyInvitationToken}}
+
+### 10.3.4 Invited Deputy Admin Accepts the Invitation - Expect 200 OK with JWT
+# @name acceptDeputyInvitation
+POST {{HostAddress}}/api/v1/auth/accept-tenant-invitation
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "userId": "{{newDeputyUserId}}",
+  "invitationToken": "{{newDeputyInvitationToken}}",
+  "newPassword": "DeputySecure@123",
+  "confirmPassword": "DeputySecure@123"
+}
+
+### 10.3.5 CompanyAdmin Invites a Maintenance Worker (role=208) - Expect 201 Created
+# @name inviteMaintenanceWorker
+POST {{HostAddress}}/api/v1/tenant-users
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "fullName": "Bandar Al-Shammari",
+  "email": "bandar.maintenance@al-salamah.com",
+  "phoneNumber": "+966501234565",
+  "role": 208,
+  "preferredLanguage": "ar"
+}
+
+@maintenanceWorkerUserId = {{inviteMaintenanceWorker.data.userId}}
+@maintenanceWorkerInvitationToken = {{inviteMaintenanceWorker.data.devOnlyInvitationToken}}
+
+### 10.3.6 Invited Maintenance Worker Accepts the Invitation - Expect 200 OK with JWT
+# @name acceptMaintenanceWorkerInvitation
+POST {{HostAddress}}/api/v1/auth/accept-tenant-invitation
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "userId": "{{maintenanceWorkerUserId}}",
+  "invitationToken": "{{maintenanceWorkerInvitationToken}}",
+  "newPassword": "MaintenanceSecure@123",
+  "confirmPassword": "MaintenanceSecure@123"
+}
+
+### 10.3.7 New Maintenance Worker Logs In With Their Chosen Password - Expect 200 OK
+# @name maintenanceWorkerLogin
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+X-Tenant-Domain: al-salamah
+
+{
+  "email": "bandar.maintenance@al-salamah.com",
+  "password": "MaintenanceSecure@123"
+}
+
+### =====================================================================
+### 10.4 FLOW 3 — CLIENT: Self-registers on al-salamah -> verifies OTP -> logs in
+### =====================================================================
+
+### 10.4.1 Client Self-Registers on the Al-Salamah Branded Portal - Expect 200 OK
+# @name registerClient
+POST {{HostAddress}}/api/v1/auth/register-client
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+X-Tenant-Domain: al-salamah
+
+{
+  "fullName": "Fahad Al-Dossari",
+  "email": "fahad.client@example.com",
+  "phoneNumber": "+966501234599",
+  "password": "ClientSecure@123"
+}
+
+@clientUserId = {{registerClient.data.userId}}
+@clientOtp = {{registerClient.data.devOnlyOtp}}
+
+### 10.4.2 Client Verifies OTP & Activates Account - Expect 200 OK with JWT
+# @name verifyClientOtp
+POST {{HostAddress}}/api/v1/auth/verify-client-otp
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "userId": "{{clientUserId}}",
+  "otp": "{{clientOtp}}"
+}
+
+@clientToken = {{verifyClientOtp.data.accessToken}}
+
+### 10.4.3 New Client Logs In With Their Chosen Password - Expect 200 OK
+# @name clientLogin
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+X-Tenant-Domain: al-salamah
+
+{
+  "email": "fahad.client@example.com",
+  "password": "ClientSecure@123"
+}
+
+### 10.4.4 Client Self-Registration Without Tenant Context (No Header/Subdomain) - Expect 400 Bad Request
+# @name registerClientNoTenant
+POST {{HostAddress}}/api/v1/auth/register-client
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "fullName": "No Tenant Client",
+  "email": "notenant.client@example.com",
+  "phoneNumber": "+966501234598",
+  "password": "ClientSecure@123"
+}
+
+### =====================================================================
+### 10.5 NEGATIVE & BOUNDARY TESTS
+### =====================================================================
+
+### 10.5.1 DeputyAdmin Attempts to Invite Tenant Staff - Expect 403 Forbidden [SOVEREIGN BOUNDARY]
+# @name deputyAdminInviteBlocked
+POST {{HostAddress}}/api/v1/tenant-users
+Authorization: Bearer {{deputyAdminToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "fullName": "Blocked Invite Attempt",
+  "email": "blocked.invite@al-salamah.com",
+  "phoneNumber": "+966501234566",
+  "role": 202,
+  "preferredLanguage": "ar"
+}
+
+### 10.5.2 CompanyAdmin Attempts to Invite a Client via Staff Endpoint - Expect 400 Bad Request
+### Clients must self-register via the branded portal, not be invited as staff.
+# @name inviteClientBlocked
+POST {{HostAddress}}/api/v1/tenant-users
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "fullName": "Should Be Blocked",
+  "email": "shouldbeblocked@al-salamah.com",
+  "phoneNumber": "+966501234567",
+  "role": 207,
+  "preferredLanguage": "ar"
+}
+
+### 10.5.3 Non-SuperAdmin Attempts to Invite Platform Staff - Expect 403 Forbidden
+# @name companyAdminInvitePlatformBlocked
+POST {{HostAddress}}/api/v1/platform/staff
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "fullName": "Should Be Blocked",
+  "email": "shouldbeblocked@amanix.com",
+  "phoneNumber": "+966501234568",
+  "role": 101,
+  "preferredLanguage": "ar"
+}
+
+### 10.5.4 Unauthenticated Access to Platform Staff Invitation - Expect 401 Unauthorized
+POST {{HostAddress}}/api/v1/platform/staff
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "fullName": "Should Be Blocked",
+  "email": "noauth@amanix.com",
+  "phoneNumber": "+966501234569",
+  "role": 101,
+  "preferredLanguage": "ar"
+}
+
+### 10.5.5 Invalid/Tampered Invitation Token - Expect 400 Bad Request
+# @name acceptInvalidToken
+POST {{HostAddress}}/api/v1/auth/accept-tenant-invitation
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "userId": "{{engineerUserId}}",
+  "invitationToken": "dGhpcyBpcyBhIHRhbXBlcmVkIHRva2Vu",
+  "newPassword": "SomeSecure@123",
+  "confirmPassword": "SomeSecure@123"
+}
+
+### 10.5.6 Accept an Already-Accepted Invitation Again (replay) - Expect 400 Bad Request
+# @name acceptInvitationReplay
+POST {{HostAddress}}/api/v1/auth/accept-tenant-invitation
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "userId": "{{engineerUserId}}",
+  "invitationToken": "{{engineerInvitationToken}}",
+  "newPassword": "AnotherSecure@123",
+  "confirmPassword": "AnotherSecure@123"
+}
+
+### 10.5.7 Accept a Tenant Invitation Through the Platform Endpoint (wrong plane) - Expect 400 Bad Request
+POST {{HostAddress}}/api/v1/auth/accept-platform-invitation
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "userId": "{{newDeputyUserId}}",
+  "invitationToken": "{{newDeputyInvitationToken}}",
+  "newPassword": "WrongPlane@123",
+  "confirmPassword": "WrongPlane@123"
+}
+
+### 10.5.8 Accept Invitation With Mismatched Password Confirmation - Expect 400 Bad Request
+POST {{HostAddress}}/api/v1/auth/accept-tenant-invitation
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "userId": "{{maintenanceWorkerUserId}}",
+  "invitationToken": "{{maintenanceWorkerInvitationToken}}",
+  "newPassword": "PasswordOne@123",
+  "confirmPassword": "PasswordTwo@123"
+}
+
+### 10.5.9 Client Verifies OTP With Wrong Code (3x, then locked out) - Expect 400 Bad Request each time
+# @name verifyClientOtpWrong1
+POST {{HostAddress}}/api/v1/auth/verify-client-otp
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "userId": "{{clientUserId}}",
+  "otp": "000001"
+}
+
+### 10.5.10 Invite Staff With an Already-Registered Email - Expect 400 Bad Request
+POST {{HostAddress}}/api/v1/tenant-users
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: ar
+
+{
+  "fullName": "Duplicate Email Attempt",
+  "email": "{{companyAdminEmail}}",
+  "phoneNumber": "+966501234570",
+  "role": 202,
+  "preferredLanguage": "ar"
+}
+
+### 10.5.11 Invite Platform Staff With an Invalid Role (e.g. SystemSuperAdmin) - Expect 400 Bad Request
+POST {{HostAddress}}/api/v1/platform/staff
+Authorization: Bearer {{superAdminToken}}
+Content-Type: application/json
+Accept: application/json
+Accept-Language: en
+
+{
+  "fullName": "Should Be Blocked",
+  "email": "shouldbeblocked2@amanix.com",
+  "phoneNumber": "+966501234571",
+  "role": 100,
+  "preferredLanguage": "ar"
+}

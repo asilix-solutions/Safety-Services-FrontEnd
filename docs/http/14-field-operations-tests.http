@@ -1,0 +1,302 @@
+@baseUrl = http://localhost:5128
+@HostAddress = {{baseUrl}}
+@companyAdminEmail = admin@al-salamah.com
+@companyAdminPassword = User@123456
+@missingId = 7c1e4d55-9a02-4b31-8f6e-2d47b9a0c318
+
+### =====================================================================
+### 14. FIELD OPERATIONS WBS & EXIF VERIFICATION (FR-OPS-01..06, FR-AUD-01..04)
+### =====================================================================
+### Site execution: the Operations Officer builds a Work Breakdown Structure of tracks, milestones
+### and granular tasks; technicians work their own tasks and upload geotagged proof; the server
+### reads GPS and capture time out of the image bytes, measures the distance from the facility pin
+### with the Haversine formula, and records a verdict.
+###
+### Three outcomes, one refusal. A photo inside the 300 m geofence and freshly captured verifies.
+### One with a location that is not the site is kept and flagged — the flag is the audit record.
+### One with no metadata routes to a supervisor's written justification (FR-AUD-04), because iOS
+### and Android strip EXIF under ordinary privacy settings. Only a photo captured outside the
+### 6-hour freshness window is refused outright (FR-AUD-03), since it is not evidence about today.
+###
+### The full lifecycle — the preset, the micro-FSM, all three photo outcomes against real JPEG EXIF
+### bytes, the obstacle escalation machine, and closing out to PreClosure — is covered by
+### FieldOperationsLifecycleTests, GeodesyTests, PhotoVerificationPolicyTests (xUnit) and a 63-check
+### scripted live run against SQL Server. This suite is a smoke test of the surface with explicit
+### assertions. Field casing is camelCase (D-8).
+
+### 14.1 Company Admin login
+# @name companyAdminLogin
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept-Language: en
+
+{ "email": "{{companyAdminEmail}}", "password": "{{companyAdminPassword}}" }
+
+?? status == 200
+
+@companyAdminToken = {{companyAdminLogin.data.token}}
+
+### ---------------------------------------------------------------------
+### Planning the Work Breakdown Structure (FR-OPS-01/02/03)
+### ---------------------------------------------------------------------
+
+### 14.2 The plan for a job that does not exist -> 404
+GET {{HostAddress}}/api/v1/workflow-instances/{{missingId}}/execution-plan
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+
+?? status == 404
+
+### 14.3 Applying the three-silo preset to a job that does not exist -> 404
+POST {{HostAddress}}/api/v1/workflow-instances/{{missingId}}/execution-plan/sections/apply-standard
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+
+?? status == 404
+
+### 14.4 A track code that is not upper snake_case -> 400
+### Codes identify a track within its project so reports can key on them, which only works if they
+### are stable and machine-safe.
+PUT {{HostAddress}}/api/v1/workflow-instances/{{missingId}}/execution-plan/sections
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{ "sectionCode": "not a code!", "sectionNameAr": "مسار" }
+
+?? status == 400
+
+### 14.5 A track with no Arabic name -> 400
+PUT {{HostAddress}}/api/v1/workflow-instances/{{missingId}}/execution-plan/sections
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{ "sectionCode": "FIRE_ALARM", "sectionNameAr": "" }
+
+?? status == 400
+
+### 14.6 A milestone whose deadline precedes its start date -> 400
+### A milestone that reads as overdue the moment it is created poisons every report downstream.
+PUT {{HostAddress}}/api/v1/workflow-instances/{{missingId}}/execution-plan/sprints
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{
+  "sectionId": "{{missingId}}",
+  "sprintTitle": "Phase 1: Ground floor loop",
+  "targetStartDate": "2026-10-01T00:00:00Z",
+  "targetCompletionDate": "2026-09-01T00:00:00Z"
+}
+
+?? status == 400
+
+### 14.7 A milestone under a track that does not exist -> 404
+PUT {{HostAddress}}/api/v1/workflow-instances/{{missingId}}/execution-plan/sprints
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{ "sectionId": "{{missingId}}", "sprintTitle": "Phase 1: Ground floor loop" }
+
+?? status == 404
+
+### 14.8 A task with no title -> 400
+PUT {{HostAddress}}/api/v1/field-tasks
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{ "sprintId": "{{missingId}}", "taskTitle": "" }
+
+?? status == 400
+
+### 14.9 A task under a milestone that does not exist -> 404
+PUT {{HostAddress}}/api/v1/field-tasks
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{ "sprintId": "{{missingId}}", "taskTitle": "Mount main control panel" }
+
+?? status == 404
+
+### 14.10 Removing a task that does not exist -> 404
+DELETE {{HostAddress}}/api/v1/field-tasks/{{missingId}}
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+
+?? status == 404
+
+### ---------------------------------------------------------------------
+### Working a task — the two sides of FR-OPS-05
+### ---------------------------------------------------------------------
+
+### 14.11 CompanyAdmin holds no FieldOps.Execute, so the mobile list refuses them -> 403
+### Doing the work and inspecting it are separate grants. Management plans and supervises; nobody
+### holds both sides of the verification gate, or it would be ceremonial.
+GET {{HostAddress}}/api/v1/field-tasks/mine
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+
+?? status == 403
+
+### 14.12 Likewise for starting a task -> 403
+POST {{HostAddress}}/api/v1/field-tasks/{{missingId}}/start
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+
+?? status == 403
+
+### 14.13 And for submitting one -> 403
+POST {{HostAddress}}/api/v1/field-tasks/{{missingId}}/submit
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+
+?? status == 403
+
+### 14.14 Reviewing work is the supervisor's side, which management does hold -> 404 on the task
+POST {{HostAddress}}/api/v1/field-tasks/{{missingId}}/review
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{ "approve": true }
+
+?? status == 404
+
+### 14.15 Returning work without saying what is wrong -> 400
+### The worker acts on this alone, from site, so "redo" is not an instruction.
+POST {{HostAddress}}/api/v1/field-tasks/{{missingId}}/review
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{ "approve": false, "reworkReason": "no" }
+
+?? status == 400
+
+### ---------------------------------------------------------------------
+### Photo verification (FR-AUD)
+### ---------------------------------------------------------------------
+
+### 14.16 Reading a task's proof when the task does not exist -> 404
+GET {{HostAddress}}/api/v1/field-tasks/{{missingId}}/photos
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+
+?? status == 404
+
+### 14.17 Justifying a photo with a one-word reason -> 400
+### The justification is the entire substitute for an automated check, so a token override is worse
+### than none: it creates a paper trail that looks like diligence.
+POST {{HostAddress}}/api/v1/field-photos/{{missingId}}/justify
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{ "justification": "ok" }
+
+?? status == 400
+
+### 14.18 Justifying a photo that does not exist -> 404
+POST {{HostAddress}}/api/v1/field-photos/{{missingId}}/justify
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{ "justification": "Attended site with the technician; the device strips GPS by policy." }
+
+?? status == 404
+
+### ---------------------------------------------------------------------
+### Site obstacles (FR-OPS-06)
+### ---------------------------------------------------------------------
+
+### 14.19 The obstacle list for a job that does not exist -> 200 with an empty list
+### A sub-collection filter, not a lookup: no blockers on an unknown job is the honest answer, and
+### the job's own endpoints already 404 for it.
+GET {{HostAddress}}/api/v1/workflow-instances/{{missingId}}/execution-plan/obstacles
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+
+?? status == 200
+
+### 14.20 Reporting a blocker is the worker's side -> 403 for management
+POST {{HostAddress}}/api/v1/field-tasks/{{missingId}}/obstacles
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{ "description": "Civil works have not poured the slab in the riser cupboard yet." }
+
+?? status == 403
+
+### 14.21 An unrecognised obstacle action -> 400
+POST {{HostAddress}}/api/v1/site-obstacles/{{missingId}}/transition
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{ "action": "ignore" }
+
+?? status == 400
+
+### 14.22 Resolving a blocker without recording how -> 400
+### A stoppage is part of the project's account of itself; "resolved" with no notes records nothing.
+POST {{HostAddress}}/api/v1/site-obstacles/{{missingId}}/transition
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{ "action": "resolve" }
+
+?? status == 400
+
+### 14.23 Transitioning a blocker that does not exist -> 404
+POST {{HostAddress}}/api/v1/site-obstacles/{{missingId}}/transition
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{ "action": "triage" }
+
+?? status == 404
+
+### ---------------------------------------------------------------------
+### Worker accounts and closing out
+### ---------------------------------------------------------------------
+
+### 14.24 Linking an account to a worker that does not exist -> 404
+PUT {{HostAddress}}/api/v1/field-workers/{{missingId}}/account
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{ "userId": "{{missingId}}" }
+
+?? status == 404
+
+### 14.25 Closing out execution on a job that does not exist -> 404
+POST {{HostAddress}}/api/v1/workflow-instances/{{missingId}}/execution-plan/complete
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+
+?? status == 404
+
+### ---------------------------------------------------------------------
+### Authentication
+### ---------------------------------------------------------------------
+
+### 14.26 Unauthenticated access to the plan -> 401
+GET {{HostAddress}}/api/v1/workflow-instances/{{missingId}}/execution-plan
+Accept-Language: en
+
+?? status == 401
+
+### 14.27 Unauthenticated access to the mobile task list -> 401
+GET {{HostAddress}}/api/v1/field-tasks/mine
+Accept-Language: en
+
+?? status == 401

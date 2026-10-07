@@ -1,0 +1,321 @@
+@baseUrl = http://localhost:5128
+@HostAddress = {{baseUrl}}
+@companyAdminEmail = admin@al-salamah.com
+@companyAdminPassword = User@123456
+@missingJob = 4c8b2d33-9e55-4f29-ae16-7d3f9b6a2c81
+@missingUser = 7d3f9b6a-2c81-4f29-ae16-4c8b2d339e55
+
+### =====================================================================
+### 20. NOTIFICATIONS: THE INBOX AND THE DELIVERY LOG
+### =====================================================================
+### Two endpoints over one table, with deliberately different authorization.
+###
+### The INBOX (GET /notifications) carries no permission. It holds only what was addressed to
+### the caller, identified from the token, so "any authenticated user" is the correct and
+### complete answer — there is no wider set of rows they could reach. A permission here would
+### mean a role could exist that receives notifications it cannot read.
+###
+### The OUTBOX (GET /notifications/outbox) is gated by Notifications.Audit. It holds messages
+### addressed to other people, with their e-mail addresses and the message bodies, so it is a
+### privilege over someone else's correspondence and is gated like the audit trail. Granted by
+### default to CompanyAdmin and DeputyAdmin.
+###
+### Why the outbox exists at all: NotificationLog records every attempt, including the failures
+### and the events that found no channel configured, so the platform can answer "was the client
+### actually told?" months later. Until it shipped, nothing could ask — the inbox filters to
+### InApp and to the caller, so every e-mail, SMS and WhatsApp attempt was written and then
+### unreadable. It is also how a transport gets commissioned: a failed send names its own
+### cause here (`SMTP 535` is a wrong password, `550` a rejected recipient), which beats going
+### to look in a mailbox the tester does not own.
+###
+### Ordering and filtering are covered by NotificationOutboxTests (xUnit), including the tenant
+### boundary. This suite is a smoke test of the surface with explicit assertions. Field casing
+### is camelCase (D-8).
+
+### 20.1 Company Admin login
+# @name companyAdminLogin
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept-Language: en
+
+{ "email": "{{companyAdminEmail}}", "password": "{{companyAdminPassword}}" }
+
+?? status == 200
+
+@companyAdminToken = {{companyAdminLogin.data.token}}
+
+### ---------------------------------------------------------------------
+### Authentication
+### ---------------------------------------------------------------------
+
+### 20.2 Unauthenticated inbox -> 401
+GET {{HostAddress}}/api/v1/notifications
+
+?? status == 401
+
+### 20.3 Unauthenticated mark-read -> 401
+POST {{HostAddress}}/api/v1/notifications/mark-read
+Content-Type: application/json
+
+{ "notificationIds": [] }
+
+?? status == 401
+
+### 20.4 Unauthenticated delivery log -> 401
+GET {{HostAddress}}/api/v1/notifications/outbox
+
+?? status == 401
+
+### ---------------------------------------------------------------------
+### The inbox: the caller's own, no permission needed
+### ---------------------------------------------------------------------
+
+### 20.5 Own inbox -> 200
+### unreadCount counts every unread notification, not just the page, so the badge stays right
+### when the list is filtered.
+# @name inbox
+GET {{HostAddress}}/api/v1/notifications
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+
+?? status == 200
+?? body isSuccess == true
+?? js response.parsedBody.data.unreadCount > -1
+?? js response.parsedBody.data.items.length > -1
+
+### 20.6 Unread only -> 200
+### A subset of 20.5 by construction, so the count can never exceed it.
+GET {{HostAddress}}/api/v1/notifications?unreadOnly=true
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+
+?? status == 200
+?? js response.parsedBody.data.items.length <= {{inbox.data.items.length}}
+
+### 20.7 pageSize is clamped, not refused -> 200
+### GetMyNotificationsQuery normalises in the handler rather than validating (it is named in
+### PagingValidationTests.ClampedInHandler), so an absurd page size is silently reduced to 200.
+### The outbox behaves differently on purpose — see 20.12.
+GET {{HostAddress}}/api/v1/notifications?pageSize=100000
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+
+?? status == 200
+?? js response.parsedBody.data.items.length <= 200
+
+### 20.8 Mark everything read -> 200
+### An empty list means "mark all read". Returns how many were NEWLY marked.
+POST {{HostAddress}}/api/v1/notifications/mark-read
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{ "notificationIds": [] }
+
+?? status == 200
+?? body isSuccess == true
+
+### 20.9 Marking again is idempotent -> 200, and newly-marked is 0
+### Already-read notifications are not re-stamped, so the first read is the one recorded and a
+### client that retries gets zero rather than an error.
+POST {{HostAddress}}/api/v1/notifications/mark-read
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{ "notificationIds": [] }
+
+?? status == 200
+?? body data == 0
+
+### 20.10 An id belonging to someone else matches nothing -> 200, 0 marked
+### Not 403 and not 404. The handler filters by the caller's own id regardless of the ids sent,
+### so a foreign id is simply not found — rather than needing a separate authorization check
+### that a future edit could forget.
+POST {{HostAddress}}/api/v1/notifications/mark-read
+Authorization: Bearer {{companyAdminToken}}
+Content-Type: application/json
+Accept-Language: en
+
+{ "notificationIds": ["{{missingUser}}"] }
+
+?? status == 200
+?? body data == 0
+
+### ---------------------------------------------------------------------
+### The delivery log: permission-gated, company-wide
+### ---------------------------------------------------------------------
+
+### 20.11 Delivery log as Company Admin -> 200
+# @name outbox
+GET {{HostAddress}}/api/v1/notifications/outbox
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+
+?? status == 200
+?? body isSuccess == true
+?? js response.parsedBody.data.items.length > -1
+?? js response.parsedBody.data.totalCount > -1
+?? js response.parsedBody.data.pageNumber > 0
+
+### 20.12 Invalid paging is refused, not clamped -> 400
+### The opposite of 20.7, and deliberate: this query validates rather than normalising, because
+### it is new and has no client relying on the old behaviour. pageNumber=0 and pageSize=-5 once
+### reached SQL Server as a negative OFFSET and a zero-row FETCH, and five list endpoints
+### answered 500.
+GET {{HostAddress}}/api/v1/notifications/outbox?pageNumber=0
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+
+?? status == 400
+?? body isSuccess == false
+
+### 20.13 Negative page size -> 400
+GET {{HostAddress}}/api/v1/notifications/outbox?pageSize=-5
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+
+?? status == 400
+
+### 20.14 Page size above the ceiling -> 400
+### PagingRules.MaxPageSize is 100, shared by every paged list.
+GET {{HostAddress}}/api/v1/notifications/outbox?pageSize=101
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+
+?? status == 400
+
+### 20.15 The ceiling itself is accepted -> 200
+GET {{HostAddress}}/api/v1/notifications/outbox?pageSize=100
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+
+?? status == 200
+
+### 20.16 Filter by delivery outcome -> 200, and every row matches
+### `?status=Failed` is the common question. Enums are integers on the wire (Docs/APIs/ENUMS.md):
+### Pending=1, Sent=2, Failed=3, NoChannelConfigured=4.
+GET {{HostAddress}}/api/v1/notifications/outbox?status=3
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+
+?? status == 200
+?? js response.parsedBody.data.items.filter(n => n.status != 3).length < 1
+
+### 20.17 Filter by transport -> 200, and every row matches
+### Channel: InApp=1, Email=2, Sms=3, WhatsApp=4.
+GET {{HostAddress}}/api/v1/notifications/outbox?channel=2
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+
+?? status == 200
+?? js response.parsedBody.data.items.filter(n => n.channel != 2).length < 1
+
+### 20.18 Filter by job -> 200
+### A job that does not exist is an empty page, not a 404: this is a filter over a log, not a
+### lookup of a job.
+GET {{HostAddress}}/api/v1/notifications/outbox?instanceId={{missingJob}}
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+
+?? status == 200
+?? body data.totalCount == 0
+
+### 20.19 Filter by recipient -> 200
+GET {{HostAddress}}/api/v1/notifications/outbox?recipientUserId={{missingUser}}
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+
+?? status == 200
+?? body data.totalCount == 0
+
+### 20.20 A non-numeric enum is a binding failure -> 400, in the envelope
+### Binding failures used to leak internal type names; they are now in-envelope like every
+### other error (D-8).
+GET {{HostAddress}}/api/v1/notifications/outbox?status=not-a-status
+Authorization: Bearer {{companyAdminToken}}
+Accept-Language: en
+
+?? status == 400
+?? body isSuccess == false
+
+### ---------------------------------------------------------------------
+### A client has an inbox but not a delivery log
+### ---------------------------------------------------------------------
+
+### 20.21 Register a client for this suite
+### Self-registered rather than assumed: seeded client accounts get Bogus-generated e-mail
+### addresses, so only admin@ and deputy@ are deterministic. A suite that logs in as a fixed
+### client account passes locally and fails in CI, and depending on another suite having run
+### first is how one timeout takes four suites down with it.
+# @name registerNotificationsClient
+POST {{HostAddress}}/api/v1/auth/register-client
+Content-Type: application/json
+Accept-Language: en
+X-Tenant-Domain: al-salamah
+
+{
+  "fullName": "Notifications Suite Client",
+  "email": "notifications.suite.client@example.com",
+  "phoneNumber": "+966500200020",
+  "password": "ClientSecure@123"
+}
+
+?? status == 200
+
+@notificationsClientId = {{registerNotificationsClient.data.userId}}
+@notificationsClientOtp = {{registerNotificationsClient.data.devOnlyOtp}}
+
+### 20.21a Verify the OTP so the account can sign in
+### devOnlyOtp above is populated by FeatureToggles:IsOtpReturnInsideTheResponse, which is on in
+### Development and Staging and refused outside them by the startup guard. Without it this step
+### is impossible and the whole suite stops here — which is exactly the state staging was in
+### before 2026-09-30.
+POST {{HostAddress}}/api/v1/auth/verify-client-otp
+Content-Type: application/json
+Accept-Language: en
+
+{ "userId": "{{notificationsClientId}}", "otp": "{{notificationsClientOtp}}" }
+
+?? status == 200
+
+### 20.22 Client login
+# @name clientLogin
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+Accept-Language: en
+X-Tenant-Domain: al-salamah
+
+{ "email": "notifications.suite.client@example.com", "password": "ClientSecure@123" }
+
+?? status == 200
+
+@clientToken = {{clientLogin.data.token}}
+
+### 20.23 A client reads their own inbox -> 200
+### The inbox is not staff-only. A client is told when their quotation is ready, so they must be
+### able to read it.
+GET {{HostAddress}}/api/v1/notifications
+Authorization: Bearer {{clientToken}}
+Accept-Language: en
+
+?? status == 200
+?? body isSuccess == true
+
+### 20.24 A client against the delivery log -> 403
+### The one assertion this suite exists for. A client who could read the outbox would read every
+### message the company sent to every other client, including their names and e-mail addresses.
+GET {{HostAddress}}/api/v1/notifications/outbox
+Authorization: Bearer {{clientToken}}
+Accept-Language: en
+
+?? status == 403
+
+### 20.25 And filtering it to themselves is still 403
+### The permission gates the endpoint, not the rows. There is no query string that turns a
+### client into an auditor.
+GET {{HostAddress}}/api/v1/notifications/outbox?recipientUserId={{missingUser}}
+Authorization: Bearer {{clientToken}}
+Accept-Language: en
+
+?? status == 403
