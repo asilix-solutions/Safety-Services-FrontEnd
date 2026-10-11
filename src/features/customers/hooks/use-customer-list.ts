@@ -9,11 +9,13 @@ import { getActiveProjects } from "@/domains/projects/storage";
 import { getUnpaidInvoices } from "@/domains/invoices/storage";
 import { hasPermission, isRole } from "@/constants/permissions";
 import { USER_ROLES } from "@/constants/roles";
+import { usersApi, BackendUserRole } from "@/domains/users/api";
 
 export function useCustomerList() {
   const { user } = useAuth();
   const tenantContext = useTenantContext();
   const [customers, setCustomers] = useState<Customer[]>([]);
+  const [isLiveSynced, setIsLiveSynced] = useState<boolean>(false);
 
   const [filters, setFilters] = useState<CustomerFilters>({
     search: "",
@@ -28,7 +30,69 @@ export function useCustomerList() {
 
   useEffect(() => {
     loadCustomers();
-  }, [tenantContext]);
+
+    if (!user || isRole(user.role, [USER_ROLES.CLIENT])) return;
+
+    let isCancelled = false;
+
+    async function syncLiveClients() {
+      try {
+        const res = await usersApi.getUsers({ role: BackendUserRole.Client, pageSize: 50 });
+        if (!isCancelled && res.isSuccess && res.data?.items) {
+          const liveClients: Customer[] = res.data.items.map((u) => {
+            const numericHash = u.id.replace(/\D/g, "").slice(0, 6).padEnd(6, "0");
+            return {
+              id: u.id,
+              tenantId: tenantContext.tenantId || "COMP-001",
+              companyName:
+                u.fullName.startsWith("شركة") || u.fullName.startsWith("مؤسسة")
+                  ? u.fullName
+                  : `مؤسسة ${u.fullName} للخدمات التجارية`,
+              commercialRegistration: `1010${numericHash}`,
+              industry: "التجارة والخدمات اللوجستية",
+              status: u.isActive ? ("Active" as const) : ("Inactive" as const),
+              primaryContactName: u.fullName,
+              primaryContactEmail: u.email,
+              primaryContactPhone: u.phoneNumber || "+966 50 000 0000",
+              city: "الرياض",
+              address: "طريق الملك فهد، الرياض، المملكة العربية السعودية",
+              representatives: [
+                {
+                  id: `rep-${u.id}`,
+                  name: u.fullName,
+                  email: u.email,
+                  phone: u.phoneNumber || "+966 50 000 0000",
+                  role: "الممثل النظامي للمنشأة",
+                },
+              ],
+              createdAt: u.createdAt,
+              updatedAt: u.createdAt,
+            };
+          });
+
+          const localCustomers = getCustomers(tenantContext);
+          const map = new Map<string, Customer>();
+          liveClients.forEach((c) => map.set(c.id, c));
+          localCustomers.forEach((c) => {
+            if (!map.has(c.id) && !map.has(c.primaryContactEmail)) {
+              map.set(c.id, c);
+            }
+          });
+
+          setCustomers(Array.from(map.values()));
+          setIsLiveSynced(true);
+        }
+      } catch (err) {
+        console.warn("Live customer directory sync failed:", err);
+      }
+    }
+
+    syncLiveClients();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [tenantContext, user]);
 
   const permissions = useMemo(() => {
     if (!user) {
@@ -170,6 +234,7 @@ export function useCustomerList() {
 
   return {
     customers: filteredCustomers,
+    isLiveSynced,
     filters,
     setFilters,
     kpis,

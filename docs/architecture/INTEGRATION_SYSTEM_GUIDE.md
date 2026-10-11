@@ -210,3 +210,54 @@ node scripts/test-live-integration.mjs
   * مزامنة المعاملات الهندسية المحتاجة لاعتماد أو مراجعة مخططات من الخادم الحي.
 * **لوحة تحكم العميل المستفيد (`ClientDashboard`):**
   * مزامنة فورية لقائمة طلبات العميل عبر `requestsApi.getMyRequests()` مع تحديث بطاقات الحالة وسجل الإنجاز.
+
+---
+
+## 12. العمليات الميدانية، الإغلاق القانوني، العقود الدورية، وبوابة الدفع (Phase 14)
+
+### 12.1 مجمع الموارد والعمليات الميدانية (`src/domains/field-ops/api.ts`)
+* **سجل العمال الميدانيين (`/field-workers`):**
+  * استعراض وتحديث قائمة العمال (`getWorkers`, `createWorker`, `updateWorker`, `retireWorker`).
+  * حساب التكلفة المباشرة للعمالة (`calculateWorkerCost`).
+  * ربط الحسابات الوظيفية بالدخول الميداني (`linkWorkerAccount`).
+* **سجل المعدات والآلات (`/equipment`):**
+  * استعراض وإدارة معدات المنشأة وتصنيف الملكية (`CompanyOwned`, `Rented`, `NewlyPurchased`).
+  * تحويل الأصول المشتراة حديثاً إلى ملكية المنشأة (`transitionEquipmentToCompanyOwned`).
+* **طابور موافقات الموارد (`/resource-approvals`):**
+  * اعتماد طلبات إضافة العمال والمعدات المرفوعة من الميدان (`approveResource`).
+* **خطة التنفيذ والمهام والصور الموثقة (`Execution Plan & Geotagged Tasks`):**
+  * خطة العمل والمسارات الزمنية (`getExecutionPlan`, `applyStandardSections`, `completeExecutionPlan`).
+  * مهام الميدان وتوثيق البداية والإنهاء (`startTask`, `submitTask`, `reviewTask`).
+  * توثيق الأدلة الميدانية بالصور وفحص بصمة EXIF والإحداثيات الجغرافية مع التبرير الإداري (`uploadTaskPhoto`, `justifyPhoto`).
+
+### 12.2 مراسم الإغلاق القانوني وقائمة الفحص والتشميع (`src/domains/closure/api.ts`)
+* **فحص الجاهزية للإغلاق (`getReadiness`):**
+  * فحص البوابات الفنية والحواجز المانعة للتشميع في إجابة موحدة (`CanSeal`, `Blockers`).
+* **قائمة الفحص المسبق للإغلاق SBC 801 (`getPunchList`, `applyStandardPunchList`, `inspectPunchListItem`):**
+  * إدراج بنود الفحص المعتمدة من كود البناء السعودي واعتماد كل بند بقرار المفتش الميداني الموثق.
+* **مراسم التوقيع الثنائي والشهادة الرسمية (`openCertificate`, `signAsClient`, `signAsManager`, `sealProject`):**
+  * فتح الشهادة وإصدار رقم الاعتماد السيادي `CRT-YYYY-NNNNN`.
+  * تسجيل توقيع العميل (الطرف الأول) وختم المنشأة المصور.
+  * تسجيل توقيع المدير العام للشركة (الطرف الثاني) كاعتماد نهائي.
+  * تشميع المشروع في خزانة الحصانة الرقمية وإقفال أي تعديل مالي أو فني في قاعدة البيانات.
+
+### 12.3 عقود الصيانة الدورية وجدول الزيارات (`src/domains/maintenance/api.ts`)
+* استعراض وإدارة عقود الصيانة الدورية (`getContracts`, `getContractById`, `openContract`, `cancelContract`).
+* لوحة التخطيط وجدول الزيارات المجدولة تلقائياً على مدى الأشهر القادمة (`getCalendar`).
+* إعادة جدولة الزيارات غير المرفوعة بعد (`rescheduleVisit`).
+
+### 12.4 دفتر الأستاذ لتكاليف المشاريع وبوابة سداد العملاء (`src/domains/payments/api.ts`)
+* **دفتر التكاليف المباشرة (`getProjectLedger`):**
+  * تتبع المصاريف، الفواتير الموردة، تكاليف المقاولين من الباطن، وهامش الربح الصافي.
+  * تسجيل فواتير الموردين وفحص سقف الصرف المعتمد (`recordExpense`, `clearExpense`).
+  * تقييد ساعات عمل العمال الميدانيين (`recordLabor`).
+* **بوابة سداد العملاء ومراجعة التحويلات (`Project Payments Gateway`):**
+  * كشف حساب المشروع المالي وحالة سداد الدفعة المقدمة (`getProjectPayments`, `getClientPaymentStatement`).
+  * السداد ببطاقات مدى/فيزا عبر ميسار والتأكيد الآلي (`payByCard`, `confirmCardPayment`).
+  * رفع إيصال التحويل البنكي للمراجعة الإدارية (`payByBankTransfer`).
+  * تحصيل المبالغ النقدية في الموقع واعتمادها فورياً (`recordCashPayment`, `reviewPayment`).
+
+### 12.5 سجل التدقيق والامتثال الرقابي (`src/domains/audit/api.ts`)
+* استعلام سجل التدقيق الموثق للحركات والعمليات والتغييرات (`getAuditLogs`, `getAuditLogById`).
+* تصدير سجل التدقيق إلى ملف CSV للأرشفة الرقابية (`exportAuditLogs`).
+

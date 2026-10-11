@@ -13,6 +13,7 @@ export function CustomerList() {
   const { t } = useTranslation();
   const {
     customers,
+    isLiveSynced,
     filters,
     setFilters,
     kpis,
@@ -63,9 +64,17 @@ export function CustomerList() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">
-            {t("common:customers.title")}
-          </h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">
+              {t("common:customers.title")}
+            </h1>
+            {isLiveSynced && (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                مزامنة حية مع أمانكس
+              </span>
+            )}
+          </div>
           <p className="text-sm text-muted-foreground">
             {t("common:customers.desc")}
           </p>
