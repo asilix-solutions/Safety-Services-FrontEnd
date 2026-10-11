@@ -61,3 +61,48 @@ export interface UpdateMyProfileRequest {
   phoneNumber: string;
   preferredLanguage: string;
 }
+
+export interface RegisterClientRequest {
+  fullName: string;
+  email: string;
+  phoneNumber: string;
+  password: string;
+}
+
+export interface RegisterClientResponseData {
+  userId: string;
+  nextStep: string;
+  devOnlyOtp?: string | null;
+}
+
+export interface VerifyClientOtpRequest {
+  userId: string;
+  otp: string;
+}
+
+export interface VerifyClientOtpResponseData {
+  accessToken: string;
+  refreshToken: string;
+  role: string;
+}
+
+export interface AcceptTenantInvitationRequest {
+  userId: string;
+  invitationToken: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
+export interface AcceptPlatformInvitationRequest {
+  userId: string;
+  invitationToken: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
+export interface AcceptInvitationResponseData {
+  accessToken: string;
+  refreshToken: string;
+  role: string;
+  userType: string;
+}

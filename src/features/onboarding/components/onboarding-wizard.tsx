@@ -16,15 +16,22 @@ import {
 import { useAuth } from "@/providers/AuthProvider";
 import { toast } from "sonner";
 import { THEME_PRESETS } from "@/constants/themes";
+import { tenantOnboardingApi, TenantActivationMethod } from "@/domains/tenants";
+import { alertService } from "@/services/alert-service";
 
 export function OnboardingWizard() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { login } = useAuth();
+  const { login, loginWithCredentials } = useAuth();
 
   const preselectedPlan = searchParams.get("plan") || "professional";
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Registered entity state from backend
+  const [, setRegisteredTenantId] = useState<string | null>(null);
+  const [registeredAdminUserId, setRegisteredAdminUserId] = useState<string | null>(null);
+  const [devOtp, setDevOtp] = useState<string | null>(null);
 
   // Form states across wizard
   const [step1Data, setStep1Data] = useState<OnboardingStep1Values>({
@@ -55,32 +62,77 @@ export function OnboardingWizard() {
   const handleStep3Submit = async () => {
     setIsSubmitting(true);
     try {
-      // Simulate registering company and dispatching OTP
-      await new Promise((res) => setTimeout(res, 800));
-      toast.success("تم إرسال رمز التحقق OTP بنجاح!");
-      setStep(4);
-    } catch {
-      toast.error("فشل إرسال رمز التحقق.");
+      const res = await tenantOnboardingApi.registerCompany({
+        companyNameAr: step1Data.companyName.trim(),
+        companyNameEn: step1Data.subdomain.toUpperCase() + " Safety Co.",
+        commercialRegistrationNumber: step1Data.commercialRegistration.trim(),
+        nationalUnifiedNumber700: step1Data.unifiedNumber700.trim(),
+        subdomain: step1Data.subdomain.trim().toLowerCase(),
+        adminFullName: step3Data.adminFullName.trim(),
+        adminEmail: step3Data.adminEmail.trim(),
+        adminPhoneNumber: step3Data.adminPhone.trim(),
+        password: step3Data.adminPassword,
+        activationMethod: TenantActivationMethod.ManualPlatformApproval,
+      });
+
+      if (res.isSuccess && res.data) {
+        setRegisteredTenantId(res.data.tenantId);
+        setRegisteredAdminUserId(res.data.adminUserId);
+        if (res.data.devOnlyOtp) {
+          setDevOtp(res.data.devOnlyOtp);
+          toast.success("تم إرسال رمز التحقق OTP بنجاح!", {
+            description: `رمز التحقق التجريبي (OTP): ${res.data.devOnlyOtp}`,
+            duration: 8000,
+          });
+        } else {
+          toast.success("تم إرسال رمز التحقق OTP بنجاح إلى بريدك الإلكتروني!");
+        }
+        setStep(4);
+      } else {
+        alertService.showApiResponse(res, {
+          defaultError: "فشل تسجيل المنشأة. يرجى التحقق من صحة البيانات.",
+        });
+      }
+    } catch (err) {
+      alertService.showApiError(err, { fallbackMessage: "فشل إرسال طلب تسجيل المنشأة." });
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleVerifyOtp = async (_otp: string) => {
+  const handleVerifyOtp = async (otp: string) => {
     setIsSubmitting(true);
     try {
-      // Simulate OTP verification and workspace provisioning
-      await new Promise((res) => setTimeout(res, 1200));
+      if (registeredAdminUserId) {
+        const res = await tenantOnboardingApi.verifyTenantOtp({
+          userId: registeredAdminUserId,
+          otpCode: otp.trim(),
+        });
 
-      toast.success("تم تفعيل بوابة شركة السلامة بنجاح!", {
-        description: `تم إعداد النطاق https://${step1Data.subdomain}.sslm.sa وتعيين الصلاحيات.`,
-      });
+        if (res.isSuccess && res.data) {
+          toast.success("تم تفعيل بوابة شركة السلامة بنجاح!", {
+            description: `تم إعداد النطاق https://${res.data.subdomain}.sslm.sa وتفعيل الصلاحيات.`,
+          });
+          // Authenticate with the credentials
+          await loginWithCredentials({
+            email: step3Data.adminEmail.trim(),
+            password: step3Data.adminPassword,
+          });
+          router.push("/dashboard");
+          return;
+        } else {
+          alertService.showApiResponse(res, {
+            defaultError: "رمز التحقق غير صحيح أو انتهت صلاحيته.",
+          });
+          return;
+        }
+      }
 
-      // Auto login as Company Admin to access the dashboard seamlessly
+      // Fallback
       await login("Company Admin");
       router.push("/dashboard");
-    } catch {
-      toast.error("فشل التحقق من الرمز.");
+    } catch (err) {
+      alertService.showApiError(err, { fallbackMessage: "فشل التحقق من الرمز." });
     } finally {
       setIsSubmitting(false);
     }
@@ -146,6 +198,7 @@ export function OnboardingWizard() {
           <Step4OtpVerification
             email={step3Data.adminEmail}
             subdomain={step1Data.subdomain}
+            initialOtp={devOtp || undefined}
             onVerify={handleVerifyOtp}
             onPrev={() => setStep(3)}
             isSubmitting={isSubmitting}

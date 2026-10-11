@@ -8,16 +8,16 @@ const BASE_API_URL =
 const MOCK_TENANTS: Record<string, TenantBrandingDTO> = {
   "al-salamah": {
     tenantId: "al-salamah",
-    tenantName: "شركة السلامة لحماية الحرائق",
+    tenantName: "شركة السلامة المتطورة لحلول وأنظمة السلامة ومكافحة الحريق",
     tenantSlug: "al-salamah",
-    logoUrl: "https://ui-avatars.com/api/?name=Al-Salamah%20Fire%20Protection%20Co.&background=FF5722&color=ffffff",
-    primaryColor: "#FF5722",
+    logoUrl: "https://ui-avatars.com/api/?name=Al-Salamah%20Fire%20Protection&background=DC2626&color=ffffff",
+    primaryColor: "#DC2626",
     primaryForeground: "#ffffff",
-    secondaryColor: "#1976D2",
-    accentColor: "#1976D2",
+    secondaryColor: "#0F172A",
+    accentColor: "#F97316",
     presetId: "safety-amber",
-    contactEmail: "contact@al-salamah.com",
-    supportPhone: "0561510413",
+    contactEmail: "info@al-salamah.com",
+    supportPhone: "+966114567890",
   },
   vertex: {
     tenantId: "COMP-001",

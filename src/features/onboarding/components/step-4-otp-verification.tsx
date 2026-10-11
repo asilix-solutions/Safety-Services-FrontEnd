@@ -10,6 +10,7 @@ import { toast } from "sonner";
 interface Step4OtpVerificationProps {
   email: string;
   subdomain: string;
+  initialOtp?: string;
   onVerify: (otp: string) => Promise<void>;
   onPrev: () => void;
   isSubmitting?: boolean;
@@ -18,11 +19,12 @@ interface Step4OtpVerificationProps {
 export function Step4OtpVerification({
   email,
   subdomain,
+  initialOtp,
   onVerify,
   onPrev,
   isSubmitting = false,
 }: Step4OtpVerificationProps) {
-  const [otp, setOtp] = useState("");
+  const [otp, setOtp] = useState(initialOtp || "");
   const [cooldown, setCooldown] = useState(60);
 
   useEffect(() => {

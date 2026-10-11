@@ -337,13 +337,22 @@ export function BrandedLoginForm({ tenant }: BrandedLoginFormProps) {
         )}
       </CardContent>
 
-      <CardFooter className="flex flex-col gap-2 justify-center border-t border-border/30 pt-4 text-center">
-        <Link
-          href="/register-company"
-          className="text-xs font-bold text-primary hover:underline flex items-center gap-1"
-        >
-          <span>{t("auth:registerCompanyLink") || "تسجيل منشأة جديدة في المنصة"}</span>
-        </Link>
+      <CardFooter className="flex flex-col gap-2.5 justify-center border-t border-border/30 pt-4 text-center">
+        <div className="flex items-center justify-center gap-3 text-xs font-bold">
+          <Link
+            href="/register"
+            className="text-primary hover:underline"
+          >
+            حساب عميل جديد
+          </Link>
+          <span className="text-muted-foreground/30">•</span>
+          <Link
+            href="/register-company"
+            className="text-muted-foreground hover:text-foreground hover:underline"
+          >
+            {t("auth:registerCompanyLink") || "تسجيل شركة سلامة جديدة"}
+          </Link>
+        </div>
         <p className="text-[11px] text-muted-foreground">
           {t("auth:footerNotice") || "محمي بأنظمة التشفير المتطورة ومطابق لاشتراطات الدفاع المدني وهيئة الزكاة والضريبة والجمارك"}
         </p>

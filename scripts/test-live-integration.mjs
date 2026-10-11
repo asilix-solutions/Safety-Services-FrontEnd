@@ -460,6 +460,42 @@ async function runTestSuite() {
     }
   }
 
+  // 16. Subdomain Availability Validation Checks
+  try {
+    const takenRes = await request("/tenants/subdomains/al-salamah/availability");
+    if (takenRes.status === 200 && takenRes.data?.isSuccess) {
+      pass("Subdomain Check: Taken Slug", `Slug: al-salamah (Available: ${takenRes.data.data?.isAvailable})`);
+    } else {
+      throw new Error(`Status ${takenRes.status}: ${JSON.stringify(takenRes.data)}`);
+    }
+
+    const availSlug = `fire-sa-${Date.now().toString().slice(-5)}`;
+    const availRes = await request(`/tenants/subdomains/${availSlug}/availability`);
+    if (availRes.status === 200 && availRes.data?.isSuccess) {
+      pass("Subdomain Check: Available Slug", `Slug: ${availSlug} (Available: ${availRes.data.data?.isAvailable})`);
+    } else {
+      throw new Error(`Status ${availRes.status}: ${JSON.stringify(availRes.data)}`);
+    }
+  } catch (err) {
+    fail("Subdomain Availability Validation", err.message);
+  }
+
+  // 17. Fine-Grained Permissions Claims (/auth/permissions/me)
+  if (adminToken) {
+    try {
+      const res = await request("/auth/permissions/me", {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      });
+      if (res.status === 200 && res.data?.isSuccess) {
+        pass("Current User Permission Claims (/auth/permissions/me)", `Claims count: ${res.data.data?.length ?? 0}`);
+      } else {
+        throw new Error(`Status ${res.status}: ${JSON.stringify(res.data)}`);
+      }
+    } catch (err) {
+      fail("Current User Permission Claims (/auth/permissions/me)", err.message);
+    }
+  }
+
   console.log(`\n${colors.cyan}${colors.bold}====================================================${colors.reset}`);
   console.log(`${colors.green}${colors.bold}  ALL INTEGRATION VERIFICATIONS COMPLETED!          ${colors.reset}`);
   console.log(`${colors.cyan}${colors.bold}====================================================\n${colors.reset}`);

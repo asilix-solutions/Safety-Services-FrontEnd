@@ -9,6 +9,13 @@ import {
   ResetPasswordRequest,
   ChangePasswordRequest,
   UpdateMyProfileRequest,
+  RegisterClientRequest,
+  RegisterClientResponseData,
+  VerifyClientOtpRequest,
+  VerifyClientOtpResponseData,
+  AcceptTenantInvitationRequest,
+  AcceptPlatformInvitationRequest,
+  AcceptInvitationResponseData,
 } from "@/types/auth";
 import { UserRole } from "@/types/role";
 import { UserProfile } from "@/types/user";
@@ -139,5 +146,45 @@ export const authApi = {
    */
   async updateProfile(payload: UpdateMyProfileRequest) {
     return http.put<UserProfileResponseData>("/me", payload);
+  },
+
+  /**
+   * Self-registers a Client beneficiary on tenant branded portal.
+   * POST /api/v1/auth/register-client
+   */
+  async registerClient(payload: RegisterClientRequest) {
+    return http.post<RegisterClientResponseData>("/auth/register-client", payload);
+  },
+
+  /**
+   * Verifies OTP for client self-registration, activating account and issuing JWT.
+   * POST /api/v1/auth/verify-client-otp
+   */
+  async verifyClientOtp(payload: VerifyClientOtpRequest) {
+    return http.post<VerifyClientOtpResponseData>("/auth/verify-client-otp", payload);
+  },
+
+  /**
+   * Accepts a pending tenant staff invitation, setting chosen password.
+   * POST /api/v1/auth/accept-tenant-invitation
+   */
+  async acceptTenantInvitation(payload: AcceptTenantInvitationRequest) {
+    return http.post<AcceptInvitationResponseData>("/auth/accept-tenant-invitation", payload);
+  },
+
+  /**
+   * Accepts a pending platform HQ staff invitation.
+   * POST /api/v1/auth/accept-platform-invitation
+   */
+  async acceptPlatformInvitation(payload: AcceptPlatformInvitationRequest) {
+    return http.post<AcceptInvitationResponseData>("/auth/accept-platform-invitation", payload);
+  },
+
+  /**
+   * Retrieves fine-grained permission claims for the authenticated user.
+   * GET /api/v1/auth/permissions/me
+   */
+  async getMyPermissions() {
+    return http.get<string[]>("/auth/permissions/me");
   },
 };
