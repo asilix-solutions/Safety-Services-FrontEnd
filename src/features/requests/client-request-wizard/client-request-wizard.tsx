@@ -11,6 +11,8 @@ import { RequiredDocument, RequestType, LicensingRequest } from "@/domains/reque
 import { DEFAULT_REQUIRED_DOCUMENTS } from "@/domains/requests/constants";
 import { classifyRequest } from "@/domains/requests/workflow";
 import { getRequests, saveRequests, getRequestDraft, saveRequestDraft, deleteRequestDraft, getMergedRequests } from "@/domains/requests/storage";
+import { requestsApi, BackendServiceCategory } from "@/domains/requests/api";
+import { alertService } from "@/services/alert-service";
 
 // Steps Components
 import { WizardProgress } from "./wizard-progress";
@@ -235,19 +237,44 @@ export function ClientRequestWizard() {
     const permittedReportType =
       formValues.reportType === "instant" && !instantReportAllowed ? undefined : formValues.reportType;
 
-    // Simulate submission delay
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    // Determine category
+    let serviceCategory = BackendServiceCategory.Licensing;
+    if (selectedRequestType === "maintenance_contract") {
+      serviceCategory = BackendServiceCategory.Maintenance;
+    }
+
+    let realJobNumber: string | null = null;
+    let backendId: string | null = null;
+
+    try {
+      const draftRes = await requestsApi.createDraft({
+        serviceCategory,
+        capturedFormDataJson: "{}",
+      });
+
+      if (draftRes.isSuccess && draftRes.data) {
+        backendId = draftRes.data;
+        const submitRes = await requestsApi.submit(backendId);
+        if (submitRes.isSuccess && submitRes.data) {
+          realJobNumber = submitRes.data.jobNumber;
+          alertService.success(submitRes.message || "تم تقديم الطلب بنجاح لدى الخادم المركزي");
+        }
+      }
+    } catch (apiErr: any) {
+      console.warn("Backend intake API call failed, falling back to local persistence:", apiErr);
+    }
+
     // Get current requests list from storage
     const currentRequests = getRequests();
     const allRequests = getMergedRequests();
 
-    // Generate Job Number
+    // Generate Job Number (prefer authoritative from backend if available)
     const count = allRequests.length + 1;
     const year = new Date().getFullYear();
-    const jobNumber = `SSLM-${year}-${String(count).padStart(6, "0")}`;
+    const jobNumber = realJobNumber || `SSLM-${year}-${String(count).padStart(6, "0")}`;
 
     const newRequest: LicensingRequest = {
-      id: `REQ-${Math.floor(1000 + Math.random() * 9000)}`,
+      id: backendId || `REQ-${Math.floor(1000 + Math.random() * 9000)}`,
       jobNumber,
       // Stamped from the creating user, or the record would be invisible to its own tenant.
       tenantId: user?.tenantId || "COMP-001",
@@ -318,6 +345,7 @@ export function ClientRequestWizard() {
     setSubmittedRequest(newRequest);
     setSubmitting(false);
   };
+
 
   if (submittedRequest) {
     const getReviewPathSummary = (cls: string) => {

@@ -16,6 +16,8 @@ import {
   getWorkflowStageDisplayName,
 } from "@/domains/requests/workflow";
 import { getScopedRequests } from "@/domains/requests/storage";
+import { requestsApi } from "@/domains/requests/api";
+import { mapWorkflowSummaryToLicensingRequest, mapClientRequestSummaryToLicensingRequest } from "@/domains/requests/mappers";
 import { useTenantContext } from "@/hooks/use-tenant-context";
 import { getProjects } from "@/domains/projects/storage";
 import { Project } from "@/types/project";
@@ -28,18 +30,66 @@ export default function RequestsPage() {
   const { t } = useTranslation();
   const [requests, setRequests] = useState<LicensingRequest[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
- 
-  // Load from localStorage and merge with mock requests
+
+  // Load from localStorage and merge with mock requests, then sync with live backend
   useEffect(() => {
     const list = getScopedRequests(tenantContext);
+    let initialList = list;
     if (isRole(user?.role, ["Client"])) {
-      const filtered = list.filter((r) => r.clientId === user!.companyId);
-      setRequests(filtered);
-    } else {
-      setRequests(list);
+      initialList = list.filter((r) => r.clientId === user!.companyId);
     }
+    setRequests(initialList);
     setProjects(getProjects());
+
+    if (!user) return;
+    let isCancelled = false;
+
+    async function fetchLiveRequests() {
+      try {
+        if (isRole(user?.role, ["Client"])) {
+          const clientRes = await requestsApi.getMyRequests();
+          if (!isCancelled && clientRes.isSuccess && clientRes.data?.items) {
+            const liveItems = clientRes.data.items.map((item) =>
+              mapClientRequestSummaryToLicensingRequest(
+                item,
+                user?.tenantId || "COMP-001",
+                user?.name || "Client",
+                user?.companyId || "client-id"
+              )
+            );
+            const map = new Map<string, LicensingRequest>();
+            liveItems.forEach((r) => map.set(r.jobNumber, r));
+            initialList.forEach((r) => {
+              if (!map.has(r.jobNumber)) map.set(r.jobNumber, r);
+            });
+            setRequests(Array.from(map.values()));
+          }
+        } else {
+          const staffRes = await requestsApi.getWorkflowInstances();
+          if (!isCancelled && staffRes.isSuccess && staffRes.data?.items) {
+            const liveItems = staffRes.data.items.map((item) =>
+              mapWorkflowSummaryToLicensingRequest(item, user?.tenantId || "COMP-001")
+            );
+            const map = new Map<string, LicensingRequest>();
+            liveItems.forEach((r) => map.set(r.jobNumber, r));
+            initialList.forEach((r) => {
+              if (!map.has(r.jobNumber)) map.set(r.jobNumber, r);
+            });
+            setRequests(Array.from(map.values()));
+          }
+        }
+      } catch (err) {
+        console.warn("Could not fetch live workflow instances, staying with local data:", err);
+      }
+    }
+
+    fetchLiveRequests();
+
+    return () => {
+      isCancelled = true;
+    };
   }, [user]);
+
  
   if (!user) return null;
 

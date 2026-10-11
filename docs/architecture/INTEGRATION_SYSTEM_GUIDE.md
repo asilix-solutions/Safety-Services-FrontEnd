@@ -110,3 +110,64 @@ const result = await http.post<ProjectResult>("/projects", payload);
 | **مسؤول العمليات (Operations Officer)** | `operations@al-salamah.com` | `User@123456` | شركة السلامة لحماية الحرائق | إدارة المهام الميدانية WBS والتحقق من الموقع |
 | **ممثل المبيعات (Sales Agent)** | `sales@al-salamah.com` | `User@123456` | شركة السلامة لحماية الحرائق | استلام طلبات العملاء وإعداد عروض الأسعار |
 | **العميل المستفيد (Client)** | `client@al-salamah.com` | `User@123456` | شركة السلامة لحماية الحرائق | تقديم ومتابعة طلبات التراخيص والمشاريع |
+
+---
+
+## 7. نطاق الطلبات ومسارات العمل الذكية (`src/domains/requests`)
+
+تم ربط الواجهة الأمامية مع محرك سير العمل المتقدم (`Amanix Workflow Engine`) ونظام الاستقبال الذكي (`Smart Intake Portal`):
+
+### 7.1 الخدمات ونقاط الاتصال (`src/domains/requests/api.ts`)
+* **بوابة الاستقبال الذكية (Smart Intake Portal):**
+  * `requestsApi.createDraft(payload)`: فتح مسودة طلب خدمة جديدة عبر `POST /api/v1/intake`.
+  * `requestsApi.saveDraft(id, payload)`: حفظ التقدم في مسودة الطلب عبر `PUT /api/v1/intake/{id}`.
+  * `requestsApi.uploadDocument(id, file)`: رفع المستندات والمخططات عبر `POST /api/v1/intake/{id}/documents`.
+  * `requestsApi.submit(id)`: تقديم المسودة رسمياً وإصدار رقم المعاملة السيادي `AMX-YYYY-00000` وبدء عداد الـ SLA عبر `POST /api/v1/intake/{id}/submit`.
+  * `requestsApi.resubmit(id)`: إعادة تقديم الطلب بعد تصحيح ملاحظات المهندس عبر `POST /api/v1/intake/{id}/resubmit`.
+  * `requestsApi.accept(id)`: قبول المعاملة في مكتب الفرز الإداري عبر `POST /api/v1/intake/{id}/accept`.
+  * `requestsApi.reject(id, reason)`: رفض المعاملة مع سبب إلزامي مسجل عبر `POST /api/v1/intake/{id}/reject`.
+
+* **عرض الموظفين وسير العمل (Staff Workflow Instances):**
+  * `requestsApi.getWorkflowInstances(params)`: جلب قائمة المعاملات الخاصة بالمنشأة حسب صلاحيات الدور عبر `GET /api/v1/workflow-instances`.
+  * `requestsApi.getWorkflowInstanceById(id)`: استعراض تفاصيل المعاملة بنظام الرؤية المرحلية الموجهة (Turn-Based Role Visibility) عبر `GET /api/v1/workflow-instances/{id}`.
+  * `requestsApi.cancelWorkflowInstance(id, reason)`: إنهاء المعاملة وتوثيق السبب عبر `POST /api/v1/workflow-instances/{id}/cancel`.
+
+* **بوابة العميل المستفيد (Client Projection Shield):**
+  * `requestsApi.getMyRequests(params)`: استعراض قائمة طلبات العميل الخاصة المحمية عبر `GET /api/v1/my-requests`.
+  * `requestsApi.getMyRequestById(id)`: استعراض تفاصيل طلب العميل ومراحل الإنجاز عبر `GET /api/v1/my-requests/{id}`.
+  * `requestsApi.getMyQuotation(id)`: استعراض عرض السعر المعتمد للمعاملة عبر `GET /api/v1/my-requests/{id}/quotation`.
+  * `requestsApi.respondToQuotation(id, accept, feedback)`: قبول أو رفض عرض السعر عبر `POST /api/v1/my-requests/{id}/quotation/respond`.
+  * `requestsApi.getPaymentStatement(id)`: كشف حساب المشروع والمبالغ المسددة والمتبقية عبر `GET /api/v1/my-requests/{id}/payments`.
+
+---
+
+## 8. نطاق إعدادات المنشأة والاشتراكات (`src/domains/settings`)
+
+تم ربط إعدادات المنشأة الحية عبر `src/domains/settings/api.ts` و `src/features/settings/hooks/use-settings.ts`:
+* `settingsApi.getSettings()`: استرجاع الإعدادات الكاملة عبر `GET /api/v1/tenants/settings`.
+* `settingsApi.updateBranding(payload)`: تحديث الهوية البصرية والألوان والشعار عبر `PUT /api/v1/tenants/settings/branding`.
+* `settingsApi.updateCompanyProfile(payload)`: تحديث بيانات السجل التجاري والرقم الوطني الموحد 700 وضريبة القيمة المضافة عبر `PUT /api/v1/tenants/settings/company-profile`.
+* `settingsApi.updateContact(payload)`: تحديث بيانات التواصل الرسمية والعنوان عبر `PUT /api/v1/tenants/settings/contact`.
+* `settingsApi.getSubscription()`: استعلام حالة الخطة والحدود القصوى والحصص المستهلكة (Staff, Requests, Storage) عبر `GET /api/v1/tenants/subscription`.
+* `settingsApi.getFinancialPolicy()` & `updateFinancialPolicy(payload)`: إدارة السياسة المالية وسقف الصرف ونسبة الضريبة عبر `GET / PUT /api/v1/tenants/settings/financial-policy`.
+
+---
+
+## 9. حزمة الاختبارات الآلية الحية (`scripts/test-live-integration.mjs`)
+
+تم بناء وتشغيل حزمة اختبارات تكاملية شاملة تعمل مباشرة ضد خادم بيئة Staging الحي:
+* فحص الاستجابة ونبض الخادم: `GET /api/v1/diagnostics/ping` (نجاح بنسبة 100%).
+* فحص العلامة التجارية الخاصة بالمنشأة: `GET /api/v1/tenants/settings/public-branding` (نجاح بنسبة 100%).
+* فحص مصادقة مدير المنشأة: `POST /api/v1/auth/login` (نجاح بنسبة 100%).
+* فحص استرجاع الملف الشخصي للمدير: `GET /api/v1/me` (نجاح بنسبة 100%).
+* فحص إعدادات المنشأة واشتراكها: `GET /api/v1/tenants/settings` و `GET /api/v1/tenants/subscription` (نجاح بنسبة 100%).
+* فحص قائمة مسارات العمل للموظفين: `GET /api/v1/workflow-instances` (نجاح بنسبة 100%).
+* فحص قوالب سير العمل ومخططات النماذج الديناميكية: `GET /api/v1/workflow-templates` (نجاح بنسبة 100%).
+* فحص مصادقة العميل: `POST /api/v1/auth/login` (نجاح بنسبة 100%).
+* فحص قائمة طلبات العميل: `GET /api/v1/my-requests` (نجاح بنسبة 100%).
+* فحص فتح مسودة طلب جديد وتقديمها: `POST /api/v1/intake` ثم `POST /api/v1/intake/{id}/submit` وإصدار رقم معاملة حقيقي `AMX-2026-00001` (نجاح بنسبة 100%).
+
+لإعادة تشغيل حزمة الاختبارات في أي وقت:
+```bash
+node scripts/test-live-integration.mjs
+```

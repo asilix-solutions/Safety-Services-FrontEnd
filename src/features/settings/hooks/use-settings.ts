@@ -30,6 +30,8 @@ import {
   validateNotifications,
   validateSecurity
 } from "@/domains/settings";
+import { settingsApi } from "@/domains/settings/api";
+import { alertService } from "@/services/alert-service";
 import { applyTenantTheme } from "@/lib/theme-utils";
 
 export type SettingsTab = "company" | "branding" | "preferences" | "notifications" | "security" | "organization";
@@ -146,6 +148,26 @@ export function useSettings() {
         return;
       }
       saveCompanyProfile(companyDraft);
+      // Asynchronously sync with live backend
+      settingsApi
+        .updateCompanyProfile({
+          tenantId: user?.tenantId || "",
+          companyNameAr: companyDraft.companyName,
+          companyNameEn: companyDraft.companyShortName || companyDraft.companyName,
+          commercialRegistrationNumber: companyDraft.commercialRegistration,
+          nationalUnifiedNumber700: companyDraft.commercialRegistration.startsWith("7")
+            ? companyDraft.commercialRegistration
+            : "7000000000",
+          vatRegistrationNumber: companyDraft.taxNumber,
+        })
+        .then((response) => {
+          if (response.isSuccess) {
+            alertService.success(response.message || "تم حفظ بيانات المنشأة بنجاح على الخادم");
+          }
+        })
+        .catch((err) => {
+          console.warn("Backend updateCompanyProfile failed:", err);
+        });
     } else if (activeTab === "branding" && brandingDraft) {
       if (!tabPermissions.branding.editable) return;
       const res = validateBranding(brandingDraft);
@@ -162,6 +184,28 @@ export function useSettings() {
         accentHex: brandingDraft.accentColor,
         darkModeOverrides: brandingDraft.darkModeOverrides,
       });
+      // Asynchronously sync branding with live backend
+      settingsApi
+        .updateBranding({
+          tenantId: user?.tenantId || "",
+          logoUrl: brandingDraft.logoUrl,
+          themeColors: {
+            primary: brandingDraft.primaryColor,
+            primaryForeground: brandingDraft.primaryForeground || "#ffffff",
+            secondary: brandingDraft.secondaryColor,
+            accent: brandingDraft.accentColor,
+          },
+          socialLinks: {},
+          welcomeMessage: "نظام أمانكس للسلامة والوقاية",
+        })
+        .then((response) => {
+          if (response.isSuccess) {
+            alertService.success(response.message || "تم حفظ الهوية البصرية بنجاح على الخادم");
+          }
+        })
+        .catch((err) => {
+          console.warn("Backend updateBranding failed:", err);
+        });
     } else if (activeTab === "preferences" && prefsDraft) {
       const res = validatePreferences(prefsDraft);
       if (!res.valid) {
