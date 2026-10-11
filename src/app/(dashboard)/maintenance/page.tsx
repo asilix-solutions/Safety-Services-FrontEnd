@@ -1,5 +1,7 @@
-import { notFound } from "next/navigation";
+"use client";
+
+import { MaintenanceDashboard } from "@/features/maintenance";
 
 export default function MaintenancePage() {
-  notFound();
+  return <MaintenanceDashboard />;
 }

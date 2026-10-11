@@ -36,6 +36,7 @@ export const ROLE_NAVIGATION: Record<UserRole, NavigationItem[]> = {
     { label: "Employees", path: "/employees", iconName: "Users2" },
     { label: "Reports", path: "/reports", iconName: "FileSpreadsheet" },
     { label: "Contracts", path: "/contracts", iconName: "FileCheck2" },
+    { label: "Maintenance", path: "/maintenance", iconName: "Wrench" },
     { label: "Certificates", path: "/certificates", iconName: "Award" },
     { label: "Invoices", path: "/invoices", iconName: "Receipt" },
     { label: "Settings", path: "/settings", iconName: "Settings2" },
@@ -58,6 +59,7 @@ export const ROLE_NAVIGATION: Record<UserRole, NavigationItem[]> = {
     { label: "Employees", path: "/employees", iconName: "Users2" },
     { label: "Customers", path: "/customers", iconName: "Briefcase" },
     { label: "Site Visits", path: "/site-visits", iconName: "MapPin" },
+    { label: "Maintenance", path: "/maintenance", iconName: "Wrench" },
   ],
   "Sales Agent": [
     { label: "Dashboard", path: "/dashboard", iconName: "LayoutDashboard" },

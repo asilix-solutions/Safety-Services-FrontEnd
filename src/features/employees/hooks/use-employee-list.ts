@@ -1,17 +1,19 @@
 import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/providers/AuthProvider";
 import { useTenantContext } from "@/hooks/use-tenant-context";
-import { Employee, EmployeeDepartment, EmployeeStatus, EmployeeAvailability } from "@/domains/employees/types";
+import { Employee, EmployeeDepartment, EmployeeStatus, EmployeeAvailability, EmployeeRole } from "@/domains/employees/types";
 import { getEmployees, createOrUpdateEmployee } from "@/domains/employees/storage";
 import { validateEmployee } from "@/domains/employees/validation";
 import { canViewEmployees, canManageEmployees, isRole } from "@/constants/permissions";
 import { USER_ROLES } from "@/constants/roles";
+import { usersApi, BackendUserRole } from "@/domains/users/api";
 import { EmployeeFilters } from "../types";
 
 export function useEmployeeList() {
   const { user } = useAuth();
   const tenantContext = useTenantContext();
   const [employees, setEmployees] = useState<Employee[]>([]);
+  const [isLiveSynced, setIsLiveSynced] = useState<boolean>(false);
   
   // Active state filters
   const [filters, setFilters] = useState<EmployeeFilters>({
@@ -30,7 +32,74 @@ export function useEmployeeList() {
 
   useEffect(() => {
     loadEmployees();
-  }, [user]);
+
+    if (!user || isRole(user.role, [USER_ROLES.CLIENT])) return;
+
+    let isCancelled = false;
+
+    async function syncLiveStaff() {
+      try {
+        const res = await usersApi.getUsers({ pageSize: 50 });
+        if (!isCancelled && res.isSuccess && res.data?.items) {
+          const liveEmployees: Employee[] = res.data.items
+            .filter((u) => u.role !== BackendUserRole.Client)
+            .map((u, idx) => {
+              let role: EmployeeRole = "Company Admin";
+              let dept: EmployeeDepartment = "Administration";
+
+              if (u.role === BackendUserRole.ConsultingEngineer) {
+                role = "Consulting Engineer";
+                dept = "Engineering";
+              } else if (u.role === BackendUserRole.OperationsOfficer) {
+                role = "Operations Officer";
+                dept = "Operations";
+              } else if (u.role === BackendUserRole.SalesRepresentative) {
+                role = "Sales Agent";
+                dept = "Sales";
+              }
+
+              const numericHash = u.id.replace(/\D/g, "").slice(0, 4).padEnd(4, "0");
+
+              return {
+                id: u.id,
+                tenantId: tenantContext.tenantId || "COMP-001",
+                userId: u.id,
+                employeeNumber: `EMP-${numericHash || (idx + 1).toString().padStart(4, "0")}`,
+                fullName: u.fullName,
+                email: u.email,
+                phone: u.phoneNumber || "+966 50 000 0000",
+                role,
+                department: dept,
+                status: u.isActive ? ("Active" as const) : ("Inactive" as const),
+                availabilityStatus: "Available" as const,
+                createdAt: u.createdAt,
+                updatedAt: u.createdAt,
+              };
+            });
+
+          const localEmployees = getEmployees(tenantContext);
+          const map = new Map<string, Employee>();
+          liveEmployees.forEach((e) => map.set(e.id, e));
+          localEmployees.forEach((e) => {
+            if (!map.has(e.id) && !map.has(e.email)) {
+              map.set(e.id, e);
+            }
+          });
+
+          setEmployees(Array.from(map.values()));
+          setIsLiveSynced(true);
+        }
+      } catch (err) {
+        console.warn("Live employee directory sync failed:", err);
+      }
+    }
+
+    syncLiveStaff();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [user, tenantContext]);
 
   // Permission Checks (Centralized)
   const permissions = useMemo(() => {
@@ -160,6 +229,7 @@ export function useEmployeeList() {
 
   return {
     employees: filteredEmployees,
+    isLiveSynced,
     filters,
     setFilters,
     kpis,

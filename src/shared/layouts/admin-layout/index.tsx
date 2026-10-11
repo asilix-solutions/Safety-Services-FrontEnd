@@ -42,6 +42,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
       "Employees": "dashboard:nav_employees",
       "Reports": "dashboard:nav_reports",
       "Contracts": "dashboard:nav_contracts",
+      "Maintenance": "dashboard:nav_maintenance",
       "Certificates": "dashboard:nav_certificates",
       "Invoices": "dashboard:nav_invoices",
       "Blueprint Review": "dashboard:nav_blueprint_review",

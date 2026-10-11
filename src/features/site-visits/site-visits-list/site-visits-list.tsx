@@ -15,6 +15,7 @@ export function SiteVisitsList() {
     setActiveTab,
     allVisits,
     filteredVisits,
+    isLiveSynced,
     t,
   } = useSiteVisitsList();
 
@@ -25,6 +26,14 @@ export function SiteVisitsList() {
       <PageHeader
         title={t("dashboard:site_visits_title")}
         description={t("dashboard:site_visits_desc")}
+        actions={
+          isLiveSynced ? (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              مزامنة حية مع أمانكس
+            </span>
+          ) : undefined
+        }
       />
 
       {/* Tabs Switcher */}
