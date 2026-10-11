@@ -6,7 +6,7 @@ import {
   clearAuthSession,
   getTenantDomain,
 } from "@/lib/auth-storage";
-import { ApiErrorResponse } from "@/types/api";
+import { ApiErrorResponse, ApiResponse } from "@/types/api";
 
 export const BASE_API_URL =
   process.env.NEXT_PUBLIC_API_URL || "https://amanixapi-001-site1.ktempurl.com/api/v1";
@@ -107,12 +107,14 @@ apiClient.interceptors.response.use(
         (errorsArray && errorsArray.length > 0 ? errorsArray[0] : "") ||
         `Request failed with status ${status}`;
 
+      const errData = data as ApiErrorResponse | undefined;
+
       formattedError = {
         isSuccess: false,
         message: rawMessage,
-        code: data?.code || String(status),
+        code: errData?.code || String(status),
         errors: errorsArray,
-        details: detailsMap || data?.details,
+        details: detailsMap || errData?.details,
       };
 
       // Check if the error is 401 Unauthorized and not already retried

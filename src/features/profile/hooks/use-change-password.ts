@@ -1,9 +1,12 @@
+"use client";
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { changePasswordSchema, ChangePasswordFormValues } from "@/schemas/profile.schema";
 import { useTranslation } from "@/providers/i18n-provider";
-import { toast } from "sonner";
+import { authApi } from "@/domains/auth";
+import { alertService } from "@/services/alert-service";
 
 export function useChangePassword() {
   const { t } = useTranslation();
@@ -19,23 +22,30 @@ export function useChangePassword() {
     },
   });
 
-  const onSubmit = async (_data: ChangePasswordFormValues) => {
+  const onSubmit = async (data: ChangePasswordFormValues) => {
     setIsSubmitting(true);
     setErrorMsg("");
 
     try {
-      // Simulate API call to PUT /api/v1/me/change-password
-      await new Promise((res) => setTimeout(res, 800));
-
-      toast.success("تم تحديث كلمة المرور بنجاح!", {
-        description: "تم تأمين حسابك بكلمة المرور الجديدة.",
+      const res = await authApi.changePassword({
+        currentPassword: data.currentPassword,
+        newPassword: data.newPassword,
       });
 
-      form.reset();
+      if (res.isSuccess) {
+        alertService.success(res.message || "تم تحديث كلمة المرور بنجاح!", {
+          description: "تم تأمين حسابك بكلمة المرور الجديدة.",
+        });
+        form.reset();
+      } else {
+        alertService.showApiResponse(res, {
+          defaultError: "فشل تغيير كلمة المرور. يرجى التحقق من كلمة المرور الحالية.",
+        });
+      }
     } catch (err: unknown) {
-      const error = err as { message?: string };
-      setErrorMsg(error.message || "فشل تغيير كلمة المرور");
-      toast.error(error.message || "فشل تغيير كلمة المرور");
+      alertService.showApiError(err, {
+        fallbackMessage: "فشل تغيير كلمة المرور. تأكد من صحة كلمة المرور الحالية.",
+      });
     } finally {
       setIsSubmitting(false);
     }

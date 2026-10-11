@@ -9,8 +9,6 @@ import { OperationsLayout } from "@/shared/layouts/operations-layout";
 import { ClientLayout } from "@/shared/layouts/client-layout";
 import { ROLE_NAVIGATION } from "@/constants/navigation";
 import { NAV_LAYOUT_GROUPS } from "@/constants/permissions";
-import { getProjects } from "@/domains/projects/storage";
-
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -40,7 +38,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     };
 
     const navItems = ROLE_NAVIGATION[user.role] || [];
-    const allowedPaths = navItems.map((item: any) => item.path);
+    const allowedPaths = navItems.map((item: { path: string }) => item.path);
     const defaultRoute = ROLE_DEFAULT_ROUTE[user.role] || "/dashboard";
 
     const isAllowed = allowedPaths.some((path: string) => {
