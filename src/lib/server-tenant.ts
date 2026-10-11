@@ -2,7 +2,23 @@ import { headers } from "next/headers";
 import { TenantBrandingDTO } from "@/types/tenant";
 import { THEME_PRESETS } from "@/constants/themes";
 
+const BASE_API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "https://amanixapi-001-site1.ktempurl.com/api/v1";
+
 const MOCK_TENANTS: Record<string, TenantBrandingDTO> = {
+  "al-salamah": {
+    tenantId: "al-salamah",
+    tenantName: "شركة السلامة لحماية الحرائق",
+    tenantSlug: "al-salamah",
+    logoUrl: "https://ui-avatars.com/api/?name=Al-Salamah%20Fire%20Protection%20Co.&background=FF5722&color=ffffff",
+    primaryColor: "#FF5722",
+    primaryForeground: "#ffffff",
+    secondaryColor: "#1976D2",
+    accentColor: "#1976D2",
+    presetId: "safety-amber",
+    contactEmail: "contact@al-salamah.com",
+    supportPhone: "0561510413",
+  },
   vertex: {
     tenantId: "COMP-001",
     tenantName: "Vertex Industrial Safety Solutions",
@@ -94,22 +110,68 @@ const MOCK_TENANTS: Record<string, TenantBrandingDTO> = {
 };
 
 /**
- * Server-side helper to resolve tenant branding from incoming request headers.
+ * Server-side helper to resolve tenant branding from incoming request headers
+ * and query the backend public branding API with fallback to local presets.
  */
 export async function getServerTenantBranding(): Promise<TenantBrandingDTO | null> {
   try {
     const headersList = await headers();
-    const subdomain = (headersList.get("x-tenant-domain") || "").toLowerCase().trim();
+    let subdomain = (headersList.get("x-tenant-domain") || "").toLowerCase().trim();
+
+    if (!subdomain) {
+      const host = headersList.get("host") || "";
+      const hostParts = host.split(":")[0].split(".");
+      if (hostParts.length > 1 && hostParts[0] !== "localhost" && hostParts[0] !== "www") {
+        subdomain = hostParts[0].toLowerCase();
+      }
+    }
 
     if (!subdomain) {
       return null;
     }
 
+    // Attempt live fetch from Amanix Backend public branding endpoint
+    try {
+      const res = await fetch(`${BASE_API_URL}/tenants/settings/public-branding`, {
+        headers: {
+          "X-Tenant-Domain": subdomain,
+          "Accept-Language": "ar",
+        },
+        next: { revalidate: 120 }, // Cache SSR results for 2 minutes
+      });
+
+      if (res.ok) {
+        const json = await res.json();
+        if (json.isSuccess && json.data) {
+          const d = json.data;
+          const primaryColor = d.themeColors?.primary || "#FF5722";
+          const secondaryColor = d.themeColors?.secondary || "#1976D2";
+          const accentColor = d.themeColors?.accent || "#1976D2";
+
+          return {
+            tenantId: subdomain,
+            tenantName: d.welcomeMessage ? d.welcomeMessage.split("،")[0].replace("مرحباً بكم في ", "").trim() : `${subdomain} Safety Co.`,
+            tenantSlug: subdomain,
+            logoUrl: d.logoUrl || `https://ui-avatars.com/api/?name=${subdomain}&background=FF5722&color=ffffff`,
+            primaryColor,
+            primaryForeground: "#ffffff",
+            secondaryColor,
+            accentColor,
+            contactEmail: d.publicEmail,
+            supportPhone: d.publicPhone,
+          };
+        }
+      }
+    } catch {
+      // Graceful fallback to static/mock records if backend is temporarily unreachable
+    }
+
+    // Check mock tenants lookup
     if (MOCK_TENANTS[subdomain]) {
       return MOCK_TENANTS[subdomain];
     }
 
-    // Attempt lookup by tenant ID
+    // Lookup by tenant ID
     const byId = Object.values(MOCK_TENANTS).find(
       (t) => t.tenantId.toLowerCase() === subdomain || t.tenantSlug.toLowerCase() === subdomain
     );

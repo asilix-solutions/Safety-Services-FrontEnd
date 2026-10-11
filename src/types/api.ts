@@ -1,7 +1,14 @@
-export interface ApiResponse<T> {
-  success: boolean;
-  data: T;
+/**
+ * Unified Backend API Response envelope matching Amanix .NET 10 Clean Architecture.
+ * Contract: { isSuccess: boolean, message: string, data: T, errors: string[] }
+ */
+export interface ApiResponse<T = unknown> {
+  isSuccess: boolean;
+  /** Backward compatibility alias */
+  success?: boolean;
   message?: string;
+  data?: T;
+  errors?: string[];
   meta?: {
     totalItems?: number;
     page?: number;
@@ -11,9 +18,11 @@ export interface ApiResponse<T> {
 }
 
 export interface ApiErrorResponse {
-  success: boolean;
+  isSuccess?: boolean;
+  success?: boolean;
   message: string;
   code?: string;
-  errors?: Record<string, string[]>;
-  timestamp: string;
+  errors?: string[] | Record<string, string[]>;
+  details?: Record<string, string[]>;
+  timestamp?: string;
 }

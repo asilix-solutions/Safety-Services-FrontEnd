@@ -6,7 +6,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { resetPasswordSchema, ResetPasswordFormValues } from "@/schemas/auth.schema";
 import { useTranslation } from "@/providers/i18n-provider";
-import { toast } from "sonner";
+import { authApi } from "@/domains/auth";
+import { alertService } from "@/services/alert-service";
 
 export function useResetPassword() {
   const router = useRouter();
@@ -17,12 +18,13 @@ export function useResetPassword() {
   const [resendCooldown, setResendCooldown] = useState(60);
 
   const initialEmail = searchParams.get("email") || "";
+  const initialOtp = searchParams.get("otp") || "";
 
   const form = useForm<ResetPasswordFormValues>({
     resolver: zodResolver(resetPasswordSchema),
     defaultValues: {
       email: initialEmail,
-      otp: "",
+      otp: initialOtp,
       newPassword: "",
       confirmPassword: "",
     },
@@ -32,7 +34,10 @@ export function useResetPassword() {
     if (initialEmail) {
       form.setValue("email", initialEmail);
     }
-  }, [initialEmail, form]);
+    if (initialOtp) {
+      form.setValue("otp", initialOtp);
+    }
+  }, [initialEmail, initialOtp, form]);
 
   // Countdown timer for OTP resend
   useEffect(() => {
@@ -49,10 +54,20 @@ export function useResetPassword() {
     if (!email) return;
 
     try {
-      toast.info("تم إعادة إرسال رمز التحقق OTP بنجاح");
-      setResendCooldown(60);
-    } catch {
-      toast.error("فشل إعادة إرسال رمز التحقق");
+      const res = await authApi.forgotPassword({ email });
+      if (res.isSuccess) {
+        const payload = res.data as Record<string, unknown> | undefined;
+        const devOtp = (payload?.devOnlyOtp as string | undefined) || res.data?.otp;
+        if (devOtp) {
+          form.setValue("otp", devOtp);
+        }
+        alertService.success("تم إعادة إرسال رمز التحقق OTP بنجاح");
+        setResendCooldown(60);
+      } else {
+        alertService.showApiResponse(res);
+      }
+    } catch (err) {
+      alertService.showApiError(err, { fallbackMessage: "فشل إعادة إرسال رمز التحقق" });
     }
   };
 
@@ -61,18 +76,28 @@ export function useResetPassword() {
     setErrorMsg("");
 
     try {
-      // Simulate API call to POST /api/v1/auth/reset-password
-      await new Promise((res) => setTimeout(res, 1000));
-
-      toast.success("تم تحديث كلمة المرور بنجاح!", {
-        description: "يمكنك الآن تسجيل الدخول باستخدام كلمة المرور الجديدة.",
+      const res = await authApi.resetPassword({
+        email: data.email.trim(),
+        otp: data.otp.trim(),
+        newPassword: data.newPassword,
       });
 
-      router.push("/login?reset_success=true");
+      if (res.isSuccess) {
+        alertService.success(res.message || "تم تحديث كلمة المرور بنجاح!", {
+          description: "يمكنك الآن تسجيل الدخول باستخدام كلمة المرور الجديدة.",
+          duration: 5000,
+        });
+
+        router.push("/login?reset_success=true");
+      } else {
+        alertService.showApiResponse(res, {
+          defaultError: "فشل تحديث كلمة المرور. يرجى التحقق من صحة الرمز.",
+        });
+      }
     } catch (err: unknown) {
-      const error = err as { message?: string };
-      setErrorMsg(error.message || "فشل تحديث كلمة المرور.");
-      toast.error(error.message || "فشل تحديث كلمة المرور.");
+      alertService.showApiError(err, {
+        fallbackMessage: "فشل تحديث كلمة المرور. يرجى التأكد من صحة رمز التحقق والمحاولة مجدداً.",
+      });
     } finally {
       setIsSubmitting(false);
     }

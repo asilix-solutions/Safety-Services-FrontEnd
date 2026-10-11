@@ -1,21 +1,20 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
-
-export interface ApiErrorResponse {
-  isSuccess?: boolean;
-  message: string;
-  title?: string;
-  code?: string;
-  errors?: string[] | Record<string, string[]>;
-  details?: Record<string, string[]>;
-}
+import {
+  getAccessToken,
+  getRefreshToken,
+  setTokens,
+  clearAuthSession,
+  getTenantDomain,
+} from "@/lib/auth-storage";
+import { ApiErrorResponse } from "@/types/api";
 
 export const BASE_API_URL =
-  process.env.NEXT_PUBLIC_API_URL || "https://amainix-001-site1.ltempurl.com/api/v1";
+  process.env.NEXT_PUBLIC_API_URL || "https://amanixapi-001-site1.ktempurl.com/api/v1";
 
 // Instantiate the global Axios service configuration
 export const apiClient = axios.create({
   baseURL: BASE_API_URL,
-  timeout: 15000,
+  timeout: 20000,
   headers: {
     "Content-Type": "application/json",
   },
@@ -40,43 +39,9 @@ const processQueue = (error: unknown, token: string | null = null) => {
   failedQueue = [];
 };
 
-function getStoredAccessToken(): string | null {
-  if (typeof window === "undefined") return null;
-  const directToken = localStorage.getItem("sslm_access_token");
-  if (directToken) return directToken;
-
-  const profileStr = localStorage.getItem("sslm_user_profile_v2") || localStorage.getItem("sslm_user_profile");
-  if (profileStr) {
-    try {
-      const parsed = JSON.parse(profileStr);
-      return parsed.token || parsed.accessToken || "mock-jwt-token-xyz";
-    } catch {
-      return null;
-    }
-  }
-  return null;
-}
-
-function getStoredRefreshToken(): string | null {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem("sslm_refresh_token") || "mock-refresh-token-xyz";
-}
-
-function setStoredTokens(accessToken: string, refreshToken?: string) {
+function redirectToLogin() {
   if (typeof window === "undefined") return;
-  localStorage.setItem("sslm_access_token", accessToken);
-  if (refreshToken) {
-    localStorage.setItem("sslm_refresh_token", refreshToken);
-  }
-}
-
-function clearSessionAndRedirect() {
-  if (typeof window === "undefined") return;
-  localStorage.removeItem("sslm_access_token");
-  localStorage.removeItem("sslm_refresh_token");
-  localStorage.removeItem("sslm_user_profile_v2");
-  localStorage.removeItem("sslm_user_profile");
-
+  clearAuthSession();
   if (!window.location.pathname.includes("/login")) {
     window.location.href = "/login?session_expired=true";
   }
@@ -85,7 +50,7 @@ function clearSessionAndRedirect() {
 // Request Interceptor to inject JWT Auth Tokens, Tenant Subdomain, and Language Headers
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const token = getStoredAccessToken();
+    const token = getAccessToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -97,8 +62,8 @@ apiClient.interceptors.request.use(
         config.headers["Accept-Language"] = lang;
       }
 
-      // Injects active tenant subdomain header when present
-      const tenantDomain = localStorage.getItem("sslm_tenant_domain");
+      // Injects active tenant subdomain header when present and not already provided
+      const tenantDomain = getTenantDomain();
       if (tenantDomain && !config.headers["X-Tenant-Domain"]) {
         config.headers["X-Tenant-Domain"] = tenantDomain;
       }
@@ -112,43 +77,53 @@ apiClient.interceptors.request.use(
 // Response Interceptor for handling unified API errors and silent token rotation
 apiClient.interceptors.response.use(
   (response) => response,
-  async (error: AxiosError<ApiErrorResponse>) => {
+  async (error: AxiosError<ApiErrorResponse | ApiResponse>) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
-    // Format error payload
+    // Format unified error payload
     let formattedError: ApiErrorResponse = {
-      message: "An unexpected error occurred. Please try again later.",
+      isSuccess: false,
+      message: "حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.",
+      code: "UNKNOWN_ERROR",
     };
 
     if (error.response) {
+      const status = error.response.status;
       const data = error.response.data;
-      const rawErrors = data?.errors;
-      const details =
-        data?.details ||
-        (rawErrors && typeof rawErrors === "object" && !Array.isArray(rawErrors)
-          ? (rawErrors as Record<string, string[]>)
-          : undefined);
-      const errors = Array.isArray(rawErrors) ? rawErrors : undefined;
+
+      // Extract error messages (string[] or record)
+      let errorsArray: string[] | undefined = undefined;
+      let detailsMap: Record<string, string[]> | undefined = undefined;
+
+      if (Array.isArray(data?.errors)) {
+        errorsArray = data.errors;
+      } else if (data?.errors && typeof data.errors === "object") {
+        detailsMap = data.errors as Record<string, string[]>;
+        errorsArray = Object.values(detailsMap).flat();
+      }
+
+      const rawMessage =
+        data?.message ||
+        (errorsArray && errorsArray.length > 0 ? errorsArray[0] : "") ||
+        `Request failed with status ${status}`;
 
       formattedError = {
-        message:
-          data?.message ||
-          data?.title ||
-          `Request failed with status ${error.response.status}`,
-        code: data?.code || String(error.response.status),
-        details,
-        errors,
+        isSuccess: false,
+        message: rawMessage,
+        code: data?.code || String(status),
+        errors: errorsArray,
+        details: detailsMap || data?.details,
       };
 
       // Check if the error is 401 Unauthorized and not already retried
+      const url = originalRequest?.url || "";
       const isAuthEndpoint =
-        originalRequest.url?.includes("/auth/login") ||
-        originalRequest.url?.includes("/auth/refresh-token") ||
-        originalRequest.url?.includes("/auth/refresh") ||
-        originalRequest.url?.includes("/auth/forgot-password") ||
-        originalRequest.url?.includes("/auth/reset-password");
+        url.includes("/auth/login") ||
+        url.includes("/auth/refresh-token") ||
+        url.includes("/auth/forgot-password") ||
+        url.includes("/auth/reset-password");
 
-      if (error.response.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
+      if (status === 401 && !originalRequest._retry && !isAuthEndpoint) {
         if (isRefreshing) {
           // Queue this concurrent request while refreshing is in progress
           return new Promise<string>((resolve, reject) => {
@@ -164,22 +139,22 @@ apiClient.interceptors.response.use(
         originalRequest._retry = true;
         isRefreshing = true;
 
-        const refreshToken = getStoredRefreshToken();
+        const refreshToken = getRefreshToken();
+        const currentAccessToken = getAccessToken();
+
         if (!refreshToken) {
           isRefreshing = false;
-          clearSessionAndRedirect();
+          redirectToLogin();
           return Promise.reject(formattedError);
         }
 
-        const currentAccessToken = getStoredAccessToken();
-
         try {
-          // Call silent token refresh endpoint adhering to backend contract
+          // Silent token rotation call adhering to backend contract
           const refreshResponse = await axios.post(
             `${BASE_API_URL}/auth/refresh-token`,
             {
               accessToken: currentAccessToken || "",
-              refreshToken,
+              refreshToken: refreshToken,
             },
             {
               headers: {
@@ -189,19 +164,23 @@ apiClient.interceptors.response.use(
             }
           );
 
-          const { accessToken, refreshToken: newRefreshToken } =
-            refreshResponse.data?.data || refreshResponse.data || {};
-          const newToken = accessToken || "mock-refreshed-jwt-token";
+          const payload = refreshResponse.data?.data || refreshResponse.data;
+          const newAccessToken = payload?.accessToken || payload?.token;
+          const newRefreshToken = payload?.refreshToken;
 
-          setStoredTokens(newToken, newRefreshToken);
-          apiClient.defaults.headers.common.Authorization = `Bearer ${newToken}`;
-          originalRequest.headers.Authorization = `Bearer ${newToken}`;
+          if (!newAccessToken) {
+            throw new Error("No token returned from refresh endpoint");
+          }
 
-          processQueue(null, newToken);
+          setTokens(newAccessToken, newRefreshToken || refreshToken);
+          apiClient.defaults.headers.common.Authorization = `Bearer ${newAccessToken}`;
+          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+
+          processQueue(null, newAccessToken);
           return apiClient(originalRequest);
         } catch (refreshErr) {
           processQueue(refreshErr, null);
-          clearSessionAndRedirect();
+          redirectToLogin();
           return Promise.reject(formattedError);
         } finally {
           isRefreshing = false;
@@ -209,17 +188,19 @@ apiClient.interceptors.response.use(
       }
 
       // Handle unrecoverable 401 or auth endpoint failures
-      if (error.response.status === 401 && isAuthEndpoint) {
+      if (status === 401 && isAuthEndpoint) {
         return Promise.reject(formattedError);
       }
     } else if (error.request) {
       formattedError = {
-        message: "No response received from the server. Check your internet connection.",
+        isSuccess: false,
+        message: "تعذر الاتصال بالخادم. يرجى التحقق من اتصال الإنترنت.",
         code: "NETWORK_ERROR",
       };
     } else {
       formattedError = {
-        message: error.message,
+        isSuccess: false,
+        message: error.message || "حدث خطأ أثناء إعداد الطلب.",
         code: "REQUEST_SETUP_ERROR",
       };
     }
@@ -227,4 +208,3 @@ apiClient.interceptors.response.use(
     return Promise.reject(formattedError);
   }
 );
-

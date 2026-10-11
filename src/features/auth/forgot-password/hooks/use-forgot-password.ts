@@ -6,8 +6,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { forgotPasswordSchema, ForgotPasswordFormValues } from "@/schemas/auth.schema";
 import { useTranslation } from "@/providers/i18n-provider";
-import { toast } from "sonner";
-import { apiClient } from "@/services/api-client";
+import { authApi } from "@/domains/auth";
+import { alertService } from "@/services/alert-service";
 
 export function useForgotPassword() {
   const router = useRouter();
@@ -27,19 +27,32 @@ export function useForgotPassword() {
     setErrorMsg("");
 
     try {
-      // Simulate/Attempt dispatching OTP to API
-      await new Promise((res) => setTimeout(res, 800));
+      const res = await authApi.forgotPassword({ email: data.email.trim() });
 
-      toast.success(t("auth:sendOtpBtn"), {
-        description: `تم إرسال رمز التحقق OTP إلى البريد الإلكتروني: ${data.email}`,
-      });
+      if (res.isSuccess) {
+        const payload = res.data as Record<string, unknown> | undefined;
+        const devOtp = (payload?.devOnlyOtp as string | undefined) || res.data?.otp;
+        const desc = devOtp
+          ? `تم إرسال رمز التحقق OTP (${devOtp}) إلى بريدك الإلكتروني.`
+          : `تم إرسال رمز التحقق OTP إلى البريد: ${data.email}`;
 
-      // Navigate to reset password page with email in querystring
-      router.push(`/reset-password?email=${encodeURIComponent(data.email)}`);
+        alertService.success(res.message || "تم إرسال رمز التحقق بنجاح", {
+          description: desc,
+          duration: 8000,
+        });
+
+        // Navigate to reset password page with email and optional otp pre-filled
+        const otpParam = devOtp ? `&otp=${devOtp}` : "";
+        router.push(`/reset-password?email=${encodeURIComponent(data.email)}${otpParam}`);
+      } else {
+        alertService.showApiResponse(res, {
+          defaultError: t("validation:loginFailed") || "تعذر إرسال رمز التحقق",
+        });
+      }
     } catch (err: unknown) {
-      const error = err as { message?: string };
-      setErrorMsg(error.message || t("validation:loginFailed"));
-      toast.error(error.message || t("validation:loginFailed"));
+      alertService.showApiError(err, {
+        fallbackMessage: "تعذر إرسال رمز التحقق. يرجى التأكد من صحة البريد.",
+      });
     } finally {
       setIsSubmitting(false);
     }
