@@ -9,19 +9,17 @@ export enum BackendQuotationStatus {
 }
 
 export interface QuotationLineInput {
-  itemDescriptionAr: string;
-  itemDescriptionEn?: string;
+  description: string;
+  unitOfMeasurement: string;
   quantity: number;
-  unitOfMeasure: string;
   unitRate: number;
   unitCost?: number;
 }
 
 export interface QuotationDetailLineDto {
-  itemDescriptionAr: string;
-  itemDescriptionEn?: string;
+  description: string;
+  unitOfMeasurement: string;
   quantity: number;
-  unitOfMeasure: string;
   unitRate: number;
   unitCost: number;
   lineSubtotal: number;
