@@ -58,7 +58,7 @@ export interface ChangePasswordRequest {
 
 export interface UpdateMyProfileRequest {
   fullName: string;
-  phoneNumber: string;
+  phoneNumber?: string | null;
   preferredLanguage: string;
 }
 

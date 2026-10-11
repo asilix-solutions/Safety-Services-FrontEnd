@@ -3,6 +3,8 @@ import { getScopedRequests } from "@/domains/requests/storage";
 import { useTenantContext } from "@/hooks/use-tenant-context";
 import { getEngineeringReviews } from "@/domains/engineering/storage";
 import { buildBlueprintReviewViewModel, BlueprintReviewViewModel } from "../helpers/blueprint-review-view-model";
+import { requestsApi } from "@/domains/requests/api";
+import { mapWorkflowSummaryToLicensingRequest } from "@/domains/requests/mappers";
 
 export type QueueFilter = "all" | "engineering" | "high_hazard" | "returned" | "approved";
 
@@ -12,26 +14,57 @@ export function useBlueprintReviewQueue() {
   const [activeFilter, setActiveFilter] = useState<QueueFilter>("all");
 
   useEffect(() => {
-    const mergedRequests = getScopedRequests(tenantContext);
-    const reviews = getEngineeringReviews();
-    const reviewMap = new Map(reviews.map((r) => [r.jobNumber, r]));
+    let isMounted = true;
 
-    // Filter to requests belonging to Engineering Review Queue
-    const filtered = mergedRequests
-      .filter((r) => {
-        const queue = r.assignedQueue;
-        const classification = r.classification;
-        return (
-          queue === "ENGINEERING" ||
-          queue === "HIGH_HAZARD" ||
-          classification === "engineering_project" ||
-          classification === "high_hazard_review" ||
-          r.engineeringReviewRequired
-        );
-      })
-      .map((r) => buildBlueprintReviewViewModel(r, reviewMap.get(r.jobNumber)));
+    async function loadQueueData() {
+      const localRequests = getScopedRequests(tenantContext);
+      let combined = [...localRequests];
 
-    setRequests(filtered);
+      try {
+        const res = await requestsApi.getWorkflowInstances();
+        if (res.isSuccess && res.data?.items) {
+          const tenantId = tenantContext.tenantId || "al-salamah";
+          const liveList = res.data.items.map((i) =>
+            mapWorkflowSummaryToLicensingRequest(i, tenantId)
+          );
+          const existingJobNumbers = new Set(localRequests.map((r) => r.jobNumber));
+          const newLive = liveList.filter((r) => !existingJobNumbers.has(r.jobNumber));
+          combined = [...newLive, ...localRequests];
+        }
+      } catch {
+        // Fallback to local items
+      }
+
+      if (!isMounted) return;
+
+      const reviews = getEngineeringReviews();
+      const reviewMap = new Map(reviews.map((r) => [r.jobNumber, r]));
+
+      // Filter to requests belonging to Engineering Review Queue
+      const filtered = combined
+        .filter((r) => {
+          const queue = r.assignedQueue;
+          const classification = r.classification;
+          return (
+            queue === "ENGINEERING" ||
+            queue === "HIGH_HAZARD" ||
+            classification === "engineering_project" ||
+            classification === "high_hazard_review" ||
+            r.engineeringReviewRequired ||
+            r.currentStage === "UNDER_REVIEW" ||
+            r.requestType === "engineering_blueprint"
+          );
+        })
+        .map((r) => buildBlueprintReviewViewModel(r, reviewMap.get(r.jobNumber)));
+
+      setRequests(filtered);
+    }
+
+    loadQueueData();
+
+    return () => {
+      isMounted = false;
+    };
   }, [tenantContext]);
 
   // Compute Statistics

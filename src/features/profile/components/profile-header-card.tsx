@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/shared/ui/card";
 import { Badge } from "@/shared/ui/badge";
 import { Mail, Phone, Building, ShieldCheck, Calendar } from "lucide-react";
 import Image from "next/image";
+import { EditProfileDialog } from "./edit-profile-dialog";
 
 interface ProfileHeaderCardProps {
   profile: UserProfileResponseDTO;
@@ -56,6 +57,10 @@ export function ProfileHeaderCard({ profile }: ProfileHeaderCardProps) {
               )}
             </div>
             <p className="text-xs text-muted-foreground font-medium">{profile.jobTitle}</p>
+          </div>
+
+          <div className="flex items-center justify-center sm:justify-end">
+            <EditProfileDialog profile={profile} />
           </div>
         </div>
 

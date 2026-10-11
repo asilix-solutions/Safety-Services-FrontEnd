@@ -21,6 +21,7 @@ import { Plus, Trash2, ArrowLeft, Save, Send, X } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useTranslation, useNamespaceTranslations } from "@/providers/i18n-provider";
+import { quotationsApi, QuotationLineInput } from "@/domains/quotations";
 
 export default function QuotationBuilderPage() {
   const { user } = useAuth();
@@ -179,6 +180,20 @@ export default function QuotationBuilderPage() {
         persistQuotation(updated);
         setQuotationStatus("DRAFT");
         setExistingQuotation(updated);
+      }
+
+      // Synchronize itemized pricing with live backend instance if ID is present
+      if (request?.id) {
+        const lineInputs: QuotationLineInput[] = items.map((it) => ({
+          description: it.description || "Saudi Fire Protection Service",
+          unitOfMeasurement: "Unit",
+          quantity: it.quantity || 1,
+          unitRate: it.unitPrice || 0,
+          unitCost: (it.unitPrice || 0) * 0.7,
+        }));
+        quotationsApi.saveQuotation(request.id, lineInputs).catch((err) => {
+          console.warn("Backend quotation line sync fallback:", err);
+        });
       }
       
       const msg = status === "DRAFT" 

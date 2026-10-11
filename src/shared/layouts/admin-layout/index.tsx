@@ -90,20 +90,25 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
 
         {/* Sidebar Footer */}
         <div className="p-4 border-t border-border bg-muted/40">
-          <div className="flex items-center gap-3 mb-3">
+          <Link
+            href="/profile"
+            className="flex items-center gap-3 mb-3 p-1 rounded-lg hover:bg-muted/80 transition-colors cursor-pointer group"
+          >
             <Image
               src={user.avatarUrl || "https://api.dicebear.com/7.x/adventurer/svg?seed=default"}
               alt={user.name}
               width={36}
               height={36}
               unoptimized
-              className="h-9 w-9 rounded-full bg-muted border border-border"
+              className="h-9 w-9 rounded-full bg-muted border border-border group-hover:border-primary/50 transition-colors"
             />
             <div className="overflow-hidden">
-              <p className="text-xs font-semibold truncate text-foreground">{user.name}</p>
+              <p className="text-xs font-semibold truncate text-foreground group-hover:text-primary transition-colors">
+                {user.name}
+              </p>
               <p className="text-[10px] text-muted-foreground truncate">{user.role}</p>
             </div>
-          </div>
+          </Link>
           <Button
             variant="outline"
             size="sm"

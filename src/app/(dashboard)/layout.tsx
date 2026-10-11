@@ -38,7 +38,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     };
 
     const navItems = ROLE_NAVIGATION[user.role] || [];
-    const allowedPaths = navItems.map((item: { path: string }) => item.path);
+    const universalAllowedPaths = ["/profile", "/notifications"];
+    const allowedPaths = [...navItems.map((item: { path: string }) => item.path), ...universalAllowedPaths];
     const defaultRoute = ROLE_DEFAULT_ROUTE[user.role] || "/dashboard";
 
     const isAllowed = allowedPaths.some((path: string) => {

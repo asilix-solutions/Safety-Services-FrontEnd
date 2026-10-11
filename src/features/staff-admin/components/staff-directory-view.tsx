@@ -28,16 +28,25 @@ export function StaffDirectoryView() {
     handleUpdateRole,
     handleInviteStaff,
     canManage,
+    isLoading,
   } = useStaffDirectory();
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-border/40 mb-6">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">
-            دليل الكادر الإداري والهندسي (Staff Administration)
-          </h1>
-          <p className="text-sm text-muted-foreground">
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">
+              دليل الكادر الإداري والهندسي (Staff Administration)
+            </h1>
+            {isLoading && (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20 animate-pulse">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+                جاري المزامنة مع الخادم...
+              </span>
+            )}
+          </div>
+          <p className="text-sm text-muted-foreground mt-1">
             إدارة حسابات منسوبي الشركة، تعيين الصلاحيات، وإرسال دعوات الانضمام للمهندسين.
           </p>
         </div>

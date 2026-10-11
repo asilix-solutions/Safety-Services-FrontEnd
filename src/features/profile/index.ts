@@ -5,4 +5,5 @@ export * from "./components/supervisor-card";
 export * from "./components/audit-trail-card";
 export * from "./components/change-password-card";
 export * from "./hooks/use-profile-details";
+export * from "./components/edit-profile-dialog";
 export * from "./hooks/use-change-password";

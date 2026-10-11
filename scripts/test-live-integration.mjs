@@ -494,6 +494,29 @@ async function runTestSuite() {
     } catch (err) {
       fail("Current User Permission Claims (/auth/permissions/me)", err.message);
     }
+
+    // 18. Self-Service Profile Update (PUT /me)
+    try {
+      const res = await request("/me", {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${adminToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          fullName: "مدير شركة السلامة لحماية الحرائق",
+          phoneNumber: "+966501234567",
+          preferredLanguage: "ar",
+        }),
+      });
+      if (res.status === 200 && res.data?.isSuccess) {
+        pass("Profile Self-Service Update (PUT /me)", `Updated: ${res.data.data?.fullName || "OK"}`);
+      } else {
+        throw new Error(`Status ${res.status}: ${JSON.stringify(res.data)}`);
+      }
+    } catch (err) {
+      fail("Profile Self-Service Update (PUT /me)", err.message);
+    }
   }
 
   console.log(`\n${colors.cyan}${colors.bold}====================================================${colors.reset}`);

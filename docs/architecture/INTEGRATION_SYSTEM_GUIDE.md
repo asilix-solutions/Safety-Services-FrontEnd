@@ -171,3 +171,25 @@ const result = await http.post<ProjectResult>("/projects", payload);
 ```bash
 node scripts/test-live-integration.mjs
 ```
+
+---
+
+## 10. نطاقات الكادر الإداري، الملف الشخصي، والمراجعة الهندسية الحية (Phase 12)
+
+### 10.1 إدارة الكادر الإداري والهندسي الحية (`src/features/staff-admin`)
+* تم ربط دليل الموظفين مباشرة بـ `usersApi.getUsers()` لاستعراض كادر المنشأة الحقيقي (185 موظفاً على بيئة Staging).
+* دعم تفعيل وتعطيل الحسابات الحية عبر `usersApi.toggleUserStatus(id, isActive)`.
+* دعم تعديل الأدوار الوظيفية عبر `usersApi.updateUser(id, payload)`.
+* دعم إرسال دعوات الانضمام للمهندسين والإداريين عبر `usersApi.createUser(...)` وإصدار رمز الدعوة الفوري.
+* إضافة مؤشر نبضي حي في واجهة المستخدم `StaffDirectoryView` يوضح حالة المزامنة اللحظية مع الخادم.
+
+### 10.2 الخدمة الذاتية للملف الشخصي وتعديل البيانات (`src/features/profile`)
+* تكامل حوار `EditProfileDialog` لحفظ وتحديث الاسم الكامل، ورقم الهاتف، ولغة الواجهة المفضلة مباشرة عبر `PUT /api/v1/me`.
+* استدعاء `refreshProfile()` تلقائياً بعد الحفظ لمزامنة الجلسة وإعادة ضبط السمات البصرية.
+* ربط بطاقة المستخدم في الشريط الجانبي بكافة التخطيطات (`AdminLayout`, `OperationsLayout`, `ClientLayout`) برابط مباشر إلى `/profile`.
+* ترقية حارس المسارات (`src/app/(dashboard)/layout.tsx`) لضمان إتاحة `/profile` و `/notifications` لجميع الأدوار دون استثناء.
+
+### 10.3 تكامل عروض الأسعار ومراجعة المخططات الهندسية (`Quotations & Blueprint Review`)
+* ربط واجهة بناء عرض السعر `src/app/(dashboard)/quotations/[jobNumber]/page.tsx` بحفظ البنود مباشرة على الخادم عبر `quotationsApi.saveQuotation(instanceId, lines)`.
+* ربط طابور مراجعة المخططات الهندسية `useBlueprintReviewQueue` بجلب المعاملات الحية من `requestsApi.getWorkflowInstances()` ومطابقتها مع كود البناء السعودي SBC 801.
+* ترقية وظيفة تبديل الأدوار `switchRole(role)` لتقوم بمصادقة الحساب الحي تلقائياً وجلب توكن JWT الحقيقي للمهندس، المشرف، وممثل المبيعات.

@@ -319,26 +319,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const switchRole = (role: UserRole, scopeId?: string) => {
-    const baseProfile = MOCK_PROFILES[role];
-    let profile: UserProfile = {
-      ...baseProfile,
-      permissions: ROLE_PERMISSIONS[role],
-    };
-
     if (role === "Client" && scopeId) {
-      profile = {
-        ...profile,
+      const baseProfile = MOCK_PROFILES[role];
+      const profile: UserProfile = {
+        ...baseProfile,
+        permissions: ROLE_PERMISSIONS[role],
         id: "u-7",
         name: "Rayyan Al-Mansoor",
         email: "rayyan@gulfpetroleum.com",
         tenantId: "57bb2d62-6f4e-44ae-a0e3-7ed4073331dd",
         companyId: scopeId,
       };
+      setUser(profile);
+      localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(profile));
+      syncTheme(profile.subdomain || profile.tenantId);
+      return;
     }
 
-    setUser(profile);
-    localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(profile));
-    syncTheme(profile.subdomain || profile.tenantId);
+    // Authenticate with live backend credentials for the persona
+    login(role).catch(() => {
+      // Fallback is handled inside login
+    });
   };
 
   return (
