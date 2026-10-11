@@ -13,6 +13,7 @@ import { USER_ROLES } from "@/constants/roles";
 import { isRole } from "@/constants/permissions";
 import type { UserRole } from "@/types/role";
 import { ExecutionSummaryCard } from "../components/execution-summary-card";
+import { WbsExecutionPanel } from "../components/wbs-execution-panel";
 
 const SILO_STATUS_KEY: Record<string, string> = {
   pending: "pending",
@@ -85,6 +86,9 @@ export function SystemsTab({
 }: SystemsTabProps) {
   return (
     <div className="space-y-6">
+      {/* Live WBS Execution Plan & Geotagged Tasks */}
+      <WbsExecutionPanel projectId={project.id} />
+
       {/* Template Render Logic for Silos/Maintenance/Checklist */}
       {/* Template: installation_full / installation_fast */}
       {(project.workspaceTemplate === "installation_full" || project.workspaceTemplate === "installation_fast") && (

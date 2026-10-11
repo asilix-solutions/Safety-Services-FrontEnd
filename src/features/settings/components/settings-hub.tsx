@@ -18,6 +18,7 @@ import { WorkspaceTab } from "./tabs/workspace-tab";
 import { NotificationsTab } from "./tabs/notifications-tab";
 import { SecurityTab } from "./tabs/security-tab";
 import { OrganizationTab } from "./tabs/organization-tab";
+import { AuditTab } from "./tabs/audit-tab";
 import { useSettings, SettingsTab } from "../hooks/use-settings";
 
 export function SettingsHub() {
@@ -54,7 +55,8 @@ export function SettingsHub() {
     { value: "preferences", label: t("settings:tab_preferences") || "Workspace Preferences" },
     { value: "notifications", label: t("settings:tab_notifications") || "Notifications" },
     { value: "security", label: t("settings:tab_security") || "Security" },
-    { value: "organization", label: t("settings:tab_orgInfo") || "Organization Information" }
+    { value: "organization", label: t("settings:tab_orgInfo") || "Organization Information" },
+    { value: "audit", label: t("settings:tab_audit") || "Audit Trail & Compliance" }
   ];
 
   const visibleTabs = tabsList.filter((tab) => tabPermissions[tab.value].visible);
@@ -178,6 +180,8 @@ export function SettingsHub() {
               t={t}
             />
           )}
+
+          {activeTab === "audit" && <AuditTab />}
         </div>
       </div>
 

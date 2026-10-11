@@ -5,16 +5,21 @@ import { ShieldAlert } from "lucide-react";
 import { useProcurement } from "./hooks/use-procurement";
 import { ProcurementForm } from "./components/procurement-form";
 import { ProcurementList } from "./components/procurement-list";
+import { ProjectCostLedger } from "./components/project-cost-ledger";
 
 interface ProcurementPanelProps {
   projectId: string;
 }
 
 export function ProcurementPanel({ projectId }: ProcurementPanelProps) {
-  const { canEdit, viewModel, isLoading, saveProcurement, isSaving, saveError, t } = useProcurement(projectId);
+  const { canEdit, viewModel, isLoading, saveProcurement, isSaving, saveError, t } =
+    useProcurement(projectId);
 
   return (
     <div className="space-y-6">
+      {/* Live Financial Cost Ledger with Staging Sync */}
+      <ProjectCostLedger projectId={projectId} />
+
       {canEdit && <ProcurementForm onSubmit={saveProcurement} isSaving={isSaving} />}
 
       {saveError && (

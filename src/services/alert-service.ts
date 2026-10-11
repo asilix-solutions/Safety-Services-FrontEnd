@@ -214,4 +214,16 @@ export const alertService = {
   ) {
     return toast.promise(promise, messages);
   },
+
+  showSuccess(message: string, description?: string) {
+    return this.success(message, description ? { description } : undefined);
+  },
+
+  showError(message: string, description?: string) {
+    return this.error(message, description ? { description } : undefined);
+  },
+
+  showWarning(message: string, description?: string) {
+    return this.warning(message, description ? { description } : undefined);
+  },
 };

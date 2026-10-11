@@ -34,7 +34,7 @@ import { settingsApi } from "@/domains/settings/api";
 import { alertService } from "@/services/alert-service";
 import { applyTenantTheme } from "@/lib/theme-utils";
 
-export type SettingsTab = "company" | "branding" | "preferences" | "notifications" | "security" | "organization";
+export type SettingsTab = "company" | "branding" | "preferences" | "notifications" | "security" | "organization" | "audit";
 
 export function useSettings() {
   const { user } = useAuth();
@@ -88,6 +88,10 @@ export function useSettings() {
       },
       organization: {
         visible: isSuperAdmin || isCompanyAdmin || isOpsOfficer || isEngineer,
+        editable: false
+      },
+      audit: {
+        visible: isSuperAdmin || isCompanyAdmin,
         editable: false
       }
     };

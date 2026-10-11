@@ -1,11 +1,12 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Lock } from "lucide-react";
 import { EmptyState } from "@/shared/components/empty-state";
 import { useClosure } from "./hooks/use-closure";
 import { ClosureForm } from "./components/closure-form";
 import { ClosureSummary } from "./components/closure-summary";
+import { LegalClosureHub } from "./components/legal-closure-hub";
 
 interface ClosurePanelProps {
   projectId: string;
@@ -14,8 +15,22 @@ interface ClosurePanelProps {
 }
 
 export function ClosurePanel({ projectId, onClosed }: ClosurePanelProps) {
-  const { canEdit, viewModel, isLoading, hasPhotos, closeProject, isClosing, closeError, t } = useClosure(projectId, onClosed);
+  const [useLiveHub, setUseLiveHub] = useState(true);
+  const { canEdit, viewModel, isLoading, hasPhotos, closeProject, isClosing, closeError, t } =
+    useClosure(projectId, onClosed);
 
+  // If live backend hub is enabled, try live hub first
+  if (useLiveHub) {
+    return (
+      <LegalClosureHub
+        projectId={projectId}
+        onClosed={onClosed}
+        onFallbackToLocal={() => setUseLiveHub(false)}
+      />
+    );
+  }
+
+  // Fallback to local mock closure for offline/demo projects
   if (isLoading) return null;
 
   if (viewModel.isClosed) {
@@ -32,7 +47,14 @@ export function ClosurePanel({ projectId, onClosed }: ClosurePanelProps) {
     );
   }
 
-  return <ClosureForm onSubmit={closeProject} isSaving={isClosing} saveError={closeError} hasPhotos={hasPhotos} />;
+  return (
+    <ClosureForm
+      onSubmit={closeProject}
+      isSaving={isClosing}
+      saveError={closeError}
+      hasPhotos={hasPhotos}
+    />
+  );
 }
 
 export default ClosurePanel;
