@@ -193,3 +193,20 @@ node scripts/test-live-integration.mjs
 * ربط واجهة بناء عرض السعر `src/app/(dashboard)/quotations/[jobNumber]/page.tsx` بحفظ البنود مباشرة على الخادم عبر `quotationsApi.saveQuotation(instanceId, lines)`.
 * ربط طابور مراجعة المخططات الهندسية `useBlueprintReviewQueue` بجلب المعاملات الحية من `requestsApi.getWorkflowInstances()` ومطابقتها مع كود البناء السعودي SBC 801.
 * ترقية وظيفة تبديل الأدوار `switchRole(role)` لتقوم بمصادقة الحساب الحي تلقائياً وجلب توكن JWT الحقيقي للمهندس، المشرف، وممثل المبيعات.
+
+---
+
+## 11. لوحات القيادة الحية ودعم الروابط المباشرة للمعاملات (Phase 13)
+
+### 11.1 حل المعاملات بالروابط العميقة (`Dynamic Deep-Linking Request Resolution`)
+* ترقية صفحة تفاصيل المعاملة `src/app/(dashboard)/requests/[jobNumber]/page.tsx` للبحث الفوري على الخادم في حال عدم وجود المعاملة في التخزين المحلي.
+* يتيح ذلك للمستخدمين أو المسؤولين النقر على أي رابط مباشر لأي معاملة منشأة حديثاً على بيئة Staging (مثل `AMX-2026-00016`) وفتح تفاصيلها كاملة دون أي انقطاع أو ظهور شاشة "المعاملة غير موجودة".
+
+### 11.2 مزامنة لوحات التحكم الرئيسية بالأرقام الحية (`Live Multi-Persona Dashboards`)
+* **لوحة تحكم مدير المنشأة (`CompanyAdminDashboard`):**
+  * مزامنة المعاملات النشطة وفواتير ضريبة القيمة المضافة ZATCA الحية عبر `Promise.allSettled([requestsApi.getWorkflowInstances(), invoicesApi.getInvoices()])`.
+  * إظهار المؤشرات الحقيقية للمعاملات وعدد الفواتير الصادرة والإيرادات المحققة.
+* **لوحة تحكم المهندس الاستشاري (`ConsultingEngineerDashboard`):**
+  * مزامنة المعاملات الهندسية المحتاجة لاعتماد أو مراجعة مخططات من الخادم الحي.
+* **لوحة تحكم العميل المستفيد (`ClientDashboard`):**
+  * مزامنة فورية لقائمة طلبات العميل عبر `requestsApi.getMyRequests()` مع تحديث بطاقات الحالة وسجل الإنجاز.

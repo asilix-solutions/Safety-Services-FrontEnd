@@ -55,6 +55,8 @@ import { getSiteVisitsByProjectId } from "@/domains/site-visits/storage";
 import { USER_ROLES } from "@/constants/roles";
 import { isRole } from "@/constants/permissions";
 import { getProjectExecutionPhaseLabel } from "@/domains/projects/workflow";
+import { requestsApi } from "@/domains/requests/api";
+import { mapWorkflowSummaryToLicensingRequest, mapClientRequestSummaryToLicensingRequest } from "@/domains/requests/mappers";
 
 export default function RequestDetailsPage() {
   const { user } = useAuth();
@@ -74,11 +76,49 @@ export default function RequestDetailsPage() {
 
   const jobNumber = params?.jobNumber as string;
 
-  const loadData = () => {
+  const loadData = async () => {
     if (jobNumber) {
-      // Scoped: a job number outside the caller's tenant must resolve to null
-      // and fall through to the not-found view, not stay on screen.
-      const foundRequest = getScopedRequestByJobNumber(jobNumber, tenantContext);
+      let foundRequest = getScopedRequestByJobNumber(jobNumber, tenantContext);
+
+      // If not present in local storage, attempt live lookup from backend
+      if (!foundRequest && user) {
+        try {
+          if (isRole(user.role, ["Client"])) {
+            const clientRes = await requestsApi.getMyRequests();
+            if (clientRes.isSuccess && clientRes.data?.items) {
+              const liveMatch = clientRes.data.items.find(
+                (item) => item.jobNumber === jobNumber || item.id === jobNumber
+              );
+              if (liveMatch) {
+                foundRequest = mapClientRequestSummaryToLicensingRequest(
+                  liveMatch,
+                  user.tenantId || "COMP-001",
+                  user.name || "Client",
+                  user.companyId || "client-id"
+                );
+                upsertRequest(foundRequest);
+              }
+            }
+          } else {
+            const staffRes = await requestsApi.getWorkflowInstances();
+            if (staffRes.isSuccess && staffRes.data?.items) {
+              const liveMatch = staffRes.data.items.find(
+                (item) => item.jobNumber === jobNumber || item.id === jobNumber
+              );
+              if (liveMatch) {
+                foundRequest = mapWorkflowSummaryToLicensingRequest(
+                  liveMatch,
+                  user.tenantId || "COMP-001"
+                );
+                upsertRequest(foundRequest);
+              }
+            }
+          }
+        } catch (e) {
+          console.warn("Live request lookup fallback:", e);
+        }
+      }
+
       setRequest(foundRequest);
 
       // Load invoice if exists

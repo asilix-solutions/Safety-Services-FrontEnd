@@ -15,6 +15,9 @@ import { getScopedContracts } from "@/domains/contracts/storage";
 import { getScopedCertificates } from "@/domains/certificates/storage";
 
 import { ClientOverview, prepareClientOverviewViewModel, ClientOverviewViewModel } from "@/features/client-overview";
+import { requestsApi } from "@/domains/requests/api";
+import { mapClientRequestSummaryToLicensingRequest } from "@/domains/requests/mappers";
+import { LicensingRequest } from "@/domains/requests/types";
 
 export function ClientDashboard() {
   const { user } = useAuth();
@@ -24,14 +27,36 @@ export function ClientDashboard() {
 
   const [viewModel, setViewModel] = useState<ClientOverviewViewModel | null>(null);
 
-  const loadData = () => {
+  const loadData = async () => {
     if (!user || !user.companyId) return;
 
-    const requests = getScopedRequests(tenantContext);
+    let requests = getScopedRequests(tenantContext);
     const projects = getScopedProjects(tenantContext);
     const invoices = getScopedInvoices(tenantContext);
     const contracts = getScopedContracts(tenantContext);
     const certificates = getScopedCertificates(tenantContext);
+
+    try {
+      const clientRes = await requestsApi.getMyRequests();
+      if (clientRes.isSuccess && clientRes.data?.items) {
+        const liveItems = clientRes.data.items.map((item) =>
+          mapClientRequestSummaryToLicensingRequest(
+            item,
+            user.tenantId || "COMP-001",
+            user.name || "Client",
+            user.companyId || "client-id"
+          )
+        );
+        const map = new Map<string, LicensingRequest>();
+        liveItems.forEach((r) => map.set(r.jobNumber, r));
+        requests.forEach((r) => {
+          if (!map.has(r.jobNumber)) map.set(r.jobNumber, r);
+        });
+        requests = Array.from(map.values());
+      }
+    } catch {
+      // Fallback
+    }
 
     const vm = prepareClientOverviewViewModel(
       {

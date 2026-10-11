@@ -17,6 +17,11 @@ import {
   prepareCompanyAdminOverviewViewModel,
   CompanyAdminOverviewViewModel,
 } from "@/features/company-admin-overview";
+import { requestsApi } from "@/domains/requests/api";
+import { invoicesApi } from "@/domains/invoices/api";
+import { mapWorkflowSummaryToLicensingRequest } from "@/domains/requests/mappers";
+import { LicensingRequest } from "@/domains/requests/types";
+import { ClientInvoice } from "@/domains/invoices/types";
 
 export function CompanyAdminDashboard() {
   const { user } = useAuth();
@@ -25,15 +30,58 @@ export function CompanyAdminDashboard() {
 
   const [viewModel, setViewModel] = useState<CompanyAdminOverviewViewModel | null>(null);
 
-  const loadData = () => {
+  const loadData = async () => {
     if (!user) return;
 
     const projects = getScopedProjects(tenantContext);
-    const requests = getScopedRequests(tenantContext);
-    const invoices = getScopedInvoices(tenantContext);
+    let requests = getScopedRequests(tenantContext);
+    let invoices = getScopedInvoices(tenantContext);
     const contracts = getScopedContracts(tenantContext);
     const certificates = getScopedCertificates(tenantContext);
     const quotations = getScopedQuotations(tenantContext);
+
+    try {
+      const [wfRes, invRes] = await Promise.allSettled([
+        requestsApi.getWorkflowInstances(),
+        invoicesApi.getInvoices(),
+      ]);
+
+      if (wfRes.status === "fulfilled" && wfRes.value.isSuccess && wfRes.value.data?.items) {
+        const liveList = wfRes.value.data.items.map((i) =>
+          mapWorkflowSummaryToLicensingRequest(i, user.tenantId || "COMP-001")
+        );
+        const map = new Map<string, LicensingRequest>();
+        liveList.forEach((r) => map.set(r.jobNumber, r));
+        requests.forEach((r) => {
+          if (!map.has(r.jobNumber)) map.set(r.jobNumber, r);
+        });
+        requests = Array.from(map.values());
+      }
+
+      if (invRes.status === "fulfilled" && invRes.value.isSuccess && invRes.value.data?.items) {
+        const liveInvoices: ClientInvoice[] = invRes.value.data.items.map((inv) => ({
+          id: inv.invoiceNumber || inv.id,
+          tenantId: user.tenantId || "COMP-001",
+          clientId: "c-102",
+          jobNumber: inv.jobNumber || `AMX-${inv.invoiceNumber.replace("INV-", "")}`,
+          subtotal: inv.subtotalAmount,
+          vatAmount: inv.vatAmount,
+          grandTotal: inv.totalWithVat,
+          currency: "SAR",
+          status: "unpaid",
+          dueDate: new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString(),
+          issuedAt: inv.issuedAtUtc || new Date().toISOString(),
+        }));
+        const invMap = new Map<string, ClientInvoice>();
+        liveInvoices.forEach((i) => invMap.set(i.id, i));
+        invoices.forEach((i) => {
+          if (!invMap.has(i.id)) invMap.set(i.id, i);
+        });
+        invoices = Array.from(invMap.values());
+      }
+    } catch {
+      // Fallback
+    }
 
     const vm = prepareCompanyAdminOverviewViewModel(
       {

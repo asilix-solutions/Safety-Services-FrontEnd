@@ -15,6 +15,9 @@ import {
   prepareConsultingEngineerOverviewViewModel,
   ConsultingEngineerOverviewViewModel,
 } from "@/features/consulting-engineer-overview";
+import { requestsApi } from "@/domains/requests/api";
+import { mapWorkflowSummaryToLicensingRequest } from "@/domains/requests/mappers";
+import { LicensingRequest } from "@/domains/requests/types";
 
 export function ConsultingEngineerDashboard() {
   const { user } = useAuth();
@@ -23,13 +26,30 @@ export function ConsultingEngineerDashboard() {
 
   const [viewModel, setViewModel] = useState<ConsultingEngineerOverviewViewModel | null>(null);
 
-  const loadData = () => {
+  const loadData = async () => {
     if (!user) return;
 
     const projects = getScopedProjects(tenantContext);
-    const requests = getScopedRequests(tenantContext);
+    let requests = getScopedRequests(tenantContext);
     const quotations = getScopedQuotations(tenantContext);
     const siteVisits = getSiteVisits();
+
+    try {
+      const wfRes = await requestsApi.getWorkflowInstances();
+      if (wfRes.isSuccess && wfRes.data?.items) {
+        const liveList = wfRes.data.items.map((i) =>
+          mapWorkflowSummaryToLicensingRequest(i, user.tenantId || "COMP-001")
+        );
+        const map = new Map<string, LicensingRequest>();
+        liveList.forEach((r) => map.set(r.jobNumber, r));
+        requests.forEach((r) => {
+          if (!map.has(r.jobNumber)) map.set(r.jobNumber, r);
+        });
+        requests = Array.from(map.values());
+      }
+    } catch {
+      // Fallback
+    }
 
     const vm = prepareConsultingEngineerOverviewViewModel(
       {
