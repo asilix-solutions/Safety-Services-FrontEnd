@@ -26,7 +26,7 @@ async function request(path, options = {}) {
   const headers = {
     "Accept": "application/json",
     "Accept-Language": "ar",
-    "X-Tenant-Domain": TENANT_DOMAIN,
+    ...(options.isPlatform ? {} : { "X-Tenant-Domain": TENANT_DOMAIN }),
     ...options.headers,
   };
 
@@ -278,6 +278,187 @@ async function runTestSuite() {
     }
   }
 
+
+  // 11. SuperAdmin Platform Governance
+  let superAdminToken = null;
+  try {
+    const res = await request("/auth/login", {
+      method: "POST",
+      isPlatform: true,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: "admin@amanix.com",
+        password: "Admin@123456",
+        deviceInfo: "SuperAdmin-Runner/1.0",
+      }),
+    });
+
+    const token = res.data?.data?.token || res.data?.data?.accessToken;
+    if (res.status === 200 && res.data?.isSuccess && token) {
+      superAdminToken = token;
+      pass("System SuperAdmin Authentication", `User: ${res.data.data.userName}, Role: ${res.data.data.role}`);
+    } else {
+      console.log(`     ${colors.yellow}ℹ NOTE:${colors.reset} Platform SuperAdmin account is not bootstrapped on remote staging (requires PlatformBootstrap:SuperAdminPassword env secret in non-dev).`);
+    }
+  } catch (err) {
+    console.log(`     ${colors.yellow}ℹ NOTE:${colors.reset} Platform SuperAdmin account not bootstrapped: ${err.message}`);
+  }
+
+  // 11b. Platform Tenants List
+  if (superAdminToken) {
+    try {
+      const res = await request("/platform/tenants?pageNumber=1&pageSize=10", {
+        isPlatform: true,
+        headers: { Authorization: `Bearer ${superAdminToken}` },
+      });
+      if (res.status === 200 && res.data?.isSuccess) {
+        pass("Platform Tenants Catalog", `Total tenants: ${res.data.data?.totalCount ?? 0}`);
+      } else {
+        throw new Error(`Status ${res.status}: ${JSON.stringify(res.data)}`);
+      }
+    } catch (err) {
+      fail("Platform Tenants Catalog", err.message);
+    }
+
+    // 11c. Platform Subscription Plans
+    try {
+      const res = await request("/platform/subscription-plans", {
+        isPlatform: true,
+        headers: { Authorization: `Bearer ${superAdminToken}` },
+      });
+      if (res.status === 200 && res.data?.isSuccess) {
+        const plans = Array.isArray(res.data.data) ? res.data.data : [];
+        pass("Platform Subscription Plans Catalog", `Plans available: ${plans.length}`);
+      } else {
+        throw new Error(`Status ${res.status}: ${JSON.stringify(res.data)}`);
+      }
+    } catch (err) {
+      fail("Platform Subscription Plans Catalog", err.message);
+    }
+  }
+
+  // 12. Tenant Employee Roster Management (/tenant-users)
+  if (adminToken) {
+    try {
+      const res = await request("/tenant-users?pageNumber=1&pageSize=10", {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      });
+      if (res.status === 200 && res.data?.isSuccess) {
+        pass("Tenant Employee Roster (/tenant-users)", `Total staff: ${res.data.data?.totalCount ?? 0}`);
+      } else {
+        throw new Error(`Status ${res.status}: ${JSON.stringify(res.data)}`);
+      }
+    } catch (err) {
+      fail("Tenant Employee Roster (/tenant-users)", err.message);
+    }
+
+    // 12b. Tenant Permissions Catalog
+    try {
+      const res = await request("/tenant-users/permissions-catalog", {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      });
+      if (res.status === 200 && res.data?.isSuccess) {
+        const categories = Array.isArray(res.data.data) ? res.data.data : [];
+        pass("Tenant Permissions Catalog", `Categories: ${categories.length}`);
+      } else {
+        throw new Error(`Status ${res.status}: ${JSON.stringify(res.data)}`);
+      }
+    } catch (err) {
+      fail("Tenant Permissions Catalog", err.message);
+    }
+  }
+
+  // 13. In-App Notifications Inbox (/notifications)
+  if (adminToken) {
+    try {
+      const res = await request("/notifications?unreadOnly=false&pageSize=20", {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      });
+      if (res.status === 200 && res.data?.isSuccess) {
+        pass("In-App Notification Inbox (/notifications)", `Unread: ${res.data.data?.unreadCount ?? 0}`);
+      } else {
+        throw new Error(`Status ${res.status}: ${JSON.stringify(res.data)}`);
+      }
+    } catch (err) {
+      fail("In-App Notification Inbox (/notifications)", err.message);
+    }
+  }
+
+  // 14. ZATCA Tax Invoices Ledger (/invoices)
+  if (adminToken) {
+    try {
+      const res = await request("/invoices?pageNumber=1&pageSize=10", {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      });
+      if (res.status === 200 && res.data?.isSuccess) {
+        pass("ZATCA Tax Invoices Ledger (/invoices)", `Total invoices: ${res.data.data?.totalCount ?? 0}`);
+      } else {
+        throw new Error(`Status ${res.status}: ${JSON.stringify(res.data)}`);
+      }
+    } catch (err) {
+      fail("ZATCA Tax Invoices Ledger (/invoices)", err.message);
+    }
+
+    // 14b. Invoices Ledger Cryptographic Chain Verification
+    try {
+      const res = await request("/invoices/chain-verification", {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      });
+      if (res.status === 200 && res.data?.isSuccess) {
+        pass("ZATCA SHA-256 Ledger Chain Integrity", `Chain Intact: ${res.data.data?.isIntact}`);
+      } else {
+        throw new Error(`Status ${res.status}: ${JSON.stringify(res.data)}`);
+      }
+    } catch (err) {
+      fail("ZATCA SHA-256 Ledger Chain Integrity", err.message);
+    }
+
+    // 14c. Invoices VAT Summary
+    try {
+      const fromUtc = new Date(Date.UTC(2026, 0, 1)).toISOString();
+      const toUtc = new Date(Date.UTC(2026, 11, 31, 23, 59, 59)).toISOString();
+      const res = await request(`/invoices/vat-summary?fromUtc=${encodeURIComponent(fromUtc)}&toUtc=${encodeURIComponent(toUtc)}`, {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      });
+      if (res.status === 200 && res.data?.isSuccess) {
+        pass("VAT Return Position Summary", `Net VAT Payable: ${res.data.data?.netVatPayable ?? 0}`);
+      } else {
+        throw new Error(`Status ${res.status}: ${JSON.stringify(res.data)}`);
+      }
+    } catch (err) {
+      fail("VAT Return Position Summary", err.message);
+    }
+  }
+
+  // 15. Cross-Role Personas Authentication Verification
+  const personas = [
+    { role: "Consulting Engineer", email: "engineer@al-salamah.com", pass: "User@123456" },
+    { role: "Operations Officer", email: "operations@al-salamah.com", pass: "User@123456" },
+    { role: "Sales Representative", email: "sales@al-salamah.com", pass: "User@123456" },
+  ];
+
+  for (const persona of personas) {
+    try {
+      const res = await request("/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: persona.email,
+          password: persona.pass,
+          deviceInfo: "Persona-Test-Runner/1.0",
+        }),
+      });
+
+      const token = res.data?.data?.token || res.data?.data?.accessToken;
+      if (res.status === 200 && res.data?.isSuccess && token) {
+        pass(`Persona Auth: ${persona.role}`, `Email: ${persona.email}`);
+      } else {
+        throw new Error(`Status ${res.status}: ${JSON.stringify(res.data)}`);
+      }
+    } catch (err) {
+      fail(`Persona Auth: ${persona.role}`, err.message);
+    }
+  }
 
   console.log(`\n${colors.cyan}${colors.bold}====================================================${colors.reset}`);
   console.log(`${colors.green}${colors.bold}  ALL INTEGRATION VERIFICATIONS COMPLETED!          ${colors.reset}`);

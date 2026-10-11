@@ -11,6 +11,7 @@ import { getContracts } from "@/domains/contracts/storage";
 import { getQuotations } from "@/domains/quotations/storage";
 import { confirmMockPayment } from "@/domains/payments/workflow";
 import { isRole } from "@/constants/permissions";
+import { invoicesApi, TaxInvoiceStatus } from "@/domains/invoices/api";
 
 /** Presentation-layer only extension — adds facilityName for display */
 export type InvoiceWithFacility = ClientInvoice & { facilityName: string };
@@ -55,6 +56,58 @@ export function useInvoiceList() {
 
   useEffect(() => {
     loadData();
+
+    if (!user) return;
+    let isCancelled = false;
+
+    async function fetchLiveInvoices() {
+      try {
+        const res = await invoicesApi.getInvoices();
+        if (!isCancelled && res.isSuccess && res.data?.items) {
+          const liveInvoices: InvoiceWithFacility[] = res.data.items.map((inv) => ({
+            id: inv.invoiceNumber,
+            tenantId: user?.tenantId || "COMP-001",
+            clientId: user?.companyId || "c-102",
+            jobNumber: inv.jobNumber || inv.invoiceNumber,
+            subtotal: inv.subtotalAmount,
+            vatAmount: inv.vatAmount,
+            grandTotal: inv.totalWithVat,
+            currency: "SAR",
+            status: inv.status === TaxInvoiceStatus.Issued ? "unpaid" : "paid",
+            dueDate: inv.issuedAtUtc || new Date().toISOString(),
+            issuedAt: inv.issuedAtUtc || new Date().toISOString(),
+            facilityName: inv.buyerName || "منشأة تجارية",
+          }));
+
+          const allInvoices = getScopedInvoices(tenantContext);
+          const allRequests = getMergedRequests();
+          const localEnriched: InvoiceWithFacility[] = allInvoices.map((inv) => {
+            const req = allRequests.find((r) => r.jobNumber === inv.jobNumber);
+            return { ...inv, facilityName: req?.facilityName || "—" };
+          });
+
+          const map = new Map<string, InvoiceWithFacility>();
+          liveInvoices.forEach((i) => map.set(i.id, i));
+          localEnriched.forEach((i) => {
+            if (!map.has(i.id)) map.set(i.id, i);
+          });
+
+          let userInvoices = Array.from(map.values());
+          if (isRole(user?.role, ["Client"])) {
+            userInvoices = userInvoices.filter((i) => i.clientId === user?.companyId);
+          }
+          setInvoices(userInvoices);
+        }
+      } catch (err) {
+        console.warn("Could not fetch live invoices:", err);
+      }
+    }
+
+    fetchLiveInvoices();
+
+    return () => {
+      isCancelled = true;
+    };
   }, [user]);
 
   /** Opens the confirmation dialog — does NOT execute payment */
