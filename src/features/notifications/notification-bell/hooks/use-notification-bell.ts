@@ -3,7 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/providers/AuthProvider";
 import { useNamespaceTranslations, useTranslation } from "@/providers/i18n-provider";
-import { getNotifications, markAsRead, markAllAsRead } from "@/domains/notifications";
+import { getNotifications, markAsRead, markAllAsRead, notificationsApi } from "@/domains/notifications";
 import { QUERY_KEYS } from "@/constants/query-keys";
 
 export function useNotificationBell() {
@@ -18,7 +18,26 @@ export function useNotificationBell() {
 
   const { data: notifications = [], isLoading } = useQuery({
     queryKey: [...QUERY_KEYS.NOTIFICATIONS.LIST, companyId ?? "all"],
-    queryFn: () => getNotifications(companyId),
+    queryFn: async () => {
+      try {
+        const res = await notificationsApi.getMyNotifications(false, 50);
+        if (res.isSuccess && res.data?.items) {
+          return res.data.items.map((n) => ({
+            id: n.id,
+            title: n.title,
+            message: n.body,
+            type: "info" as const,
+            read: n.isRead,
+            actionUrl: n.jobNumber ? `/requests/${n.jobNumber}` : undefined,
+            createdAt: n.createdAt,
+            clientId: companyId,
+          }));
+        }
+      } catch (err) {
+        console.warn("Live notifications fetch failed, falling back to local:", err);
+      }
+      return getNotifications(companyId);
+    },
   });
 
   const invalidate = () => {
@@ -26,12 +45,26 @@ export function useNotificationBell() {
   };
 
   const readMutation = useMutation({
-    mutationFn: async (id: string) => markAsRead(id),
+    mutationFn: async (id: string) => {
+      try {
+        await notificationsApi.markRead([id]);
+      } catch {
+        // Fallback
+      }
+      return markAsRead(id);
+    },
     onSuccess: invalidate,
   });
 
   const readAllMutation = useMutation({
-    mutationFn: async () => markAllAsRead(companyId),
+    mutationFn: async () => {
+      try {
+        await notificationsApi.markRead([]);
+      } catch {
+        // Fallback
+      }
+      return markAllAsRead(companyId);
+    },
     onSuccess: invalidate,
   });
 

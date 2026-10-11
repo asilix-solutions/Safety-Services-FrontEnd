@@ -21,6 +21,7 @@ import { getScopedQuotationByJobNumber } from "@/domains/quotations/storage";
 import { getScopedRequestByJobNumber } from "@/domains/requests/storage";
 import { useTenantContext } from "@/hooks/use-tenant-context";
 import { getInvoiceByJobNumber } from "@/domains/invoices/storage";
+import { quotationsApi } from "@/domains/quotations/api";
 import { isRole } from "@/constants/permissions";
 import { USER_ROLES } from "@/constants/roles";
 
@@ -110,6 +111,11 @@ export default function QuotationApprovalDetailsPage() {
     const updaterName = user.name || user.role;
 
     if (actionType === "APPROVE") {
+      if (request?.id) {
+        quotationsApi.authorizeQuotation(request.id).catch((err) => {
+          console.warn("Backend quotation authorization sync error:", err);
+        });
+      }
       approveQuotation({
         quotation,
         request,

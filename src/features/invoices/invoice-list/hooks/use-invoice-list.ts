@@ -11,7 +11,12 @@ import { getContracts } from "@/domains/contracts/storage";
 import { getQuotations } from "@/domains/quotations/storage";
 import { confirmMockPayment } from "@/domains/payments/workflow";
 import { isRole } from "@/constants/permissions";
-import { invoicesApi, TaxInvoiceStatus } from "@/domains/invoices/api";
+import {
+  invoicesApi,
+  TaxInvoiceStatus,
+  InvoiceChainStatusDto,
+  VatReturnSummaryDto,
+} from "@/domains/invoices/api";
 
 /** Presentation-layer only extension — adds facilityName for display */
 export type InvoiceWithFacility = ClientInvoice & { facilityName: string };
@@ -24,6 +29,11 @@ export function useInvoiceList() {
 
   const [invoices, setInvoices] = useState<InvoiceWithFacility[]>([]);
   const [alertMsg, setAlertMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  // ZATCA Ledger & Tax summary states
+  const [chainStatus, setChainStatus] = useState<InvoiceChainStatusDto | null>(null);
+  const [vatSummary, setVatSummary] = useState<VatReturnSummaryDto | null>(null);
+  const [isVerifyingChain, setIsVerifyingChain] = useState<boolean>(false);
 
   // UI States
   const [statusFilter, setStatusFilter] = useState<"all" | "paid" | "unpaid">("all");
@@ -98,6 +108,29 @@ export function useInvoiceList() {
           }
           setInvoices(userInvoices);
         }
+
+        // Fetch ZATCA ledger integrity and VAT return summary for admin/staff
+        if (!isRole(user?.role, ["Client"])) {
+          try {
+            const chainRes = await invoicesApi.verifyChain();
+            if (!isCancelled && chainRes.isSuccess && chainRes.data) {
+              setChainStatus(chainRes.data);
+            }
+          } catch (e) {
+            console.warn("Chain verification fetch error:", e);
+          }
+
+          try {
+            const fromUtc = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString();
+            const toUtc = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+            const vatRes = await invoicesApi.getVatSummary(fromUtc, toUtc);
+            if (!isCancelled && vatRes.isSuccess && vatRes.data) {
+              setVatSummary(vatRes.data);
+            }
+          } catch (e) {
+            console.warn("VAT summary fetch error:", e);
+          }
+        }
       } catch (err) {
         console.warn("Could not fetch live invoices:", err);
       }
@@ -109,6 +142,29 @@ export function useInvoiceList() {
       isCancelled = true;
     };
   }, [user]);
+
+  const verifyLedgerNow = async () => {
+    setIsVerifyingChain(true);
+    try {
+      const chainRes = await invoicesApi.verifyChain();
+      if (chainRes.isSuccess && chainRes.data) {
+        setChainStatus(chainRes.data);
+        if (chainRes.data.isIntact) {
+          toast.success(
+            `تم التحقق من سلامة سجل الفواتير المشفر بنجاح (${chainRes.data.invoicesVerified} فواتير موثقة)`
+          );
+        } else {
+          toast.error(
+            `تنبيه: تم رصد انقطاع في سلسلة التشفير عند الفاتورة ${chainRes.data.firstBrokenInvoiceNumber}`
+          );
+        }
+      }
+    } catch {
+      toast.error("فشل التحقق من سلسلة التشفير");
+    } finally {
+      setIsVerifyingChain(false);
+    }
+  };
 
   /** Opens the confirmation dialog — does NOT execute payment */
   const handlePayInvoice = (invoice: ClientInvoice) => {
@@ -190,6 +246,10 @@ export function useInvoiceList() {
     invoices,
     alertMsg,
     setAlertMsg,
+    chainStatus,
+    vatSummary,
+    isVerifyingChain,
+    verifyLedgerNow,
     statusFilter,
     setStatusFilter,
     searchQuery,

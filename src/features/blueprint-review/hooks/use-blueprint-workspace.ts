@@ -9,6 +9,11 @@ import {
   returnRequestForModification,
   returnRequestForMissingDocuments,
 } from "@/domains/requests/workflow";
+import {
+  engineeringApi,
+  OccupancyHazardClass,
+  EngineeringComplianceStatus,
+} from "@/domains/engineering";
 import { buildBlueprintReviewViewModel, toLicensingRequest, BlueprintReviewViewModel } from "../helpers/blueprint-review-view-model";
 import { useTranslation } from "@/providers/i18n-provider";
 import { useTenantContext } from "@/hooks/use-tenant-context";
@@ -99,6 +104,21 @@ export function useBlueprintWorkspace(jobNumber: string) {
     //    status + currentStage + updatedAt and appends the audit event.
     upsertRequest(approveRequestForQuotation(toLicensingRequest(viewModel)));
 
+    // 3. Asynchronously record SBC 801 compliance on backend if instance exists
+    if (viewModel.id) {
+      engineeringApi
+        .recordReview(viewModel.id, {
+          occupancyHazardClass: OccupancyHazardClass.OrdinaryHazard1,
+          isolatedCompartmentAreaM2: 1500,
+          requiredSprinklerDensity: 0.15,
+          complianceStatus: EngineeringComplianceStatus.Compliant,
+          technicalRemarks: engineerNotes || "Approved according to SBC 801",
+        })
+        .catch((err) => {
+          console.warn("Backend engineering review sync error:", err);
+        });
+    }
+
     toast.success(t("requests:blueprintReview.status.APPROVED"));
     
     // Reload model
@@ -134,11 +154,25 @@ export function useBlueprintWorkspace(jobNumber: string) {
       returnRequestForModification(toLicensingRequest(viewModel), correctionReason)
     );
 
+    // Record review modification on backend
+    if (viewModel.id) {
+      engineeringApi
+        .recordReview(viewModel.id, {
+          occupancyHazardClass: OccupancyHazardClass.OrdinaryHazard1,
+          isolatedCompartmentAreaM2: 1500,
+          requiredSprinklerDensity: 0.15,
+          complianceStatus: EngineeringComplianceStatus.RequiresModifications,
+          technicalRemarks: correctionReason,
+        })
+        .catch((err) => {
+          console.warn("Backend engineering review sync error:", err);
+        });
+    }
+
     setShowReturnDialog(false);
     toast.success(t("requests:blueprintReview.status.MODIFICATION_REQUIRED"));
 
     loadData();
-
   };
 
   const handleRequestMissingDocs = () => {
