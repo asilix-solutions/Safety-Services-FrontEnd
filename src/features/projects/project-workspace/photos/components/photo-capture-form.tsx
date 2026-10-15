@@ -3,7 +3,7 @@
 import React from "react";
 import { useForm, Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Camera } from "lucide-react";
+import { Camera, MapPin } from "lucide-react";
 import { photoSchema, PhotoFormValues } from "@/schemas/photo.schema";
 import { useTranslation } from "@/providers/i18n-provider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
@@ -12,6 +12,7 @@ import { Input } from "@/shared/ui/input";
 import { Select } from "@/shared/ui/select";
 import { Button } from "@/shared/ui/button";
 import { CameraCapture } from "@/shared/components/camera-capture";
+import type { ExifMetadata } from "@/lib/exif-extractor";
 import { SILO_TAG_OPTIONS, siloLabelKey } from "../helpers/helpers";
 
 interface PhotoCaptureFormProps {
@@ -26,6 +27,10 @@ const DEFAULT_VALUES: PhotoFormValues = {
   siloTag: "alarm",
   caption: "",
   image: "",
+  latitude: null,
+  longitude: null,
+  captureTimestampUtc: null,
+  deviceModel: null,
 };
 
 export function PhotoCaptureForm({ onSubmit, isSaving }: PhotoCaptureFormProps) {
@@ -37,6 +42,15 @@ export function PhotoCaptureForm({ onSubmit, isSaving }: PhotoCaptureFormProps) 
   });
 
   const image = form.watch("image");
+  const lat = form.watch("latitude");
+  const lng = form.watch("longitude");
+
+  const handleExif = (meta: ExifMetadata) => {
+    form.setValue("latitude", meta.latitude);
+    form.setValue("longitude", meta.longitude);
+    form.setValue("captureTimestampUtc", meta.captureTimestampUtc);
+    form.setValue("deviceModel", meta.deviceModel || meta.deviceMake);
+  };
 
   const handleFormSubmit = form.handleSubmit(async (values) => {
     await onSubmit(values);
@@ -79,10 +93,19 @@ export function PhotoCaptureForm({ onSubmit, isSaving }: PhotoCaptureFormProps) 
           </div>
 
           <div className="space-y-1.5">
-            <Label>{t("photos:form.photo")}</Label>
+            <div className="flex items-center justify-between">
+              <Label>{t("photos:form.photo")}</Label>
+              {lat && lng && (
+                <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-600 bg-emerald-500/10 px-2 py-0.5 rounded-full">
+                  <MapPin className="h-3 w-3" />
+                  GPS: {lat.toFixed(4)}, {lng.toFixed(4)}
+                </span>
+              )}
+            </div>
             <CameraCapture
               value={image}
               onChange={(base64) => form.setValue("image", base64, { shouldValidate: true })}
+              onExifExtracted={handleExif}
               compress={PHOTO_COMPRESSION}
               error={form.formState.errors.image ? t(form.formState.errors.image.message as string) : undefined}
             />

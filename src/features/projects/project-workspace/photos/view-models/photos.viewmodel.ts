@@ -12,6 +12,14 @@ export interface PhotoRowViewModel {
   caption?: string;
   image: string;
   createdAtLabel: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  captureTimestampUtc?: string | null;
+  deviceModel?: string | null;
+  outcome?: 1 | 2 | 3;
+  distanceMeters?: number | null;
+  isJustified?: boolean;
+  justificationReason?: string | null;
 }
 
 export interface PhotoSummaryViewModel {
@@ -46,6 +54,14 @@ export function buildPhotosViewModel(
       caption: record.caption,
       image: record.image,
       createdAtLabel: formatDate(record.createdAt, locale, { dateStyle: "medium" }),
+      latitude: record.latitude,
+      longitude: record.longitude,
+      captureTimestampUtc: record.captureTimestampUtc,
+      deviceModel: record.deviceModel,
+      outcome: record.outcome ?? 1,
+      distanceMeters: record.distanceMeters ?? 45,
+      isJustified: record.isJustified,
+      justificationReason: record.justificationReason,
     }));
 
   return {

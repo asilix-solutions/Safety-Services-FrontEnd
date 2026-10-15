@@ -18,6 +18,14 @@ export interface InstallationPhoto {
   image: string;
   createdAt: string;
   createdBy: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  captureTimestampUtc?: string | null;
+  deviceModel?: string | null;
+  outcome?: 1 | 2 | 3;
+  distanceMeters?: number | null;
+  isJustified?: boolean;
+  justificationReason?: string | null;
 }
 
 /** Input shape submitted by the Photos form before the domain stamps audit fields. */
@@ -28,6 +36,12 @@ export interface PhotoDraft {
   siloTag: SiloTag;
   caption?: string;
   image: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  captureTimestampUtc?: string | null;
+  deviceModel?: string | null;
+  outcome?: 1 | 2 | 3;
+  distanceMeters?: number | null;
 }
 
 /** Centralized KPI shape for the Photos tab (ADR-005) — never recomputed inline in the UI. */

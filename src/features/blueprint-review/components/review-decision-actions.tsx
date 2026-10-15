@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { useTranslation } from "@/providers/i18n-provider";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/shared/ui/card";
 import { Button } from "@/shared/ui/button";
+import { Input } from "@/shared/ui/input";
+import { Select } from "@/shared/ui/select";
 import { Textarea } from "@/shared/ui/textarea";
 import { Label } from "@/shared/ui/label";
 import {
@@ -14,10 +16,20 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
 } from "@/shared/ui/alert-dialog";
-import { Check, CornerUpLeft, FileQuestion } from "lucide-react";
+import { Check, CornerUpLeft, FileQuestion, ShieldCheck } from "lucide-react";
+import { OccupancyHazardClass } from "@/domains/engineering";
+
+export interface Sbc801ComplianceData {
+  occupancyHazardClass: OccupancyHazardClass;
+  isolatedCompartmentAreaM2: number;
+  requiredSprinklerDensity: number;
+  pumpHeadRatingMeters?: number;
+  smokeVentilationAirChangesPerHour?: number;
+  technicalRemarks?: string;
+}
 
 interface ReviewDecisionActionsProps {
-  onApprove: () => void;
+  onApprove: (compliance: Sbc801ComplianceData) => void;
   onReturn: () => void;
   onRequestMissingDocs: () => void;
   disabled?: boolean;
@@ -57,6 +69,26 @@ export function ReviewDecisionActions({
 }: ReviewDecisionActionsProps) {
   const { t } = useTranslation();
   const [showApproveConfirm, setShowApproveConfirm] = useState(false);
+
+  // SBC 801 Engineering Parameters State
+  const [hazardClass, setHazardClass] = useState<OccupancyHazardClass>(OccupancyHazardClass.OrdinaryHazard1);
+  const [compartmentArea, setCompartmentArea] = useState<number>(1200);
+  const [sprinklerDensity, setSprinklerDensity] = useState<number>(0.15);
+  const [pumpHead, setPumpHead] = useState<number>(60);
+  const [smokeVentilation, setSmokeVentilation] = useState<number>(6);
+  const [techRemarks, setTechRemarks] = useState<string>("");
+
+  const handleConfirmApproval = () => {
+    onApprove({
+      occupancyHazardClass: hazardClass,
+      isolatedCompartmentAreaM2: Number(compartmentArea) || 1200,
+      requiredSprinklerDensity: Number(sprinklerDensity) || 0.15,
+      pumpHeadRatingMeters: pumpHead ? Number(pumpHead) : undefined,
+      smokeVentilationAirChangesPerHour: smokeVentilation ? Number(smokeVentilation) : undefined,
+      technicalRemarks: techRemarks.trim() || undefined,
+    });
+    setShowApproveConfirm(false);
+  };
 
   return (
     <>
@@ -105,31 +137,133 @@ export function ReviewDecisionActions({
         </CardContent>
       </Card>
 
-      {/* Approve confirmation */}
+      {/* SBC 801 Compliance Approval Dialog */}
       <AlertDialog open={showApproveConfirm} onOpenChange={setShowApproveConfirm}>
-        <AlertDialogContent className="font-sans">
+        <AlertDialogContent className="font-sans max-w-lg max-h-[90vh] overflow-y-auto">
           <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2 text-sm">
-              <Check className="h-5 w-5 text-success shrink-0" />
-              {t("requests:blueprintReview.decisions.approveTitle")}
+            <AlertDialogTitle className="flex items-center gap-2 text-sm text-foreground">
+              <ShieldCheck className="h-5 w-5 text-success shrink-0" />
+              <span>اعتماد المخططات الهندسية وفق كود البناء السعودي (SBC 801)</span>
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-xs leading-relaxed">
-              {t("requests:blueprintReview.decisions.approveDesc")}
+            <AlertDialogDescription className="text-xs leading-relaxed text-muted-foreground">
+              يرجى التحقق من محددات السلامة والوقاية من الحريق وتسجيل بارامترات الامتثال قبل إحالة المشروع لمرحلة التسعير.
             </AlertDialogDescription>
           </AlertDialogHeader>
 
-          <div className="p-3 bg-secondary/15 rounded-lg border border-border space-y-2 text-xs">
-            <div className="flex justify-between gap-3">
-              <span className="text-muted-foreground">{t("requests:blueprintReview.decisions.currentStatus")}</span>
-              <span className="font-bold text-foreground">{t("requests:stages.UNDER_REVIEW")}</span>
+          <div className="space-y-3.5 py-2 text-xs">
+            {/* Status Summary */}
+            <div className="p-3 bg-secondary/15 rounded-lg border border-border space-y-1.5 text-xs">
+              <div className="flex justify-between gap-3">
+                <span className="text-muted-foreground">{t("requests:blueprintReview.decisions.currentStatus")}</span>
+                <span className="font-bold text-foreground">{t("requests:stages.UNDER_REVIEW")}</span>
+              </div>
+              <div className="flex justify-between gap-3">
+                <span className="text-muted-foreground">{t("requests:blueprintReview.decisions.nextStage")}</span>
+                <span className="font-bold text-success">{t("requests:stages.QUOTATION")}</span>
+              </div>
             </div>
-            <div className="flex justify-between gap-3">
-              <span className="text-muted-foreground">{t("requests:blueprintReview.decisions.nextStage")}</span>
-              <span className="font-bold text-success">{t("requests:stages.QUOTATION")}</span>
-            </div>
-            <div className="flex justify-between gap-3">
-              <span className="text-muted-foreground">{t("requests:blueprintReview.decisions.impact")}</span>
-              <span className="font-bold text-foreground text-end">{t("requests:blueprintReview.decisions.approveImpact")}</span>
+
+            {/* SBC 801 Form Section */}
+            <div className="space-y-3 rounded-lg border border-primary/20 bg-primary/5 p-3.5">
+              <div className="space-y-1.5">
+                <Label htmlFor="hazard-class" className="text-[11px] font-semibold text-foreground">
+                  فئة خطورة الإشغال (Occupancy Hazard Class) *
+                </Label>
+                <Select
+                  id="hazard-class"
+                  value={String(hazardClass)}
+                  onChange={(e) => setHazardClass(Number(e.target.value) as OccupancyHazardClass)}
+                  className="text-xs bg-background"
+                >
+                  <option value={OccupancyHazardClass.LightHazard}>
+                    خطورة خفيفة (Light Hazard) — مكاتب، مدارس، مستشفيات
+                  </option>
+                  <option value={OccupancyHazardClass.OrdinaryHazard1}>
+                    خطورة عادية 1 (Ordinary Hazard 1) — مواقف سيارات، مطاعم
+                  </option>
+                  <option value={OccupancyHazardClass.OrdinaryHazard2}>
+                    خطورة عادية 2 (Ordinary Hazard 2) — مستودعات تجارية، ورش
+                  </option>
+                  <option value={OccupancyHazardClass.ExtraHazard}>
+                    خطورة عالية (Extra Hazard) — مواد كيميائية، غازات، تصنيع
+                  </option>
+                </Select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2.5">
+                <div className="space-y-1.5">
+                  <Label htmlFor="compartment-area" className="text-[11px] font-semibold text-foreground">
+                    مساحة القطاع المعزول (م²) *
+                  </Label>
+                  <Input
+                    id="compartment-area"
+                    type="number"
+                    min={1}
+                    value={compartmentArea}
+                    onChange={(e) => setCompartmentArea(Number(e.target.value))}
+                    className="text-xs bg-background h-8"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="sprinkler-density" className="text-[11px] font-semibold text-foreground">
+                    كثافة الرشاشات (L/min/m²) *
+                  </Label>
+                  <Input
+                    id="sprinkler-density"
+                    type="number"
+                    step="0.01"
+                    min={0.01}
+                    value={sprinklerDensity}
+                    onChange={(e) => setSprinklerDensity(Number(e.target.value))}
+                    className="text-xs bg-background h-8"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2.5">
+                <div className="space-y-1.5">
+                  <Label htmlFor="pump-head" className="text-[11px] font-semibold text-foreground">
+                    ضغط المضخة التصميمي (متر)
+                  </Label>
+                  <Input
+                    id="pump-head"
+                    type="number"
+                    min={0}
+                    value={pumpHead}
+                    onChange={(e) => setPumpHead(Number(e.target.value))}
+                    className="text-xs bg-background h-8"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="smoke-ventilation" className="text-[11px] font-semibold text-foreground">
+                    معدل تجديد الهواء (تغيير/ساعة)
+                  </Label>
+                  <Input
+                    id="smoke-ventilation"
+                    type="number"
+                    min={0}
+                    value={smokeVentilation}
+                    onChange={(e) => setSmokeVentilation(Number(e.target.value))}
+                    className="text-xs bg-background h-8"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="tech-remarks" className="text-[11px] font-semibold text-foreground">
+                  الملاحظات الفنية ومبررات الامتثال
+                </Label>
+                <Textarea
+                  id="tech-remarks"
+                  value={techRemarks}
+                  onChange={(e) => setTechRemarks(e.target.value)}
+                  placeholder="ملاحظات الاعتماد وفق كود البناء السعودي الصادر عن الدفاع المدني..."
+                  rows={2}
+                  className="text-xs bg-background"
+                />
+              </div>
             </div>
           </div>
 
@@ -137,9 +271,9 @@ export function ReviewDecisionActions({
             <AlertDialogCancel>{t("requests:blueprintReview.decisions.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               className="bg-success hover:bg-success/90 text-success-foreground font-semibold"
-              onClick={onApprove}
+              onClick={handleConfirmApproval}
             >
-              {t("requests:blueprintReview.decisions.approveBtn")}
+              تأكيد الاعتماد والامتثال لـ SBC 801
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

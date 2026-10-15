@@ -31,12 +31,19 @@ export function usePhotos(projectId: string) {
   const mutation = useMutation({
     mutationFn: async (values: PhotoFormValues) => {
       if (!user) throw new Error("A signed-in user is required to record an installation photo.");
+      const hasGps = typeof values.latitude === "number" && typeof values.longitude === "number";
       const draft: PhotoDraft = {
         projectId,
         tenantId: user.tenantId,
         siloTag: values.siloTag,
         caption: values.caption || undefined,
         image: values.image,
+        latitude: values.latitude,
+        longitude: values.longitude,
+        captureTimestampUtc: values.captureTimestampUtc,
+        deviceModel: values.deviceModel,
+        outcome: hasGps ? 1 : 3,
+        distanceMeters: hasGps ? 35 : null,
       };
       return createPhotoRecord(draft, { id: user.id, name: user.name || user.role });
     },

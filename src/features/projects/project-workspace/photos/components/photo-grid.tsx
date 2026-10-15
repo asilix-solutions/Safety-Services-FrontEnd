@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
 import { EmptyState } from "@/shared/components/empty-state";
 import { Badge } from "@/shared/ui/badge";
 import { useTranslation } from "@/providers/i18n-provider";
+import { PhotoVerificationBadge } from "@/components/field/photo-verification-badge";
 import { PhotosViewModel } from "../view-models/photos.viewmodel";
 import { siloLabelKey } from "../helpers/helpers";
 
@@ -58,22 +59,44 @@ export function PhotoGrid({ viewModel, isLoading }: PhotoGridProps) {
               description={t("photos:empty")}
             />
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {viewModel.rows.map((row) => (
-                <div key={row.id} className="space-y-1.5 rounded-lg border border-border bg-card p-2">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={row.image}
-                    alt={row.caption || t(row.siloLabelKey)}
-                    className="w-full aspect-square rounded-md object-cover border border-border"
-                  />
-                  <div className="flex items-center justify-between gap-1">
-                    <Badge variant="outline" className="text-[10px]">
-                      {t(row.siloLabelKey)}
-                    </Badge>
-                    <span className="text-[10px] text-muted-foreground tabular-nums">{row.createdAtLabel}</span>
+                <div
+                  key={row.id}
+                  className="flex flex-col justify-between space-y-2 rounded-lg border border-border bg-card p-2.5 transition-shadow hover:shadow-sm"
+                >
+                  <div className="space-y-1.5">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={row.image}
+                      alt={row.caption || t(row.siloLabelKey)}
+                      className="w-full aspect-square rounded-md object-cover border border-border bg-muted"
+                    />
+                    <div className="flex items-center justify-between gap-1 pt-1">
+                      <Badge variant="outline" className="text-[10px]">
+                        {t(row.siloLabelKey)}
+                      </Badge>
+                      <span className="text-[10px] text-muted-foreground tabular-nums">{row.createdAtLabel}</span>
+                    </div>
+                    {row.caption && <p className="text-xs text-foreground text-start line-clamp-2">{row.caption}</p>}
                   </div>
-                  {row.caption && <p className="text-xs text-foreground text-start line-clamp-2">{row.caption}</p>}
+
+                  <div className="pt-2 border-t border-border/50">
+                    <PhotoVerificationBadge
+                      data={{
+                        photoId: row.id,
+                        outcome: (row.outcome as 1 | 2 | 3) || 1,
+                        latitude: row.latitude,
+                        longitude: row.longitude,
+                        distanceMeters: row.distanceMeters,
+                        captureTimestampUtc: row.captureTimestampUtc,
+                        deviceModel: row.deviceModel,
+                        isJustified: row.isJustified,
+                        justificationReason: row.justificationReason,
+                      }}
+                      canJustify={true}
+                    />
+                  </div>
                 </div>
               ))}
             </div>

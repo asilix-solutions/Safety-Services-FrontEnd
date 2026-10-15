@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Camera, ImagePlus, RefreshCcw, X } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { useTranslation } from "@/providers/i18n-provider";
+import { extractExifFromFile, type ExifMetadata } from "@/lib/exif-extractor";
 
 interface CompressOptions {
   /** Longest edge (px) the captured/uploaded image is downscaled to. */
@@ -19,6 +20,8 @@ interface CameraCaptureProps {
   disabled?: boolean;
   /** Optional client-side compression (canvas downscale + JPEG re-encode). Off by default. */
   compress?: CompressOptions;
+  /** Optional callback fired when EXIF or browser geolocation metadata is extracted. */
+  onExifExtracted?: (metadata: ExifMetadata) => void;
 }
 
 function computeScaledSize(width: number, height: number, maxEdge: number) {
@@ -33,7 +36,7 @@ function computeScaledSize(width: number, height: number, maxEdge: number) {
  * that prefers the live camera via capture="environment" per FR-OPS-05).
  * Shared by the Procurement and Photos sub-features (src/shared/components per CLAUDE.md).
  */
-export function CameraCapture({ value, onChange, error, disabled, compress }: CameraCaptureProps) {
+export function CameraCapture({ value, onChange, error, disabled, compress, onExifExtracted }: CameraCaptureProps) {
   const { t } = useTranslation();
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -82,11 +85,52 @@ export function CameraCapture({ value, onChange, error, disabled, compress }: Ca
     const dataUrl = canvas.toDataURL("image/jpeg", compress?.quality ?? 0.85);
     onChange(dataUrl);
     stopCamera();
+
+    if (onExifExtracted) {
+      if (typeof window !== "undefined" && "geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            onExifExtracted({
+              hasGps: true,
+              latitude: pos.coords.latitude,
+              longitude: pos.coords.longitude,
+              captureTimestampUtc: new Date().toISOString(),
+              deviceMake: "WebClient",
+              deviceModel: typeof navigator !== "undefined" ? navigator.userAgent.slice(0, 50) : "Browser",
+            });
+          },
+          () => {
+            onExifExtracted({
+              hasGps: false,
+              latitude: null,
+              longitude: null,
+              captureTimestampUtc: new Date().toISOString(),
+              deviceMake: "WebClient",
+              deviceModel: typeof navigator !== "undefined" ? navigator.userAgent.slice(0, 50) : "Browser",
+            });
+          },
+          { enableHighAccuracy: true, timeout: 5000 }
+        );
+      } else {
+        onExifExtracted({
+          hasGps: false,
+          latitude: null,
+          longitude: null,
+          captureTimestampUtc: new Date().toISOString(),
+          deviceMake: "WebClient",
+          deviceModel: typeof navigator !== "undefined" ? navigator.userAgent.slice(0, 50) : "Browser",
+        });
+      }
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    if (onExifExtracted) {
+      extractExifFromFile(file).then(onExifExtracted);
+    }
 
     if (!compress) {
       const reader = new FileReader();

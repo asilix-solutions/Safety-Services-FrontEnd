@@ -47,6 +47,7 @@ export function ClientRequestWizard() {
 
   const [step, setStep] = useState(1);
   const [documents, setDocuments] = useState<RequiredDocument[]>([]);
+  const [dynamicFormData, setDynamicFormData] = useState<Record<string, any>>({});
   const [submitting, setSubmitting] = useState(false);
   const [submittedRequest, setSubmittedRequest] = useState<LicensingRequest | null>(null);
 
@@ -241,15 +242,37 @@ export function ClientRequestWizard() {
     let serviceCategory = BackendServiceCategory.Licensing;
     if (selectedRequestType === "maintenance_contract") {
       serviceCategory = BackendServiceCategory.Maintenance;
+    } else if ((selectedRequestType as string) === "contracting" || (selectedRequestType as string) === "new_project_execution") {
+      serviceCategory = BackendServiceCategory.Contracting;
     }
 
     let realJobNumber: string | null = null;
     let backendId: string | null = null;
 
+    // Parse GPS coordinates if available
+    let facilityLatitude: number | undefined = undefined;
+    let facilityLongitude: number | undefined = undefined;
+    if (formValues.gpsCoordinates && formValues.gpsCoordinates.includes(",")) {
+      const parts = formValues.gpsCoordinates.split(",");
+      const lat = parseFloat(parts[0].trim());
+      const lng = parseFloat(parts[1].trim());
+      if (!isNaN(lat) && !isNaN(lng)) {
+        facilityLatitude = lat;
+        facilityLongitude = lng;
+      }
+    }
+
+    const payloadJson = JSON.stringify({
+      ...formValues,
+      dynamicFields: dynamicFormData,
+    });
+
     try {
       const draftRes = await requestsApi.createDraft({
         serviceCategory,
-        capturedFormDataJson: "{}",
+        facilityLatitude,
+        facilityLongitude,
+        capturedFormDataJson: payloadJson,
       });
 
       if (draftRes.isSuccess && draftRes.data) {
@@ -466,6 +489,8 @@ export function ClientRequestWizard() {
               instantReportAllowed={instantReportAllowed}
               onNext={handleNext}
               onPrev={handlePrev}
+              dynamicFormData={dynamicFormData}
+              onDynamicFormDataChange={setDynamicFormData}
             />
           )}
 

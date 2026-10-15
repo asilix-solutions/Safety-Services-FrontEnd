@@ -15,6 +15,8 @@ import { AlertTriangle } from "lucide-react";
 import { SERVICE_REGISTRY, FieldConfig, FieldOption } from "@/domains/requests/service-config";
 import { GeoCoordinatesField } from "./geo-coordinates-field";
 import { RequestType } from "@/domains/requests/types";
+import { DynamicIntakeFields } from "./dynamic-intake-fields";
+import { BackendServiceCategory } from "@/domains/requests/api";
 
 interface SafetyRiskStepProps {
   form: UseFormReturn<ClientRequestFormValues>;
@@ -25,14 +27,30 @@ interface SafetyRiskStepProps {
   instantReportAllowed: boolean;
   onNext: () => void;
   onPrev: () => void;
+  dynamicFormData?: Record<string, any>;
+  onDynamicFormDataChange?: (data: Record<string, any>) => void;
 }
 
-export function SafetyRiskStep({ form, instantReportAllowed, onNext, onPrev }: SafetyRiskStepProps) {
+export function SafetyRiskStep({
+  form,
+  instantReportAllowed,
+  onNext,
+  onPrev,
+  dynamicFormData,
+  onDynamicFormDataChange,
+}: SafetyRiskStepProps) {
   const { t } = useTranslation();
   const { register, watch, trigger, setValue, formState: { errors } } = form;
 
   const requestType = watch("requestType") as RequestType;
   const config = SERVICE_REGISTRY[requestType];
+
+  let serviceCategory = BackendServiceCategory.Licensing;
+  if (requestType === "maintenance_contract") {
+    serviceCategory = BackendServiceCategory.Maintenance;
+  } else if ((requestType as string) === "contracting" || (requestType as string) === "new_project_execution") {
+    serviceCategory = BackendServiceCategory.Contracting;
+  }
 
   // FR-RUL-05 / UC-01.5: the client-declared hazard elements. Read here only to
   // decide whether to *explain* the consequence — the consequence itself is
@@ -247,6 +265,13 @@ export function SafetyRiskStep({ form, instantReportAllowed, onNext, onPrev }: S
           );
         })}
       </div>
+
+      {/* Dynamic Workflow JSON Schema Section */}
+      <DynamicIntakeFields
+        serviceCategory={serviceCategory}
+        value={dynamicFormData || {}}
+        onChange={onDynamicFormDataChange || (() => {})}
+      />
 
       <div className="flex justify-between pt-4 border-t border-border/80">
         <Button type="button" variant="outline" size="sm" onClick={onPrev}>

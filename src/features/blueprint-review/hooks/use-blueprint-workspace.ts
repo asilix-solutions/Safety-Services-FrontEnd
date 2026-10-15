@@ -15,6 +15,7 @@ import {
   EngineeringComplianceStatus,
 } from "@/domains/engineering";
 import { buildBlueprintReviewViewModel, toLicensingRequest, BlueprintReviewViewModel } from "../helpers/blueprint-review-view-model";
+import { Sbc801ComplianceData } from "../components/review-decision-actions";
 import { useTranslation } from "@/providers/i18n-provider";
 import { useTenantContext } from "@/hooks/use-tenant-context";
 import { useRouter } from "next/navigation";
@@ -82,7 +83,7 @@ export function useBlueprintWorkspace(jobNumber: string) {
     });
   }, [viewModel]);
 
-  const handleApprove = () => {
+  const handleApprove = (complianceData?: Sbc801ComplianceData) => {
     if (!viewModel || isReadonly) return;
 
     if (!hasValidBlueprint) {
@@ -92,11 +93,16 @@ export function useBlueprintWorkspace(jobNumber: string) {
 
     setValidationError("");
 
+    const hazardClass = complianceData?.occupancyHazardClass ?? OccupancyHazardClass.OrdinaryHazard1;
+    const compartmentArea = complianceData?.isolatedCompartmentAreaM2 ?? 1200;
+    const sprinklerDensity = complianceData?.requiredSprinklerDensity ?? 0.15;
+    const remarks = complianceData?.technicalRemarks || engineerNotes || "Approved according to SBC 801";
+
     // 1. Save EngineeringReviewRecord with status APPROVED
     const reviewRecord = {
       jobNumber,
       status: "APPROVED" as const,
-      notes: engineerNotes,
+      notes: remarks,
     };
     saveEngineeringReview(reviewRecord);
 
@@ -108,11 +114,13 @@ export function useBlueprintWorkspace(jobNumber: string) {
     if (viewModel.id) {
       engineeringApi
         .recordReview(viewModel.id, {
-          occupancyHazardClass: OccupancyHazardClass.OrdinaryHazard1,
-          isolatedCompartmentAreaM2: 1500,
-          requiredSprinklerDensity: 0.15,
+          occupancyHazardClass: hazardClass,
+          isolatedCompartmentAreaM2: compartmentArea,
+          requiredSprinklerDensity: sprinklerDensity,
+          pumpHeadRatingMeters: complianceData?.pumpHeadRatingMeters,
+          smokeVentilationAirChangesPerHour: complianceData?.smokeVentilationAirChangesPerHour,
           complianceStatus: EngineeringComplianceStatus.Compliant,
-          technicalRemarks: engineerNotes || "Approved according to SBC 801",
+          technicalRemarks: remarks,
         })
         .catch((err) => {
           console.warn("Backend engineering review sync error:", err);
