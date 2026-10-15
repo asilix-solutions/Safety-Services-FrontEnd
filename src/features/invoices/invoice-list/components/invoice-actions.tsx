@@ -9,7 +9,7 @@ import {
 } from "@/shared/ui/dialog";
 import { Button } from "@/shared/ui/button";
 import { Badge } from "@/shared/ui/badge";
-import { FileText, Download, ArrowRight, Layers, FileCheck, Landmark, ClipboardList } from "lucide-react";
+import { FileText, Download, ArrowRight, Layers, FileCheck, Landmark, ClipboardList, QrCode, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { useTranslation } from "@/providers/i18n-provider";
 import { useAuth } from "@/providers/AuthProvider";
@@ -186,6 +186,22 @@ export function InvoiceActions({
               {t("invoices_dialog_integrity")}
             </h4>
             <div className="grid gap-2">
+              <Button
+                variant="default"
+                size="sm"
+                className="w-full justify-between text-xs h-9 cursor-pointer bg-primary text-primary-foreground hover:bg-primary/90"
+                onClick={() => {
+                  onClose();
+                  onDownloadInvoice(currentInvoice);
+                }}
+              >
+                <span className="flex items-center gap-2">
+                  <QrCode className="h-4 w-4" />
+                  استعراض الفاتورة الضريبية ZATCA
+                </span>
+                <span className="text-[10px] font-mono opacity-80">QR &amp; SHA-256</span>
+              </Button>
+
               <Button
                 variant="outline"
                 size="sm"

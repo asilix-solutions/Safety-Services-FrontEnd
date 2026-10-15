@@ -10,6 +10,8 @@ import { useInvoiceList } from "./hooks/use-invoice-list";
 import { InvoiceTable } from "./components/invoice-table";
 import { InvoiceActions } from "./components/invoice-actions";
 import { PaymentConfirmDialog } from "./components/payment-confirm-dialog";
+import { ZatcaTaxInvoiceView } from "@/components/invoices/zatca-tax-invoice-view";
+import { Dialog, DialogContent } from "@/shared/ui/dialog";
 
 export function InvoiceList() {
   const {
@@ -29,6 +31,8 @@ export function InvoiceList() {
     setSelectedInvoice,
     handlePayInvoice,
     handleDownloadInvoice,
+    previewZatcaInvoice,
+    setPreviewZatcaInvoice,
     hasLinkedProject,
     hasLinkedContract,
     hasLinkedQuotation,
@@ -215,6 +219,18 @@ export function InvoiceList() {
         onConfirm={handleConfirmPayment}
         onCancel={handleCancelPayment}
       />
+
+      {/* ZATCA Phase 2 Official Tax Invoice Modal */}
+      {previewZatcaInvoice && (
+        <Dialog open={!!previewZatcaInvoice} onOpenChange={(open) => !open && setPreviewZatcaInvoice(null)}>
+          <DialogContent className="max-w-4xl p-6 max-h-[90vh] overflow-y-auto">
+            <ZatcaTaxInvoiceView
+              invoice={previewZatcaInvoice}
+              onClose={() => setPreviewZatcaInvoice(null)}
+            />
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
