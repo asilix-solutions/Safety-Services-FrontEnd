@@ -22,6 +22,21 @@ export interface TenantBrandingDTO {
   civilDefenseLicense?: string;
   contactEmail?: string;
   supportPhone?: string;
+  address?: string;
+  faviconUrl?: string;
+  welcomeMessage?: string;
+  aboutUsText?: string;
+  socialLinks?: Record<string, string>;
+  seoTitle?: string;
+  seoDescription?: string;
+  seoKeywords?: string;
+  ogTitle?: string;
+  ogDescription?: string;
+  ogImage?: string;
+  ogType?: string;
+  twitterCard?: string;
+  twitterSite?: string;
+  canonicalUrl?: string;
 }
 
 export type TenantBrandingResponse = ApiResponse<TenantBrandingDTO>;

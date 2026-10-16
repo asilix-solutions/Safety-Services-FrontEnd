@@ -29,33 +29,45 @@ import { getServerTenantBranding } from "@/lib/server-tenant";
 export async function generateMetadata(): Promise<Metadata> {
   const branding = await getServerTenantBranding();
   const tenantName = branding?.tenantName || "منصة أمانكس لخدمات وتراخيص السلامة";
-  const description = branding?.tenantName
-    ? `بوابة حلول وأنظمة السلامة الهندسية وتراخيص كود البناء السعودي - ${branding.tenantName}`
-    : "المنصة السحابية الموحدة لخدمات السلامة وتراخيص الدفاع المدني والاعتماد الهندسي.";
-  const iconUrl = branding?.logoUrl || "/favicon.ico";
+  const title = branding?.seoTitle || tenantName;
+  const description =
+    branding?.seoDescription ||
+    (branding?.tenantName
+      ? `بوابة حلول وأنظمة السلامة الهندسية وتراخيص كود البناء السعودي - ${branding.tenantName}`
+      : "المنصة السحابية الموحدة لخدمات السلامة وتراخيص الدفاع المدني والاعتماد الهندسي.");
+  const iconUrl = branding?.faviconUrl || branding?.logoUrl || "/favicon.ico";
+  const ogTitle = branding?.ogTitle || title;
+  const ogDescription = branding?.ogDescription || description;
+  const ogImageUrl = branding?.ogImage || branding?.logoUrl;
+  const keywords = branding?.seoKeywords
+    ? branding.seoKeywords.split(",").map((k) => k.trim())
+    : ["سلامة", "دفاع مدني", "كود البناء السعودي", "أمانكس", tenantName];
 
   return {
     title: {
-      default: tenantName,
+      default: title,
       template: `%s | ${tenantName}`,
     },
     description,
+    keywords,
     icons: {
       icon: iconUrl,
       shortcut: iconUrl,
       apple: iconUrl,
     },
+    alternates: branding?.canonicalUrl ? { canonical: branding.canonicalUrl } : undefined,
     openGraph: {
-      title: tenantName,
-      description,
-      images: branding?.logoUrl ? [{ url: branding.logoUrl }] : [],
-      type: "website",
+      title: ogTitle,
+      description: ogDescription,
+      images: ogImageUrl ? [{ url: ogImageUrl }] : [],
+      type: (branding?.ogType as any) || "website",
     },
     twitter: {
-      card: "summary_large_image",
-      title: tenantName,
-      description,
-      images: branding?.logoUrl ? [branding.logoUrl] : [],
+      card: (branding?.twitterCard as any) || "summary_large_image",
+      site: branding?.twitterSite || undefined,
+      title: ogTitle,
+      description: ogDescription,
+      images: ogImageUrl ? [ogImageUrl] : [],
     },
   };
 }

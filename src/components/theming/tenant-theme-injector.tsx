@@ -31,6 +31,12 @@ export async function TenantThemeInjector({ branding: explicitBranding }: Tenant
   const secondaryHsl = branding.secondaryColor ? hexToHsl(branding.secondaryColor) : null;
   const accentHsl = branding.accentColor ? hexToHsl(branding.accentColor) : null;
 
+  const darkSecondaryHex = branding.darkModeOverrides?.secondary || branding.secondaryColor;
+  const darkSecondaryHsl = darkSecondaryHex ? hexToHsl(darkSecondaryHex) : secondaryHsl;
+
+  const darkAccentHex = branding.darkModeOverrides?.accent || branding.accentColor;
+  const darkAccentHsl = darkAccentHex ? hexToHsl(darkAccentHex) : accentHsl;
+
   const cssString = `
     :root {
       --primary: ${primaryHsl.hslString};
@@ -45,8 +51,8 @@ export async function TenantThemeInjector({ branding: explicitBranding }: Tenant
       --primary-foreground: ${darkPrimaryFg};
       --ring: ${darkPrimaryHsl};
       --chart-1: ${darkPrimaryHsl};
-      ${secondaryHsl ? `--secondary: ${secondaryHsl.hslString};` : ""}
-      ${accentHsl ? `--accent: ${accentHsl.hslString};` : ""}
+      ${darkSecondaryHsl ? `--secondary: ${darkSecondaryHsl.hslString};` : ""}
+      ${darkAccentHsl ? `--accent: ${darkAccentHsl.hslString};` : ""}
     }
   `;
 
