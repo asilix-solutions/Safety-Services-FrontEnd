@@ -11,7 +11,7 @@ import { Button } from "@/shared/ui/button";
 import { Badge } from "@/shared/ui/badge";
 import { EmptyState } from "@/shared/components/empty-state";
 import { DataTable, ColumnDef } from "@/shared/components/data-table/data-table";
-import { Eye, DollarSign } from "lucide-react";
+import { Eye, DollarSign, Building2 } from "lucide-react";
 import Link from "next/link";
 import { useTranslation, useNamespaceTranslations } from "@/providers/i18n-provider";
 import { ActionMenu } from "@/shared/components/action-menu";
@@ -224,12 +224,64 @@ export default function QuotationsQueuePage() {
               icon={<DollarSign className="h-6 w-6 text-muted-foreground" />}
             />
           ) : (
-            <DataTable
-              data={requests}
-              columns={columns}
-              searchKey="facilityName"
-              searchPlaceholder={t("dashboard:search_requests_placeholder")}
-            />
+            <>
+              {/* Mobile Card List View (< 768px) */}
+              <div className="md:hidden space-y-3">
+                {requests.map((row) => (
+                  <Card key={row.id} className="p-4 border-border bg-card space-y-3 shadow-sm">
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-xs font-bold text-primary">{row.jobNumber}</span>
+                      {getQuotationStatusBadge(row.derivedStatus)}
+                    </div>
+
+                    <div className="space-y-1 text-sm">
+                      <div className="flex items-center gap-1.5">
+                        <Building2 className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                        <p className="font-medium text-foreground">{row.facilityName}</p>
+                      </div>
+                      {row.clientName && (
+                        <p className="text-xs text-muted-foreground ps-5">{row.clientName}</p>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 text-[11px] text-muted-foreground p-2 rounded-lg bg-muted/40 border border-border/50">
+                      <div>
+                        <span className="block text-[10px] text-muted-foreground uppercase">{t("requests:quotations.columns.requestType")}</span>
+                        <span className="font-medium text-foreground">{getRequestTypeLabel(row.requestType)}</span>
+                      </div>
+                      <div>
+                        <span className="block text-[10px] text-muted-foreground uppercase">{t("requests:quotations.columns.area")}</span>
+                        <span className="font-medium text-foreground">{row.area} m²</span>
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-border flex items-center justify-between">
+                      <Badge variant="outline" className="text-[10px]">
+                        {getReviewPathDisplayName(row, t)}
+                      </Badge>
+                      <div className="flex items-center gap-1.5">
+                        <Link href={`/quotations/${row.jobNumber}`}>
+                          <Button size="sm" className="h-8 gap-1.5 text-xs">
+                            <DollarSign className="h-3.5 w-3.5" />
+                            {getActionButtonLabel(row.derivedStatus)}
+                          </Button>
+                        </Link>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+
+              {/* Desktop Table View (>= 768px) */}
+              <div className="hidden md:block">
+                <DataTable
+                  data={requests}
+                  columns={columns}
+                  searchKey="facilityName"
+                  searchPlaceholder={t("dashboard:search_requests_placeholder")}
+                />
+              </div>
+            </>
           )}
         </CardContent>
       </Card>

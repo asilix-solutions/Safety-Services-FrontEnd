@@ -11,7 +11,7 @@ import { Button } from "@/shared/ui/button";
 import { Badge } from "@/shared/ui/badge";
 import { EmptyState } from "@/shared/components/empty-state";
 import { DataTable, ColumnDef } from "@/shared/components/data-table/data-table";
-import { Eye, FileCheck } from "lucide-react";
+import { Eye, FileCheck, Building2, Calendar } from "lucide-react";
 import Link from "next/link";
 import { useTranslation, useNamespaceTranslations } from "@/providers/i18n-provider";
 import { Quotation } from "@/domains/quotations/types";
@@ -166,12 +166,63 @@ export default function QuotationApprovalsQueuePage() {
               icon={<FileCheck className="h-8 w-8 text-muted-foreground/60" />}
             />
           ) : (
-            <DataTable
-              data={approvals}
-              columns={columns}
-              searchKey="jobNumber"
-              searchPlaceholder={t("dashboard:search_requests_placeholder")}
-            />
+            <>
+              {/* Mobile Card List View (< 768px) */}
+              <div className="md:hidden space-y-3">
+                {approvals.map((row) => (
+                  <Card key={row.jobNumber} className="p-4 border-border bg-card space-y-3 shadow-sm">
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-xs font-bold text-primary">{row.jobNumber}</span>
+                      <span className="text-xs font-bold text-primary">
+                        {row.grandTotal.toLocaleString()} {t("common:sar") || "SAR"}
+                      </span>
+                    </div>
+
+                    <div className="space-y-1 text-sm">
+                      <div className="flex items-center gap-1.5">
+                        <Building2 className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                        <p className="font-medium text-foreground">{row.facilityName}</p>
+                      </div>
+                      {row.clientName && (
+                        <p className="text-xs text-muted-foreground ps-5">{row.clientName}</p>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 text-[11px] text-muted-foreground p-2 rounded-lg bg-muted/40 border border-border/50">
+                      <div>
+                        <span className="block text-[10px] text-muted-foreground">{t("requests:quotations.details.submittedBy")}</span>
+                        <span className="font-medium text-foreground">{row.submittedBy || "—"}</span>
+                      </div>
+                      <div>
+                        <span className="block text-[10px] text-muted-foreground">{t("requests:quotations.details.submittedAt")}</span>
+                        <span className="font-medium text-foreground">
+                          {row.submittedAt ? new Date(row.submittedAt).toLocaleDateString() : "—"}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-border flex items-center justify-end">
+                      <Link href={`/quotations/approvals/${row.jobNumber}`}>
+                        <Button size="sm" className="h-8 gap-1.5 text-xs bg-primary text-primary-foreground hover:bg-primary/90">
+                          <Eye className="h-3.5 w-3.5" />
+                          {t("requests:quotations.actions.review")}
+                        </Button>
+                      </Link>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+
+              {/* Desktop Table View (>= 768px) */}
+              <div className="hidden md:block">
+                <DataTable
+                  data={approvals}
+                  columns={columns}
+                  searchKey="jobNumber"
+                  searchPlaceholder={t("dashboard:search_requests_placeholder")}
+                />
+              </div>
+            </>
           )}
         </CardContent>
       </Card>

@@ -334,51 +334,97 @@ export function MaintenanceDashboard() {
               </Button>
             </Card>
           ) : (
-            <div className="border rounded-lg overflow-hidden bg-card">
-              <div className="overflow-x-auto">
-                <table className="w-full text-xs text-right">
-                  <thead className="bg-muted/50 border-b text-muted-foreground font-semibold">
-                    <tr>
-                      <th className="p-3">رقم العقد</th>
-                      <th className="p-3">المعاملة المصدر</th>
-                      <th className="p-3">اسم العميل</th>
-                      <th className="p-3">مدة العقد</th>
-                      <th className="p-3">دورية الزيارات</th>
-                      <th className="p-3">الزيارات المنجزة</th>
-                      <th className="p-3">الحالة</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y">
-                    {contracts.map((contract) => (
-                      <tr key={contract.id} className="hover:bg-muted/30 transition-colors">
-                        <td className="p-3 font-mono font-bold text-foreground">
-                          {contract.contractNumber}
-                        </td>
-                        <td className="p-3 font-mono text-muted-foreground">
-                          {contract.sourceJobNumber || "—"}
-                        </td>
-                        <td className="p-3 font-medium text-foreground">
-                          {contract.clientName || "—"}
-                        </td>
-                        <td className="p-3 text-muted-foreground">
-                          {contract.termMonths} شهر
-                        </td>
-                        <td className="p-3 text-muted-foreground">
-                          {contract.visitsPerYear} زيارات / سنة
-                        </td>
-                        <td className="p-3">
-                          <span className="font-bold text-emerald-600 dark:text-emerald-400">
-                            {contract.visitsCompleted}
-                          </span>{" "}
-                          / {contract.visitsScheduled + contract.visitsCompleted}
-                        </td>
-                        <td className="p-3">
-                          {getContractStatusBadge(contract.status)}
-                        </td>
+            <div className="space-y-3">
+              {/* Mobile Card List View (< 768px) */}
+              <div className="md:hidden space-y-3">
+                {contracts.map((contract) => (
+                  <Card key={contract.id} className="p-4 border-border bg-card space-y-3 shadow-sm">
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-xs font-bold text-foreground">
+                        {contract.contractNumber}
+                      </span>
+                      {getContractStatusBadge(contract.status)}
+                    </div>
+
+                    <div className="space-y-1 text-sm">
+                      <div className="flex items-center gap-1.5">
+                        <Building className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                        <p className="font-medium text-foreground">{contract.clientName || "—"}</p>
+                      </div>
+                      {contract.sourceJobNumber && (
+                        <p className="text-xs text-muted-foreground font-mono ps-5">
+                          المعاملة: {contract.sourceJobNumber}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 text-[11px] text-muted-foreground p-2 rounded-lg bg-muted/40 border border-border/50">
+                      <div>
+                        <span className="block text-[10px] text-muted-foreground">مدة العقد</span>
+                        <span className="font-medium text-foreground">{contract.termMonths} شهر</span>
+                      </div>
+                      <div>
+                        <span className="block text-[10px] text-muted-foreground">الدورية السنوية</span>
+                        <span className="font-medium text-foreground">{contract.visitsPerYear} زيارات / سنة</span>
+                      </div>
+                      <div className="col-span-2 pt-1 border-t border-border/40 flex items-center justify-between">
+                        <span className="text-[10px] text-muted-foreground">الزيارات المنجزة:</span>
+                        <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                          {contract.visitsCompleted} / {contract.visitsScheduled + contract.visitsCompleted}
+                        </span>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+
+              {/* Desktop Table View (>= 768px) */}
+              <div className="hidden md:block border rounded-lg overflow-hidden bg-card">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs text-right">
+                    <thead className="bg-muted/50 border-b text-muted-foreground font-semibold">
+                      <tr>
+                        <th className="p-3">رقم العقد</th>
+                        <th className="p-3">المعاملة المصدر</th>
+                        <th className="p-3">اسم العميل</th>
+                        <th className="p-3">مدة العقد</th>
+                        <th className="p-3">دورية الزيارات</th>
+                        <th className="p-3">الزيارات المنجزة</th>
+                        <th className="p-3">الحالة</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="divide-y">
+                      {contracts.map((contract) => (
+                        <tr key={contract.id} className="hover:bg-muted/30 transition-colors">
+                          <td className="p-3 font-mono font-bold text-foreground">
+                            {contract.contractNumber}
+                          </td>
+                          <td className="p-3 font-mono text-muted-foreground">
+                            {contract.sourceJobNumber || "—"}
+                          </td>
+                          <td className="p-3 font-medium text-foreground">
+                            {contract.clientName || "—"}
+                          </td>
+                          <td className="p-3 text-muted-foreground">
+                            {contract.termMonths} شهر
+                          </td>
+                          <td className="p-3 text-muted-foreground">
+                            {contract.visitsPerYear} زيارات / سنة
+                          </td>
+                          <td className="p-3">
+                            <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                              {contract.visitsCompleted}
+                            </span>{" "}
+                            / {contract.visitsScheduled + contract.visitsCompleted}
+                          </td>
+                          <td className="p-3">
+                            {getContractStatusBadge(contract.status)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           )}
