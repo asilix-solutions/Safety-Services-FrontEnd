@@ -9,6 +9,7 @@ export interface LoginCredentials {
 
 export interface LoginResponseData {
   token: string;
+  accessToken?: string;
   refreshToken: string;
   userName: string;
   email: string;

@@ -1,7 +1,6 @@
 "use client";
-
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
-import { UserRole } from "@/types/role";
+import { UserRole, RolePermissionKey } from "@/types/role";
 import { UserProfile } from "@/types/user";
 import { LoginCredentials } from "@/types/auth";
 import { ROLE_PERMISSIONS } from "@/constants/permissions";
@@ -133,6 +132,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const res = await authApi.getMe();
       if (res.isSuccess && res.data) {
         const liveProfile = mapBackendProfileToUser(res.data);
+        try {
+          const permRes = await authApi.getMyPermissions();
+          if (permRes.isSuccess && Array.isArray(permRes.data) && permRes.data.length > 0) {
+            liveProfile.permissions = permRes.data as unknown as RolePermissionKey[];
+          }
+        } catch {
+          // Retain role-based defaults on error
+        }
+
         setUser(liveProfile);
         setAuthSession({
           accessToken: token,
@@ -200,7 +208,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return false;
       }
 
-      const { token, refreshToken } = loginRes.data;
+      const token = loginRes.data.accessToken || loginRes.data.token;
+      const refreshToken = loginRes.data.refreshToken;
 
       // Temporary token storage to allow subsequent GET /api/v1/me request
       setAuthSession({
@@ -214,6 +223,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (profileRes.isSuccess && profileRes.data) {
         liveProfile = mapBackendProfileToUser(profileRes.data);
+        try {
+          const permRes = await authApi.getMyPermissions();
+          if (permRes.isSuccess && Array.isArray(permRes.data) && permRes.data.length > 0) {
+            liveProfile.permissions = permRes.data as unknown as RolePermissionKey[];
+          }
+        } catch {
+          // Retain role defaults
+        }
       } else {
         // Fallback profile if /me response is partial
         const defaultRole = credentials.email.includes("admin")
