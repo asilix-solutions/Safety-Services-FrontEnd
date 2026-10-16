@@ -290,9 +290,99 @@ export function CommissionsView() {
         </CardContent>
       </Card>
 
-      {/* Table */}
+      {/* Table & Mobile Cards */}
       <Card className="rounded-2xl border-border/80 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* Mobile View: Cards */}
+        <div className="block md:hidden divide-y divide-border">
+          <AnimatePresence mode="popLayout">
+            {filtered.length > 0 ? (
+              filtered.map((r) => {
+                const status = STATUS_CONFIG[r.status];
+                return (
+                  <motion.div
+                    key={r.id}
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    className="p-4 space-y-3"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
+                          <User className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <span className="font-semibold text-sm text-foreground block">{r.agentName}</span>
+                          <span className="text-[11px] text-muted-foreground">{r.agentRole}</span>
+                        </div>
+                      </div>
+                      <span className={`inline-flex px-2 py-0.5 rounded-lg text-xs font-medium border ${status.badge}`}>
+                        {status.label}
+                      </span>
+                    </div>
+
+                    <div className="bg-muted/30 p-2.5 rounded-xl border border-border/60 text-xs space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-muted-foreground">رقم المعاملة:</span>
+                        <span className="font-mono font-semibold text-primary">{r.jobNumber}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-muted-foreground">المنشأة:</span>
+                        <span className="text-foreground font-medium">{r.facilityName}</span>
+                      </div>
+                      <div className="flex items-center justify-between pt-1 border-t border-border/40">
+                        <span className="text-muted-foreground">قيمة العقد:</span>
+                        <span className="font-mono font-semibold">{r.contractValue.toLocaleString()} ر.س</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-muted-foreground">العمولة المستحقة ({r.ratePercent}%):</span>
+                        <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                          {r.commissionAmount.toLocaleString()} ر.س
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-end gap-2 pt-1">
+                      {r.status === "PENDING" && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleApprove(r.id)}
+                          className="h-8 px-3 rounded-lg text-xs text-primary border-primary/30 hover:bg-primary/10"
+                        >
+                          اعتماد الصرف
+                        </Button>
+                      )}
+                      {r.status === "APPROVED" && (
+                        <Button
+                          variant="default"
+                          size="sm"
+                          onClick={() => handleDisburse(r.id)}
+                          className="h-8 px-3 rounded-lg text-xs bg-emerald-600 hover:bg-emerald-700 text-white"
+                        >
+                          تأكيد الصرف
+                        </Button>
+                      )}
+                      {r.status === "PAID" && (
+                        <span className="text-xs text-muted-foreground flex items-center gap-1">
+                          <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                          مسدد بالكامل
+                        </span>
+                      )}
+                    </div>
+                  </motion.div>
+                );
+              })
+            ) : (
+              <div className="text-center py-8 text-sm text-muted-foreground">
+                لا توجد سجلات عمولات تطابق معايير البحث.
+              </div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Desktop View: Table */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-sm text-start">
             <thead className="bg-muted/50 border-b border-border text-xs text-muted-foreground uppercase font-semibold">
               <tr>

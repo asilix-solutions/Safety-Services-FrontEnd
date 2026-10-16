@@ -315,9 +315,92 @@ export function ActivitiesView() {
         </CardContent>
       </Card>
 
-      {/* Audit Log Table */}
+      {/* Audit Log Table & Mobile Cards */}
       <Card className="rounded-2xl border-border/80 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* Mobile View: Cards */}
+        <div className="block md:hidden divide-y divide-border">
+          <AnimatePresence mode="popLayout">
+            {logs.length > 0 ? (
+              logs.map((log) => {
+                const actionConfig = ACTION_MAP[log.action] || {
+                  label: "عملية نظام",
+                  color: "text-foreground",
+                  bg: "bg-muted border-border",
+                };
+                return (
+                  <motion.div
+                    key={log.id}
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    className="p-4 space-y-2.5"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span
+                        className={`inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium border ${actionConfig.bg} ${actionConfig.color}`}
+                      >
+                        {actionConfig.label}
+                      </span>
+                      <span className="text-[11px] text-muted-foreground flex items-center gap-1">
+                        <Calendar className="h-3 w-3" />
+                        {new Date(log.createdAt).toLocaleDateString("ar-SA", {
+                          month: "short",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between gap-2">
+                      <div>
+                        <span className="font-semibold text-sm text-primary block">{log.entityName}</span>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          <code className="text-[11px] font-mono text-foreground bg-muted px-1.5 py-0.5 rounded">
+                            {log.entityId}
+                          </code>
+                          <button
+                            onClick={() => handleCopy(log.entityId)}
+                            className="text-muted-foreground hover:text-foreground p-0.5 rounded"
+                          >
+                            {copiedId === log.entityId ? (
+                              <Check className="h-3 w-3 text-emerald-500" />
+                            ) : (
+                              <Copy className="h-3 w-3" />
+                            )}
+                          </button>
+                        </div>
+                      </div>
+
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleViewDetails(log)}
+                        className="h-8 px-3 rounded-lg text-xs gap-1 border-border shrink-0"
+                      >
+                        <Eye className="h-3.5 w-3.5" />
+                        تفاصيل
+                      </Button>
+                    </div>
+
+                    {log.changedColumns && (
+                      <p className="text-[11px] text-muted-foreground truncate bg-muted/40 px-2 py-1 rounded-md">
+                        الحقول: {log.changedColumns}
+                      </p>
+                    )}
+                  </motion.div>
+                );
+              })
+            ) : (
+              <div className="text-center py-8 text-sm text-muted-foreground">
+                لا توجد عمليات تطابق معايير البحث المحددة.
+              </div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Desktop View: Table */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-sm text-start">
             <thead className="bg-muted/50 border-b border-border text-xs text-muted-foreground uppercase font-semibold">
               <tr>
