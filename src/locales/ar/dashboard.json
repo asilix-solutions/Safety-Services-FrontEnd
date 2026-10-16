@@ -38,6 +38,8 @@
   "nav_contracts": "العقود",
   "nav_certificates": "الشهادات",
   "nav_invoices": "الفواتير",
+  "nav_messages": "الإشعارات والتنبيهات",
+  "nav_equipment": "إدارة الأسطول والمعدات",
   "role_Super_Admin": "مشرف عام",
   "role_Company_Admin": "مدير منشأة",
   "role_Consulting_Engineer": "مهندس استشاري",

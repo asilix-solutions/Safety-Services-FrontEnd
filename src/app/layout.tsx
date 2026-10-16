@@ -24,10 +24,41 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Safety Services & Licensing Management Platform",
-  description: "Enterprise SaaS platform for safety engineering compliance, blueprint reviews, and permit management.",
-};
+import { getServerTenantBranding } from "@/lib/server-tenant";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const branding = await getServerTenantBranding();
+  const tenantName = branding?.tenantName || "منصة أمانكس لخدمات وتراخيص السلامة";
+  const description = branding?.tenantName
+    ? `بوابة حلول وأنظمة السلامة الهندسية وتراخيص كود البناء السعودي - ${branding.tenantName}`
+    : "المنصة السحابية الموحدة لخدمات السلامة وتراخيص الدفاع المدني والاعتماد الهندسي.";
+  const iconUrl = branding?.logoUrl || "/favicon.ico";
+
+  return {
+    title: {
+      default: tenantName,
+      template: `%s | ${tenantName}`,
+    },
+    description,
+    icons: {
+      icon: iconUrl,
+      shortcut: iconUrl,
+      apple: iconUrl,
+    },
+    openGraph: {
+      title: tenantName,
+      description,
+      images: branding?.logoUrl ? [{ url: branding.logoUrl }] : [],
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: tenantName,
+      description,
+      images: branding?.logoUrl ? [branding.logoUrl] : [],
+    },
+  };
+}
 
 export default async function RootLayout({
   children,

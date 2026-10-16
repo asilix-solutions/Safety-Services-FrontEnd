@@ -50,6 +50,13 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
       "Site Visits": "dashboard:nav_site_visits",
       "Home": "dashboard:nav_home",
       "My Requests": "dashboard:nav_my_requests",
+      "Analytics": "dashboard:nav_analytics",
+      "Activities": "dashboard:nav_activities",
+      "Calendar": "dashboard:nav_calendar",
+      "Pipeline": "dashboard:nav_pipeline",
+      "Commissions": "dashboard:nav_commissions",
+      "Equipment": "dashboard:nav_equipment",
+      "Messages": "dashboard:nav_messages",
     };
     return map[label] || label;
   };

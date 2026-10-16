@@ -1,5 +1,8 @@
-import { notFound } from "next/navigation";
+"use client";
 
-export default function Page() {
-  notFound();
+import React from "react";
+import { EquipmentView } from "@/features/equipment";
+
+export default function TrackingPage() {
+  return <EquipmentView />;
 }

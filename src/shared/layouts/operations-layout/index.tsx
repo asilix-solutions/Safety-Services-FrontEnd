@@ -45,6 +45,10 @@ export function OperationsLayout({ children }: { children: React.ReactNode }) {
       "Customers": "dashboard:nav_customers",
       "Employees": "dashboard:nav_employees",
       "Maintenance": "dashboard:nav_maintenance",
+      "Analytics": "dashboard:nav_analytics",
+      "Calendar": "dashboard:nav_calendar",
+      "Equipment": "dashboard:nav_equipment",
+      "Messages": "dashboard:nav_messages",
     };
     return map[label] || label;
   };

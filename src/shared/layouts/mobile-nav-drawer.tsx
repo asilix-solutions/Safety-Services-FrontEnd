@@ -72,6 +72,13 @@ export function MobileNavDrawer({
       "Labor": "dashboard:nav_labor",
       "Obstacles": "dashboard:nav_obstacles",
       "Documents": "dashboard:nav_documents",
+      "Analytics": "dashboard:nav_analytics",
+      "Activities": "dashboard:nav_activities",
+      "Calendar": "dashboard:nav_calendar",
+      "Pipeline": "dashboard:nav_pipeline",
+      "Commissions": "dashboard:nav_commissions",
+      "Equipment": "dashboard:nav_equipment",
+      "Messages": "dashboard:nav_messages",
     };
     return map[label] || label;
   };

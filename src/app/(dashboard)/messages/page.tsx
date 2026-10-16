@@ -1,5 +1,8 @@
-import { notFound } from "next/navigation";
+"use client";
 
-export default function Page() {
-  notFound();
+import React from "react";
+import { NotificationsHubView } from "@/features/notifications";
+
+export default function MessagesPage() {
+  return <NotificationsHubView />;
 }

@@ -1,5 +1,8 @@
-import { notFound } from "next/navigation";
+"use client";
 
-export default function Page() {
-  notFound();
+import React from "react";
+import { CommissionsView } from "@/features/commissions";
+
+export default function CommissionsPage() {
+  return <CommissionsView />;
 }

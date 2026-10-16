@@ -38,6 +38,8 @@
   "nav_contracts": "Contracts",
   "nav_certificates": "Certificates",
   "nav_invoices": "Invoices",
+  "nav_messages": "Notifications",
+  "nav_equipment": "Equipment Fleet",
   "role_Super_Admin": "Super Admin",
   "role_Company_Admin": "Company Admin",
   "role_Consulting_Engineer": "Consulting Engineer",

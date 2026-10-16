@@ -1,5 +1,8 @@
-import { notFound } from "next/navigation";
+"use client";
 
-export default function Page() {
-  notFound();
+import React from "react";
+import { PipelineView } from "@/features/pipeline";
+
+export default function LeadsPage() {
+  return <PipelineView />;
 }

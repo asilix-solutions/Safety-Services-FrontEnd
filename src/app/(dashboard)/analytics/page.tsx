@@ -1,5 +1,8 @@
-import { notFound } from "next/navigation";
+"use client";
 
-export default function Page() {
-  notFound();
+import React from "react";
+import { AnalyticsView } from "@/features/analytics";
+
+export default function AnalyticsPage() {
+  return <AnalyticsView />;
 }

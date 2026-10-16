@@ -28,18 +28,25 @@ export async function TenantThemeInjector({ branding: explicitBranding }: Tenant
     ? hexToHsl(branding.darkModeOverrides.primaryForeground)?.hslString || getContrastForeground(darkPrimaryHex)
     : getContrastForeground(darkPrimaryHex);
 
+  const secondaryHsl = branding.secondaryColor ? hexToHsl(branding.secondaryColor) : null;
+  const accentHsl = branding.accentColor ? hexToHsl(branding.accentColor) : null;
+
   const cssString = `
     :root {
       --primary: ${primaryHsl.hslString};
       --primary-foreground: ${primaryFg};
       --ring: ${primaryHsl.hslString};
       --chart-1: ${primaryHsl.hslString};
+      ${secondaryHsl ? `--secondary: ${secondaryHsl.hslString};` : ""}
+      ${accentHsl ? `--accent: ${accentHsl.hslString};` : ""}
     }
     .dark {
       --primary: ${darkPrimaryHsl};
       --primary-foreground: ${darkPrimaryFg};
       --ring: ${darkPrimaryHsl};
       --chart-1: ${darkPrimaryHsl};
+      ${secondaryHsl ? `--secondary: ${secondaryHsl.hslString};` : ""}
+      ${accentHsl ? `--accent: ${accentHsl.hslString};` : ""}
     }
   `;
 
